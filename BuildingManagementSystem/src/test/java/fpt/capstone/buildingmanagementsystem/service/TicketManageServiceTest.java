@@ -47,7 +47,7 @@ class TicketManageServiceTest {
         List<TicketRequestResponse> result = ticketManageService.getAllTickets();
         Assertions.assertEquals(List.of(new TicketRequestResponse()), result);
     }
-    //pass
+    //pass1
 
     @Test
     void testGetAllTicketsBySenderId() {
