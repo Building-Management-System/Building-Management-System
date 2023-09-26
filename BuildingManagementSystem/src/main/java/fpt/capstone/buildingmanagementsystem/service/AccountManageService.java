@@ -5,7 +5,9 @@ import fpt.capstone.buildingmanagementsystem.exception.ForbiddenError;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.AccountMapper;
+import fpt.capstone.buildingmanagementsystem.mapper.AccountMapperImpl;
 import fpt.capstone.buildingmanagementsystem.mapper.RoleMapper;
+import fpt.capstone.buildingmanagementsystem.mapper.RoleMapperImpl;
 import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.Role;
@@ -41,11 +43,11 @@ public class AccountManageService implements UserDetailsService {
     @Autowired
     PasswordEncode passwordEncode;
     @Autowired
-    AccountMapper accountMapper;
+    AccountMapperImpl accountMapper;
     @Autowired
     StatusRepository statusRepository;
     @Autowired
-    RoleMapper roleMapper;
+    RoleMapperImpl roleMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
