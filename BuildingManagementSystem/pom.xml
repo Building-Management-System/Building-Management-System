@@ -83,34 +83,36 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.7</version>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.1.6.RELEASE</version>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
                 <configuration>
-                    <excludes>
-                        <exclude>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>1.18.30</version>
-                    </exclude>
+                        </path>
+
                         <!-- This is needed when using Lombok 1.18.16 and above -->
-                        <exclude>
+                        <path>
+
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok-mapstruct-binding</artifactId>
                             <version>0.2.0</version>
-                    </exclude>
+                        </path>
+
                         <!-- Mapstruct should follow the lombok path(s) -->
-                        <exclude>
+                        <path>
+
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
                             <version>1.5.5.Final</version>
 
-                        </exclude>
-                    </excludes>
+                        </path>
+
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>
