@@ -35,7 +35,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()
-                .authorizeRequests().antMatchers("/register","/changePassword","/login","/changeStatusAccount").permitAll()
+                .authorizeRequests().antMatchers("../register","../changePassword","../login","../changeStatusAccount").permitAll()
                 .anyRequest().authenticated().and().exceptionHandling().accessDeniedPage("/deny").and().
                 exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
