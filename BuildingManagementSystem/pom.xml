@@ -82,19 +82,16 @@
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <version>1.18.2</version>
                         </exclude>
                         <!-- This is needed when using Lombok 1.18.16 and above -->
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok-mapstruct-binding</artifactId>
-                            <version>0.2.0</version>
                         </exclude>
                         <!-- Mapstruct should follow the lombok path(s) -->
                         <exclude>
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
-                            <version>1.2.0.Final</version>
                         </exclude>
                     </excludes>
                 </configuration>
