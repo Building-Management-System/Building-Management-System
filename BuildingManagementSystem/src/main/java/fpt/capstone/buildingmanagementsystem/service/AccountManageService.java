@@ -10,9 +10,7 @@ import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.Role;
 import fpt.capstone.buildingmanagementsystem.model.entity.Status;
-import fpt.capstone.buildingmanagementsystem.model.request.ChangePasswordRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.ChangeStatusAccountRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.*;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
 import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
@@ -131,18 +129,66 @@ public class AccountManageService implements UserDetailsService {
     public boolean changeStatusAccount(ChangeStatusAccountRequest changeStatusAccountRequest) {
         try {
             String accountId=changeStatusAccountRequest.getAccountId();
-            if (accountId != null && changeStatusAccountRequest.getStatusId() != null) {
+            if (accountId != null && changeStatusAccountRequest.getStatusName() != null) {
                 if (!accountRepository.existsById(changeStatusAccountRequest.getAccountId())) {
                     throw new NotFound("user_not_found");
                 }
-                String oldStatus = accountRepository.findByAccountId(accountId).get().getStatus().getStatusId();
-                if (!oldStatus.equals(changeStatusAccountRequest.getStatusId())) {
-                    accountRepository.updateStatusAccount(changeStatusAccountRequest.getStatusId(),accountId);
+                String oldStatus = accountRepository.findByAccountId(accountId).get().getStatus().getStatusName();
+                if (!oldStatus.equals(changeStatusAccountRequest.getStatusName())) {
+                    Optional<Status> status = statusRepository.findByStatusName(changeStatusAccountRequest.getStatusName());
+                    if (!status.isPresent()) {
+                        throw new NotFound("status_not_found");
+                    }
+                    accountRepository.updateStatusAccount(status.get().statusId,accountId);
                     return true;
                 }
                 else{
                     throw new BadRequest("new_status_existed");
                 }
+            } else {
+                throw new BadRequest("request_fail");
+            }
+        } catch (ServerError e) {
+            throw new ServerError("fail");
+        }
+    }
+    public boolean changeRoleAccount(ChangeRoleRequest changeRoleRequest) {
+        try {
+            String accountId=changeRoleRequest.getAccountId();
+            if (accountId != null && changeRoleRequest.getRoleName() != null) {
+                if (!accountRepository.existsById(changeRoleRequest.getAccountId())) {
+                    throw new NotFound("user_not_found");
+                }
+                String oldRole = accountRepository.findByAccountId(accountId).get().getRole().getRoleName();
+                if (!oldRole.equals(changeRoleRequest.getRoleName())) {
+                    Optional<Role> role = roleRepository.findByRoleName(changeRoleRequest.getRoleName());
+                    if (!role.isPresent()) {
+                        throw new NotFound("role_not_found");
+                    }
+                    String newRoleId = role.get().getRoleId();
+                    accountRepository.updateRoleAccount(newRoleId,accountId);
+                    return true;
+                }
+                else{
+                    throw new BadRequest("new_role_existed");
+                }
+            } else {
+                throw new BadRequest("request_fail");
+            }
+        } catch (ServerError e) {
+            throw new ServerError("fail");
+        }
+    }
+    public boolean resetPassword(ResetPasswordRequest resetPassword) {
+        try {
+            String username = resetPassword.getUsername();
+            if (username != null) {
+                if (!accountRepository.existsByUsername(resetPassword.getUsername())) {
+                    throw new NotFound("user_not_found");
+                }
+                String newPassword = passwordEncode.passwordEncoder().encode("123aA@");
+                accountRepository.updatePassword(newPassword, generateRealTime(), username);
+                return true;
             } else {
                 throw new BadRequest("request_fail");
             }

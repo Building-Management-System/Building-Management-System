@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChangeStatusAccountRequest {
-    public String accountId;
-    public String statusName;
+public class ResetPasswordRequest {
+    public String username;
 }

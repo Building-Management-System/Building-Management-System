@@ -1,10 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
 import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
-import fpt.capstone.buildingmanagementsystem.model.request.ChangePasswordRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.ChangeStatusAccountRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.LoginRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.*;
 import fpt.capstone.buildingmanagementsystem.model.response.JwtResponse;
 import fpt.capstone.buildingmanagementsystem.security.JwtTokenUtil;
 import fpt.capstone.buildingmanagementsystem.service.AccountManageService;
@@ -35,10 +32,19 @@ public class AccountController {
     public boolean changeStatusAccount(@RequestBody ChangeStatusAccountRequest changeStatusAccountRequest) throws Exception {
         return accountManageService.changeStatusAccount(changeStatusAccountRequest);
     }
+    @RequestMapping(value = "/changeRoleAccount", method = RequestMethod.POST)
+    public boolean changeRoleAccount(@RequestBody ChangeRoleRequest changeRoleRequest) throws Exception {
+        return accountManageService.changeRoleAccount(changeRoleRequest);
+    }
     @RequestMapping(value = "/changePassword", method = RequestMethod.POST)
     public boolean changPassword(@RequestBody ChangePasswordRequest changePasswordRequest) throws Exception {
         return accountManageService.changePassword(changePasswordRequest);
     }
+    @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
+    public boolean resetPassword(@RequestBody ResetPasswordRequest resetPassword) throws Exception {
+        return accountManageService.resetPassword(resetPassword);
+    }
+
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest authenticationRequest) throws Exception {
         JwtResponse jwtResponse=new JwtResponse();

@@ -24,4 +24,8 @@ public interface AccountRepository extends JpaRepository<Account,String> {
     @Modifying
     @Query(value = "UPDATE account SET status_id = :status_id where account_id = :account_id", nativeQuery = true)
     int updateStatusAccount(@Param(value = "status_id") String status_id, @Param(value = "account_id") String account_id);
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE account SET role_id = :role_id where account_id = :account_id", nativeQuery = true)
+    int updateRoleAccount(@Param(value = "role_id") String role_id, @Param(value = "account_id") String account_id);
 }
