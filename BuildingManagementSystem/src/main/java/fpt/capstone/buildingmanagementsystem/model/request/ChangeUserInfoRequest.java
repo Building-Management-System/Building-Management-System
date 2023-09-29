@@ -17,5 +17,4 @@ public class ChangeUserInfoRequest {
     String country;
     String city;
     String email;
-    String image;
 }

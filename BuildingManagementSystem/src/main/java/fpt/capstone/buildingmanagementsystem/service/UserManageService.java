@@ -44,7 +44,6 @@ public class UserManageService {
                     changeUserInfoRequest.getGender()!=null &&
                     changeUserInfoRequest.getCity()!=null &&
                     changeUserInfoRequest.getTelephone_number()!=null &&
-                    changeUserInfoRequest.getImage()!=null &&
                     changeUserInfoRequest.getDate_of_birth()!=null&&
                     file !=null
             ) {
