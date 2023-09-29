@@ -10,10 +10,12 @@ import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.Role;
 import fpt.capstone.buildingmanagementsystem.model.entity.Status;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.request.*;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
 import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,12 +24,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 
 @Service
@@ -42,6 +42,8 @@ public class AccountManageService implements UserDetailsService {
     AccountMapper accountMapper;
     @Autowired
     StatusRepository statusRepository;
+    @Autowired
+    UserRepository userRepository;
     @Autowired
     RoleMapper roleMapper;
 
@@ -70,6 +72,10 @@ public class AccountManageService implements UserDetailsService {
                         Optional<Status> status = statusRepository.findByStatusId("1");
                         Account newAccount = accountMapper.convertRegisterAccount(registerRequest, status.get(), role.get());
                         accountRepository.save(newAccount);
+                        User user= User.builder().city("unknown").country("unknown").email("unknown").first_name("unknown")
+                                .last_name("unknown").date_of_birth("unknown").telephone_number("unknown").gender("unknown").createdDate(
+                                        generateRealTime()).updatedDate(generateRealTime()).account(newAccount).build();
+                        userRepository.save(user);
                         return true;
                     } else {
                         throw new NotFound("role_name_not_found");

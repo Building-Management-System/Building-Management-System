@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Data
@@ -13,9 +14,9 @@ import javax.persistence.*;
 @Table(name = "status")
 public class Status {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "status_id")
     public String statusId;
+    @NotNull
     @Column(name = "status_name")
     public String statusName;
 }

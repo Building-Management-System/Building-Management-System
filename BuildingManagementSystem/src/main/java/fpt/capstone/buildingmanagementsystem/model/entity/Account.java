@@ -3,8 +3,10 @@ package fpt.capstone.buildingmanagementsystem.model.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 
@@ -15,24 +17,37 @@ import java.util.Date;
 @Table(name = "account")
 public class Account {
     @Id
-    @Column(name = "account_id")
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(name = "accountId",updatable = false, nullable = false)
     public String accountId;
+    @NotNull
     @Column(name = "username")
     public String username;
+    @NotNull
     @Column(name = "password")
     public String password;
     @Temporal(TemporalType.TIMESTAMP)
-
+    @NotNull
     @Column(name = "created_date")
     public Date createdDate;
     @Temporal(TemporalType.TIMESTAMP)
-
+    @NotNull
     @Column(name = "updated_date")
     public Date updatedDate;
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private User user;
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "status_id")
     public Status status;
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "role_id")
     public Role role;
+
 }
