@@ -74,7 +74,7 @@ public class AccountManageService implements UserDetailsService {
                         accountRepository.save(newAccount);
                         User user= User.builder().city("unknown").country("unknown").email("unknown").first_name("unknown")
                                 .last_name("unknown").date_of_birth("unknown").telephone_number("unknown").gender("unknown").createdDate(
-                                        generateRealTime()).updatedDate(generateRealTime()).account(newAccount).build();
+                                        generateRealTime()).image("unknown").updatedDate(generateRealTime()).account(newAccount).build();
                         userRepository.save(user);
                         return true;
                     } else {

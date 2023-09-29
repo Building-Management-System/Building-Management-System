@@ -3,6 +3,7 @@ package fpt.capstone.buildingmanagementsystem.until;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.Path;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.UUID;
 @Component
 public class Until {
+
     public static String generateId() {
         return UUID.randomUUID().toString();
     }
@@ -26,4 +28,5 @@ public class Until {
     public static String encodePassword(String password){
         return new PasswordEncode().passwordEncoder().encode(password);
     }
+
 }

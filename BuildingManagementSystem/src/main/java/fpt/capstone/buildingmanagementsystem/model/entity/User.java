@@ -50,6 +50,9 @@ public class User {
     @NotNull
     @Column(name = "email")
     String email;
+    @NotNull
+    @Column(name = "image")
+    String image;
     @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     @Column(name = "created_date")
