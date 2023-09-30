@@ -25,22 +25,22 @@ public class User {
             strategy = "org.hibernate.id.UUIDGenerator"
     )
     @Column(name = "user_id",updatable = false, nullable = false)
-    String user_id;
+    String userId;
     @NotNull
     @Column(name = "first_name")
-    String first_name;
+    String firstName;
     @NotNull
     @Column(name = "last_name")
-    String last_name;
+    String lastName;
     @NotNull
     @Column(name = "gender")
     String gender;
     @NotNull
     @Column(name = "date_of_birth")
-    String date_of_birth;
+    String dateOfBirth;
     @NotNull
     @Column(name = "telephone_number")
-    String telephone_number;
+    String telephoneNumber;
     @NotNull
     @Column(name = "country")
     String country;

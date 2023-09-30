@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.repository;
 
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
@@ -26,4 +28,6 @@ public interface UserRepository extends JpaRepository<User, String> {
                        @Param(value = "telephone_number") String telephone_number, @Param(value = "country") String country,
                        @Param(value = "city") String city, @Param(value = "email") String email, @Param(value = "image") String image
             , @Param(value = "updated_date") Date updated_date, @Param(value = "user_id") String user_id);
+    Optional<User> findByUserId(String user_id);
+
 }

@@ -72,8 +72,8 @@ public class AccountManageService implements UserDetailsService {
                         Optional<Status> status = statusRepository.findByStatusId("1");
                         Account newAccount = accountMapper.convertRegisterAccount(registerRequest, status.get(), role.get());
                         accountRepository.save(newAccount);
-                        User user= User.builder().city("unknown").country("unknown").email("unknown").first_name("unknown")
-                                .last_name("unknown").date_of_birth("unknown").telephone_number("unknown").gender("unknown").createdDate(
+                        User user= User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
+                                .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
                                         generateRealTime()).image("unknown").updatedDate(generateRealTime()).account(newAccount).build();
                         userRepository.save(user);
                         return true;

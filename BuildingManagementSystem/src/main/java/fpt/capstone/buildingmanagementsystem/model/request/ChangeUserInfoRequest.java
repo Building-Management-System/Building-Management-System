@@ -8,12 +8,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChangeUserInfoRequest {
-    String user_id;
-    String first_name;
-    String last_name;
+    String userId;
+    String firstName;
+    String lastName;
     String gender;
-    String date_of_birth;
-    String telephone_number;
+    String dateOfBirth;
+    String telephoneNumber;
     String country;
     String city;
     String email;
