@@ -22,7 +22,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="BuildingManagementSystem" target="1.8" />
+      <module name="BuildingManagementSystem" target="10" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

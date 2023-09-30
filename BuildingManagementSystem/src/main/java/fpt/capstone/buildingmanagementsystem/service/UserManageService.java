@@ -3,9 +3,13 @@ package fpt.capstone.buildingmanagementsystem.service;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Bucket;
+import com.google.firebase.cloud.StorageClient;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
+import fpt.capstone.buildingmanagementsystem.firebase.UploadFile;
 import fpt.capstone.buildingmanagementsystem.mapper.UserMapper;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
@@ -14,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -25,8 +30,6 @@ import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime
 
 @Service
 public class UserManageService {
-    @Value("${upload.path}")
-    private String fileUpload;
     @Autowired
     AccountRepository accountRepository;
     @Autowired
@@ -53,31 +56,17 @@ public class UserManageService {
                 String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
                 List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
                 String username=accountRepository.findByAccountId(userId).get().getUsername();
-                String fileName = username+"."+stringList.get(1);
-                File convertFile= new File(fileUpload+fileName);
-                File dir = new File(fileUpload);
-                String[] list = dir.list();
-                for (int i = 0; i < list.length; i++) {
-                    String[] subOldFileName = Objects.requireNonNull(list[i]).split("\\.");
-                    List<String> checkOldFile = new ArrayList<>(Arrays.asList(subOldFileName));
-                    if(username.equals(checkOldFile.get(0))){
-                        File oldFile = new File(fileUpload+list[i]);
-                        oldFile.delete();
-                    }
+                String name = username+"."+stringList.get(1);
+                Bucket bucket = StorageClient.getInstance().bucket();
+                Blob blob = bucket.get(name);
+                if (blob != null) {
+                    blob.delete();
                 }
-                convertFile.createNewFile();
-                FileOutputStream fileOutputStream = new FileOutputStream(convertFile);
-                fileOutputStream.write(file.getBytes());
-                fileOutputStream.close();
-                try {
-                    FileCopyUtils.copy(file.getBytes(), new File(this.fileUpload + fileName));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                bucket.create(name, file.getBytes(), file.getContentType());
                 userRepository.updateUserInfo(changeUserInfoRequest.getFirst_name(),
                         changeUserInfoRequest.getLast_name(), changeUserInfoRequest.getGender(), changeUserInfoRequest.getDate_of_birth()
                         ,changeUserInfoRequest.getTelephone_number(),changeUserInfoRequest.getCountry()
-                        ,changeUserInfoRequest.getCity(),changeUserInfoRequest.getEmail(),fileName,generateRealTime(),changeUserInfoRequest.getUser_id());
+                        ,changeUserInfoRequest.getCity(),changeUserInfoRequest.getEmail(),name,generateRealTime(),changeUserInfoRequest.getUser_id());
                 return true;
             } else {
                 throw new BadRequest("request_fail");
