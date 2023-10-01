@@ -28,6 +28,10 @@ public class AccountController {
     public ResponseEntity<?> saveUser(@RequestBody RegisterRequest registerRequest) throws Exception {
         return ResponseEntity.ok(accountManageService.saveNewAccount(registerRequest));
     }
+    @RequestMapping(value = "/getAllAccount", method = RequestMethod.GET)
+    public ResponseEntity<?> getAllAccount() throws Exception {
+        return ResponseEntity.ok(accountManageService.getGetAllAccount());
+    }
     @RequestMapping(value = "/changeStatusAccount", method = RequestMethod.POST)
     public boolean changeStatusAccount(@RequestBody ChangeStatusAccountRequest changeStatusAccountRequest) throws Exception {
         return accountManageService.changeStatusAccount(changeStatusAccountRequest);

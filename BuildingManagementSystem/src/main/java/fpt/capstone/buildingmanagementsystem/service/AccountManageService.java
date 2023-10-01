@@ -12,6 +12,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Role;
 import fpt.capstone.buildingmanagementsystem.model.entity.Status;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.request.*;
+import fpt.capstone.buildingmanagementsystem.model.response.GetAllAccountResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
 import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
@@ -207,8 +208,13 @@ public class AccountManageService implements UserDetailsService {
         Optional<Role> role = roleRepository.findByRoleId(userAccount.get().getRole().getRoleId());
         return roleMapper.convertRegisterAccount(role.get());
     }
+    public List<GetAllAccountResponse> getGetAllAccount() {
+        List<Account> account = accountRepository.findAll();
+        List<GetAllAccountResponse> getAllAccountResponses = new ArrayList<>();
+        account.forEach(element -> getAllAccountResponses.add(accountMapper.convertGetAllAccount(element)));
+        return getAllAccountResponses;
+    }
     public String getAccountId(String username) {
-        ;
         Optional<Account> userAccount = accountRepository.findByUsername(username);
         return userAccount.get().getAccountId();
     }
