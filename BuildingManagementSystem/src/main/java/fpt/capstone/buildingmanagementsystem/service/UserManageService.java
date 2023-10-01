@@ -7,13 +7,23 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.UserMapper;
+import fpt.capstone.buildingmanagementsystem.mapper.UserPendingMapper;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.UserPending;
+import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.AcceptChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeUserInfoRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.GetAllUserInfoPending;
+import fpt.capstone.buildingmanagementsystem.model.response.GetUserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserPendingRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserPendingStatusRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
+
 import java.util.*;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
@@ -23,9 +33,15 @@ public class UserManageService {
     @Autowired
     AccountRepository accountRepository;
     @Autowired
+    UserPendingRepository userPendingRepository;
+    @Autowired
     UserRepository userRepository;
     @Autowired
     UserMapper userMapper;
+    @Autowired
+    UserPendingMapper userPendingMapper;
+    @Autowired
+    UserPendingStatusRepository userPendingStatusRepository;
 
     public boolean ChangeUserInfo(String data, MultipartFile file) {
         try {
@@ -41,24 +57,23 @@ public class UserManageService {
                     changeUserInfoRequest.getDateOfBirth() != null &&
                     file != null
             ) {
-                if (!userRepository.existsById(userId)) {
-                    throw new NotFound("user_not_found");
-                }
                 String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
                 List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
-                String username = accountRepository.findByAccountId(userId).get().getUsername();
-                String name = username + "." + stringList.get(1);
-                String oldImage=userRepository.findByUserId(userId).get().getImage();
+                String name = UUID.randomUUID().toString().toString() + "." + stringList.get(1);
                 Bucket bucket = StorageClient.getInstance().bucket();
-                Blob blob = bucket.get(oldImage);
-                if (blob != null) {
-                    blob.delete();
-                }
                 bucket.create(name, file.getBytes(), file.getContentType());
-                userRepository.updateUserInfo(changeUserInfoRequest.getFirstName(),
-                        changeUserInfoRequest.getLastName(), changeUserInfoRequest.getGender(), changeUserInfoRequest.getDateOfBirth()
-                        , changeUserInfoRequest.getTelephoneNumber(), changeUserInfoRequest.getCountry()
-                        , changeUserInfoRequest.getCity(), changeUserInfoRequest.getEmail(), name, generateRealTime(), changeUserInfoRequest.getUserId());
+                if (!userPendingRepository.existsById(userId)) {
+                    Optional<UserPendingStatus> userPendingStatus = userPendingStatusRepository.findByUserPendingStatusId("0");
+                    UserPending userPending = userPendingMapper.convertRegisterAccount(changeUserInfoRequest);
+                    userPending.setImage(name);
+                    userPending.setUserPendingStatus(userPendingStatus.get());
+                    userPendingRepository.save(userPending);
+                } else {
+                    userPendingRepository.updateUserInfo(changeUserInfoRequest.getFirstName(),
+                            changeUserInfoRequest.getLastName(), changeUserInfoRequest.getGender(), changeUserInfoRequest.getDateOfBirth()
+                            , changeUserInfoRequest.getTelephoneNumber(), changeUserInfoRequest.getCountry()
+                            , changeUserInfoRequest.getCity(), changeUserInfoRequest.getEmail(), name, generateRealTime(), "0", changeUserInfoRequest.getUserId());
+                }
                 return true;
             } else {
                 throw new BadRequest("request_fail");
@@ -68,7 +83,52 @@ public class UserManageService {
         }
     }
 
-    public Object getUserInfo(String username) throws IOException {
-        return null;
+
+    public boolean AcceptChangeUserInfo(AcceptChangeUserInfo acceptChangeUserInfo) {
+        try {
+            String userId = acceptChangeUserInfo.getUserId();
+            if (userId != null) {
+                if (!userRepository.existsById(userId)) {
+                    throw new NotFound("user_not_found");
+                }
+                Optional<UserPending> userPending = userPendingRepository.findById(userId);
+                userRepository.updateAcceptUserInfo(userPending.get().getFirstName(), userPending.get().getLastName(), userPending.get().getGender()
+                        , userPending.get().getDateOfBirth(), userPending.get().getTelephoneNumber()
+                        , userPending.get().getCity(), userPending.get().getCity(), userPending.get().getEmail()
+                        , userPending.get().getImage(), generateRealTime()
+                        , userId);
+                userPendingRepository.updateStatus("1", userId);
+                return true;
+            } else {
+                throw new BadRequest("request_fail");
+            }
+        } catch (ServerError e) {
+            throw new ServerError("fail");
+        }
+    }
+
+    public List<GetAllUserInfoPending> getAllUserNotVerify() {
+        UserPendingStatus status = new UserPendingStatus("0", "not_verify");
+        List<GetAllUserInfoPending> listResponse = new ArrayList<>();
+        List<UserPending> userPending = userPendingRepository.findAllByUserPendingStatus(status);
+        if (userPending.size() == 0) {
+            return listResponse;
+        }
+        userPending.forEach(element -> listResponse.add(userPendingMapper.convertGetUserInfoPending(element)));
+        return listResponse;
+    }
+
+    public GetUserInfoResponse getInfoUser(GetUserInfoRequest getUserInfoRequest) {
+        GetUserInfoResponse getUserInfoResponse = new GetUserInfoResponse();
+        if (getUserInfoRequest.getUserId() != null) {
+            Optional<User> user = userRepository.findByUserId(getUserInfoRequest.getUserId());
+            if (!user.isPresent()) {
+                throw new NotFound("user_not_found");
+            }
+            getUserInfoResponse = userMapper.convertGetUserInfo(user.get());
+        } else {
+            throw new BadRequest("request_fail");
+        }
+        return getUserInfoResponse;
     }
 }

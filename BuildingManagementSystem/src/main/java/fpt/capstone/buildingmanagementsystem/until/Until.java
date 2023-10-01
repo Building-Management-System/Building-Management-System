@@ -2,8 +2,6 @@ package fpt.capstone.buildingmanagementsystem.until;
 
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import org.springframework.stereotype.Component;
-
-import java.nio.file.Path;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;

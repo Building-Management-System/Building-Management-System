@@ -211,6 +211,9 @@ public class AccountManageService implements UserDetailsService {
     public List<GetAllAccountResponse> getGetAllAccount() {
         List<Account> account = accountRepository.findAll();
         List<GetAllAccountResponse> getAllAccountResponses = new ArrayList<>();
+        if (account.size()==0) {
+            return getAllAccountResponses;
+        }
         account.forEach(element -> getAllAccountResponses.add(accountMapper.convertGetAllAccount(element)));
         return getAllAccountResponses;
     }
