@@ -18,7 +18,10 @@ import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
 import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
+import fpt.capstone.buildingmanagementsystem.until.EmailSender;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,9 +33,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
+import static fpt.capstone.buildingmanagementsystem.until.Until.getRandomString;
 
 @Service
 public class AccountManageService implements UserDetailsService {
+    @Autowired
+    EmailSender emailSender;
     @Autowired
     AccountRepository accountRepository;
     @Autowired
@@ -193,8 +199,11 @@ public class AccountManageService implements UserDetailsService {
                 if (!accountRepository.existsByUsername(resetPassword.getUsername())) {
                     throw new NotFound("user_not_found");
                 }
-                String newPassword = passwordEncode.passwordEncoder().encode("123aA@");
-                accountRepository.updatePassword(newPassword, generateRealTime(), username);
+                String newPassword = getRandomString(8);
+                String toEmail=accountRepository.findByUsername(username).get().getUser().getEmail();
+                String newPasswordEncode = passwordEncode.passwordEncoder().encode(newPassword);
+                accountRepository.updatePassword(newPasswordEncode, generateRealTime(), username);
+                emailSender.setMailSender(toEmail,"[Notification] - Password has been successfully reset!","Your newly reset password is: "+newPassword);
                 return true;
             } else {
                 throw new BadRequest("request_fail");
