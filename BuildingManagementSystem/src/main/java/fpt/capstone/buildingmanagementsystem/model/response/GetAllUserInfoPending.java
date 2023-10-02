@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetAllUserInfoPending {
-    String userId;
+    String accountId;
     String firstName;
     String lastName;
     String gender;

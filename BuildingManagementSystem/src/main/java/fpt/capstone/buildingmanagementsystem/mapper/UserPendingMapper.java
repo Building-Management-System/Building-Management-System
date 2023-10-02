@@ -15,5 +15,6 @@ public abstract class UserPendingMapper {
             @Mapping(target = "createdDate", expression = "java(fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime())")
     })
     public abstract UserPending convertRegisterAccount(ChangeUserInfoRequest changeUserInfoRequest);
+    @Mapping(target = "accountId", source = "userId")
     public abstract GetAllUserInfoPending convertGetUserInfoPending(UserPending userPending);
 }
