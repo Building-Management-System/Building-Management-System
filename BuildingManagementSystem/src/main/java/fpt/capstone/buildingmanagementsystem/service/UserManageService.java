@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
@@ -90,6 +91,13 @@ public class UserManageService {
             if (userId != null) {
                 if (!userRepository.existsById(userId)) {
                     throw new NotFound("user_not_found");
+                }
+                Optional<User> user= userRepository.findByUserId(userId);
+                String oldImage=user.get().getImage();
+                Bucket bucket = StorageClient.getInstance().bucket();
+                Blob blob = bucket.get(oldImage);
+                if (blob != null) {
+                    blob.delete();
                 }
                 Optional<UserPending> userPending = userPendingRepository.findById(userId);
                 userRepository.updateAcceptUserInfo(userPending.get().getFirstName(), userPending.get().getLastName(), userPending.get().getGender()
