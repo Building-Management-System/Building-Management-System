@@ -150,6 +150,7 @@ public class UserManageService {
         users.forEach(user -> {
             UserInfoResponse userInfoResponse = new UserInfoResponse();
             BeanUtils.copyProperties(user, userInfoResponse);
+            userInfoResponse.setAccountId(user.getUserId());
             userInfoResponse.setRoleName(user.getAccount().getRole().getRoleName());
             userInfoResponses.add(userInfoResponse);
         });
