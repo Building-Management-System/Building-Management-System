@@ -30,4 +30,9 @@ public class UserController {
     public boolean acceptChangeUserInfo(@RequestBody AcceptChangeUserInfo acceptChangeUserInfo) throws Exception {
         return userManageService.AcceptChangeUserInfo(acceptChangeUserInfo);
     }
+
+    @RequestMapping(value = "/getAllUserInfo", method = RequestMethod.GET)
+    public ResponseEntity<?> getAllUserInfo() {
+        return ResponseEntity.ok(userManageService.getAllUserInfo());
+    }
 }

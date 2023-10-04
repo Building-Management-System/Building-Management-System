@@ -1,13 +1,15 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.cloud.storage.*;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.UserMapper;
 import fpt.capstone.buildingmanagementsystem.mapper.UserPendingMapper;
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.UserPending;
 import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
@@ -16,15 +18,16 @@ import fpt.capstone.buildingmanagementsystem.model.request.ChangeUserInfoRequest
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAllUserInfoPending;
 import fpt.capstone.buildingmanagementsystem.model.response.GetUserInfoResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserPendingRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserPendingStatusRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.*;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
@@ -60,7 +63,7 @@ public class UserManageService {
             ) {
                 String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
                 List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
-                String name = UUID.randomUUID().toString().toString() + "." + stringList.get(1);
+                String name = UUID.randomUUID() + "." + stringList.get(1);
                 Bucket bucket = StorageClient.getInstance().bucket();
                 bucket.create(name, file.getBytes(), file.getContentType());
                 if (!userPendingRepository.existsById(userId)) {
@@ -92,8 +95,8 @@ public class UserManageService {
                 if (!userRepository.existsById(userId)) {
                     throw new NotFound("user_not_found");
                 }
-                Optional<User> user= userRepository.findByUserId(userId);
-                String oldImage=user.get().getImage();
+                Optional<User> user = userRepository.findByUserId(userId);
+                String oldImage = user.get().getImage();
                 Bucket bucket = StorageClient.getInstance().bucket();
                 Blob blob = bucket.get(oldImage);
                 if (blob != null) {
@@ -139,4 +142,18 @@ public class UserManageService {
         }
         return getUserInfoResponse;
     }
+
+    public List<UserInfoResponse> getAllUserInfo() {
+        List<UserInfoResponse> userInfoResponses = new ArrayList<>();
+        List<User> users = userRepository.findAll();
+        if(users.isEmpty()) return userInfoResponses;
+        users.forEach(user -> {
+            UserInfoResponse userInfoResponse = new UserInfoResponse();
+            BeanUtils.copyProperties(user, userInfoResponse);
+            userInfoResponse.setRoleName(user.getAccount().getRole().getRoleName());
+            userInfoResponses.add(userInfoResponse);
+        });
+        return userInfoResponses;
+    }
+
 }
