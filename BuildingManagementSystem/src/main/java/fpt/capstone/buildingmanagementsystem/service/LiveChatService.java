@@ -1,6 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
-import fpt.capstone.buildingmanagementsystem.exception.NotFound;
+import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.model.entity.ChatMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest;
@@ -48,7 +48,7 @@ public class LiveChatService {
                     chatMessage.getUpdateAt()
             ));
         } catch (Exception e) {
-            throw new NotFound("Could not found user");
+            throw new BadRequest("Could not found user");
         }
     }
 
