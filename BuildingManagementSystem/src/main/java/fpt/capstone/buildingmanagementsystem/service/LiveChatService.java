@@ -5,6 +5,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.ChatMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.ChatMessageResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.MessageResponse;
 import fpt.capstone.buildingmanagementsystem.repository.ChatMessageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -52,5 +54,22 @@ public class LiveChatService {
         }
     }
 
+    public List<MessageResponse> getMessageBySenderAndReceiver(String from, String to) {
+
+        List<MessageResponse> messageResponses = new ArrayList<>();
+
+        List<ChatMessage> chatMessages = chatMessageRepository.findBySenderIdAndReceiverId(from, to);
+
+        chatMessages.forEach(chatMessage -> {
+            MessageResponse messageResponse;
+            if (chatMessage.getSender().getUserId().equals(from)) {
+                messageResponse = new MessageResponse(true, chatMessage.getMessage());
+            } else {
+                messageResponse = new MessageResponse(false, chatMessage.getMessage());
+            }
+            messageResponses.add(messageResponse);
+        });
+        return messageResponses;
+    }
 
 }
