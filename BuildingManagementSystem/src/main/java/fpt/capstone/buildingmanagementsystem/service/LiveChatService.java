@@ -7,9 +7,6 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.model.entity.ChatMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
-import fpt.capstone.buildingmanagementsystem.model.entity.UserPending;
-import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
-import fpt.capstone.buildingmanagementsystem.model.request.ChangeUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest2;
 import fpt.capstone.buildingmanagementsystem.model.response.ChatMessageResponse;
@@ -23,8 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.util.*;
-
-import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 
 @Service
 public class LiveChatService {
@@ -48,6 +43,7 @@ public class LiveChatService {
                     .message(chatMessageRequest.getMessage())
                     .createAt(Instant.now())
                     .updateAt(Instant.now())
+                    .type("text")
                     .build();
 
             chatMessageRepository.save(chatMessage);
@@ -55,7 +51,7 @@ public class LiveChatService {
                     List.of(from.getUserId(), to.getUserId()),
                     from.getUserId(),
                     to.getUserId(),
-                    chatMessage.getMessage(),
+                    chatMessage.getMessage(),"text",
                     chatMessage.getCreateAt(),
                     chatMessage.getUpdateAt()
             ));
@@ -74,7 +70,7 @@ public class LiveChatService {
 
                 String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
                 List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
-                String name = UUID.randomUUID() + "." + stringList.get(1);
+                String name = UUID.randomUUID() + "_livechat." + stringList.get(1);
                 Bucket bucket = StorageClient.getInstance().bucket();
                 bucket.create(name, file.getBytes(), file.getContentType());
 
@@ -84,13 +80,14 @@ public class LiveChatService {
                         .message(name)
                         .createAt(Instant.now())
                         .updateAt(Instant.now())
+                        .type("image")
                         .build();
                 chatMessageRepository.save(chatMessage);
                 return ResponseEntity.ok().body(new ChatMessageResponse(
                         List.of(from.getUserId(), to.getUserId()),
                         from.getUserId(),
                         to.getUserId(),
-                        name,
+                        name,"image",
                         chatMessage.getCreateAt(),
                         chatMessage.getUpdateAt()
                 ));
@@ -110,9 +107,9 @@ public class LiveChatService {
         chatMessages.forEach(chatMessage -> {
             MessageResponse messageResponse;
             if (chatMessage.getSender().getUserId().equals(from)) {
-                messageResponse = new MessageResponse(true, chatMessage.getMessage(),chatMessage.getCreateAt().toString());
+                messageResponse = new MessageResponse(true, chatMessage.getMessage(),chatMessage.getCreateAt().toString(),chatMessage.getType());
             } else {
-                messageResponse = new MessageResponse(false, chatMessage.getMessage(),chatMessage.getCreateAt().toString());
+                messageResponse = new MessageResponse(false, chatMessage.getMessage(),chatMessage.getCreateAt().toString(),chatMessage.getType());
             }
             messageResponses.add(messageResponse);
         });

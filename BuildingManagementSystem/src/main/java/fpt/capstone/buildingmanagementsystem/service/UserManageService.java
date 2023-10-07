@@ -63,7 +63,7 @@ public class UserManageService {
             ) {
                 String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
                 List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
-                String name = UUID.randomUUID() + "." + stringList.get(1);
+                String name = UUID.randomUUID() + "_avatar." + stringList.get(1);
                 Bucket bucket = StorageClient.getInstance().bucket();
                 bucket.create(name, file.getBytes(), file.getContentType());
                 if (!userPendingRepository.existsById(userId)) {
