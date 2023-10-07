@@ -1,9 +1,17 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.cloud.storage.Bucket;
+import com.google.firebase.cloud.StorageClient;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
+import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.model.entity.ChatMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.UserPending;
+import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangeUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest2;
 import fpt.capstone.buildingmanagementsystem.model.response.ChatMessageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.MessageResponse;
 import fpt.capstone.buildingmanagementsystem.repository.ChatMessageRepository;
@@ -11,10 +19,12 @@ import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 
 @Service
 public class LiveChatService {
@@ -53,7 +63,44 @@ public class LiveChatService {
             throw new BadRequest("Could not found user");
         }
     }
+    public ResponseEntity<?> createChat2(String data, MultipartFile file) {
+        try {
+            ChatMessageRequest2 chatMessageRequest2 = new ObjectMapper().readValue(data, ChatMessageRequest2.class);
+            if (chatMessageRequest2.getFrom() != null && chatMessageRequest2.getTo() != null && file != null) {
+                User from = userRepository.findByUserId(chatMessageRequest2.getFrom())
+                        .orElseThrow(Exception::new);
+                User to = userRepository.findByUserId(chatMessageRequest2.getTo())
+                        .orElseThrow(Exception::new);
 
+                String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
+                List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
+                String name = UUID.randomUUID() + "." + stringList.get(1);
+                Bucket bucket = StorageClient.getInstance().bucket();
+                bucket.create(name, file.getBytes(), file.getContentType());
+
+                ChatMessage chatMessage = ChatMessage.builder()
+                        .sender(from)
+                        .receiver(to)
+                        .message(name)
+                        .createAt(Instant.now())
+                        .updateAt(Instant.now())
+                        .build();
+                chatMessageRepository.save(chatMessage);
+                return ResponseEntity.ok().body(new ChatMessageResponse(
+                        List.of(from.getUserId(), to.getUserId()),
+                        from.getUserId(),
+                        to.getUserId(),
+                        name,
+                        chatMessage.getCreateAt(),
+                        chatMessage.getUpdateAt()
+                ));
+            } else {
+                throw new BadRequest("request_fail");
+            }
+        } catch (Exception e) {
+            throw new ServerError("fail");
+        }
+    }
     public List<MessageResponse> getMessageBySenderAndReceiver(String from, String to) {
 
         List<MessageResponse> messageResponses = new ArrayList<>();
@@ -63,9 +110,9 @@ public class LiveChatService {
         chatMessages.forEach(chatMessage -> {
             MessageResponse messageResponse;
             if (chatMessage.getSender().getUserId().equals(from)) {
-                messageResponse = new MessageResponse(true, chatMessage.getMessage());
+                messageResponse = new MessageResponse(true, chatMessage.getMessage(),chatMessage.getCreateAt().toString());
             } else {
-                messageResponse = new MessageResponse(false, chatMessage.getMessage());
+                messageResponse = new MessageResponse(false, chatMessage.getMessage(),chatMessage.getCreateAt().toString());
             }
             messageResponses.add(messageResponse);
         });
