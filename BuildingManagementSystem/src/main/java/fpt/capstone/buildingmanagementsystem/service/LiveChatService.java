@@ -70,7 +70,7 @@ public class LiveChatService {
 
                 String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
                 List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
-                String name = UUID.randomUUID() + "_livechat." + stringList.get(1);
+                String name = "livechat_" + UUID.randomUUID() + "." + stringList.get(1);
                 Bucket bucket = StorageClient.getInstance().bucket();
                 bucket.create(name, file.getBytes(), file.getContentType());
 
