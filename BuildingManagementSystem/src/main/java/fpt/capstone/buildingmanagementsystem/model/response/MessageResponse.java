@@ -15,4 +15,5 @@ public class MessageResponse {
     private boolean myself;
     private String message;
     private String createdAt;
+    private String type;
 }
