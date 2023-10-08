@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,8 +21,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import java.sql.Date;
+import java.sql.Time;
 import java.time.Instant;
-import java.util.Date;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,52 +32,50 @@ import java.util.Date;
 @Setter
 @Builder
 @Data
-@Entity(name = "dailyLog")
+@Entity(name = "daily_log")
 public class DailyLog {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long dailyId;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(name = "daily_log_id")
+    private String dailyId;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "dayTime")
-    private Date dayTime;
+    @Column(name = "date")
+    private Date date;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "firstEntry")
-    private Date firstEntry;
+    @Column(name = "first_entry")
+    private Time firstEntry;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "lastExit")
-    private Instant lastExit;
+    @Column(name = "last_exit")
+    private Time lastExit;
 
-    @Column(name = "morningTotal")
-    private int morningTotal;
+    @Column(name = "morning_total")
+    private float morningTotal;
 
-    @Column(name = "afternoonTotal")
-    private int afternoonTotal;
+    @Column(name = "afternoon_total")
+    private float afternoonTotal;
 
-    @Column(name = "permittedLeave")
-    private int permittedLeave;
+    @Column(name = "permitted_leave")
+    private float permittedLeave;
 
-    @Column(name = "nonPermittedLeave")
-    private int nonPermittedLeave;
+    @Column(name = "non_permitted_leave")
+    private float nonPermittedLeave;
 
-    @Column(name = "dateType")
+    @Column(name = "date_type")
     @Enumerated(EnumType.STRING)
     private DateType dateType;
 
+    @Column(name = "total_time")
+    private float totalTime;
 
-    @Column(name = "otStatus")
-    private boolean otStatus;
+    @Column(name = "outside_time")
+    private float outsideTime;
 
-    @Column(name = "totalTime")
-    private int totalTime;
-
-    @Column(name = "outsideTime")
-    private int outsideTime;
-
-    @Column(name = "insideTime")
-    private int insideTime;
+    @Column(name = "inside_time")
+    private float insideTime;
 
     @Column(name = "description")
     private String description;

@@ -7,20 +7,20 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import java.util.Date;
+import java.sql.Date;
+import java.sql.Time;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,31 +28,33 @@ import java.util.Date;
 @Setter
 @Builder
 @Data
-@Entity(name = "overtimeLog")
+@Entity(name = "overtime_log")
 public class OvertimeLog {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long otId;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(name = "overtime_log_id")
+    private String otId;
+    @Column(name = "date")
+    private Date date;
+    @Column(name = "start_time")
+    private Time startTime;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "startTime")
-    private Date startTime;
+    @Column(name = "end_time")
+    private Time endTime;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "endTime")
-    private Date endTime;
-
-    @Column(name = "dateType")
+    @Column(name = "date_type")
     @Enumerated(EnumType.STRING)
     private DateType dateType;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "manualStart")
-    private Date manualStart;
+    @Column(name = "manual_start")
+    private Time manualStart;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "manualEnd")
-    private Date manualEnd;
+    @Column(name = "manual_end")
+    private Time manualEnd;
 
     @Column(name = "description")
     private String description;
