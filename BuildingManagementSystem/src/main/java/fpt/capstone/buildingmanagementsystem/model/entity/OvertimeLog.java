@@ -38,8 +38,10 @@ public class OvertimeLog {
     )
     @Column(name = "overtime_log_id")
     private String otId;
+
     @Column(name = "date")
     private Date date;
+
     @Column(name = "start_time")
     private Time startTime;
 

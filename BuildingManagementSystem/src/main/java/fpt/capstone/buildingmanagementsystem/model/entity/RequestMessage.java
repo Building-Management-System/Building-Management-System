@@ -1,7 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.model.entity;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,25 +12,31 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import java.time.Instant;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Entity
 @Getter
 @Setter
-@Table(name = "chat_message")
-public class ChatMessage {
+@Entity
+public class RequestMessage {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(
             name = "UUID",
             strategy = "org.hibernate.id.UUIDGenerator"
     )
-    @Column(name = "messageId",updatable = false, nullable = false)
-    private String id;
+    private UUID requestMessageId;
+
+    @Column
+    private String content;
+
+    @Column
+    private Instant createDate;
+
+    @Column
+    private Instant updateDate;
 
     @ManyToOne
     @JoinColumn(name = "senderId")
@@ -41,17 +46,12 @@ public class ChatMessage {
     @JoinColumn(name = "receiverId")
     private User receiver;
 
-    @Column(name = "message")
-    private String message;
+    @ManyToOne
+    @JoinColumn(name = "requestId")
+    private RequestTicket request;
 
-    @Column(name = "createAt")
-    private Instant createAt;
+    @ManyToOne
+    @JoinColumn(name = "departmentId")
+    private Department department;
 
-    @Column(name = "updateAt")
-    private Instant updateAt;
-
-    @Column(name = "status")
-    private String status;
-    @Column(name = "type")
-    private String type;
 }
