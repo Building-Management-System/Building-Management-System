@@ -3,7 +3,7 @@ package fpt.capstone.buildingmanagementsystem.service;
 import fpt.capstone.buildingmanagementsystem.model.dto.RequestTicketDto;
 import fpt.capstone.buildingmanagementsystem.model.dto.TicketDto;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponse;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.groupingBy;
 public class TicketManageService {
 
     @Autowired
-    private TicketRepository ticketRepository;
+    private TicketRepositoryv2 ticketRepository;
 
     public List<TicketRequestResponse> getAllTickets() {
         List<TicketRequestResponse> ticketRequestResponses = new ArrayList<>();

@@ -1,7 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.repository.impl;
 
 import fpt.capstone.buildingmanagementsystem.model.dto.TicketDto;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.transform.Transformers;
 import org.springframework.stereotype.Repository;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
-public class TicketRepositoryImplement implements TicketRepository {
+public class TicketRepositoryImplement implements TicketRepositoryv2 {
 
     @PersistenceContext
     EntityManager entityManager;

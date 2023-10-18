@@ -22,13 +22,7 @@ import javax.persistence.ManyToOne;
 @Builder
 @Entity
 public class RequestTicket {
-
     @Id
-//    @GeneratedValue(generator = "UUID")
-//    @GenericGenerator(
-//            name = "UUID",
-//            strategy = "org.hibernate.id.UUIDGenerator"
-//    )
     @Column(name = "requestId", updatable = false, nullable = false)
     private String requestId;
 

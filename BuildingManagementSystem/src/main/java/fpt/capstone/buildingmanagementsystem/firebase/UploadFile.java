@@ -21,7 +21,6 @@ public class UploadFile {
     public void init(ApplicationReadyEvent event) {
         try {
             ClassPathResource serviceAccount = new ClassPathResource("/firebase.json");
-            System.out.println(serviceAccount.getInputStream());
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount.getInputStream()))
                     .setStorageBucket(properties.getBucketName())

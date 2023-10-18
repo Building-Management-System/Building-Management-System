@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.model.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,14 +13,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import java.time.Instant;
-import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
+@Builder
 public class RequestMessage {
     @Id
     @GeneratedValue(generator = "UUID")
@@ -27,16 +27,16 @@ public class RequestMessage {
             name = "UUID",
             strategy = "org.hibernate.id.UUIDGenerator"
     )
-    private UUID requestMessageId;
+    private String requestMessageId;
 
     @Column
     private String content;
 
     @Column
-    private Instant createDate;
+    private String createDate;
 
     @Column
-    private Instant updateDate;
+    private String updateDate;
 
     @ManyToOne
     @JoinColumn(name = "senderId")
@@ -53,5 +53,4 @@ public class RequestMessage {
     @ManyToOne
     @JoinColumn(name = "departmentId")
     private Department department;
-
 }
