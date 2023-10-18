@@ -46,7 +46,7 @@ public class UserPending {
     String image;
     @NotNull
     @Column(name = "created_date")
-    public String createdDate;
+    String createdDate;
     @NotNull
     @ManyToOne
     @JoinColumn(name = "user_pending_status_id")

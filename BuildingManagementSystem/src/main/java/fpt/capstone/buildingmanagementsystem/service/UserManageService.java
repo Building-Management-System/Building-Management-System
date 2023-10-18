@@ -23,6 +23,7 @@ import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserPendingRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserPendingStatusRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,7 @@ public class UserManageService {
                 Bucket bucket = StorageClient.getInstance().bucket();
                 bucket.create(name, file.getBytes(), file.getContentType());
                 if (!userPendingRepository.existsById(userId)) {
-                    Optional<UserPendingStatus> userPendingStatus = userPendingStatusRepository.findByUserPendingStatusId("0");
+                    Optional<UserPendingStatus> userPendingStatus = userPendingStatusRepository.findByUserPendingStatusId("1");
                     UserPending userPending = userPendingMapper.convertRegisterAccount(changeUserInfoRequest);
                     userPending.setImage(name);
                     userPending.setUserPendingStatus(userPendingStatus.get());
@@ -76,7 +77,7 @@ public class UserManageService {
                     userPendingRepository.updateUserInfo(changeUserInfoRequest.getFirstName(),
                             changeUserInfoRequest.getLastName(), changeUserInfoRequest.getGender(), changeUserInfoRequest.getDateOfBirth()
                             , changeUserInfoRequest.getTelephoneNumber(), changeUserInfoRequest.getCountry()
-                            , changeUserInfoRequest.getCity(), changeUserInfoRequest.getEmail(), name, generateRealTime(), "0", changeUserInfoRequest.getUserId());
+                            , changeUserInfoRequest.getCity(), changeUserInfoRequest.getEmail(), name, Until.generateRealTime(), "1", changeUserInfoRequest.getUserId());
                 }
                 return true;
             } else {
@@ -108,7 +109,7 @@ public class UserManageService {
                         , userPending.get().getCity(), userPending.get().getCity(), userPending.get().getEmail()
                         , userPending.get().getImage(), generateRealTime()
                         , userId);
-                userPendingRepository.updateStatus("1", userId);
+                userPendingRepository.updateStatus("2", userId);
                 return true;
             } else {
                 throw new BadRequest("request_fail");
@@ -119,7 +120,7 @@ public class UserManageService {
     }
 
     public List<GetAllUserInfoPending> getAllUserNotVerify() {
-        UserPendingStatus status = new UserPendingStatus("0", "not_verify");
+        UserPendingStatus status = new UserPendingStatus("1", "not_verify");
         List<GetAllUserInfoPending> listResponse = new ArrayList<>();
         List<UserPending> userPending = userPendingRepository.findAllByUserPendingStatus(status);
         if (userPending.size() == 0) {

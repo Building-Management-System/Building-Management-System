@@ -28,18 +28,15 @@ public class RequestMessage {
     private String requestMessageId;
 
     @Column
-    private String content;
-
-    @Column
     private String createDate;
 
     @Column
     private String updateDate;
-
+    @Column
+    private String attachmentMessageId;
     @ManyToOne
     @JoinColumn(name = "senderId")
     private User sender;
-
     @ManyToOne
     @JoinColumn(name = "receiverId")
     private User receiver;
