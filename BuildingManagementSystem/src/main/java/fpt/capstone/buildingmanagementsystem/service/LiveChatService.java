@@ -1,6 +1,5 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
-import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
@@ -20,7 +19,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Service
 public class LiveChatService {
@@ -52,7 +55,7 @@ public class LiveChatService {
                     List.of(from.getUserId(), to.getUserId()),
                     from.getUserId(),
                     to.getUserId(),
-                    chatMessage.getMessage(),"text",
+                    chatMessage.getMessage(), "text",
                     chatMessage.getCreateAt(),
                     chatMessage.getUpdateAt()
             ));
@@ -60,6 +63,7 @@ public class LiveChatService {
             throw new BadRequest("Could not found user");
         }
     }
+
     public ResponseEntity<?> createChat2(String data, MultipartFile file) {
         try {
             ChatMessageRequest2 chatMessageRequest2 = new ObjectMapper().readValue(data, ChatMessageRequest2.class);
@@ -88,7 +92,7 @@ public class LiveChatService {
                         List.of(from.getUserId(), to.getUserId()),
                         from.getUserId(),
                         to.getUserId(),
-                        name,"image",
+                        name, "image",
                         chatMessage.getCreateAt(),
                         chatMessage.getUpdateAt()
                 ));
@@ -99,6 +103,7 @@ public class LiveChatService {
             throw new ServerError("fail");
         }
     }
+
     public List<MessageResponse> getMessageBySenderAndReceiver(String from, String to) {
 
         List<MessageResponse> messageResponses = new ArrayList<>();
@@ -108,9 +113,9 @@ public class LiveChatService {
         chatMessages.forEach(chatMessage -> {
             MessageResponse messageResponse;
             if (chatMessage.getSender().getUserId().equals(from)) {
-                messageResponse = new MessageResponse(true, chatMessage.getMessage(),chatMessage.getCreateAt().toString(),chatMessage.getType());
+                messageResponse = new MessageResponse(true, chatMessage.getMessage(), chatMessage.getCreateAt().toString(), chatMessage.getType());
             } else {
-                messageResponse = new MessageResponse(false, chatMessage.getMessage(),chatMessage.getCreateAt().toString(),chatMessage.getType());
+                messageResponse = new MessageResponse(false, chatMessage.getMessage(), chatMessage.getCreateAt().toString(), chatMessage.getType());
             }
             messageResponses.add(messageResponse);
         });
