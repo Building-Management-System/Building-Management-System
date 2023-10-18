@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,11 +17,9 @@ public class Until {
         return UUID.randomUUID().toString();
     }
     public static String generateRealTime(){
-        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
-        ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime nowAtVietNam = now.withZoneSameInstant(zoneId);
-        Instant instant= Timestamp.valueOf(nowAtVietNam.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).toInstant();
-        return instant.toString();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+        return dtf.format(now).toString();
     }
     public static String encodePassword(String password){
         return new PasswordEncode().passwordEncoder().encode(password);
