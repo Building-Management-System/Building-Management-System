@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.repository;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
+import fpt.capstone.buildingmanagementsystem.model.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,7 +18,6 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     Optional<Account> findByUsername(String username);
 
     Optional<Account> findByAccountId(String accountId);
-
     Boolean existsByUsername(String username);
 
     @Transactional
