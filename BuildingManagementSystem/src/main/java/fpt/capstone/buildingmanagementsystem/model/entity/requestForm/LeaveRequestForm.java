@@ -1,7 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.model.entity.requestForm;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
-//import fpt.capstone.buildingmanagementsystem.model.entity.Topic;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +8,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
-import java.sql.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @AllArgsConstructor
 @NoArgsConstructor

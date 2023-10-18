@@ -3,7 +3,7 @@ package fpt.capstone.buildingmanagementsystem.mqttClients;
 import org.springframework.context.ApplicationEvent;
 
 public class CustomSpringEvent extends ApplicationEvent {
-    private String message;
+    private final String message;
 
     public CustomSpringEvent(Object source, String message) {
         super(source);

@@ -9,7 +9,6 @@ import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.UserMapper;
 import fpt.capstone.buildingmanagementsystem.mapper.UserPendingMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.UserPending;
 import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
@@ -29,7 +28,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 
@@ -147,7 +151,7 @@ public class UserManageService {
     public List<UserInfoResponse> getAllUserInfo() {
         List<UserInfoResponse> userInfoResponses = new ArrayList<>();
         List<User> users = userRepository.findAll();
-        if(users.isEmpty()) return userInfoResponses;
+        if (users.isEmpty()) return userInfoResponses;
         users.forEach(user -> {
             UserInfoResponse userInfoResponse = new UserInfoResponse();
             BeanUtils.copyProperties(user, userInfoResponse);

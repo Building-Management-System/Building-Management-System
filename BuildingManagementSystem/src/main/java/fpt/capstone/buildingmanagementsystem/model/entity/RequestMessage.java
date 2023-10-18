@@ -3,14 +3,7 @@ package fpt.capstone.buildingmanagementsystem.model.entity;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import java.time.Instant;
-import java.util.UUID;
+import javax.persistence.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -37,6 +30,7 @@ public class RequestMessage {
     @ManyToOne
     @JoinColumn(name = "senderId")
     private User sender;
+
     @ManyToOne
     @JoinColumn(name = "receiverId")
     private User receiver;
@@ -48,4 +42,5 @@ public class RequestMessage {
     @ManyToOne
     @JoinColumn(name = "departmentId")
     private Department department;
+
 }

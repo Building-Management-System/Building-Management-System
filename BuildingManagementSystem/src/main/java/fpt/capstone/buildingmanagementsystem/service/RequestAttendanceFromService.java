@@ -24,7 +24,7 @@ public class RequestAttendanceFromService {
     @Autowired
     AttendanceRequestFormRepository attendanceRequestFormRepository;
     @Autowired
-    TicketRepository ticketRepository;
+    TicketRepositoryv2 ticketRepositoryv2;
     @Autowired
     RequestTicketRepository requestTicketRepository;
     @Autowired
@@ -33,6 +33,9 @@ public class RequestAttendanceFromService {
     DepartmentRepository departmentRepository;
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    TicketRepository ticketRepository;
     public boolean getAttendanceUser(SendAttendanceFormRequest sendAttendanceFormRequest) {
         try {
             if (sendAttendanceFormRequest.getContent() != null&&
