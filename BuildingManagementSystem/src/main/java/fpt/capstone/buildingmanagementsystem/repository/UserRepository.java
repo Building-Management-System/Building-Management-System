@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -28,5 +29,5 @@ public interface UserRepository extends JpaRepository<User, String> {
                        @Param(value = "city") String city, @Param(value = "email") String email, @Param(value = "image") String image
             , @Param(value = "updated_date") String updated_date, @Param(value = "user_id") String user_id);
     Optional<User> findByUserId(String userId);
-
+    List<User> findAllByDepartment(Department department);
 }

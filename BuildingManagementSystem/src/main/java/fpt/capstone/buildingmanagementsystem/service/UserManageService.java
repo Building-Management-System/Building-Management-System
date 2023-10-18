@@ -9,19 +9,15 @@ import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.UserMapper;
 import fpt.capstone.buildingmanagementsystem.mapper.UserPendingMapper;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.UserPending;
 import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.AcceptChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
-import fpt.capstone.buildingmanagementsystem.model.response.GetAllUserInfoPending;
-import fpt.capstone.buildingmanagementsystem.model.response.GetUserInfoResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
-import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
-import fpt.capstone.buildingmanagementsystem.repository.UserPendingRepository;
-import fpt.capstone.buildingmanagementsystem.repository.UserPendingStatusRepository;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.model.response.*;
+import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +37,10 @@ import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime
 public class UserManageService {
     @Autowired
     AccountRepository accountRepository;
+    @Autowired
+    RoleRepository roleRepository;
+    @Autowired
+    DepartmentRepository departmentRepository;
     @Autowired
     UserPendingRepository userPendingRepository;
     @Autowired
@@ -162,4 +162,32 @@ public class UserManageService {
         return userInfoResponses;
     }
 
+    public ReceiveIdAndDepartmentIdResponse getReceiveIdAndDepartmentId(String userId) {
+        if (userId != null) {
+            if (userRepository.findByUserId(userId).isPresent()) {
+                Department department = userRepository.findByUserId(userId).get().getDepartment();
+                List<User> userOfDepartment = userRepository.findAllByDepartment(department);
+                String managerId=null;
+                for(int i=0;i<userOfDepartment.size();i++) {
+                    Optional<Account> account = accountRepository.findByAccountId(userOfDepartment.get(i).getUserId());
+                    if(Objects.equals(account.get().getRole().getRoleId(), "3")){
+                        managerId=account.get().getAccountId();
+                    }
+                }
+                ManagerInfoResponse managerInfoResponse = ManagerInfoResponse.builder().managerDepartmentId(department.getDepartmentId())
+                        .managerDepartmentName(department.getDepartmentName())
+                        .managerId(managerId)
+                        .build();
+                Optional<Department> departmentHr = departmentRepository.findByDepartmentId("3");
+                HrDepartmentResponse hrDepartmentResponse = HrDepartmentResponse.builder().hrDepartmentId(departmentHr.get().getDepartmentId())
+                        .hrDepartmentName(departmentHr.get().getDepartmentName())
+                        .build();
+                return new ReceiveIdAndDepartmentIdResponse(managerInfoResponse, hrDepartmentResponse);
+            } else {
+                throw new NotFound("user_not_found");
+            }
+        } else {
+            throw new BadRequest("request_fail");
+        }
+    }
 }
