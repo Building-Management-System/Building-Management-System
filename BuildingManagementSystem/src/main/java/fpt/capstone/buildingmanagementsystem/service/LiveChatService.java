@@ -13,6 +13,7 @@ import fpt.capstone.buildingmanagementsystem.model.response.ChatMessageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.MessageResponse;
 import fpt.capstone.buildingmanagementsystem.repository.ChatMessageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -41,8 +42,8 @@ public class LiveChatService {
                     .sender(from)
                     .receiver(to)
                     .message(chatMessageRequest.getMessage())
-                    .createAt(Instant.now())
-                    .updateAt(Instant.now())
+                    .createAt(Until.generateRealTime())
+                    .updateAt(Until.generateRealTime())
                     .type("text")
                     .build();
 
@@ -78,8 +79,8 @@ public class LiveChatService {
                         .sender(from)
                         .receiver(to)
                         .message(name)
-                        .createAt(Instant.now())
-                        .updateAt(Instant.now())
+                        .createAt(Until.generateRealTime())
+                        .updateAt(Until.generateRealTime())
                         .type("image")
                         .build();
                 chatMessageRepository.save(chatMessage);

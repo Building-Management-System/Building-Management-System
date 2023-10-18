@@ -11,5 +11,5 @@ import java.sql.Date;
 @Repository
 public interface OverTimeRepository extends JpaRepository<OvertimeLog, Long> {
     @Query(value = "select * from overtime_log where user_id = :user_id and date = :date", nativeQuery = true)
-    OvertimeLog getAttendanceDetail(String user_id, Date date);
+    OvertimeLog getAttendanceDetail(String user_id, String date);
 }

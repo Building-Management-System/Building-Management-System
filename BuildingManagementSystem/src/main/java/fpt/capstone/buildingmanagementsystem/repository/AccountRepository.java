@@ -23,7 +23,7 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     @Transactional
     @Modifying
     @Query(value = "UPDATE account SET password = :password,updated_date = :updated_date where username = :username", nativeQuery = true)
-    int updatePassword(@Param(value = "password") String password, @Param(value = "updated_date") Date updated_date, @Param(value = "username") String username);
+    int updatePassword(@Param(value = "password") String password, @Param(value = "updated_date") String updated_date, @Param(value = "username") String username);
 
     @Transactional
     @Modifying

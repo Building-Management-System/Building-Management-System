@@ -15,12 +15,12 @@ public class Until {
     public static String generateId() {
         return UUID.randomUUID().toString();
     }
-    public static Date generateRealTime(){
+    public static String generateRealTime(){
         ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
         ZonedDateTime now = ZonedDateTime.now();
         ZonedDateTime nowAtVietNam = now.withZoneSameInstant(zoneId);
         Instant instant= Timestamp.valueOf(nowAtVietNam.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).toInstant();
-        return Time.from(instant);
+        return instant.toString();
     }
     public static String encodePassword(String password){
         return new PasswordEncode().passwordEncoder().encode(password);

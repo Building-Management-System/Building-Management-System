@@ -22,7 +22,7 @@ public class AttendanceController {
         return attendanceService.getAttendanceUser(user_id);
     }
     @GetMapping("/getAttendanceUserDetail")
-    public AttendanceDetailResponse getAttendanceUserDetail(@Param("user_id") String user_id, @Param("date") Date date) {
+    public AttendanceDetailResponse getAttendanceUserDetail(@Param("user_id") String user_id, @Param("date") String date) {
         return attendanceService.getAttendanceDetail(user_id,date);
     }
 }

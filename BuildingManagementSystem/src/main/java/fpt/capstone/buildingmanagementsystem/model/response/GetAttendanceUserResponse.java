@@ -9,8 +9,8 @@ import java.sql.Time;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetAttendanceUserResponse{
-    private Date date;
-    private Time firstEntry;
-    private Time lastExit;
+    private String date;
+    private String firstEntry;
+    private String lastExit;
     private float totalTime;
 }

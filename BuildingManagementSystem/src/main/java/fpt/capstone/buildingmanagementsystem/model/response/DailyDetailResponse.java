@@ -9,8 +9,8 @@ import java.sql.Time;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DailyDetailResponse {
-    private Time firstEntry;
-    private Time lastExit;
+    private String firstEntry;
+    private String lastExit;
     private float morning_total;
     private float afternoonTotal;
     private float permittedLeave;

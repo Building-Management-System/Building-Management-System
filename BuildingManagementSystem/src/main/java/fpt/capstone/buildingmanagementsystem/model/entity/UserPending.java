@@ -44,10 +44,9 @@ public class UserPending {
     @NotNull
     @Column(name = "image")
     String image;
-    @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     @Column(name = "created_date")
-    public Date createdDate;
+    public String createdDate;
     @NotNull
     @ManyToOne
     @JoinColumn(name = "user_pending_status_id")

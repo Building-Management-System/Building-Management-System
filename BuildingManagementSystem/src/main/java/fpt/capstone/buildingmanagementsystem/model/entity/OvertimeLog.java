@@ -40,23 +40,23 @@ public class OvertimeLog {
     private String otId;
 
     @Column(name = "date")
-    private Date date;
+    private String date;
 
     @Column(name = "start_time")
-    private Time startTime;
+    private String startTime;
 
     @Column(name = "end_time")
-    private Time endTime;
+    private String endTime;
 
     @Column(name = "date_type")
     @Enumerated(EnumType.STRING)
     private DateType dateType;
 
     @Column(name = "manual_start")
-    private Time manualStart;
+    private String manualStart;
 
     @Column(name = "manual_end")
-    private Time manualEnd;
+    private String manualEnd;
 
     @Column(name = "description")
     private String description;

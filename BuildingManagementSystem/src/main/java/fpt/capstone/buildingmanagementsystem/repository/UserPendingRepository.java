@@ -27,7 +27,7 @@ public interface UserPendingRepository extends JpaRepository<UserPending,String>
                        @Param(value = "gender") String gender, @Param(value = "date_of_birth") String date_of_birth,
                        @Param(value = "telephone_number") String telephone_number, @Param(value = "country") String country,
                        @Param(value = "city") String city, @Param(value = "email") String email, @Param(value = "image") String image
-            , @Param(value = "created_date") Date created_date, @Param(value = "user_pending_status_id") String user_pending_status_id, @Param(value = "user_pending_id") String user_pending_id);
+            , @Param(value = "created_date") String created_date, @Param(value = "user_pending_status_id") String user_pending_status_id, @Param(value = "user_pending_id") String user_pending_id);
     @Transactional
     @Modifying
     @Query(value = "UPDATE user_pending SET user_pending_status_id = :user_pending_status_id"+

@@ -45,10 +45,10 @@ public class ChatMessage {
     private String message;
 
     @Column(name = "createAt")
-    private Instant createAt;
+    private String createAt;
 
     @Column(name = "updateAt")
-    private Instant updateAt;
+    private String updateAt;
 
     @Column(name = "status")
     private String status;
