@@ -46,7 +46,7 @@ public class LeaveRequestForm {
     private int durationEvaluation;
 
     @Column
-    private String note;
+    private String content;
 
     @Column
     private boolean status;

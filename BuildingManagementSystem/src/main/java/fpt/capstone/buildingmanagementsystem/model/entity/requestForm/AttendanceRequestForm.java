@@ -38,7 +38,7 @@ public class AttendanceRequestForm {
     private String manualLastExit;
 
     @Column
-    private String note;
+    private String content;
 
     @Column
     private boolean status;

@@ -7,16 +7,10 @@ import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.AccountMapper;
 import fpt.capstone.buildingmanagementsystem.mapper.RoleMapper;
 import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
-import fpt.capstone.buildingmanagementsystem.model.entity.Account;
-import fpt.capstone.buildingmanagementsystem.model.entity.Role;
-import fpt.capstone.buildingmanagementsystem.model.entity.Status;
-import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.request.*;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAllAccountResponse;
-import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
-import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import fpt.capstone.buildingmanagementsystem.until.EmailSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +29,8 @@ import static fpt.capstone.buildingmanagementsystem.until.Until.getRandomString;
 
 @Service
 public class AccountManageService implements UserDetailsService {
+    @Autowired
+    DepartmentRepository departmentRepository;
     @Autowired
     EmailSender emailSender;
     @Autowired
@@ -73,17 +69,19 @@ public class AccountManageService implements UserDetailsService {
             if (registerRequest.getPassword() != null && registerRequest.getUsername() != null) {
                 if (!accountRepository.existsByUsername(registerRequest.getUsername())) {
                     Optional<Role> role = roleRepository.findByRoleName(registerRequest.getRole());
-                    if (role.isPresent()) {
+                    Optional<Department> department= departmentRepository.findByDepartmentName(registerRequest.getDepartmentName());
+                    if (role.isPresent() && department.isPresent()) {
                         Optional<Status> status = statusRepository.findByStatusId("1");
                         Account newAccount = accountMapper.convertRegisterAccount(registerRequest, status.get(), role.get());
                         accountRepository.save(newAccount);
                         User user= User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
                                 .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
-                                        generateRealTime()).image("unknown").updatedDate(generateRealTime()).account(newAccount).build();
+                                        generateRealTime()).image("unknown").updatedDate(generateRealTime()).account(newAccount).department(department.get())
+                                .build();
                         userRepository.save(user);
                         return true;
                     } else {
-                        throw new NotFound("role_name_not_found");
+                        throw new NotFound("not_found");
                     }
                 } else {
                     throw new BadRequest("username_exist");

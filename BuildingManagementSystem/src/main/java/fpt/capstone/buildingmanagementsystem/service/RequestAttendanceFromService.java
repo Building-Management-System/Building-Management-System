@@ -60,7 +60,7 @@ public class RequestAttendanceFromService {
                             .status(PENDING).ticketRequest(ticket).title(sendAttendanceFormRequest.getTitle()).user(send_user.get()).build();
                     //
                     RequestMessage requestMessage= RequestMessage.builder().createDate(Until.generateRealTime().toString())
-                            .updateDate(Until.generateRealTime().toString()).content(sendAttendanceFormRequest.getContent())
+                            .updateDate(Until.generateRealTime().toString())
                             .sender(send_user.get()).receiver(receive_user.get()).request(requestTicket).department(department.get()).build();
                     //
                     AttendanceRequestForm attendanceRequestForm = attendanceRequestFormMapper.convert(sendAttendanceFormRequest);

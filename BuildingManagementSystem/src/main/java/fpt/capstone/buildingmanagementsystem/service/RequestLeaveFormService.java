@@ -56,7 +56,7 @@ public class RequestLeaveFormService {
                             .status(PENDING).ticketRequest(ticket).title(sendLeaveFormRequest.getTitle()).user(send_user.get()).build();
                     //
                     RequestMessage requestMessage= RequestMessage.builder().createDate(Until.generateRealTime().toString())
-                            .updateDate(Until.generateRealTime().toString()).content(sendLeaveFormRequest.getContent())
+                            .updateDate(Until.generateRealTime().toString())
                             .sender(send_user.get()).receiver(receive_user.get()).request(requestTicket).department(department.get()).build();
                     //
                     LeaveRequestForm leaveRequestForm = leaveRequestFormMapper.convert(sendLeaveFormRequest);
