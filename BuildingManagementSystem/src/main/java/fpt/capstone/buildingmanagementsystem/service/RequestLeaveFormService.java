@@ -37,14 +37,12 @@ public class RequestLeaveFormService {
             if (sendLeaveFormRequest.getContent() != null&&
                     sendLeaveFormRequest.getDepartmentId() != null&&
                     sendLeaveFormRequest.getTitle() != null&&
-                    sendLeaveFormRequest.getReceivedId() != null&&
                     sendLeaveFormRequest.getFromDate()!= null&&
                     sendLeaveFormRequest.getToDate()!= null
             ) {
                 Optional<User> send_user= userRepository.findByUserId(sendLeaveFormRequest.getUserId());
-                Optional<User> receive_user= userRepository.findByUserId(sendLeaveFormRequest.getReceivedId());
                 Optional<Department> department= departmentRepository.findByDepartmentId(sendLeaveFormRequest.getDepartmentId());
-                if(send_user.isPresent()&&receive_user.isPresent()&&department.isPresent()) {
+                if(send_user.isPresent()&&department.isPresent()) {
                     String id_ticket = "LV_" + Until.generateId();
                     String id_request_ticket = "LV_" + Until.generateId();
                     //
@@ -55,9 +53,13 @@ public class RequestLeaveFormService {
                             .updateDate(Until.generateRealTime().toString())
                             .status(PENDING).ticketRequest(ticket).title(sendLeaveFormRequest.getTitle()).user(send_user.get()).build();
                     //
-                    RequestMessage requestMessage= RequestMessage.builder().createDate(Until.generateRealTime().toString())
-                            .updateDate(Until.generateRealTime().toString())
-                            .sender(send_user.get()).receiver(receive_user.get()).request(requestTicket).department(department.get()).build();
+                    RequestMessage requestMessage = RequestMessage.builder().createDate(Until.generateRealTime())
+                            .updateDate(Until.generateRealTime())
+                            .sender(send_user.get()).request(requestTicket).department(department.get()).build();
+                    if (sendLeaveFormRequest.getReceivedId() != null){
+                        Optional<User> receive_user = userRepository.findByUserId(sendLeaveFormRequest.getReceivedId());
+                        requestMessage.setReceiver(receive_user.get());
+                    }
                     //
                     LeaveRequestForm leaveRequestForm = leaveRequestFormMapper.convert(sendLeaveFormRequest);
                     leaveRequestForm.setTopic(LEAVE_REQUEST);
