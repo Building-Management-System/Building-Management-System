@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
+import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
