@@ -37,13 +37,11 @@ public class RequestOtherService {
         try {
             if (sendOtherFormRequest.getContent() != null&&
                     sendOtherFormRequest.getDepartmentId() != null&&
-                    sendOtherFormRequest.getTitle() != null&&
-                    sendOtherFormRequest.getReceivedId() != null
+                    sendOtherFormRequest.getTitle() != null
             ) {
                 Optional<User> send_user= userRepository.findByUserId(sendOtherFormRequest.getUserId());
-                Optional<User> receive_user= userRepository.findByUserId(sendOtherFormRequest.getReceivedId());
                 Optional<Department> department= departmentRepository.findByDepartmentId(sendOtherFormRequest.getDepartmentId());
-                if(send_user.isPresent()&&receive_user.isPresent()&&department.isPresent()) {
+                if(send_user.isPresent()&&department.isPresent()) {
                     String id_ticket = "OR_" + Until.generateId();
                     String id_request_ticket = "OR_" + Until.generateId();
                     //
@@ -54,9 +52,13 @@ public class RequestOtherService {
                             .updateDate(Until.generateRealTime().toString())
                             .status(PENDING).ticketRequest(ticket).title(sendOtherFormRequest.getTitle()).user(send_user.get()).build();
                     //
-                    RequestMessage requestMessage= RequestMessage.builder().createDate(Until.generateRealTime().toString())
-                            .updateDate(Until.generateRealTime().toString())
-                            .sender(send_user.get()).receiver(receive_user.get()).request(requestTicket).department(department.get()).build();
+                    RequestMessage requestMessage = RequestMessage.builder().createDate(Until.generateRealTime())
+                            .updateDate(Until.generateRealTime())
+                            .sender(send_user.get()).request(requestTicket).department(department.get()).build();
+                    if (sendOtherFormRequest.getReceivedId() != null){
+                        Optional<User> receive_user = userRepository.findByUserId(sendOtherFormRequest.getReceivedId());
+                        requestMessage.setReceiver(receive_user.get());
+                    }
                     //
                     OtherRequest otherRequest=otherRequestMapper.convert(sendOtherFormRequest);
                     otherRequest.setTopic(OTHER_REQUEST);

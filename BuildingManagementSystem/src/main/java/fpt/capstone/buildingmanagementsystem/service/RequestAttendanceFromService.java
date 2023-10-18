@@ -42,27 +42,28 @@ public class RequestAttendanceFromService {
             sendAttendanceFormRequest.getDepartmentId() != null&&
             sendAttendanceFormRequest.getManualDate() != null&&
             sendAttendanceFormRequest.getTitle() != null&&
-            sendAttendanceFormRequest.getManualLastExit() != null&&
-            sendAttendanceFormRequest.getReceivedId() != null
+            sendAttendanceFormRequest.getManualLastExit() != null
             ) {
                 Optional<User> send_user= userRepository.findByUserId(sendAttendanceFormRequest.getUserId());
-                Optional<User> receive_user= userRepository.findByUserId(sendAttendanceFormRequest.getReceivedId());
                 Optional<Department> department= departmentRepository.findByDepartmentId(sendAttendanceFormRequest.getDepartmentId());
-                if(send_user.isPresent()&&receive_user.isPresent()&&department.isPresent()) {
+                if(send_user.isPresent()&&department.isPresent()) {
                     String id_ticket = "AT_" + Until.generateId();
                     String id_request_ticket = "AT_" + Until.generateId();
                     //
-                    Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(ATTENDANCE_REQUEST).status(false).createDate(Until.generateRealTime().toString())
-                            .updateDate(Until.generateRealTime().toString()).build();
+                    Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(ATTENDANCE_REQUEST).status(false).createDate(Until.generateRealTime())
+                            .updateDate(Until.generateRealTime()).build();
                     //
-                    RequestTicket requestTicket = RequestTicket.builder().requestId(id_request_ticket).createDate(Until.generateRealTime().toString())
-                            .updateDate(Until.generateRealTime().toString())
+                    RequestTicket requestTicket = RequestTicket.builder().requestId(id_request_ticket).createDate(Until.generateRealTime())
+                            .updateDate(Until.generateRealTime())
                             .status(PENDING).ticketRequest(ticket).title(sendAttendanceFormRequest.getTitle()).user(send_user.get()).build();
                     //
-                    RequestMessage requestMessage= RequestMessage.builder().createDate(Until.generateRealTime().toString())
-                            .updateDate(Until.generateRealTime().toString())
-                            .sender(send_user.get()).receiver(receive_user.get()).request(requestTicket).department(department.get()).build();
-                    //
+                    RequestMessage requestMessage = RequestMessage.builder().createDate(Until.generateRealTime())
+                            .updateDate(Until.generateRealTime())
+                            .sender(send_user.get()).request(requestTicket).department(department.get()).build();
+                    if (sendAttendanceFormRequest.getReceivedId() != null){
+                        Optional<User> receive_user = userRepository.findByUserId(sendAttendanceFormRequest.getReceivedId());
+                        requestMessage.setReceiver(receive_user.get());
+                    }
                     AttendanceRequestForm attendanceRequestForm = attendanceRequestFormMapper.convert(sendAttendanceFormRequest);
                     attendanceRequestForm.setTopic(ATTENDANCE_REQUEST);
                     attendanceRequestForm.setStatus(false);
