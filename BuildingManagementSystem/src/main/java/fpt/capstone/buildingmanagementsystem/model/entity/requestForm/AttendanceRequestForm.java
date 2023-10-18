@@ -1,7 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.model.entity.requestForm;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
-import fpt.capstone.buildingmanagementsystem.model.entity.Topic;
+//import fpt.capstone.buildingmanagementsystem.model.entity.Topic;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,12 +32,14 @@ public class AttendanceRequestForm {
             strategy = "org.hibernate.id.UUIDGenerator"
     )
     private String attendanceRequestId;
+    @Column
+    private String manualDate;
 
     @Column
-    private Time manualFirstEntry;
+    private String manualFirstEntry;
 
     @Column
-    private Time manualLastExit;
+    private String manualLastExit;
 
     @Column
     private String note;
@@ -48,10 +50,6 @@ public class AttendanceRequestForm {
     @ManyToOne
     @JoinColumn(name = "requestMassageId")
     private RequestMessage requestMessage;
-
-//    @ManyToOne
-//    @JoinColumn(name = "topicId")
-//    private Topic topic;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 50, columnDefinition = "varchar(50) default 'ATTENDANCE_REQUEST'")

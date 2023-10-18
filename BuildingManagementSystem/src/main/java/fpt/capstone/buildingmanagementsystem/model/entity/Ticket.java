@@ -23,21 +23,13 @@ import java.util.UUID;
 @Builder
 public class Ticket {
     @Id
-//    @GeneratedValue(generator = "UUID")
-//    @GenericGenerator(
-//            name = "UUID",
-//            strategy = "org.hibernate.id.UUIDGenerator"
-//    )
-    private UUID ticketId;
+    private String ticketId;
 
     @Column
-    private String title;
+    private String createDate;
 
     @Column
-    private Instant createDate;
-
-    @Column
-    private Instant updateDate;
+    private String updateDate;
 
     @Column
     private boolean status;

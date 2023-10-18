@@ -66,4 +66,7 @@ public class User {
     @MapsId
     @JoinColumn(name = "user_id")
     private Account account;
+    @ManyToOne
+    @JoinColumn(name = "departmentId")
+    private Department department;
 }

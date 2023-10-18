@@ -24,24 +24,18 @@ import java.util.UUID;
 @Builder
 @Entity
 public class RequestTicket {
-
     @Id
-//    @GeneratedValue(generator = "UUID")
-//    @GenericGenerator(
-//            name = "UUID",
-//            strategy = "org.hibernate.id.UUIDGenerator"
-//    )
     @Column(name = "requestId", updatable = false, nullable = false)
-    private UUID requestId;
+    private String requestId;
 
     @Column
-    private String topic;
+    private String title;
 
     @Column
-    private Instant createDate;
+    private String createDate;
 
     @Column
-    private Instant updateDate;
+    private String updateDate;
 
     @Column
     @Enumerated(EnumType.STRING)

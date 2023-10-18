@@ -41,10 +41,6 @@ public class OtherRequest {
     @JoinColumn(name = "requestMassageId")
     private RequestMessage requestMessage;
 
-//    @ManyToOne
-//    @JoinColumn(name = "topicId")
-//    private Topic topic;
-
     @Enumerated(EnumType.STRING)
     @Column(length = 50, columnDefinition = "varchar(50) default 'ATTENDANCE_REQUEST'")
     private TopicEnum topic = TopicEnum.OTHER_REQUEST;
