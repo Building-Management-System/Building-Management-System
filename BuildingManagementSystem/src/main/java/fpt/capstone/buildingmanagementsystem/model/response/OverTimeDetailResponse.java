@@ -9,11 +9,11 @@ import java.sql.Time;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OverTimeDetailResponse {
-    private Time startTime;
-    private Time endTime;
+    private String startTime;
+    private String endTime;
     private String dateType;
-    private Time manualStart;
+    private String manualStart;
 
-    private Time manualEnd;
+    private String manualEnd;
     private String description;
 }

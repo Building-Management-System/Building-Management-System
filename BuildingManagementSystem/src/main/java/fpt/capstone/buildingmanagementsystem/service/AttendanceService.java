@@ -44,7 +44,7 @@ public class AttendanceService {
         }
     }
 
-    public AttendanceDetailResponse getAttendanceDetail(String user_id, Date date) {
+    public AttendanceDetailResponse getAttendanceDetail(String user_id, String date) {
         if (user_id != null) {
             try {
                 DailyLog dailyLogs = dailyLogRepository.getAttendanceDetail(user_id, date);

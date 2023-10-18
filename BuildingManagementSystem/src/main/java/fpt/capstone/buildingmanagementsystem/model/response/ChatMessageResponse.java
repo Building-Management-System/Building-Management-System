@@ -20,6 +20,6 @@ public class ChatMessageResponse {
     private String receiver;
     private String message;
     private String type;
-    private Instant createAt;
-    private Instant updateAt;
+    private String createAt;
+    private String updateAt;
 }

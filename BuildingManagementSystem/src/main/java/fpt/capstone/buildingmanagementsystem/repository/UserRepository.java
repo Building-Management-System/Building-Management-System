@@ -26,7 +26,7 @@ public interface UserRepository extends JpaRepository<User, String> {
                        @Param(value = "gender") String gender, @Param(value = "date_of_birth") String date_of_birth,
                        @Param(value = "telephone_number") String telephone_number, @Param(value = "country") String country,
                        @Param(value = "city") String city, @Param(value = "email") String email, @Param(value = "image") String image
-            , @Param(value = "updated_date") Date updated_date, @Param(value = "user_id") String user_id);
+            , @Param(value = "updated_date") String updated_date, @Param(value = "user_id") String user_id);
     Optional<User> findByUserId(String userId);
 
 }

@@ -12,7 +12,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AttendanceDetailResponse {
-    Date date;
+    String date;
     DailyDetailResponse dailyDetailResponse;
     OverTimeDetailResponse overTimeDetailResponse;
 }

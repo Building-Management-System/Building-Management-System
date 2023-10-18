@@ -53,14 +53,12 @@ public class User {
     @NotNull
     @Column(name = "image")
     String image;
-    @Temporal(TemporalType.TIMESTAMP)
     @NotNull
     @Column(name = "created_date")
-    public Date createdDate;
-    @Temporal(TemporalType.TIMESTAMP)
+    public String createdDate;
     @NotNull
     @Column(name = "updated_date")
-    public Date updatedDate;
+    public String updatedDate;
 
     @OneToOne
     @MapsId
