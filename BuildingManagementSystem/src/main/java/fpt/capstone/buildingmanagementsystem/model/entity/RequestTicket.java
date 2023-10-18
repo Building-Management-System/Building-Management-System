@@ -14,8 +14,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import java.time.Instant;
-import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,16 +30,16 @@ public class RequestTicket {
 //            strategy = "org.hibernate.id.UUIDGenerator"
 //    )
     @Column(name = "requestId", updatable = false, nullable = false)
-    private UUID requestId;
+    private String requestId;
 
     @Column
-    private String topic;
+    private String title;
 
     @Column
-    private Instant createDate;
+    private String createDate;
 
     @Column
-    private Instant updateDate;
+    private String updateDate;
 
     @Column
     @Enumerated(EnumType.STRING)

@@ -12,8 +12,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import java.time.Instant;
-import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,16 +26,13 @@ public class Ticket {
 //            name = "UUID",
 //            strategy = "org.hibernate.id.UUIDGenerator"
 //    )
-    private UUID ticketId;
+    private String ticketId;
 
     @Column
-    private String title;
+    private String createDate;
 
     @Column
-    private Instant createDate;
-
-    @Column
-    private Instant updateDate;
+    private String updateDate;
 
     @Column
     private boolean status;

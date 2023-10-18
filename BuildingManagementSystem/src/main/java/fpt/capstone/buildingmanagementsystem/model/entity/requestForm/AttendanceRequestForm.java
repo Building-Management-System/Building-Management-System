@@ -1,7 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.model.entity.requestForm;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
-import fpt.capstone.buildingmanagementsystem.model.entity.Topic;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +16,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import java.sql.Time;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,10 +32,10 @@ public class AttendanceRequestForm {
     private String attendanceRequestId;
 
     @Column
-    private Time manualFirstEntry;
+    private String manualFirstEntry;
 
     @Column
-    private Time manualLastExit;
+    private String manualLastExit;
 
     @Column
     private String note;
@@ -49,9 +47,6 @@ public class AttendanceRequestForm {
     @JoinColumn(name = "requestMassageId")
     private RequestMessage requestMessage;
 
-//    @ManyToOne
-//    @JoinColumn(name = "topicId")
-//    private Topic topic;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 50, columnDefinition = "varchar(50) default 'ATTENDANCE_REQUEST'")

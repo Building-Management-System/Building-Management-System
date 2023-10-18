@@ -1,10 +1,9 @@
 package fpt.capstone.buildingmanagementsystem.repository;
 
-import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import fpt.capstone.buildingmanagementsystem.model.dto.TicketDto;
 
-@Repository
-public interface TicketRepository extends JpaRepository<Ticket, String> {
+import java.util.List;
 
+public interface TicketRepository {
+     List<TicketDto> getAllTicketRequest();
 }
