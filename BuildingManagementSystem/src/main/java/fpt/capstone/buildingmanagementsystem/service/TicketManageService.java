@@ -53,6 +53,35 @@ public class TicketManageService {
                 .filter(ticketRequestDto -> ticketRequestDto.getSenderId().equals(senderId))
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
 
+        return getTicketRequestResponse(responseV2s, ticketDtos);
+    }
+
+    public List<TicketRequestResponseV2> getAllTicketsByHr() {
+        List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
+        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepository.getTicketRequestByHr()
+                .stream()
+                .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
+
+        return getTicketRequestResponse(responseV2s, ticketDtos);
+    }
+
+    public List<TicketRequestResponseV2> getAllTicketsBySecurity() {
+        List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
+        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepository.getTicketRequestBySecurity()
+                .stream()
+                .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
+        return getTicketRequestResponse(responseV2s, ticketDtos);
+    }
+
+    public List<TicketRequestResponseV2> getAllTicketsByAdmin() {
+        List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
+        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepository.getTicketRequestByAdmin()
+                .stream()
+                .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
+        return getTicketRequestResponse(responseV2s, ticketDtos);
+    }
+
+    private List<TicketRequestResponseV2> getTicketRequestResponse(List<TicketRequestResponseV2> responseV2s, Map<String, List<TicketRequestDto>> ticketDtos) {
         ticketDtos.forEach((s, tickets) -> {
             List<RequestTicketResponse> requestTickets = new ArrayList<>();
             TicketRequestResponseV2 ticketResponse = new TicketRequestResponseV2();
