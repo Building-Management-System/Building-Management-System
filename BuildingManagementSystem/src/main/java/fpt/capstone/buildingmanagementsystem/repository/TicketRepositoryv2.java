@@ -9,4 +9,12 @@ public interface TicketRepositoryv2 {
      List<TicketDto> getAllTicketRequest();
 
      List<TicketRequestDto> getTicketRequestv2();
+
+     List<TicketRequestDto> getTicketRequestByHr();
+
+     List<TicketRequestDto> getTicketRequestBySecurity();
+
+     List<TicketRequestDto> getTicketRequestByAdmin();
+
+
 }

@@ -27,4 +27,19 @@ public class TicketController {
     public List<TicketRequestResponseV2> getAllTicketAndRequest(@RequestParam("sender_id") String senderId) {
         return ticketManageService.getAllTicketsBySenderId(senderId);
     }
+
+    @GetMapping("/getTicketHr")
+    public List<TicketRequestResponseV2> getAllTicketAndRequestByHr() {
+        return ticketManageService.getAllTicketsByHr();
+    }
+
+    @GetMapping("/getTicketSecurity")
+    public List<TicketRequestResponseV2> getAllTicketAndRequestBySecurity() {
+        return ticketManageService.getAllTicketsBySecurity();
+    }
+
+    @GetMapping("/getTicketAdmin")
+    public List<TicketRequestResponseV2> getAllTicketAndRequestByAdmin() {
+        return ticketManageService.getAllTicketsByAdmin();
+    }
 }
