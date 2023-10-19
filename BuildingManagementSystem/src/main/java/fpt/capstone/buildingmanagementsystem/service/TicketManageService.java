@@ -2,7 +2,10 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.model.dto.RequestTicketDto;
 import fpt.capstone.buildingmanagementsystem.model.dto.TicketDto;
+import fpt.capstone.buildingmanagementsystem.model.dto.TicketRequestDto;
+import fpt.capstone.buildingmanagementsystem.model.response.RequestTicketResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponseV2;
 import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,5 +44,28 @@ public class TicketManageService {
             ticketRequestResponses.add(ticketResponse);
         });
         return ticketRequestResponses;
+    }
+
+    public List<TicketRequestResponseV2> getAllTicketsBySenderId(String senderId) {
+        List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
+        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepository.getTicketRequestv2()
+                .stream()
+                .filter(ticketRequestDto -> ticketRequestDto.getSenderId().equals(senderId))
+                .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
+
+        ticketDtos.forEach((s, tickets) -> {
+            List<RequestTicketResponse> requestTickets = new ArrayList<>();
+            TicketRequestResponseV2 ticketResponse = new TicketRequestResponseV2();
+            BeanUtils.copyProperties(tickets.get(0), ticketResponse);
+            tickets.forEach(ticketDto -> {
+                RequestTicketResponse requestTicket = new RequestTicketResponse();
+                BeanUtils.copyProperties(ticketDto, requestTicket);
+                requestTicket.setRequestStatus(ticketDto.getRequestStatus());
+                requestTickets.add(requestTicket);
+            });
+            ticketResponse.setRequestTickets(requestTickets);
+            responseV2s.add(ticketResponse);
+        });
+        return responseV2s;
     }
 }
