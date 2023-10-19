@@ -1,9 +1,15 @@
 package fpt.capstone.buildingmanagementsystem.until;
 
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Instant;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -15,8 +21,8 @@ public class Until {
 
     public static String generateRealTime() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now();
-        return dtf.format(now).toString();
+        LocalDateTime localDate = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        return dtf.format(localDate);
     }
 
     public static String encodePassword(String password) {
