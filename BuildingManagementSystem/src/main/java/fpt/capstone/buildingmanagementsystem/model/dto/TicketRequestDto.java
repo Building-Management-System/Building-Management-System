@@ -2,12 +2,10 @@ package fpt.capstone.buildingmanagementsystem.model.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter
-@ToString
-public class TicketDto {
+public class TicketRequestDto {
     private String ticketId;
     private String createDate;
     private String updateDate;
@@ -19,4 +17,11 @@ public class TicketDto {
     private String requestUpdateDate;
     private String requestStatus;
     private String userId;
+    private String senderId;
+    private String receiverId;
+    private String messageCreateDate;
+    private String departmentId;
+    private String departmentName;
+    private String receiverFirstName;
+    private String receiverLastName;
 }
