@@ -27,6 +27,7 @@ public class RequestMessage {
     private String updateDate;
     @Column
     private String attachmentMessageId;
+
     @ManyToOne
     @JoinColumn(name = "senderId")
     private User sender;
@@ -35,7 +36,7 @@ public class RequestMessage {
     @JoinColumn(name = "receiverId")
     private User receiver;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "requestId")
     private RequestTicket request;
 

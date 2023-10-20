@@ -42,4 +42,9 @@ public class TicketController {
     public List<TicketRequestResponseV2> getAllTicketAndRequestByAdmin() {
         return ticketManageService.getAllTicketsByAdmin();
     }
+
+    @GetMapping("/getTicketDepartment")
+    public List<TicketRequestResponseV2> getAllTicketAndRequestByDepartmentManager(@RequestParam("department") String departmentName) {
+        return ticketManageService.getAllTicketByDepartmentManager(departmentName);
+    }
 }

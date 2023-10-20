@@ -16,5 +16,6 @@ public interface TicketRepositoryv2 {
 
      List<TicketRequestDto> getTicketRequestByAdmin();
 
+     List<TicketRequestDto> getTicketRequestByDepartmentManager(String managerId);
 
 }
