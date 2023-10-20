@@ -14,10 +14,12 @@ import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.RoomBookin
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
 import fpt.capstone.buildingmanagementsystem.model.request.SendRoomBookingRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.RoomBookingResponse;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RoomBookingFormRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RoomBookingFormRepositoryV2;
 import fpt.capstone.buildingmanagementsystem.repository.RoomBookingFormRoomRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RoomRepository;
 import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
@@ -26,6 +28,8 @@ import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class RoomBookingService {
@@ -46,6 +50,9 @@ public class RoomBookingService {
 
     @Autowired
     RoomBookingFormRepository roomBookingFormRepository;
+
+    @Autowired
+    RoomBookingFormRepositoryV2 roomFormRepositoryV2;
 
     @Autowired
     RoomBookingFormRoomRepository roomBookingRoomRepository;
@@ -131,5 +138,9 @@ public class RoomBookingService {
         } catch (ServerError e) {
             throw new ServerError("fail");
         }
+    }
+
+    public List<RoomBookingResponse> getAllBookedRoom() {
+        return roomFormRepositoryV2.getAllBookedRoom();
     }
 }

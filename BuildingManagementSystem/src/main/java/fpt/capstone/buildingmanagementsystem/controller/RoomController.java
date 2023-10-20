@@ -1,6 +1,8 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
+import fpt.capstone.buildingmanagementsystem.model.response.RoomBookingResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.RoomResponse;
+import fpt.capstone.buildingmanagementsystem.service.RoomBookingService;
 import fpt.capstone.buildingmanagementsystem.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,9 @@ public class RoomController {
     @Autowired
     private RoomService roomService;
 
+    @Autowired
+    private RoomBookingService roomBookingService;
+
     @GetMapping("getAllRooms")
     public List<RoomResponse> getAllRoom() {
         return roomService.getAllRoom();
@@ -25,5 +30,10 @@ public class RoomController {
     @GetMapping("getRoomById")
     public ResponseEntity<?> getRoomById(@RequestParam("room_id") int roomId) {
         return ResponseEntity.ok(roomService.getRoomById(roomId));
+    }
+
+    @GetMapping("getBookedRoom")
+    public List<RoomBookingResponse> getAllBookedRoom() {
+        return roomBookingService.getAllBookedRoom();
     }
 }
