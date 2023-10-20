@@ -3,10 +3,12 @@ package fpt.capstone.buildingmanagementsystem.service;
 import fpt.capstone.buildingmanagementsystem.model.dto.RequestTicketDto;
 import fpt.capstone.buildingmanagementsystem.model.dto.TicketDto;
 import fpt.capstone.buildingmanagementsystem.model.dto.TicketRequestDto;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.response.RequestTicketResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponseV2;
 import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,9 @@ public class TicketManageService {
 
     @Autowired
     private TicketRepositoryv2 ticketRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public List<TicketRequestResponse> getAllTickets() {
         List<TicketRequestResponse> ticketRequestResponses = new ArrayList<>();
@@ -81,6 +86,17 @@ public class TicketManageService {
         return getTicketRequestResponse(responseV2s, ticketDtos);
     }
 
+    public List<TicketRequestResponseV2> getAllTicketByDepartmentManager(String departmentName) {
+        List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
+        List<User> manager = userRepository.getManagerByDepartment(departmentName);
+        if(manager.isEmpty()) return new ArrayList<>();
+        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepository.getTicketRequestByDepartmentManager(manager.get(0).getUserId())
+                .stream()
+                .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
+        return getTicketRequestResponse(responseV2s, ticketDtos);
+    }
+
+
     private List<TicketRequestResponseV2> getTicketRequestResponse(List<TicketRequestResponseV2> responseV2s, Map<String, List<TicketRequestDto>> ticketDtos) {
         ticketDtos.forEach((s, tickets) -> {
             List<RequestTicketResponse> requestTickets = new ArrayList<>();
@@ -97,4 +113,5 @@ public class TicketManageService {
         });
         return responseV2s;
     }
+
 }

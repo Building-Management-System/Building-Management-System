@@ -46,16 +46,30 @@ public class RequestLeaveFormService {
                     String id_ticket = "LV_" + Until.generateId();
                     String id_request_ticket = "LV_" + Until.generateId();
                     //
-                    Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(LEAVE_REQUEST).status(false).createDate(Until.generateRealTime().toString())
-                            .updateDate(Until.generateRealTime().toString()).build();
-                    //
-                    RequestTicket requestTicket = RequestTicket.builder().requestId(id_request_ticket).createDate(Until.generateRealTime().toString())
+                    Ticket ticket = Ticket.builder()
+                            .ticketId(id_ticket)
+                            .topic(LEAVE_REQUEST)
+                            .status(false)
+                            .createDate(Until.generateRealTime().toString())
                             .updateDate(Until.generateRealTime().toString())
-                            .status(PENDING).ticketRequest(ticket).title(sendLeaveFormRequest.getTitle()).user(send_user.get()).build();
+                            .build();
                     //
-                    RequestMessage requestMessage = RequestMessage.builder().createDate(Until.generateRealTime())
+                    RequestTicket requestTicket = RequestTicket.builder()
+                            .requestId(id_request_ticket)
+                            .createDate(Until.generateRealTime().toString())
+                            .updateDate(Until.generateRealTime().toString())
+                            .status(PENDING)
+                            .ticketRequest(ticket)
+                            .title(sendLeaveFormRequest.getTitle())
+                            .user(send_user.get()).build();
+                    //
+                    RequestMessage requestMessage = RequestMessage.builder()
+                            .createDate(Until.generateRealTime())
                             .updateDate(Until.generateRealTime())
-                            .sender(send_user.get()).request(requestTicket).department(department.get()).build();
+                            .sender(send_user.get())
+                            .request(requestTicket)
+                            .department(department.get())
+                            .build();
                     if (sendLeaveFormRequest.getReceivedId() != null){
                         Optional<User> receive_user = userRepository.findByUserId(sendLeaveFormRequest.getReceivedId());
                         requestMessage.setReceiver(receive_user.get());
