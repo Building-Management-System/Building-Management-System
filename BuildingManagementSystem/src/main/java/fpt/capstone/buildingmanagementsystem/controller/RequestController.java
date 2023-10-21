@@ -40,18 +40,33 @@ public class RequestController {
     public boolean requestAttendanceForm(@RequestBody SendAttendanceFormRequest sendAttendanceFormRequest) {
         return requestAttendanceFromService.getAttendanceUser(sendAttendanceFormRequest);
     }
+    @PostMapping("/requestAttendanceFormExistTicket")
+    public boolean requestAttendanceFormExistTicket(@RequestBody SendAttendanceFormRequest sendAttendanceFormRequest) {
+        return requestAttendanceFromService.getAttendanceUserExistTicket(sendAttendanceFormRequest);
+    }
     @PostMapping("/requestLeaveForm")
     public boolean requestLeaveForm(@RequestBody SendLeaveFormRequest sendLeaveFormRequest) {
         return requestLeaveFormService.getLeaveFormUser(sendLeaveFormRequest);
+    }
+    @PostMapping("/requestLeaveFormExistTicket")
+    public boolean requestLeaveFormUserExistTicket(@RequestBody SendLeaveFormRequest sendLeaveFormRequest) {
+        return requestLeaveFormService.getLeaveFormUserExistTicket(sendLeaveFormRequest);
     }
 
     @PostMapping("/roomBookingForm")
     public boolean requestOtherForm(@RequestBody SendRoomBookingRequest sendRoomBookingRequest) {
         return roomBookingService.getRoomBookingForm(sendRoomBookingRequest);
     }
-
+    @PostMapping("/roomBookingFormExistTicket")
+    public boolean requestOtherFormExistTicket(@RequestBody SendRoomBookingRequest sendRoomBookingRequest) {
+        return roomBookingService.getRoomBookingFormExistTicket(sendRoomBookingRequest);
+    }
     @PostMapping("/otherForm")
     public boolean requestOtherForm(@RequestBody SendOtherFormRequest sendOtherFormRequest) {
-        return requestOtherService.getLeaveFormUser(sendOtherFormRequest);
+        return requestOtherService.getOtherFormUser(sendOtherFormRequest);
+    }
+    @PostMapping("/otherFormExistTicket")
+    public boolean requestOtherFormExistTicket(@RequestBody SendOtherFormRequest sendOtherFormRequest) {
+        return requestOtherService.getOtherFormUserExistTicket(sendOtherFormRequest);
     }
 }

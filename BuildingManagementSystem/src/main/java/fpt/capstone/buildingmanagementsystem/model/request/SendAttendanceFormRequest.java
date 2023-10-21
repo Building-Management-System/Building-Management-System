@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class SendAttendanceFormRequest {
     String userId;
+    String ticketId;
     String title;
     String content;
     String manualDate;

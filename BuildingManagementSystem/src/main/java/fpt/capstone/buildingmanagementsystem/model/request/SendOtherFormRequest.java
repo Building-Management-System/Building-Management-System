@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SendOtherFormRequest {
     String userId;
+    String ticketId;
     String title;
     String content;
     String departmentId;
