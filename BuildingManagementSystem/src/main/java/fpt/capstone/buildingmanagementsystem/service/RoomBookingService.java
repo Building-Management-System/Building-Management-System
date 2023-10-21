@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RoomBookingService {
@@ -117,7 +118,7 @@ public class RoomBookingService {
 
                 RoomBookingRequestForm roomBookingForm = new RoomBookingRequestForm();
                 BeanUtils.copyProperties(sendRoomBookingRequest, roomBookingForm);
-                roomBookingForm.setStatus(true);
+                roomBookingForm.setStatus(false);
                 roomBookingForm.setDepartmentSender(senderDepartment);
                 roomBookingForm.setRequestMessage(requestMessage);
                 roomBookingForm.setTopic(TopicEnum.ROOM_REQUEST);
