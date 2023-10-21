@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RoomBookingService {
@@ -90,47 +91,8 @@ public class RoomBookingService {
                         .createDate(Until.generateRealTime())
                         .updateDate(Until.generateRealTime())
                         .build();
-
-                RequestTicket requestTicket = RequestTicket.builder()
-                        .requestId(requestTicketId)
-                        .createDate(Until.generateRealTime())
-                        .updateDate(Until.generateRealTime())
-                        .status(RequestStatus.PENDING)
-                        .ticketRequest(ticket)
-                        .title(sendRoomBookingRequest.getTitle())
-                        .user(user)
-                        .build();
-
-                RequestMessage requestMessage = RequestMessage.builder()
-                        .createDate(Until.generateRealTime())
-                        .updateDate(Until.generateRealTime())
-                        .sender(user)
-                        .request(requestTicket)
-                        .department(receiverDepartment)
-                        .build();
-
-                if (sendRoomBookingRequest.getReceiverId() != null) {
-                    User receiver = userRepository.findByUserId(sendRoomBookingRequest.getReceiverId())
-                            .orElseThrow(() -> new NotFound("not_found_receiver"));
-                    requestMessage.setReceiver(receiver);
-                }
-
-                RoomBookingRequestForm roomBookingForm = new RoomBookingRequestForm();
-                BeanUtils.copyProperties(sendRoomBookingRequest, roomBookingForm);
-                roomBookingForm.setStatus(true);
-                roomBookingForm.setDepartmentSender(senderDepartment);
-                roomBookingForm.setRequestMessage(requestMessage);
-                roomBookingForm.setTopic(TopicEnum.ROOM_REQUEST);
-
                 ticketRepository.save(ticket);
-                requestTicketRepository.saveAndFlush(requestTicket);
-                requestMessageRepository.saveAndFlush(requestMessage);
-                roomBookingFormRepository.saveAndFlush(roomBookingForm);
-
-                RoomBookingFormRoom roomBookingFormRoom = new RoomBookingFormRoom();
-                roomBookingFormRoom.setRoomRequestForm(roomBookingForm);
-                roomBookingFormRoom.setRoom(room);
-                roomBookingRoomRepository.save(roomBookingFormRoom);
+                saveRoomBookingRequest(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicketId, ticket);
                 return true;
             } else {
                 throw new BadRequest("request_fail");
@@ -138,6 +100,82 @@ public class RoomBookingService {
         } catch (ServerError e) {
             throw new ServerError("fail");
         }
+    }
+
+
+    public boolean getRoomBookingFormExistTicket(SendRoomBookingRequest sendRoomBookingRequest) {
+        try {
+            if (sendRoomBookingRequest.getUserId() != null
+                    && sendRoomBookingRequest.getDepartmentSenderId() != null
+                    && sendRoomBookingRequest.getTitle() != null
+                    && sendRoomBookingRequest.getStartTime() != null
+                    && sendRoomBookingRequest.getEndTime() != null
+                    && sendRoomBookingRequest.getDepartmentReceiverId() != null
+                    && sendRoomBookingRequest.getTicketId() != null) {
+
+                Room room = roomRepository.findById(sendRoomBookingRequest.getRoomId())
+                        .orElseThrow(() -> new BadRequest("not_found_room"));
+                User user = userRepository.findByUserId(sendRoomBookingRequest.getUserId())
+                        .orElseThrow(() -> new BadRequest("not_found_user"));
+                Department receiverDepartment = departmentRepository.findByDepartmentId(sendRoomBookingRequest.getDepartmentReceiverId())
+                        .orElseThrow(() -> new BadRequest("not_found_receiver_department"));
+                Department senderDepartment = departmentRepository.findByDepartmentId(sendRoomBookingRequest.getDepartmentSenderId())
+                        .orElseThrow(() -> new BadRequest("not_found_sender_department"));
+                Optional<Ticket> ticket = ticketRepository.findByTicketId(sendRoomBookingRequest.getTicketId());
+                if (ticket.isPresent()) {
+                    String requestTicketId = "RB_" + Until.generateId();
+                    saveRoomBookingRequest(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicketId, ticket.get());
+                    return true;
+                }
+                else {
+                    throw new BadRequest("not_found_ticket");
+                }
+            } else {
+                throw new BadRequest("request_fail");
+            }
+        } catch (ServerError e) {
+            throw new ServerError("fail");
+        }
+    }
+    private void saveRoomBookingRequest(SendRoomBookingRequest sendRoomBookingRequest, Room room, User user, Department receiverDepartment, Department senderDepartment, String requestTicketId, Ticket ticket) {
+        RequestTicket requestTicket = RequestTicket.builder()
+                .requestId(requestTicketId)
+                .createDate(Until.generateRealTime())
+                .updateDate(Until.generateRealTime())
+                .status(RequestStatus.PENDING)
+                .ticketRequest(ticket)
+                .title(sendRoomBookingRequest.getTitle())
+                .user(user)
+                .build();
+
+        RequestMessage requestMessage = RequestMessage.builder()
+                .createDate(Until.generateRealTime())
+                .updateDate(Until.generateRealTime())
+                .sender(user)
+                .request(requestTicket)
+                .department(receiverDepartment)
+                .build();
+
+        if (sendRoomBookingRequest.getReceiverId() != null) {
+            User receiver = userRepository.findByUserId(sendRoomBookingRequest.getReceiverId())
+                    .orElseThrow(() -> new NotFound("not_found_receiver"));
+            requestMessage.setReceiver(receiver);
+        }
+
+        RoomBookingRequestForm roomBookingForm = new RoomBookingRequestForm();
+        BeanUtils.copyProperties(sendRoomBookingRequest, roomBookingForm);
+        roomBookingForm.setStatus(true);
+        roomBookingForm.setDepartmentSender(senderDepartment);
+        roomBookingForm.setRequestMessage(requestMessage);
+        roomBookingForm.setTopic(TopicEnum.ROOM_REQUEST);
+        requestTicketRepository.saveAndFlush(requestTicket);
+        requestMessageRepository.saveAndFlush(requestMessage);
+        roomBookingFormRepository.saveAndFlush(roomBookingForm);
+
+        RoomBookingFormRoom roomBookingFormRoom = new RoomBookingFormRoom();
+        roomBookingFormRoom.setRoomRequestForm(roomBookingForm);
+        roomBookingFormRoom.setRoom(room);
+        roomBookingRoomRepository.save(roomBookingFormRoom);
     }
 
     public List<RoomBookingResponse> getAllBookedRoom() {
