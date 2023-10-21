@@ -130,6 +130,24 @@ public class RoomBookingService {
                 else {
                     throw new BadRequest("not_found_ticket");
                 }
+
+                RoomBookingRequestForm roomBookingForm = new RoomBookingRequestForm();
+                BeanUtils.copyProperties(sendRoomBookingRequest, roomBookingForm);
+                roomBookingForm.setStatus(false);
+                roomBookingForm.setDepartmentSender(senderDepartment);
+                roomBookingForm.setRequestMessage(requestMessage);
+                roomBookingForm.setTopic(TopicEnum.ROOM_REQUEST);
+
+                ticketRepository.save(ticket);
+                requestTicketRepository.saveAndFlush(requestTicket);
+                requestMessageRepository.saveAndFlush(requestMessage);
+                roomBookingFormRepository.saveAndFlush(roomBookingForm);
+
+                RoomBookingFormRoom roomBookingFormRoom = new RoomBookingFormRoom();
+                roomBookingFormRoom.setRoomRequestForm(roomBookingForm);
+                roomBookingFormRoom.setRoom(room);
+                roomBookingRoomRepository.save(roomBookingFormRoom);
+                return true;
             } else {
                 throw new BadRequest("request_fail");
             }

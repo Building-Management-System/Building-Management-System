@@ -29,7 +29,7 @@ public class RoomBookingFormRepositoryV2Implement implements RoomBookingFormRepo
                 "FROM room_booking_request_form rb\n" +
                 "         JOIN request_message rm ON rb.request_massage_id = rm.request_message_id\n" +
                 "         JOIN room_booking_form_room rr ON rb.room_booking_request_id = rr.room_booking_request_id\n" +
-                "WHERE status = TRUE;";
+                "WHERE rb.status = TRUE;";
 
         return (List<RoomBookingResponse>) entityManager.createNativeQuery(query).unwrap(NativeQuery.class)
                 .setResultTransformer(Transformers.aliasToBean(RoomBookingResponse.class))
