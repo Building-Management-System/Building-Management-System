@@ -126,8 +126,7 @@ public class RoomBookingService {
                     String requestTicketId = "RB_" + Until.generateId();
                     saveRoomBookingRequest(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicketId, ticket.get());
                     return true;
-                }
-                else {
+                } else {
                     throw new BadRequest("not_found_ticket");
                 }
             } else {
@@ -137,6 +136,7 @@ public class RoomBookingService {
             throw new ServerError("fail");
         }
     }
+
     private void saveRoomBookingRequest(SendRoomBookingRequest sendRoomBookingRequest, Room room, User user, Department receiverDepartment, Department senderDepartment, String requestTicketId, Ticket ticket) {
         RequestTicket requestTicket = RequestTicket.builder()
                 .requestId(requestTicketId)
@@ -180,5 +180,36 @@ public class RoomBookingService {
 
     public List<RoomBookingResponse> getAllBookedRoom() {
         return roomFormRepositoryV2.getAllBookedRoom();
+    }
+
+    public boolean acceptBooking(String roomBookingFormRoomId) {
+        try {
+            RoomBookingRequestForm roomBookingRequestForm = roomBookingFormRepository.findById(roomBookingFormRoomId)
+                    .orElseThrow(() -> new BadRequest("Not_found_form"));
+
+            RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
+                    .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+
+            RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
+                    .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+            Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
+                    .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+
+            ticket.setUpdateDate(Until.generateRealTime());
+            ticket.setStatus(true);
+            requestTicket.setUpdateDate(Until.generateRealTime());
+            requestTicket.setStatus(RequestStatus.ANSWERED);
+            requestMessage.setUpdateDate(Until.generateRealTime());
+
+            roomBookingRequestForm.setStatus(true);
+            roomBookingFormRepository.saveAndFlush(roomBookingRequestForm);
+            requestMessageRepository.saveAndFlush(requestMessage);
+            requestTicketRepository.saveAndFlush(requestTicket);
+            ticketRepository.save(ticket);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("Fail");
+        }
     }
 }
