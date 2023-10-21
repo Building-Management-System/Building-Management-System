@@ -13,6 +13,7 @@ import lombok.Setter;
 @Data
 public class SendRoomBookingRequest {
     private String userId;
+    private String ticketId;
     private String departmentSenderId;
     private int roomId;
     private String title;

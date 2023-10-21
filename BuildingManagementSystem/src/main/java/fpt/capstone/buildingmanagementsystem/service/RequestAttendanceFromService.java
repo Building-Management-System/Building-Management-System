@@ -49,29 +49,10 @@ public class RequestAttendanceFromService {
                 if(send_user.isPresent()&&department.isPresent()) {
                     String id_ticket = "AT_" + Until.generateId();
                     String id_request_ticket = "AT_" + Until.generateId();
-                    //
                     Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(ATTENDANCE_REQUEST).status(false).createDate(Until.generateRealTime())
                             .updateDate(Until.generateRealTime()).build();
-                    //
-                    RequestTicket requestTicket = RequestTicket.builder().requestId(id_request_ticket).createDate(Until.generateRealTime())
-                            .updateDate(Until.generateRealTime())
-                            .status(PENDING).ticketRequest(ticket).title(sendAttendanceFormRequest.getTitle()).user(send_user.get()).build();
-                    //
-                    RequestMessage requestMessage = RequestMessage.builder().createDate(Until.generateRealTime())
-                            .updateDate(Until.generateRealTime())
-                            .sender(send_user.get()).request(requestTicket).department(department.get()).build();
-                    if (sendAttendanceFormRequest.getReceivedId() != null){
-                        Optional<User> receive_user = userRepository.findByUserId(sendAttendanceFormRequest.getReceivedId());
-                        requestMessage.setReceiver(receive_user.get());
-                    }
-                    AttendanceRequestForm attendanceRequestForm = attendanceRequestFormMapper.convert(sendAttendanceFormRequest);
-                    attendanceRequestForm.setTopic(ATTENDANCE_REQUEST);
-                    attendanceRequestForm.setStatus(false);
-                    attendanceRequestForm.setRequestMessage(requestMessage);
                     ticketRepository.save(ticket);
-                    requestTicketRepository.save(requestTicket);
-                    requestMessageRepository.save(requestMessage);
-                    attendanceRequestFormRepository.save(attendanceRequestForm);
+                    saveAttendanceRequest(sendAttendanceFormRequest, send_user, department, id_request_ticket, ticket);
                     return true;
                 }else {
                     throw new NotFound("not_found");
@@ -82,5 +63,51 @@ public class RequestAttendanceFromService {
         } catch (ServerError e) {
             throw new ServerError("fail");
         }
+    }
+    public boolean getAttendanceUserExistTicket(SendAttendanceFormRequest sendAttendanceFormRequest) {
+        try {
+            if (sendAttendanceFormRequest.getContent() != null&&
+                    sendAttendanceFormRequest.getDepartmentId() != null&&
+                    sendAttendanceFormRequest.getManualDate() != null&&
+                    sendAttendanceFormRequest.getTitle() != null&&
+                    sendAttendanceFormRequest.getManualLastExit() != null&&
+                    sendAttendanceFormRequest.getTicketId() != null
+            ) {
+                Optional<User> send_user= userRepository.findByUserId(sendAttendanceFormRequest.getUserId());
+                Optional<Department> department= departmentRepository.findByDepartmentId(sendAttendanceFormRequest.getDepartmentId());
+                Optional<Ticket> ticket = ticketRepository.findByTicketId(sendAttendanceFormRequest.getTicketId());
+                if(send_user.isPresent()&&department.isPresent()&&ticket.isPresent()) {
+                    String id_request_ticket = "AT_" + Until.generateId();
+                    saveAttendanceRequest(sendAttendanceFormRequest, send_user, department, id_request_ticket, ticket.get());
+                    return true;
+                }else {
+                    throw new NotFound("not_found");
+                }
+            } else {
+                throw new BadRequest("request_fail");
+            }
+        } catch (ServerError e) {
+            throw new ServerError("fail");
+        }
+    }
+
+    private void saveAttendanceRequest(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) {
+        RequestTicket requestTicket = RequestTicket.builder().requestId(id_request_ticket).createDate(Until.generateRealTime())
+                .updateDate(Until.generateRealTime())
+                .status(PENDING).ticketRequest(ticket).title(sendAttendanceFormRequest.getTitle()).user(send_user.get()).build();
+        RequestMessage requestMessage = RequestMessage.builder().createDate(Until.generateRealTime())
+                .updateDate(Until.generateRealTime())
+                .sender(send_user.get()).request(requestTicket).department(department.get()).build();
+        if (sendAttendanceFormRequest.getReceivedId() != null){
+            Optional<User> receive_user = userRepository.findByUserId(sendAttendanceFormRequest.getReceivedId());
+            requestMessage.setReceiver(receive_user.get());
+        }
+        AttendanceRequestForm attendanceRequestForm = attendanceRequestFormMapper.convert(sendAttendanceFormRequest);
+        attendanceRequestForm.setTopic(ATTENDANCE_REQUEST);
+        attendanceRequestForm.setStatus(false);
+        attendanceRequestForm.setRequestMessage(requestMessage);
+        requestTicketRepository.save(requestTicket);
+        requestMessageRepository.save(requestMessage);
+        attendanceRequestFormRepository.save(attendanceRequestForm);
     }
 }
