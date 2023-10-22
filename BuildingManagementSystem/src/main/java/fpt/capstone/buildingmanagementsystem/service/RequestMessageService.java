@@ -11,12 +11,10 @@ import fpt.capstone.buildingmanagementsystem.repository.AttendanceRequestFormRep
 import fpt.capstone.buildingmanagementsystem.repository.OtherRequestFormRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -54,7 +52,7 @@ public class RequestMessageService {
                         form.getContent(),
                         form.getRequestMessage().getRequestMessageId(),
                         form.getTopic()
-                        ))
+                ))
                 .collect(Collectors.toList());
 
         List<OtherRequestResponse> otherRequests = otherRequestFormRepository.findByRequestMessageIn(requestMessages)
@@ -65,16 +63,21 @@ public class RequestMessageService {
                         form.getTopic()
                 )).collect(Collectors.toList());
 
-        List<RequestMessageResponse> messageResponses = new ArrayList<>();
-        requestMessages.forEach(requestMessage -> {
-            RequestMessageResponse messageResponse = new RequestMessageResponse();
-            BeanUtils.copyProperties(requestMessage, messageResponse);
-            messageResponse.setSenderId(requestMessage.getSender().getUserId());
-            messageResponse.setReceiverId(requestMessage.getReceiver().getUserId());
-            messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
-            messageResponse.setReceiverDepartment(requestMessage.getDepartment());
-            messageResponses.add(messageResponse);
-        });
+        List<RequestMessageResponse> messageResponses = requestMessages.stream()
+                .map(requestMessage -> new RequestMessageResponse(
+                        requestMessage.getRequestMessageId(),
+                        requestMessage.getCreateDate(),
+                        requestMessage.getAttachmentMessageId(),
+                        requestMessage.getSender().getUserId(),
+                        requestMessage.getSender().getFirstName(),
+                        requestMessage.getSender().getLastName(),
+                        requestMessage.getReceiver().getUserId(),
+                        requestMessage.getReceiver().getFirstName(),
+                        requestMessage.getReceiver().getLastName(),
+                        requestMessage.getRequest().getRequestId(),
+                        requestMessage.getDepartment()
+                ))
+                .collect(Collectors.toList());
 
         Map<String, AttendanceFormResponse> attendanceMap = attendanceRequests.stream()
                 .collect(Collectors.toMap(AttendanceFormResponse::getRequestMessageId, Function.identity()));
@@ -91,7 +94,7 @@ public class RequestMessageService {
                     if (attendanceMap.containsKey(o.getRequestMessageId())) {
                         return new AbstractMap.SimpleImmutableEntry<>(o, new AttendanceAndOtherFormResponse(o, attendanceMap.get(o.getRequestMessageId())));
                     }
-                    return new AbstractMap.SimpleImmutableEntry<>(o,new AttendanceAndOtherFormResponse(o,  otherMap.get(o.getRequestMessageId())));
+                    return new AbstractMap.SimpleImmutableEntry<>(o, new AttendanceAndOtherFormResponse(o, otherMap.get(o.getRequestMessageId())));
                 }).collect(Collectors.toMap(Map.Entry::getKey,
                         Map.Entry::getValue,
                         (left, right) -> right,
