@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.mapper;
 
+
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.response.DepartmentResponse;
 import org.mapstruct.Mapper;

@@ -135,13 +135,14 @@ public class UserManageService {
     }
 
     public GetUserInfoResponse getInfoUser(GetUserInfoRequest getUserInfoRequest) {
-        GetUserInfoResponse getUserInfoResponse = new GetUserInfoResponse();
+        GetUserInfoResponse getUserInfoResponse;
         if (getUserInfoRequest.getUserId() != null) {
             Optional<User> user = userRepository.findByUserId(getUserInfoRequest.getUserId());
             if (!user.isPresent()) {
                 throw new NotFound("user_not_found");
             }
             getUserInfoResponse = userMapper.convertGetUserInfo(user.get());
+            getUserInfoResponse.setDepartmentName(user.get().getDepartment().getDepartmentName());
         } else {
             throw new BadRequest("request_fail");
         }
