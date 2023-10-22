@@ -32,6 +32,10 @@ public class AccountController {
     public ResponseEntity<?> getAllAccount() throws Exception {
         return ResponseEntity.ok(accountManageService.getGetAllAccount());
     }
+    @RequestMapping(value = "/getRoleByUserId", method = RequestMethod.POST)
+    public RoleDto getRoleByUserId(@RequestBody GetUserInfoRequest getUserInfoRequest) throws Exception {
+        return accountManageService.getGettingRole2(getUserInfoRequest);
+    }
     @RequestMapping(value = "/changeStatusAccount", method = RequestMethod.POST)
     public boolean changeStatusAccount(@RequestBody ChangeStatusAccountRequest changeStatusAccountRequest) throws Exception {
         return accountManageService.changeStatusAccount(changeStatusAccountRequest);

@@ -213,6 +213,16 @@ public class AccountManageService implements UserDetailsService {
         Optional<Role> role = roleRepository.findByRoleId(userAccount.get().getRole().getRoleId());
         return roleMapper.convertRegisterAccount(role.get());
     }
+    public RoleDto getGettingRole2(GetUserInfoRequest getUserInfoRequest) {
+        if(getUserInfoRequest.getUserId()!=null) {
+            Optional<Account> userAccount = accountRepository.findByAccountId(getUserInfoRequest.getUserId());
+            Optional<Role> role = roleRepository.findByRoleId(userAccount.get().getRole().getRoleId());
+            return roleMapper.convertRegisterAccount(role.get());
+        }
+        else {
+            throw new BadRequest("request_fail");
+        }
+    }
     public List<GetAllAccountResponse> getGetAllAccount() {
         List<Account> account = accountRepository.findAll();
         List<GetAllAccountResponse> getAllAccountResponses = new ArrayList<>();

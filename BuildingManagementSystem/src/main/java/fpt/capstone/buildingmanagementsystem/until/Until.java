@@ -1,15 +1,10 @@
 package fpt.capstone.buildingmanagementsystem.until;
 
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Instant;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 

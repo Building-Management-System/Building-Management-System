@@ -14,6 +14,7 @@ import lombok.Setter;
 public class SendRoomBookingRequest {
     private String userId;
     private String ticketId;
+    private String requestId;
     private String departmentSenderId;
     private int roomId;
     private String title;
