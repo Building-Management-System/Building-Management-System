@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -111,7 +112,10 @@ public class TicketManageService {
             ticketResponse.setRequestTickets(requestTickets);
             responseV2s.add(ticketResponse);
         });
-        return responseV2s;
+        return responseV2s.stream()
+                .sorted((Comparator.comparing(TicketRequestResponseV2::getUpdateDate).reversed()))
+                .collect(Collectors.toList());
+
     }
 
 }
