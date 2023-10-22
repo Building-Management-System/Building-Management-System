@@ -111,12 +111,13 @@ public class TicketRepositoryImplement implements TicketRepositoryv2 {
                 "       rt.create_date    AS requestCreateDate,\n" +
                 "       rt.update_date    AS requestUpdateDate,\n" +
                 "       rt.status         AS requestStatus,\n" +
-                "       rt.user_id        AS userId,\n" +
                 "       rm.sender_id      AS senderId,\n" +
                 "       rm.receiver_id    AS receiverId,\n" +
                 "       rm.create_date    AS messageCreateDate,\n" +
                 "       rm.department_id  AS departmentId,\n" +
                 "       d.department_name AS departmentName,\n" +
+                "       u1.first_name     AS senderFirstName,\n" +
+                "       u1.last_name      AS senderLastName,\n" +
                 "       u.first_name      AS receiverFirstName,\n" +
                 "       u.last_name       AS receiverLastName\n" +
                 "FROM ticket t\n" +
@@ -128,6 +129,7 @@ public class TicketRepositoryImplement implements TicketRepositoryv2 {
                 "         JOIN request_message rm ON rt.request_id = rm.request_id\n" +
                 "    AND rm.create_date = first_messages.min_create_date\n" +
                 "         LEFT JOIN user u ON u.user_id = rm.receiver_id\n" +
+                "         LEFT JOIN user u1 ON u1.user_id = rm.sender_id\n" +
                 "         JOIN department d ON d.department_id = rm.department_id\n";
     }
 }
