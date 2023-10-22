@@ -16,12 +16,13 @@ public class TicketRequestDto {
     private String requestCreateDate;
     private String requestUpdateDate;
     private String requestStatus;
-    private String userId;
     private String senderId;
     private String receiverId;
     private String messageCreateDate;
     private String departmentId;
     private String departmentName;
+    private String senderFirstName;
+    private String senderLastName;
     private String receiverFirstName;
     private String receiverLastName;
 }
