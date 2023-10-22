@@ -113,7 +113,7 @@ public class TicketManageService {
             responseV2s.add(ticketResponse);
         });
         return responseV2s.stream()
-                .sorted((Comparator.comparing(TicketRequestResponseV2::getUpdateDate).reversed()))
+                .sorted((Comparator.comparing(TicketRequestResponseV2::getUpdateDate)))
                 .collect(Collectors.toList());
 
     }
