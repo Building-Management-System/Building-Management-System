@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -89,7 +90,7 @@ public class TicketManageService {
     public List<TicketRequestResponseV2> getAllTicketByDepartmentManager(String departmentName) {
         List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
         List<User> manager = userRepository.getManagerByDepartment(departmentName);
-        if(manager.isEmpty()) return new ArrayList<>();
+        if (manager.isEmpty()) return new ArrayList<>();
         Map<String, List<TicketRequestDto>> ticketDtos = ticketRepository.getTicketRequestByDepartmentManager(manager.get(0).getUserId())
                 .stream()
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
@@ -111,7 +112,10 @@ public class TicketManageService {
             ticketResponse.setRequestTickets(requestTickets);
             responseV2s.add(ticketResponse);
         });
-        return responseV2s;
+        return responseV2s.stream()
+                .sorted((Comparator.comparing(TicketRequestResponseV2::getUpdateDate)))
+                .collect(Collectors.toList());
+
     }
 
 }

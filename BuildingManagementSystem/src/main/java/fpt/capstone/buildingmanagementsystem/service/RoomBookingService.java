@@ -266,7 +266,7 @@ public class RoomBookingService {
             ticket.setUpdateDate(Until.generateRealTime());
             ticket.setStatus(true);
             requestTicket.setUpdateDate(Until.generateRealTime());
-            requestTicket.setStatus(RequestStatus.ANSWERED);
+            requestTicket.setStatus(RequestStatus.CLOSED);
             requestMessage.setUpdateDate(Until.generateRealTime());
 
             roomBookingRequestForm.setStatus(true);
