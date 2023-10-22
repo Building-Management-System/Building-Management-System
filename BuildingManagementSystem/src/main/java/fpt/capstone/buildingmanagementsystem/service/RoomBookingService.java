@@ -13,7 +13,6 @@ import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.RoomBookingRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
-import fpt.capstone.buildingmanagementsystem.model.request.SendAttendanceFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendRoomBookingRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.RoomBookingResponse;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
@@ -30,11 +29,14 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Optional;
 
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.*;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateTime;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartTimeAndEndTime;
 
 @Service
 public class RoomBookingService {
@@ -65,7 +67,7 @@ public class RoomBookingService {
 
 //    private static final TopicEnum ROOM_BOOKING = TopicEnum.ROOM_REQUEST;
 
-    //    @Transactional
+        @Transactional
     public boolean getRoomBookingForm(SendRoomBookingRequest sendRoomBookingRequest) {
         try {
             if (sendRoomBookingRequest.getUserId() != null
@@ -246,6 +248,7 @@ public class RoomBookingService {
         return roomFormRepositoryV2.getAllBookedRoom();
     }
 
+    @Transactional
     public boolean acceptBooking(String roomBookingFormRoomId) {
         try {
             RoomBookingRequestForm roomBookingRequestForm = roomBookingFormRepository.findById(roomBookingFormRoomId)
