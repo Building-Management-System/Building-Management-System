@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
@@ -131,9 +133,20 @@ public class RequestAttendanceFromService {
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendAttendanceFormRequest.getDepartmentId());
                     Optional<RequestTicket> request = requestTicketRepository.findByRequestId(sendAttendanceFormRequest.getRequestId());
                     if (send_user.isPresent() && department.isPresent() && request.isPresent()) {
+                        List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(request.get());
+                        String senderId = requestMessageOptional.get(0).getSender().getUserId();
+                        if(requestMessageOptional.get(0).getReceiver()!=null) {
+                            String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
+                            if (Objects.equals(sendAttendanceFormRequest.getUserId(), senderId)) {
+                                sendAttendanceFormRequest.setReceivedId(receiverId);
+                            }else {
+                                sendAttendanceFormRequest.setReceivedId(senderId);
+                            }
+                        }
                         saveAttendanceMessage(sendAttendanceFormRequest, send_user, department, request.get());
-                        ticketRepository.updateTicketTime(Until.generateRealTime(), request.get().getTicketRequest().getTicketId());
-                        requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(), sendAttendanceFormRequest.getRequestId());
+                        String time=Until.generateRealTime();
+                        ticketRepository.updateTicketTime(time, request.get().getTicketRequest().getTicketId());
+                        requestTicketRepository.updateTicketRequestTime(time, sendAttendanceFormRequest.getRequestId());
                         return true;
                     } else {
                         throw new NotFound("not_found");

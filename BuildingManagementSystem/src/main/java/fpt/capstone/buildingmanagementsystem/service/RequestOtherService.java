@@ -23,6 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
@@ -107,9 +110,20 @@ public class RequestOtherService {
                 Optional<Department> department= departmentRepository.findByDepartmentId(sendOtherFormRequest.getDepartmentId());
                 Optional<RequestTicket> requestTicket = requestTicketRepository.findByRequestId(sendOtherFormRequest.getRequestId());
                 if(send_user.isPresent()&&department.isPresent()&&requestTicket.isPresent()) {
+                        List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(requestTicket.get());
+                        String senderId = requestMessageOptional.get(0).getSender().getUserId();
+                    if(requestMessageOptional.get(0).getReceiver()!=null) {
+                        String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
+                        if (Objects.equals(sendOtherFormRequest.getUserId(), senderId)) {
+                            sendOtherFormRequest.setReceivedId(receiverId);
+                        }else {
+                            sendOtherFormRequest.setReceivedId(senderId);
+                        }
+                    }
+                    String time=Until.generateRealTime();
                     saveOtherMessage(sendOtherFormRequest, send_user, department, requestTicket.get());
-                    ticketRepository.updateTicketTime(Until.generateRealTime(),requestTicket.get().getTicketRequest().getTicketId());
-                    requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(),sendOtherFormRequest.getRequestId());
+                    ticketRepository.updateTicketTime(time,requestTicket.get().getTicketRequest().getTicketId());
+                    requestTicketRepository.updateTicketRequestTime(time,sendOtherFormRequest.getRequestId());
                     return true;
                 }else {
                     throw new NotFound("not_found");
@@ -121,7 +135,6 @@ public class RequestOtherService {
             throw new ServerError("fail");
         }
     }
-
     private void saveOtherRequest(SendOtherFormRequest sendOtherFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) {
         RequestTicket requestTicket = RequestTicket.builder().requestId(id_request_ticket).createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())
