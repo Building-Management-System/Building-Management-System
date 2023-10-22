@@ -22,7 +22,7 @@ public class BuildingManagementSystemApplication {
         InitializationService initDB = context.getBean(InitializationService.class);
         initDB.init();
     }
-    //note zxcvbnmzxhj
+    //note 1
     @PostConstruct
     public void init(){
         // Setting Spring Boot SetTimeZone
