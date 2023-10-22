@@ -6,11 +6,13 @@ import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
 import fpt.capstone.buildingmanagementsystem.model.entity.RoomBookingFormRoom;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.RoomBookingRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.response.AttendanceFormResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.LeaveRequestResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.OtherRequestResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.RequestFormResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.RequestMessageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.RoomBookingResponseV2;
 import fpt.capstone.buildingmanagementsystem.repository.AttendanceRequestFormRepository;
+import fpt.capstone.buildingmanagementsystem.repository.LeaveRequestFormRepository;
 import fpt.capstone.buildingmanagementsystem.repository.OtherRequestFormRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
@@ -49,27 +51,33 @@ public class RequestMessageService {
     @Autowired
     private RoomBookingFormRoomRepository roomFormRoomRepository;
 
+    @Autowired
+    private LeaveRequestFormRepository leaveRequestFormRepository;
+
     public List<Map<RequestMessageResponse, Object>> getAllAttendanceMessageByRequestId(String requestId) {
         RequestTicket requestTicket = requestTicketRepository.findById(requestId)
                 .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
 
         List<RequestMessage> requestMessages = requestMessageRepository.findByRequest(requestTicket);
 
-        List<RequestMessageResponse> messageResponses = requestMessages.stream()
-                .map(requestMessage -> new RequestMessageResponse(
-                        requestMessage.getRequestMessageId(),
-                        requestMessage.getCreateDate(),
-                        requestMessage.getAttachmentMessageId(),
-                        requestMessage.getSender().getUserId(),
-                        requestMessage.getSender().getFirstName(),
-                        requestMessage.getSender().getLastName(),
-                        requestMessage.getReceiver().getUserId(),
-                        requestMessage.getReceiver().getFirstName(),
-                        requestMessage.getReceiver().getLastName(),
-                        requestMessage.getRequest().getRequestId(),
-                        requestMessage.getDepartment()
-                ))
-                .collect(Collectors.toList());
+        List<RequestMessageResponse> messageResponses = new ArrayList<>();
+        requestMessages.forEach(requestMessage -> {
+            RequestMessageResponse messageResponse = new RequestMessageResponse();
+            messageResponse.setRequestMessageId(requestMessage.getRequestMessageId());
+            messageResponse.setCreateDate(requestMessage.getCreateDate());
+            messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
+            messageResponse.setSenderId(requestMessage.getSender().getUserId());
+            messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
+            messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
+            messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
+            messageResponse.setReceiverDepartment(requestMessage.getDepartment());
+            if (requestMessage.getReceiver() != null) {
+                messageResponse.setReceiverId(requestMessage.getReceiver().getUserId());
+                messageResponse.setReceiverFirstName(requestMessage.getReceiver().getFirstName());
+                messageResponse.setReceiverLastName(requestMessage.getReceiver().getLastName());
+            }
+            messageResponses.add(messageResponse);
+        });
 
         List<OtherRequestResponse> otherRequests = otherRequestFormRepository.findByRequestMessageIn(requestMessages)
                 .stream().map(form -> new OtherRequestResponse(
@@ -202,6 +210,131 @@ public class RequestMessageService {
                 ));
         return List.of(responseObjectMap);
 
+    }
+
+    public List<Map<RequestMessageResponse, Object>> getAllLeaveMessageByRequestId(String requestId) {
+        RequestTicket requestTicket = requestTicketRepository.findById(requestId)
+                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+        List<RequestMessage> requestMessages = requestMessageRepository.findByRequest(requestTicket);
+
+        List<RequestMessageResponse> messageResponses = new ArrayList<>();
+        requestMessages.forEach(requestMessage -> {
+            RequestMessageResponse messageResponse = new RequestMessageResponse();
+            messageResponse.setRequestMessageId(requestMessage.getRequestMessageId());
+            messageResponse.setCreateDate(requestMessage.getCreateDate());
+            messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
+            messageResponse.setSenderId(requestMessage.getSender().getUserId());
+            messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
+            messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
+            messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
+            messageResponse.setReceiverDepartment(requestMessage.getDepartment());
+            if (requestMessage.getReceiver() != null) {
+                messageResponse.setReceiverId(requestMessage.getReceiver().getUserId());
+                messageResponse.setReceiverFirstName(requestMessage.getReceiver().getFirstName());
+                messageResponse.setReceiverLastName(requestMessage.getReceiver().getLastName());
+            }
+            messageResponses.add(messageResponse);
+        });
+
+        List<OtherRequestResponse> otherRequests = otherRequestFormRepository.findByRequestMessageIn(requestMessages)
+                .stream().map(form -> new OtherRequestResponse(
+                        form.getOtherRequestId(),
+                        form.getContent(),
+                        form.getRequestMessage().getRequestMessageId(),
+                        form.getTopic()
+                )).collect(Collectors.toList());
+
+        List<LeaveRequestResponse> leaveRequestResponses = new ArrayList<>();
+        leaveRequestFormRepository.findByRequestMessageIn(requestMessages)
+                .forEach(leave -> {
+                    LeaveRequestResponse leaveRequestResponse = LeaveRequestResponse.builder()
+                            .leaveRequestId(leave.getLeaveRequestId())
+                            .fromDate(leave.getFromDate())
+                            .toDate(leave.getToDate())
+                            .halfDay(leave.isHalfDay())
+                            .durationEvaluation(leave.getDurationEvaluation())
+                            .content(leave.getContent())
+                            .requestMessageId(leave.getRequestMessage().getRequestMessageId())
+                            .topic(leave.getTopic())
+                            .build();
+                    leaveRequestResponses.add(leaveRequestResponse);
+                });
+
+
+        Map<String, LeaveRequestResponse> attendanceMap = leaveRequestResponses.stream()
+                .collect(Collectors.toMap(LeaveRequestResponse::getRequestMessageId, Function.identity()));
+
+        Map<String, OtherRequestResponse> otherMap = otherRequests.stream()
+                .collect(Collectors.toMap(OtherRequestResponse::getRequestMessageId, Function.identity()));
+
+        Map<RequestMessageResponse, Object> responseObjectMap = messageResponses.stream()
+                .collect(Collectors.toMap(Function.identity(), messageResponse -> messageResponse));
+
+        responseObjectMap = responseObjectMap.keySet().stream()
+                .sorted(Comparator.comparing(RequestMessageResponse::getCreateDate))
+                .map(o -> {
+                    if (attendanceMap.containsKey(o.getRequestMessageId())) {
+                        return new AbstractMap.SimpleImmutableEntry<>(o, new RequestFormResponse(o, attendanceMap.get(o.getRequestMessageId())));
+                    }
+                    return new AbstractMap.SimpleImmutableEntry<>(o, new RequestFormResponse(o, otherMap.get(o.getRequestMessageId())));
+                }).collect(Collectors.toMap(Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (left, right) -> right,
+                        LinkedHashMap::new
+                ));
+        return List.of(responseObjectMap);
+    }
+
+    public List<Map<RequestMessageResponse, Object>> getAllOtherMessageByRequestId(String requestId) {
+        RequestTicket requestTicket = requestTicketRepository.findById(requestId)
+                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+        List<RequestMessage> requestMessages = requestMessageRepository.findByRequest(requestTicket);
+
+        List<RequestMessageResponse> messageResponses = new ArrayList<>();
+
+        requestMessages.forEach(requestMessage -> {
+            RequestMessageResponse messageResponse = new RequestMessageResponse();
+            messageResponse.setRequestMessageId(requestMessage.getRequestMessageId());
+            messageResponse.setCreateDate(requestMessage.getCreateDate());
+            messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
+            messageResponse.setSenderId(requestMessage.getSender().getUserId());
+            messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
+            messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
+            messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
+            messageResponse.setReceiverDepartment(requestMessage.getDepartment());
+            if (requestMessage.getReceiver() != null) {
+                messageResponse.setReceiverId(requestMessage.getReceiver().getUserId());
+                messageResponse.setReceiverFirstName(requestMessage.getReceiver().getFirstName());
+                messageResponse.setReceiverLastName(requestMessage.getReceiver().getLastName());
+            }
+            messageResponses.add(messageResponse);
+        });
+
+        List<OtherRequestResponse> otherRequests = otherRequestFormRepository.findByRequestMessageIn(requestMessages)
+                .stream().map(form -> new OtherRequestResponse(
+                        form.getOtherRequestId(),
+                        form.getContent(),
+                        form.getRequestMessage().getRequestMessageId(),
+                        form.getTopic()
+                )).collect(Collectors.toList());
+
+        Map<String, OtherRequestResponse> otherMap = otherRequests.stream()
+                .collect(Collectors.toMap(OtherRequestResponse::getRequestMessageId, Function.identity()));
+
+        Map<RequestMessageResponse, Object> responseObjectMap = messageResponses.stream()
+                .collect(Collectors.toMap(Function.identity(), messageResponse -> messageResponse));
+
+        responseObjectMap = responseObjectMap.keySet().stream()
+                .sorted(Comparator.comparing(RequestMessageResponse::getCreateDate))
+                .map(o -> new AbstractMap.SimpleImmutableEntry<>(o, new RequestFormResponse(o, otherMap.get(o.getRequestMessageId()))))
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (left, right) -> right,
+                        LinkedHashMap::new
+                ));
+        return List.of(responseObjectMap);
     }
 
 }

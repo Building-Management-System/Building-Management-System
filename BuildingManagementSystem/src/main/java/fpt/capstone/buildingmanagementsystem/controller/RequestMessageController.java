@@ -27,4 +27,14 @@ public class RequestMessageController {
     public List<Map<RequestMessageResponse, Object>> getAllRoomBookingMessageByRequestId(@RequestParam("request_id") String requestId) {
         return requestMessageService.getAllRoomBookingMessageByRequestId(requestId);
     }
+
+    @GetMapping("getLeaveMessage")
+    List<Map<RequestMessageResponse, Object>> getAllLeaveMessageByRequestId(@RequestParam("request_id") String requestId) {
+        return requestMessageService.getAllLeaveMessageByRequestId(requestId);
+    }
+
+    @GetMapping("getOtherMessage")
+    List<Map<RequestMessageResponse, Object>> getAllOtherMessageByRequestId(@RequestParam("request_id") String requestId) {
+        return requestMessageService.getAllOtherMessageByRequestId(requestId);
+    }
 }

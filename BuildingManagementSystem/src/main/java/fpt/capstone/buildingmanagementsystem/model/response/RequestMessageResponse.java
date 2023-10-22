@@ -33,5 +33,8 @@ public class RequestMessageResponse {
 
     private Department receiverDepartment;
 
-
+    @Override
+    public String toString() {
+        return "Detail";
+    }
 }
