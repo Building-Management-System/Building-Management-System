@@ -4,20 +4,32 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.LeaveRequestFormMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.Department;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
+import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.LeaveRequestForm;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.SendLeaveFormRequest;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.LeaveRequestFormRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.text.ParseException;
 import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.LEAVE_REQUEST;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.*;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartDateAndEndDate;
 
 @Service
 public class RequestLeaveFormService {
@@ -107,6 +119,7 @@ public class RequestLeaveFormService {
             throw new RuntimeException(e);
         }
     }
+
     public boolean getLeaveFormUserExistRequest(SendLeaveFormRequest sendLeaveFormRequest) {
         try {
             if (sendLeaveFormRequest.getContent() != null &&
@@ -121,8 +134,9 @@ public class RequestLeaveFormService {
                     Optional<RequestTicket> requestTicket = requestTicketRepository.findByRequestId(sendLeaveFormRequest.getRequestId());
                     if (send_user.isPresent() && department.isPresent() && requestTicket.isPresent()) {
                         saveLeaveMessage(sendLeaveFormRequest, send_user, department, requestTicket.get());
-                        ticketRepository.updateTicketTime(Until.generateRealTime(),requestTicket.get().getTicketRequest().getTicketId());
-                        requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(),sendLeaveFormRequest.getRequestId());                        return true;
+                        ticketRepository.updateTicketTime(Until.generateRealTime(), requestTicket.get().getTicketRequest().getTicketId());
+                        requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(), sendLeaveFormRequest.getRequestId());
+                        return true;
                     } else {
                         throw new NotFound("not_found");
                     }
@@ -144,6 +158,7 @@ public class RequestLeaveFormService {
                 validateDateFormat(sendLeaveFormRequest.getToDate()) && validateStartDateAndEndDate(sendLeaveFormRequest.getFromDate()
                 , sendLeaveFormRequest.getToDate());
     }
+
     private void saveLeaveRequest(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) {
         RequestTicket requestTicket = RequestTicket.builder()
                 .requestId(id_request_ticket)
@@ -175,5 +190,37 @@ public class RequestLeaveFormService {
         requestTicketRepository.save(requestTicket);
         requestMessageRepository.save(requestMessage);
         leaveRequestFormRepository.save(leaveRequestForm);
+    }
+
+    @Transactional
+    public boolean acceptLeaveRequest(String leaveRequestId) {
+        LeaveRequestForm leaveRequestForm = leaveRequestFormRepository.findById(leaveRequestId)
+                .orElseThrow(() -> new BadRequest("Not_found_leave_id"));
+
+        RequestMessage requestMessage = requestMessageRepository.findById(leaveRequestForm.getRequestMessage().getRequestMessageId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+
+        RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+        Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
+                .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+
+        ticket.setUpdateDate(Until.generateRealTime());
+        ticket.setStatus(true);
+        requestTicket.setUpdateDate(Until.generateRealTime());
+        requestTicket.setStatus(RequestStatus.CLOSED);
+        requestMessage.setUpdateDate(Until.generateRealTime());
+
+        try {
+            leaveRequestForm.setStatus(true);
+            leaveRequestFormRepository.save(leaveRequestForm);
+            requestMessageRepository.saveAndFlush(requestMessage);
+            requestTicketRepository.saveAndFlush(requestTicket);
+            ticketRepository.saveAndFlush(ticket);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("Fail");
+        }
     }
 }

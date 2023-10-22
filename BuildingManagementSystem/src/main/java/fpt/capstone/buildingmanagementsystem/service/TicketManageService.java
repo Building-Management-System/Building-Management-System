@@ -90,7 +90,7 @@ public class TicketManageService {
     public List<TicketRequestResponseV2> getAllTicketByDepartmentManager(String departmentName) {
         List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
         List<User> manager = userRepository.getManagerByDepartment(departmentName);
-        if(manager.isEmpty()) return new ArrayList<>();
+        if (manager.isEmpty()) return new ArrayList<>();
         Map<String, List<TicketRequestDto>> ticketDtos = ticketRepository.getTicketRequestByDepartmentManager(manager.get(0).getUserId())
                 .stream()
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
@@ -113,7 +113,7 @@ public class TicketManageService {
             responseV2s.add(ticketResponse);
         });
         return responseV2s.stream()
-                .sorted((Comparator.comparing(TicketRequestResponseV2::getUpdateDate).reversed()))
+                .sorted((Comparator.comparing(TicketRequestResponseV2::getUpdateDate)))
                 .collect(Collectors.toList());
 
     }

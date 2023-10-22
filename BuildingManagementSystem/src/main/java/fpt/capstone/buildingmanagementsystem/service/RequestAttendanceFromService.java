@@ -4,20 +4,34 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.AttendanceRequestFormMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.Department;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
+import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.AttendanceRequestForm;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.SendAttendanceFormRequest;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.repository.AttendanceRequestFormRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.text.ParseException;
 import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.ATTENDANCE_REQUEST;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.*;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateTime;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartTimeAndEndTime;
 
 @Service
 public class RequestAttendanceFromService {
@@ -61,7 +75,7 @@ public class RequestAttendanceFromService {
                     } else {
                         throw new NotFound("not_found");
                     }
-                }else {
+                } else {
                     throw new BadRequest("date_time_input_wrong");
                 }
             } else {
@@ -88,12 +102,12 @@ public class RequestAttendanceFromService {
                     if (send_user.isPresent() && department.isPresent() && ticket.isPresent()) {
                         String id_request_ticket = "AT_" + Until.generateId();
                         saveAttendanceRequest(sendAttendanceFormRequest, send_user, department, id_request_ticket, ticket.get());
-                        ticketRepository.updateTicketTime(Until.generateRealTime(),sendAttendanceFormRequest.getTicketId());
+                        ticketRepository.updateTicketTime(Until.generateRealTime(), sendAttendanceFormRequest.getTicketId());
                         return true;
                     } else {
                         throw new NotFound("not_found");
                     }
-                }else {
+                } else {
                     throw new BadRequest("date_time_input_wrong");
                 }
             } else {
@@ -103,6 +117,7 @@ public class RequestAttendanceFromService {
             throw new ServerError("fail");
         }
     }
+
     public boolean getAttendanceUserExistRequest(SendAttendanceFormRequest sendAttendanceFormRequest) {
         try {
             if (sendAttendanceFormRequest.getContent() != null &&
@@ -117,13 +132,13 @@ public class RequestAttendanceFromService {
                     Optional<RequestTicket> request = requestTicketRepository.findByRequestId(sendAttendanceFormRequest.getRequestId());
                     if (send_user.isPresent() && department.isPresent() && request.isPresent()) {
                         saveAttendanceMessage(sendAttendanceFormRequest, send_user, department, request.get());
-                        ticketRepository.updateTicketTime(Until.generateRealTime(),request.get().getTicketRequest().getTicketId());
-                        requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(),sendAttendanceFormRequest.getRequestId());
+                        ticketRepository.updateTicketTime(Until.generateRealTime(), request.get().getTicketRequest().getTicketId());
+                        requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(), sendAttendanceFormRequest.getRequestId());
                         return true;
                     } else {
                         throw new NotFound("not_found");
                     }
-                }else {
+                } else {
                     throw new BadRequest("date_time_input_wrong");
                 }
             } else {
@@ -133,6 +148,7 @@ public class RequestAttendanceFromService {
             throw new ServerError("fail");
         }
     }
+
     private static boolean checkValidate(SendAttendanceFormRequest sendAttendanceFormRequest) throws ParseException {
         return validateDateFormat(sendAttendanceFormRequest.getManualDate()) &&
                 validateDateTime(sendAttendanceFormRequest.getManualFirstEntry()) &&
@@ -164,4 +180,35 @@ public class RequestAttendanceFromService {
         attendanceRequestFormRepository.save(attendanceRequestForm);
     }
 
+    @Transactional
+    public boolean acceptAttendanceRequest(String attendanceRequestId) {
+        AttendanceRequestForm attendanceRequestForm = attendanceRequestFormRepository.findById(attendanceRequestId)
+                .orElseThrow(() -> new BadRequest("Not_found_attendance_id"));
+
+        RequestMessage requestMessage = requestMessageRepository.findById(attendanceRequestForm.getRequestMessage().getRequestMessageId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+
+        RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+        Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
+                .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+
+            ticket.setUpdateDate(Until.generateRealTime());
+            ticket.setStatus(true);
+            requestTicket.setUpdateDate(Until.generateRealTime());
+            requestTicket.setStatus(RequestStatus.CLOSED);
+            requestMessage.setUpdateDate(Until.generateRealTime());
+
+        try {
+            attendanceRequestForm.setStatus(true);
+            attendanceRequestFormRepository.save(attendanceRequestForm);
+            requestMessageRepository.saveAndFlush(requestMessage);
+            requestTicketRepository.saveAndFlush(requestTicket);
+            ticketRepository.save(ticket);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("Fail");
+        }
+    }
 }
