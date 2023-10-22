@@ -54,7 +54,7 @@ public class RequestMessageService {
     @Autowired
     private LeaveRequestFormRepository leaveRequestFormRepository;
 
-//    List<Map<RequestMessageResponse, Object>>
+    //    List<Map<RequestMessageResponse, Object>>
     public List<Object> getAllAttendanceMessageByRequestId(String requestId) {
         RequestTicket requestTicket = requestTicketRepository.findById(requestId)
                 .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
@@ -124,7 +124,7 @@ public class RequestMessageService {
         return new ArrayList<>(responseObjectMap.values());
     }
 
-    public List<Map<RequestMessageResponse, Object>> getAllRoomBookingMessageByRequestId(String requestId) {
+    public List<Object> getAllRoomBookingMessageByRequestId(String requestId) {
         RequestTicket requestTicket = requestTicketRepository.findById(requestId)
                 .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
 
@@ -209,11 +209,11 @@ public class RequestMessageService {
                         (left, right) -> right,
                         LinkedHashMap::new
                 ));
-        return List.of(responseObjectMap);
+        return new ArrayList<>(responseObjectMap.values());
 
     }
 
-    public List<Map<RequestMessageResponse, Object>> getAllLeaveMessageByRequestId(String requestId) {
+    public List<Object> getAllLeaveMessageByRequestId(String requestId) {
         RequestTicket requestTicket = requestTicketRepository.findById(requestId)
                 .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
 
@@ -284,10 +284,10 @@ public class RequestMessageService {
                         (left, right) -> right,
                         LinkedHashMap::new
                 ));
-        return List.of(responseObjectMap);
+        return new ArrayList<>(responseObjectMap.values());
     }
 
-    public List<Map<RequestMessageResponse, Object>> getAllOtherMessageByRequestId(String requestId) {
+    public List<Object> getAllOtherMessageByRequestId(String requestId) {
         RequestTicket requestTicket = requestTicketRepository.findById(requestId)
                 .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
 
@@ -335,7 +335,7 @@ public class RequestMessageService {
                         (left, right) -> right,
                         LinkedHashMap::new
                 ));
-        return List.of(responseObjectMap);
+        return new ArrayList<>(responseObjectMap.values());
     }
 
 }
