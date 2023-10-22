@@ -54,7 +54,8 @@ public class RequestMessageService {
     @Autowired
     private LeaveRequestFormRepository leaveRequestFormRepository;
 
-    public List<Map<RequestMessageResponse, Object>> getAllAttendanceMessageByRequestId(String requestId) {
+//    List<Map<RequestMessageResponse, Object>>
+    public List<Object> getAllAttendanceMessageByRequestId(String requestId) {
         RequestTicket requestTicket = requestTicketRepository.findById(requestId)
                 .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
 
@@ -120,7 +121,7 @@ public class RequestMessageService {
                         (left, right) -> right,
                         LinkedHashMap::new
                 ));
-        return List.of(responseObjectMap);
+        return new ArrayList<>(responseObjectMap.values());
     }
 
     public List<Map<RequestMessageResponse, Object>> getAllRoomBookingMessageByRequestId(String requestId) {

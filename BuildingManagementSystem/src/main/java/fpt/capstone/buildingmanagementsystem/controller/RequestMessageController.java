@@ -19,7 +19,7 @@ public class RequestMessageController {
     RequestMessageService requestMessageService;
 
     @GetMapping("getAttendanceMessage")
-    public List<Map<RequestMessageResponse, Object>> getAllAttendanceMessageByRequestId(@RequestParam("request_id") String requestId) {
+    public List<Object> getAllAttendanceMessageByRequestId(@RequestParam("request_id") String requestId) {
         return requestMessageService.getAllAttendanceMessageByRequestId(requestId);
     }
 
