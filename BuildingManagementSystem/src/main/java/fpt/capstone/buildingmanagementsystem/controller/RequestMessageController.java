@@ -22,4 +22,9 @@ public class RequestMessageController {
     public List<Map<RequestMessageResponse, Object>> getAllAttendanceMessageByRequestId(@RequestParam("request_id") String requestId) {
         return requestMessageService.getAllAttendanceMessageByRequestId(requestId);
     }
+
+    @GetMapping("getRoomBookingMessage")
+    public List<Map<RequestMessageResponse, Object>> getAllRoomBookingMessageByRequestId(@RequestParam("request_id") String requestId) {
+        return requestMessageService.getAllRoomBookingMessageByRequestId(requestId);
+    }
 }
