@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class AttendanceAndOtherFormResponse {
+public class RequestFormResponse {
     private RequestMessageResponse requestMessageResponse;
     private Object object;
 }
