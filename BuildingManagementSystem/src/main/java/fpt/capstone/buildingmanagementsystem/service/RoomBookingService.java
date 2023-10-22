@@ -67,7 +67,7 @@ public class RoomBookingService {
 
 //    private static final TopicEnum ROOM_BOOKING = TopicEnum.ROOM_REQUEST;
 
-        @Transactional
+    @Transactional
     public boolean getRoomBookingForm(SendRoomBookingRequest sendRoomBookingRequest) {
         try {
             if (sendRoomBookingRequest.getUserId() != null
@@ -153,6 +153,7 @@ public class RoomBookingService {
             throw new RuntimeException(e);
         }
     }
+
     public boolean getRoomBookingFormExistRequest(SendRoomBookingRequest sendRoomBookingRequest) {
         try {
             if (sendRoomBookingRequest.getUserId() != null
@@ -173,8 +174,8 @@ public class RoomBookingService {
                     Optional<RequestTicket> requestTicket = requestTicketRepository.findByRequestId(sendRoomBookingRequest.getRequestId());
                     if (requestTicket.isPresent()) {
                         saveRoomBookingMessage(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicket.get());
-                        ticketRepository.updateTicketTime(Until.generateRealTime(),requestTicket.get().getTicketRequest().getTicketId());
-                        requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(),sendRoomBookingRequest.getRequestId());
+                        ticketRepository.updateTicketTime(Until.generateRealTime(), requestTicket.get().getTicketRequest().getTicketId());
+                        requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(), sendRoomBookingRequest.getRequestId());
                         return true;
                     } else {
                         throw new BadRequest("not_found_request");
@@ -250,25 +251,24 @@ public class RoomBookingService {
 
     @Transactional
     public boolean acceptBooking(String roomBookingFormRoomId) {
+        RoomBookingRequestForm roomBookingRequestForm = roomBookingFormRepository.findById(roomBookingFormRoomId)
+                .orElseThrow(() -> new BadRequest("Not_found_form"));
+
+        RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+
+        RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+        Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
+                .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+
+        ticket.setUpdateDate(Until.generateRealTime());
+        ticket.setStatus(true);
+        requestTicket.setUpdateDate(Until.generateRealTime());
+        requestTicket.setStatus(RequestStatus.CLOSED);
+        requestMessage.setUpdateDate(Until.generateRealTime());
         try {
-            RoomBookingRequestForm roomBookingRequestForm = roomBookingFormRepository.findById(roomBookingFormRoomId)
-                    .orElseThrow(() -> new BadRequest("Not_found_form"));
-
-            RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
-                    .orElseThrow(() -> new BadRequest("Not_found_request_message"));
-
-            RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
-                    .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
-
-            Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
-                    .orElseThrow(() -> new BadRequest("Not_found_ticket"));
-
-            ticket.setUpdateDate(Until.generateRealTime());
-            ticket.setStatus(true);
-            requestTicket.setUpdateDate(Until.generateRealTime());
-            requestTicket.setStatus(RequestStatus.CLOSED);
-            requestMessage.setUpdateDate(Until.generateRealTime());
-
             roomBookingRequestForm.setStatus(true);
             roomBookingFormRepository.saveAndFlush(roomBookingRequestForm);
             requestMessageRepository.saveAndFlush(requestMessage);

@@ -4,16 +4,27 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.OtherRequestMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
-import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.LeaveRequestForm;
+import fpt.capstone.buildingmanagementsystem.model.entity.Department;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
+import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.OtherRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.SendLeaveFormRequest;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.OtherRequestFormRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
 import java.util.Optional;
+
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.OTHER_REQUEST;
 
@@ -133,5 +144,37 @@ public class RequestOtherService {
         requestTicketRepository.save(requestTicket);
         requestMessageRepository.save(requestMessage);
         otherRequestFormRepository.save(otherRequest);
+    }
+
+    @Transactional
+    public boolean acceptOtherRequest(String otherRequestId) {
+        try {
+            OtherRequest otherRequest = otherRequestFormRepository.findById(otherRequestId)
+                    .orElseThrow(() -> new BadRequest("Not_found_form"));
+
+            RequestMessage requestMessage = requestMessageRepository.findById(otherRequest.getRequestMessage().getRequestMessageId())
+                    .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+
+            RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
+                    .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+            Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
+                    .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+
+            ticket.setUpdateDate(Until.generateRealTime());
+            ticket.setStatus(true);
+            requestTicket.setUpdateDate(Until.generateRealTime());
+            requestTicket.setStatus(RequestStatus.CLOSED);
+            requestMessage.setUpdateDate(Until.generateRealTime());
+
+            otherRequest.setStatus(true);
+            otherRequestFormRepository.save(otherRequest);
+            requestMessageRepository.saveAndFlush(requestMessage);
+            requestTicketRepository.saveAndFlush(requestTicket);
+            ticketRepository.save(ticket);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("Fail");
+        }
     }
 }
