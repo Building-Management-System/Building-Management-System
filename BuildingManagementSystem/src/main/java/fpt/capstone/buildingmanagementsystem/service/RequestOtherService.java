@@ -121,13 +121,10 @@ public class RequestOtherService {
                             sendOtherFormRequest.setReceivedId(senderId);
                         }
                     }
-                    if (requestTicket.isPresent()) {
-                        RequestStatus status = requestTicket.get().getStatus();
-                        if(!status.equals(ANSWERED)){
-                            requestTicket.get().setStatus(ANSWERED);
-                            requestTicketRepository.save(requestTicket.get());                        }
-                    }else{
-                        throw new BadRequest("not_found_request");
+                    RequestStatus status = requestTicket.get().getStatus();
+                    if (!status.equals(ANSWERED) && !Objects.equals(senderId, sendOtherFormRequest.getUserId())) {
+                        requestTicket.get().setStatus(ANSWERED);
+                        requestTicketRepository.save(requestTicket.get());
                     }
                     String time=Until.generateRealTime();
                     saveOtherMessage(sendOtherFormRequest, send_user, department, requestTicket.get());

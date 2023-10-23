@@ -144,13 +144,10 @@ public class RequestAttendanceFromService {
                                 sendAttendanceFormRequest.setReceivedId(senderId);
                             }
                         }
-                        if (request.isPresent()) {
-                            RequestStatus status = request.get().getStatus();
-                            if(!status.equals(ANSWERED)){
-                                request.get().setStatus(ANSWERED);
-                                requestTicketRepository.save(request.get());                            }
-                        }else{
-                            throw new BadRequest("not_found_request");
+                        RequestStatus status = request.get().getStatus();
+                        if (!status.equals(ANSWERED) && !Objects.equals(senderId, sendAttendanceFormRequest.getUserId())) {
+                            request.get().setStatus(ANSWERED);
+                            requestTicketRepository.save(request.get());
                         }
                         saveAttendanceMessage(sendAttendanceFormRequest, send_user, department, request.get());
                         String time = Until.generateRealTime();

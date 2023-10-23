@@ -176,26 +176,23 @@ public class RoomBookingService {
                     if (requestTicket.isPresent()) {
                         List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(requestTicket.get());
                         String sender_id = requestMessageOptional.get(0).getSender().getUserId();
-                        if(requestMessageOptional.get(0).getReceiver()!=null) {
-                        String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
+                        if (requestMessageOptional.get(0).getReceiver() != null) {
+                            String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
                             if (Objects.equals(sendRoomBookingRequest.getUserId(), sender_id)) {
                                 sendRoomBookingRequest.setReceiverId(receiverId);
-                            }else {
+                            } else {
                                 sendRoomBookingRequest.setReceiverId(sender_id);
                             }
                         }
-                        if (requestTicket.isPresent()) {
-                            RequestStatus status = requestTicket.get().getStatus();
-                            if(!status.equals(ANSWERED)){
-                                requestTicket.get().setStatus(ANSWERED);
-                                requestTicketRepository.save(requestTicket.get());                            }
-                        }else{
-                            throw new BadRequest("not_found_request");
+                        RequestStatus status = requestTicket.get().getStatus();
+                        if (!status.equals(ANSWERED) && !Objects.equals(sender_id, sendRoomBookingRequest.getUserId())) {
+                            requestTicket.get().setStatus(ANSWERED);
+                            requestTicketRepository.save(requestTicket.get());
                         }
-                        String time=Until.generateRealTime();
+                        String time = Until.generateRealTime();
                         saveRoomBookingMessage(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicket.get());
-                        ticketRepository.updateTicketTime(time,requestTicket.get().getTicketRequest().getTicketId());
-                        requestTicketRepository.updateTicketRequestTime(time,sendRoomBookingRequest.getRequestId());
+                        ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
+                        requestTicketRepository.updateTicketRequestTime(time, sendRoomBookingRequest.getRequestId());
                         return true;
                     } else {
                         throw new BadRequest("not_found_request");
