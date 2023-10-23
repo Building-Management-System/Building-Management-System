@@ -86,7 +86,6 @@ public class RoomBookingService {
                     Department senderDepartment = departmentRepository.findByDepartmentId(sendRoomBookingRequest.getDepartmentSenderId())
                             .orElseThrow(() -> new BadRequest("not_found_sender_department"));
 
-
                     String ticketId = "RB_" + Until.generateId();
                     String requestTicketId = "RB_" + Until.generateId();
 

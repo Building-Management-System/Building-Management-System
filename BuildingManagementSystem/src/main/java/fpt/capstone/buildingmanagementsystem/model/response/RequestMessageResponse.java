@@ -19,6 +19,8 @@ public class RequestMessageResponse {
 
     private String senderId;
 
+    private String title;
+
     private String senderFirstName;
 
     private String senderLastName;

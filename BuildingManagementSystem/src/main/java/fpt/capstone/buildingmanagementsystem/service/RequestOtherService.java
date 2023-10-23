@@ -146,9 +146,9 @@ public class RequestOtherService {
         otherRequestFormRepository.save(otherRequest);
     }
 
+    //other k co tin nhan
     @Transactional
     public boolean acceptOtherRequest(String otherRequestId) {
-        try {
             OtherRequest otherRequest = otherRequestFormRepository.findById(otherRequestId)
                     .orElseThrow(() -> new BadRequest("Not_found_form"));
 
@@ -166,7 +166,7 @@ public class RequestOtherService {
             requestTicket.setUpdateDate(Until.generateRealTime());
             requestTicket.setStatus(RequestStatus.CLOSED);
             requestMessage.setUpdateDate(Until.generateRealTime());
-
+        try {
             otherRequest.setStatus(true);
             otherRequestFormRepository.save(otherRequest);
             requestMessageRepository.saveAndFlush(requestMessage);
