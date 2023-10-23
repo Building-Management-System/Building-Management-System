@@ -19,4 +19,9 @@ public class LeaveFormController {
     public boolean acceptLeaveRequest(@RequestBody LeaveMessageRequest leaveMessageRequest) {
         return leaveFormService.acceptLeaveRequest(leaveMessageRequest.getLeaveRequestId());
     }
+
+    @PostMapping("rejectLeaveRequest")
+    public boolean rejectLeaveRequest(@RequestBody LeaveMessageRequest leaveMessageRequest) {
+        return leaveFormService.rejectLeaveRequest(leaveMessageRequest.getLeaveRequestId());
+    }
 }

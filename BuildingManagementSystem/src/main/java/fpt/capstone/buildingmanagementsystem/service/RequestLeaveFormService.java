@@ -236,4 +236,32 @@ public class RequestLeaveFormService {
             throw new ServerError("Fail");
         }
     }
+
+    @Transactional
+    public boolean rejectLeaveRequest(String leaveRequestId) {
+        LeaveRequestForm roomBookingRequestForm = leaveRequestFormRepository.findById(leaveRequestId)
+                .orElseThrow(() -> new BadRequest("Not_found_form"));
+
+        RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+
+        RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+        Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
+                .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+        ticket.setUpdateDate(Until.generateRealTime());
+        ticket.setStatus(true);
+        requestTicket.setUpdateDate(Until.generateRealTime());
+        requestTicket.setStatus(RequestStatus.CLOSED);
+        requestMessage.setUpdateDate(Until.generateRealTime());
+        try {
+            requestMessageRepository.saveAndFlush(requestMessage);
+            requestTicketRepository.saveAndFlush(requestTicket);
+            ticketRepository.save(ticket);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("Fail");
+        }
+    }
 }

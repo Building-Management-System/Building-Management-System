@@ -135,16 +135,16 @@ public class RequestAttendanceFromService {
                     if (send_user.isPresent() && department.isPresent() && request.isPresent()) {
                         List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(request.get());
                         String senderId = requestMessageOptional.get(0).getSender().getUserId();
-                        if(requestMessageOptional.get(0).getReceiver()!=null) {
+                        if (requestMessageOptional.get(0).getReceiver() != null) {
                             String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
                             if (Objects.equals(sendAttendanceFormRequest.getUserId(), senderId)) {
                                 sendAttendanceFormRequest.setReceivedId(receiverId);
-                            }else {
+                            } else {
                                 sendAttendanceFormRequest.setReceivedId(senderId);
                             }
                         }
                         saveAttendanceMessage(sendAttendanceFormRequest, send_user, department, request.get());
-                        String time=Until.generateRealTime();
+                        String time = Until.generateRealTime();
                         ticketRepository.updateTicketTime(time, request.get().getTicketRequest().getTicketId());
                         requestTicketRepository.updateTicketRequestTime(time, sendAttendanceFormRequest.getRequestId());
                         return true;
@@ -207,15 +207,43 @@ public class RequestAttendanceFromService {
         Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
                 .orElseThrow(() -> new BadRequest("Not_found_ticket"));
 
-            ticket.setUpdateDate(Until.generateRealTime());
-            ticket.setStatus(true);
-            requestTicket.setUpdateDate(Until.generateRealTime());
-            requestTicket.setStatus(RequestStatus.CLOSED);
-            requestMessage.setUpdateDate(Until.generateRealTime());
+        ticket.setUpdateDate(Until.generateRealTime());
+        ticket.setStatus(true);
+        requestTicket.setUpdateDate(Until.generateRealTime());
+        requestTicket.setStatus(RequestStatus.CLOSED);
+        requestMessage.setUpdateDate(Until.generateRealTime());
 
         try {
             attendanceRequestForm.setStatus(true);
             attendanceRequestFormRepository.save(attendanceRequestForm);
+            requestMessageRepository.saveAndFlush(requestMessage);
+            requestTicketRepository.saveAndFlush(requestTicket);
+            ticketRepository.save(ticket);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("Fail");
+        }
+    }
+
+    @Transactional
+    public boolean rejectAttendanceRequest(String attendanceRequestFormId) {
+        AttendanceRequestForm roomBookingRequestForm = attendanceRequestFormRepository.findById(attendanceRequestFormId)
+                .orElseThrow(() -> new BadRequest("Not_found_form"));
+
+        RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+
+        RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+        Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
+                .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+        ticket.setUpdateDate(Until.generateRealTime());
+        ticket.setStatus(true);
+        requestTicket.setUpdateDate(Until.generateRealTime());
+        requestTicket.setStatus(RequestStatus.CLOSED);
+        requestMessage.setUpdateDate(Until.generateRealTime());
+        try {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);
             ticketRepository.save(ticket);
