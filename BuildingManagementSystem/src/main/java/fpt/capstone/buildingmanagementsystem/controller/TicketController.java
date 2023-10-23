@@ -1,13 +1,12 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
+import fpt.capstone.buildingmanagementsystem.model.request.ChangeReceiveIdRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponseV2;
 import fpt.capstone.buildingmanagementsystem.service.TicketManageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -46,5 +45,9 @@ public class TicketController {
     @GetMapping("/getTicketDepartment")
     public List<TicketRequestResponseV2> getAllTicketAndRequestByDepartmentManager(@RequestParam("department") String departmentName) {
         return ticketManageService.getAllTicketByDepartmentManager(departmentName);
+    }
+    @PostMapping("/changeReceiveId")
+    public boolean changeReceiveIdRequest(@RequestBody ChangeReceiveIdRequest changeReceiveIdRequest) {
+        return ticketManageService.changeReceiveId(changeReceiveIdRequest);
     }
 }

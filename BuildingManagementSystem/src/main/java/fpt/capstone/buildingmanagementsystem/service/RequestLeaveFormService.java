@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
@@ -133,9 +135,20 @@ public class RequestLeaveFormService {
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendLeaveFormRequest.getDepartmentId());
                     Optional<RequestTicket> requestTicket = requestTicketRepository.findByRequestId(sendLeaveFormRequest.getRequestId());
                     if (send_user.isPresent() && department.isPresent() && requestTicket.isPresent()) {
+                        List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(requestTicket.get());
+                        String sender_id = requestMessageOptional.get(0).getSender().getUserId();
+                        if(requestMessageOptional.get(0).getReceiver()!=null) {
+                            String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
+                            if (Objects.equals(sendLeaveFormRequest.getUserId(), sender_id)) {
+                                sendLeaveFormRequest.setReceivedId(receiverId);
+                            }else {
+                                sendLeaveFormRequest.setReceivedId(sender_id);
+                            }
+                        }
+                        String time=Until.generateRealTime();
                         saveLeaveMessage(sendLeaveFormRequest, send_user, department, requestTicket.get());
-                        ticketRepository.updateTicketTime(Until.generateRealTime(), requestTicket.get().getTicketRequest().getTicketId());
-                        requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(), sendLeaveFormRequest.getRequestId());
+                        ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
+                        requestTicketRepository.updateTicketRequestTime(time, sendLeaveFormRequest.getRequestId());
                         return true;
                     } else {
                         throw new NotFound("not_found");

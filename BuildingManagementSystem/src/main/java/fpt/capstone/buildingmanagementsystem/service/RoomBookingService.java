@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
@@ -172,9 +173,20 @@ public class RoomBookingService {
                             .orElseThrow(() -> new BadRequest("not_found_sender_department"));
                     Optional<RequestTicket> requestTicket = requestTicketRepository.findByRequestId(sendRoomBookingRequest.getRequestId());
                     if (requestTicket.isPresent()) {
+                        List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(requestTicket.get());
+                        String sender_id = requestMessageOptional.get(0).getSender().getUserId();
+                        if(requestMessageOptional.get(0).getReceiver()!=null) {
+                        String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
+                            if (Objects.equals(sendRoomBookingRequest.getUserId(), sender_id)) {
+                                sendRoomBookingRequest.setReceiverId(receiverId);
+                            }else {
+                                sendRoomBookingRequest.setReceiverId(sender_id);
+                            }
+                        }
+                        String time=Until.generateRealTime();
                         saveRoomBookingMessage(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicket.get());
-                        ticketRepository.updateTicketTime(Until.generateRealTime(), requestTicket.get().getTicketRequest().getTicketId());
-                        requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(), sendRoomBookingRequest.getRequestId());
+                        ticketRepository.updateTicketTime(time,requestTicket.get().getTicketRequest().getTicketId());
+                        requestTicketRepository.updateTicketRequestTime(time,sendRoomBookingRequest.getRequestId());
                         return true;
                     } else {
                         throw new BadRequest("not_found_request");
