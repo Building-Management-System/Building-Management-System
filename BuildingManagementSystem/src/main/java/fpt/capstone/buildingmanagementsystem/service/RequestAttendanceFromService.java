@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.ATTENDANCE_REQUEST;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
@@ -142,6 +143,14 @@ public class RequestAttendanceFromService {
                             } else {
                                 sendAttendanceFormRequest.setReceivedId(senderId);
                             }
+                        }
+                        if (request.isPresent()) {
+                            RequestStatus status = request.get().getStatus();
+                            if(!status.equals(ANSWERED)){
+                                request.get().setStatus(ANSWERED);
+                                requestTicketRepository.save(request.get());                            }
+                        }else{
+                            throw new BadRequest("not_found_request");
                         }
                         saveAttendanceMessage(sendAttendanceFormRequest, send_user, department, request.get());
                         String time = Until.generateRealTime();

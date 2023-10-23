@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.LEAVE_REQUEST;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
@@ -144,6 +145,15 @@ public class RequestLeaveFormService {
                             }else {
                                 sendLeaveFormRequest.setReceivedId(sender_id);
                             }
+                        }
+                        if (requestTicket.isPresent()) {
+                            RequestStatus status = requestTicket.get().getStatus();
+                            if(!status.equals(ANSWERED)){
+                                requestTicket.get().setStatus(ANSWERED);
+                                requestTicketRepository.save(requestTicket.get());
+                            }
+                        }else{
+                            throw new BadRequest("not_found_request");
                         }
                         String time=Until.generateRealTime();
                         saveLeaveMessage(sendLeaveFormRequest, send_user, department, requestTicket.get());

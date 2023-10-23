@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateTime;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartTimeAndEndTime;
@@ -182,6 +183,14 @@ public class RoomBookingService {
                             }else {
                                 sendRoomBookingRequest.setReceiverId(sender_id);
                             }
+                        }
+                        if (requestTicket.isPresent()) {
+                            RequestStatus status = requestTicket.get().getStatus();
+                            if(!status.equals(ANSWERED)){
+                                requestTicket.get().setStatus(ANSWERED);
+                                requestTicketRepository.save(requestTicket.get());                            }
+                        }else{
+                            throw new BadRequest("not_found_request");
                         }
                         String time=Until.generateRealTime();
                         saveRoomBookingMessage(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicket.get());
