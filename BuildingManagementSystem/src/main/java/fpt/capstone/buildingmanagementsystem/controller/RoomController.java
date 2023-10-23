@@ -45,7 +45,7 @@ public class RoomController {
         return roomBookingService.acceptBooking(roomBookingFormRoomId.getRoomBookingFormRoomId());
     }
 
-    @PostMapping("acceptBookRoom")
+    @PostMapping("rejectBookRoom")
     public boolean rejectBookRoom(@RequestBody RoomBookingIdRequest roomBookingFormRoomId) {
         return roomBookingService.rejectRoomBooking(roomBookingFormRoomId.getRoomBookingFormRoomId());
     }
