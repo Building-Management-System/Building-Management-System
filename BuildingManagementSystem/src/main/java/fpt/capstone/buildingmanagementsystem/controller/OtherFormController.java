@@ -14,8 +14,8 @@ public class OtherFormController {
     @Autowired
     private RequestOtherService requestOtherService;
 
-    @GetMapping("acceptOtherRequest")
+    @GetMapping("closeOtherRequest")
     public boolean acceptOtherRequest(@RequestBody OtherFormRequest otherFormRequest) {
-        return requestOtherService.acceptOtherRequest(otherFormRequest.getOtherRequestId());
+        return requestOtherService.closeOtherRequest(otherFormRequest.getTicketId());
     }
 }

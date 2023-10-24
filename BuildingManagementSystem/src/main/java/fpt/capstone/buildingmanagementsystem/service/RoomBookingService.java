@@ -285,12 +285,6 @@ public class RoomBookingService {
         Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
                 .orElseThrow(() -> new BadRequest("Not_found_ticket"));
 
-        ticket.setUpdateDate(Until.generateRealTime());
-        ticket.setStatus(true);
-        requestTicket.setUpdateDate(Until.generateRealTime());
-        requestTicket.setStatus(RequestStatus.CLOSED);
-        requestMessage.setUpdateDate(Until.generateRealTime());
-
         SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
                 .userId(requestMessage.getReceiver().getUserId())
                 .ticketId(ticket.getTicketId())
@@ -301,8 +295,9 @@ public class RoomBookingService {
                 .receivedId(requestMessage.getSender().getUserId())
                 .build();
 
-        requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
 
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
             roomBookingRequestForm.setStatus(true);
             roomBookingFormRepository.saveAndFlush(roomBookingRequestForm);
@@ -328,11 +323,6 @@ public class RoomBookingService {
 
         Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
                 .orElseThrow(() -> new BadRequest("Not_found_ticket"));
-        ticket.setUpdateDate(Until.generateRealTime());
-        ticket.setStatus(true);
-        requestTicket.setUpdateDate(Until.generateRealTime());
-        requestTicket.setStatus(RequestStatus.CLOSED);
-        requestMessage.setUpdateDate(Until.generateRealTime());
 
         SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
                 .userId(requestMessage.getReceiver().getUserId())
@@ -344,7 +334,9 @@ public class RoomBookingService {
                 .receivedId(requestMessage.getSender().getUserId())
                 .build();
 
-        requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);
@@ -353,5 +345,9 @@ public class RoomBookingService {
         } catch (Exception e) {
             throw new ServerError("Fail");
         }
+    }
+
+    private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
+        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
     }
 }

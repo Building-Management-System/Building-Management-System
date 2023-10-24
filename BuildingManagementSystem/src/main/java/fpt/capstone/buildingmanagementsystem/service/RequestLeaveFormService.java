@@ -143,11 +143,11 @@ public class RequestLeaveFormService {
                     if (send_user.isPresent() && department.isPresent() && requestTicket.isPresent()) {
                         List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(requestTicket.get());
                         String sender_id = requestMessageOptional.get(0).getSender().getUserId();
-                        if(requestMessageOptional.get(0).getReceiver()!=null) {
+                        if (requestMessageOptional.get(0).getReceiver() != null) {
                             String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
                             if (Objects.equals(sendLeaveFormRequest.getUserId(), sender_id)) {
                                 sendLeaveFormRequest.setReceivedId(receiverId);
-                            }else {
+                            } else {
                                 sendLeaveFormRequest.setReceivedId(sender_id);
                             }
                         }
@@ -156,7 +156,7 @@ public class RequestLeaveFormService {
                             requestTicket.get().setStatus(ANSWERED);
                             requestTicketRepository.save(requestTicket.get());
                         }
-                        String time=Until.generateRealTime();
+                        String time = Until.generateRealTime();
                         saveLeaveMessage(sendLeaveFormRequest, send_user, department, requestTicket.get());
                         ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
                         requestTicketRepository.updateTicketRequestTime(time, sendLeaveFormRequest.getRequestId());
@@ -230,12 +230,6 @@ public class RequestLeaveFormService {
         Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
                 .orElseThrow(() -> new BadRequest("Not_found_ticket"));
 
-        ticket.setUpdateDate(Until.generateRealTime());
-        ticket.setStatus(true);
-        requestTicket.setUpdateDate(Until.generateRealTime());
-        requestTicket.setStatus(RequestStatus.CLOSED);
-        requestMessage.setUpdateDate(Until.generateRealTime());
-
         SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
                 .userId(requestMessage.getReceiver().getUserId())
                 .ticketId(ticket.getTicketId())
@@ -247,12 +241,15 @@ public class RequestLeaveFormService {
                 .build();
 
         requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
 
         try {
             leaveRequestForm.setStatus(true);
             leaveRequestFormRepository.save(leaveRequestForm);
             requestMessageRepository.saveAndFlush(requestMessage);
-            requestTicketRepository.saveAndFlush(requestTicket);
+            requestTicketRepository.saveAll(requestTickets);
             ticketRepository.saveAndFlush(ticket);
             return true;
         } catch (Exception e) {
@@ -273,11 +270,6 @@ public class RequestLeaveFormService {
 
         Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
                 .orElseThrow(() -> new BadRequest("Not_found_ticket"));
-        ticket.setUpdateDate(Until.generateRealTime());
-        ticket.setStatus(true);
-        requestTicket.setUpdateDate(Until.generateRealTime());
-        requestTicket.setStatus(RequestStatus.CLOSED);
-        requestMessage.setUpdateDate(Until.generateRealTime());
 
         SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
                 .userId(requestMessage.getReceiver().getUserId())
@@ -291,13 +283,20 @@ public class RequestLeaveFormService {
 
         requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
 
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
             requestMessageRepository.saveAndFlush(requestMessage);
-            requestTicketRepository.saveAndFlush(requestTicket);
+            requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
         }
+    }
+
+    private void executeRequestDecision(List<RequestTicket> requestTickets,Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
+        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
     }
 }
