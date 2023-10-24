@@ -22,6 +22,6 @@ public class LeaveFormController {
 
     @PostMapping("rejectLeaveRequest")
     public boolean rejectLeaveRequest(@RequestBody LeaveMessageRequest leaveMessageRequest) {
-        return leaveFormService.rejectLeaveRequest(leaveMessageRequest.getLeaveRequestId());
+        return leaveFormService.rejectLeaveRequest(leaveMessageRequest);
     }
 }

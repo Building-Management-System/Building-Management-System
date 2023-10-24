@@ -11,7 +11,9 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.AttendanceRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.AttendanceMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendAttendanceFormRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.repository.AttendanceRequestFormRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
@@ -54,6 +56,9 @@ public class RequestAttendanceFromService {
 
     @Autowired
     TicketRepository ticketRepository;
+
+    @Autowired
+    RequestOtherService requestOtherService;
 
     public boolean getAttendanceUser(SendAttendanceFormRequest sendAttendanceFormRequest) {
         try {
@@ -213,6 +218,17 @@ public class RequestAttendanceFromService {
         requestTicket.setStatus(RequestStatus.CLOSED);
         requestMessage.setUpdateDate(Until.generateRealTime());
 
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(requestMessage.getReceiver().getUserId())
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Approve attendance request")
+                .content("Approve attendance request")
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
+
+        requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
         try {
             attendanceRequestForm.setStatus(true);
             attendanceRequestFormRepository.save(attendanceRequestForm);
@@ -226,8 +242,8 @@ public class RequestAttendanceFromService {
     }
 
     @Transactional
-    public boolean rejectAttendanceRequest(String attendanceRequestFormId) {
-        AttendanceRequestForm roomBookingRequestForm = attendanceRequestFormRepository.findById(attendanceRequestFormId)
+    public boolean rejectAttendanceRequest(AttendanceMessageRequest attendanceMessageRequest) {
+        AttendanceRequestForm roomBookingRequestForm = attendanceRequestFormRepository.findById(attendanceMessageRequest.getAttendanceRequestId())
                 .orElseThrow(() -> new BadRequest("Not_found_form"));
 
         RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
@@ -243,6 +259,18 @@ public class RequestAttendanceFromService {
         requestTicket.setUpdateDate(Until.generateRealTime());
         requestTicket.setStatus(RequestStatus.CLOSED);
         requestMessage.setUpdateDate(Until.generateRealTime());
+
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(requestMessage.getReceiver().getUserId())
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Reject Attendance request")
+                .content(attendanceMessageRequest.getContent())
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
+
+        requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
         try {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);

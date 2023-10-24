@@ -11,7 +11,9 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.LeaveRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.LeaveMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendLeaveFormRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.LeaveRequestFormRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
@@ -49,6 +51,9 @@ public class RequestLeaveFormService {
     DepartmentRepository departmentRepository;
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    RequestOtherService requestOtherService;
 
     public boolean getLeaveFormUser(SendLeaveFormRequest sendLeaveFormRequest) {
         try {
@@ -225,6 +230,18 @@ public class RequestLeaveFormService {
         requestTicket.setStatus(RequestStatus.CLOSED);
         requestMessage.setUpdateDate(Until.generateRealTime());
 
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(requestMessage.getReceiver().getUserId())
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Approve Leave Request")
+                .content("Approve Leave Request")
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
+
+        requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
+
         try {
             leaveRequestForm.setStatus(true);
             leaveRequestFormRepository.save(leaveRequestForm);
@@ -238,8 +255,8 @@ public class RequestLeaveFormService {
     }
 
     @Transactional
-    public boolean rejectLeaveRequest(String leaveRequestId) {
-        LeaveRequestForm roomBookingRequestForm = leaveRequestFormRepository.findById(leaveRequestId)
+    public boolean rejectLeaveRequest(LeaveMessageRequest leaveMessageRequest) {
+        LeaveRequestForm roomBookingRequestForm = leaveRequestFormRepository.findById(leaveMessageRequest.getLeaveRequestId())
                 .orElseThrow(() -> new BadRequest("Not_found_form"));
 
         RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
@@ -255,6 +272,19 @@ public class RequestLeaveFormService {
         requestTicket.setUpdateDate(Until.generateRealTime());
         requestTicket.setStatus(RequestStatus.CLOSED);
         requestMessage.setUpdateDate(Until.generateRealTime());
+
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(requestMessage.getReceiver().getUserId())
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Reject Leave Request")
+                .content(leaveMessageRequest.getContent())
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
+
+        requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
+
         try {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);

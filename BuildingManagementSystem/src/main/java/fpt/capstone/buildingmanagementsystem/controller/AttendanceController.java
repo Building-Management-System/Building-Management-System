@@ -41,6 +41,6 @@ public class AttendanceController {
 
     @PostMapping("/rejectAttendanceRequest")
     public boolean rejectAttendanceRequest(@RequestBody AttendanceMessageRequest attendanceMessageRequest) {
-        return attendanceFromService.rejectAttendanceRequest(attendanceMessageRequest.getAttendanceRequestId());
+        return attendanceFromService.rejectAttendanceRequest(attendanceMessageRequest);
     }
 }
