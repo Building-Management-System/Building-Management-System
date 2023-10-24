@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.ATTENDANCE_REQUEST;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
@@ -147,6 +148,11 @@ public class RequestAttendanceFromService {
                             } else {
                                 sendAttendanceFormRequest.setReceivedId(senderId);
                             }
+                        }
+                        RequestStatus status = request.get().getStatus();
+                        if (!status.equals(ANSWERED) && !Objects.equals(senderId, sendAttendanceFormRequest.getUserId())) {
+                            request.get().setStatus(ANSWERED);
+                            requestTicketRepository.save(request.get());
                         }
                         saveAttendanceMessage(sendAttendanceFormRequest, send_user, department, request.get());
                         String time = Until.generateRealTime();

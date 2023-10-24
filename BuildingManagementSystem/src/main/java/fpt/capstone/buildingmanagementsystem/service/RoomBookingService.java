@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateTime;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartTimeAndEndTime;
@@ -180,18 +181,23 @@ public class RoomBookingService {
                     if (requestTicket.isPresent()) {
                         List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(requestTicket.get());
                         String sender_id = requestMessageOptional.get(0).getSender().getUserId();
-                        if(requestMessageOptional.get(0).getReceiver()!=null) {
-                        String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
+                        if (requestMessageOptional.get(0).getReceiver() != null) {
+                            String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
                             if (Objects.equals(sendRoomBookingRequest.getUserId(), sender_id)) {
                                 sendRoomBookingRequest.setReceiverId(receiverId);
-                            }else {
+                            } else {
                                 sendRoomBookingRequest.setReceiverId(sender_id);
                             }
                         }
-                        String time=Until.generateRealTime();
+                        RequestStatus status = requestTicket.get().getStatus();
+                        if (!status.equals(ANSWERED) && !Objects.equals(sender_id, sendRoomBookingRequest.getUserId())) {
+                            requestTicket.get().setStatus(ANSWERED);
+                            requestTicketRepository.save(requestTicket.get());
+                        }
+                        String time = Until.generateRealTime();
                         saveRoomBookingMessage(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicket.get());
-                        ticketRepository.updateTicketTime(time,requestTicket.get().getTicketRequest().getTicketId());
-                        requestTicketRepository.updateTicketRequestTime(time,sendRoomBookingRequest.getRequestId());
+                        ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
+                        requestTicketRepository.updateTicketRequestTime(time, sendRoomBookingRequest.getRequestId());
                         return true;
                     } else {
                         throw new BadRequest("not_found_request");

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.OTHER_REQUEST;
 
@@ -119,6 +120,11 @@ public class RequestOtherService {
                         }else {
                             sendOtherFormRequest.setReceivedId(senderId);
                         }
+                    }
+                    RequestStatus status = requestTicket.get().getStatus();
+                    if (!status.equals(ANSWERED) && !Objects.equals(senderId, sendOtherFormRequest.getUserId())) {
+                        requestTicket.get().setStatus(ANSWERED);
+                        requestTicketRepository.save(requestTicket.get());
                     }
                     String time=Until.generateRealTime();
                     saveOtherMessage(sendOtherFormRequest, send_user, department, requestTicket.get());
