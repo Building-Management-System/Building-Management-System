@@ -57,7 +57,7 @@ class AutomaticNotificationServiceTest {
 
         automaticNotificationService.sendChangeNotification(new AcceptOrRejectChangeUserInfo("hrId", "userId"), "status");
     }
-    //1
+    //pass
 
     @Test
     void testSendApprovalEvaluateRequest() {
