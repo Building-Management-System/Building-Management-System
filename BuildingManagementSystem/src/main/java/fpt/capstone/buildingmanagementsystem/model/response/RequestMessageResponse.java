@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.model.response;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,8 @@ public class RequestMessageResponse {
     private String senderId;
 
     private String title;
+
+    private RequestStatus requestTicketStatus;
 
     private String senderFirstName;
 

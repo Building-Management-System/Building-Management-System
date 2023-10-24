@@ -69,6 +69,7 @@ public class RequestMessageService {
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
             messageResponse.setTitle(requestTicket.getTitle());
+            messageResponse.setRequestTicketStatus(requestTicket.getStatus());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
             messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
             messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
@@ -140,6 +141,7 @@ public class RequestMessageService {
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
             messageResponse.setTitle(requestTicket.getTitle());
+            messageResponse.setRequestTicketStatus(requestTicket.getStatus());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
             messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
             messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
@@ -229,6 +231,7 @@ public class RequestMessageService {
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
             messageResponse.setTitle(requestTicket.getTitle());
+            messageResponse.setRequestTicketStatus(requestTicket.getStatus());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
             messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
             messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
@@ -303,6 +306,7 @@ public class RequestMessageService {
             messageResponse.setRequestMessageId(requestMessage.getRequestMessageId());
             messageResponse.setCreateDate(requestMessage.getCreateDate());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
+            messageResponse.setRequestTicketStatus(requestTicket.getStatus());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
             messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
