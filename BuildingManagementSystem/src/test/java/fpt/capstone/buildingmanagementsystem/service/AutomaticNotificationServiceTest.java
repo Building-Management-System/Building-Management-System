@@ -67,7 +67,7 @@ class AutomaticNotificationServiceTest {
         Assertions.assertEquals(new NotificationAcceptResponse("notificationId", "userId", "receiverId", "senderName", true, "title", new GregorianCalendar(2023, Calendar.DECEMBER, 19, 23, 44).getTime(), new Department("departmentId", "departmentName")), result);
     }
 
-    //pass
+    //bug
 }
 
 //Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme
