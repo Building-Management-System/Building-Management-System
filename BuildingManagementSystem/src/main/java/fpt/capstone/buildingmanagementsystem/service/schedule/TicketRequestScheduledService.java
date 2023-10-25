@@ -35,8 +35,8 @@ public class TicketRequestScheduledService {
     private static final int day = 1000 * 60 * 60 * 24;
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
 
-    //(cron = "* /* * * **")
-    @Scheduled(fixedDelay = 10000)
+    //(cron = "* /* * * *")
+    @Scheduled(cron = "* /* * * * *")
     public void closeTicketUpTime() {
         closeTicketWithAnsweredRequests();
     }

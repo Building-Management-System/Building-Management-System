@@ -136,7 +136,7 @@ public class TicketManageService {
         executeListTicketResponse(responseV2s, ticketDtos);
         return responseV2s.stream()
                 .sorted((Comparator.comparing(TicketRequestResponseV2::getUpdateDate).reversed()))
-                .sorted((Comparator.comparing(TicketRequestResponseV2::isStatus).reversed()))
+                .sorted((Comparator.comparing(TicketRequestResponseV2::isStatus)))
                 .collect(Collectors.toList());
 
     }
