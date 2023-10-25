@@ -135,8 +135,12 @@ public class UserManageService {
     public boolean RejectChangeUserInfo(GetUserInfoRequest getUserInfoRequest) {
         try {
            if(getUserInfoRequest.getUserId()!=null){
-                userPendingRepository.updateStatus("3", getUserInfoRequest.getUserId());
-                return true;
+               if (userPendingRepository.existsById(getUserInfoRequest.getUserId())) {
+                   userPendingRepository.updateStatus("3", getUserInfoRequest.getUserId());
+                   return true;
+               } else {
+               throw new NotFound("user_not_found");
+           }
             } else {
                 throw new BadRequest("request_fail");
             }
