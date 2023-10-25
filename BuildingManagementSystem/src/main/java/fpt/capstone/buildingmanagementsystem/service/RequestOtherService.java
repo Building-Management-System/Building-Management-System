@@ -59,7 +59,7 @@ public class RequestOtherService {
                     String id_ticket = "OR_" + Until.generateId();
                     String id_request_ticket = "OR_" + Until.generateId();
                     //
-                    Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(OTHER_REQUEST).status(false).createDate(Until.generateRealTime())
+                    Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(OTHER_REQUEST).status(true).createDate(Until.generateRealTime())
                             .updateDate(Until.generateRealTime()).build();
                     ticketRepository.save(ticket);
                     //

@@ -75,7 +75,7 @@ public class RequestAttendanceFromService {
                     if (send_user.isPresent() && department.isPresent()) {
                         String id_ticket = "AT_" + Until.generateId();
                         String id_request_ticket = "AT_" + Until.generateId();
-                        Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(ATTENDANCE_REQUEST).status(false).createDate(Until.generateRealTime())
+                        Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(ATTENDANCE_REQUEST).status(true).createDate(Until.generateRealTime())
                                 .updateDate(Until.generateRealTime()).build();
                         ticketRepository.save(ticket);
                         saveAttendanceRequest(sendAttendanceFormRequest, send_user, department, id_request_ticket, ticket);
