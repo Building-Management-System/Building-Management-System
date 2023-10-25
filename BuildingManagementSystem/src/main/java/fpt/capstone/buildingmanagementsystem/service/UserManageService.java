@@ -66,7 +66,7 @@ public class UserManageService {
                     changeUserInfoRequest.getDateOfBirth() != null
             ) {
                 String name = "avatar_" + UUID.randomUUID();
-                if (!file.isEmpty()) {
+                if (file!=null) {
                     String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
                     List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
                     name = name + "." + stringList.get(stringList.size()-1);
