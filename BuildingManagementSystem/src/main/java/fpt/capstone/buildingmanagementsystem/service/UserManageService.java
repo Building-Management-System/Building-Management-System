@@ -132,6 +132,18 @@ public class UserManageService {
             throw new ServerError("fail");
         }
     }
+    public boolean RejectChangeUserInfo(GetUserInfoRequest getUserInfoRequest) {
+        try {
+           if(getUserInfoRequest.getUserId()!=null){
+                userPendingRepository.updateStatus("3", getUserInfoRequest.getUserId());
+                return true;
+            } else {
+                throw new BadRequest("request_fail");
+            }
+        } catch (ServerError e) {
+            throw new ServerError("fail");
+        }
+    }
 
     public List<GetAllUserInfoPending> getAllUserNotVerify() {
         UserPendingStatus status = new UserPendingStatus("1", "not_verify");
