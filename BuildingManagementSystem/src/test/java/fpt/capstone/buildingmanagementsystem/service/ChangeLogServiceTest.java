@@ -44,4 +44,5 @@ class ChangeLogServiceTest {
         List<ChangeLogResponse> result = changeLogService.getAllLogsInDay(new ChangeLogRequest("employeeId", 0, null));
         Assertions.assertEquals(List.of(new ChangeLogResponse("changeLogId", null, null, 0d, true, "reason", ChangeLogType.FROM_REQUEST, null, new GregorianCalendar(2023, Calendar.DECEMBER, 19, 23, 50).getTime(), "managerId", "employeeId", "userName", "firstName", "lastName")), result);
     }
+    //1
 }
