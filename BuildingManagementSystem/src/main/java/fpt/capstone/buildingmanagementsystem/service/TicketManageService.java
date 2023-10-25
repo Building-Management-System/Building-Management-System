@@ -11,7 +11,11 @@ import fpt.capstone.buildingmanagementsystem.model.request.ChangeReceiveIdReques
 import fpt.capstone.buildingmanagementsystem.model.response.RequestTicketResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponseV2;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +74,26 @@ public class TicketManageService {
                 .filter(ticketRequestDto -> ticketRequestDto.getSenderId().equals(senderId))
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
 
-        return getTicketRequestResponse(responseV2s, ticketDtos);
+        executeListTicketResponse(responseV2s, ticketDtos);
+        return responseV2s.stream()
+                .sorted((Comparator.comparing(TicketRequestResponseV2::getUpdateDate).reversed()))
+                .collect(Collectors.toList());
+    }
+
+    private void executeListTicketResponse(List<TicketRequestResponseV2> responseV2s, Map<String, List<TicketRequestDto>> ticketDtos) {
+        ticketDtos.forEach((s, tickets) -> {
+            List<RequestTicketResponse> requestTickets = new ArrayList<>();
+            TicketRequestResponseV2 ticketResponse = new TicketRequestResponseV2();
+            BeanUtils.copyProperties(tickets.get(0), ticketResponse);
+            tickets.forEach(ticketDto -> {
+                RequestTicketResponse requestTicket = new RequestTicketResponse();
+                BeanUtils.copyProperties(ticketDto, requestTicket);
+                requestTicket.setRequestStatus(ticketDto.getRequestStatus());
+                requestTickets.add(requestTicket);
+            });
+            ticketResponse.setRequestTickets(requestTickets);
+            responseV2s.add(ticketResponse);
+        });
     }
 
     public List<TicketRequestResponseV2> getAllTicketsByHr() {
@@ -110,46 +133,35 @@ public class TicketManageService {
 
 
     private List<TicketRequestResponseV2> getTicketRequestResponse(List<TicketRequestResponseV2> responseV2s, Map<String, List<TicketRequestDto>> ticketDtos) {
-        ticketDtos.forEach((s, tickets) -> {
-            List<RequestTicketResponse> requestTickets = new ArrayList<>();
-            TicketRequestResponseV2 ticketResponse = new TicketRequestResponseV2();
-            BeanUtils.copyProperties(tickets.get(0), ticketResponse);
-            tickets.forEach(ticketDto -> {
-                RequestTicketResponse requestTicket = new RequestTicketResponse();
-                BeanUtils.copyProperties(ticketDto, requestTicket);
-                requestTicket.setRequestStatus(ticketDto.getRequestStatus());
-                requestTickets.add(requestTicket);
-            });
-            ticketResponse.setRequestTickets(requestTickets);
-            responseV2s.add(ticketResponse);
-        });
+        executeListTicketResponse(responseV2s, ticketDtos);
         return responseV2s.stream()
                 .sorted((Comparator.comparing(TicketRequestResponseV2::getUpdateDate).reversed()))
+                .sorted((Comparator.comparing(TicketRequestResponseV2::isStatus).reversed()))
                 .collect(Collectors.toList());
 
     }
+
     public boolean changeReceiveId(ChangeReceiveIdRequest changeReceiveIdRequest) {
-        if(changeReceiveIdRequest.getReceiverId()!=null &&
-        changeReceiveIdRequest.getRequestId()!=null){
-            if(!userRepository.findByUserId(changeReceiveIdRequest.getReceiverId()).isPresent()){
+        if (changeReceiveIdRequest.getReceiverId() != null &&
+                changeReceiveIdRequest.getRequestId() != null) {
+            if (!userRepository.findByUserId(changeReceiveIdRequest.getReceiverId()).isPresent()) {
                 throw new NotFound("receiver_id_not_found");
             }
-            String time=Until.generateRealTime();
-            requestMessageRepository.updateTicketRequestTime(changeReceiveIdRequest.getReceiverId(),time,changeReceiveIdRequest.getRequestId());
-            RequestTicket requestTicket= requestTicketRepository.findByRequestId(changeReceiveIdRequest.getRequestId()).get();
+            String time = Until.generateRealTime();
+            requestMessageRepository.updateTicketRequestTime(changeReceiveIdRequest.getReceiverId(), time, changeReceiveIdRequest.getRequestId());
+            RequestTicket requestTicket = requestTicketRepository.findByRequestId(changeReceiveIdRequest.getRequestId()).get();
             requestTicket.setStatus(EXECUTING);
             requestTicket.setUpdateDate(time);
             requestTicket.setRequestId(changeReceiveIdRequest.getRequestId());
             requestTicketRepository.save(requestTicket);
-            if(requestTicketRepository.findByRequestId(changeReceiveIdRequest.getRequestId()).isPresent()) {
+            if (requestTicketRepository.findByRequestId(changeReceiveIdRequest.getRequestId()).isPresent()) {
                 String ticketId = requestTicketRepository.findByRequestId(changeReceiveIdRequest.getRequestId()).get().getTicketRequest().getTicketId();
                 ticketRepository2.updateTicketTime(time, ticketId);
                 return true;
-            }
-            else {
+            } else {
                 throw new NotFound("request_ticket_not_found");
             }
-        }else{
+        } else {
             throw new BadRequest("request_fail");
         }
     }
