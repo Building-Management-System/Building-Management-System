@@ -23,7 +23,7 @@ public class UserController {
         return ResponseEntity.ok(userManageService.getInfoUser(getUserInfoRequest));
     }
     @RequestMapping(path = "/changeUserInfo", method = RequestMethod.POST, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public boolean changeUserInfo(@RequestParam("data") String data,@RequestParam("image") MultipartFile image) throws Exception {
+    public boolean changeUserInfo(@RequestParam("data") String data,@RequestParam(value = "image",required = false) MultipartFile image) throws Exception {
         return userManageService.ChangeUserInfo(data,image);
     }
     @RequestMapping(value = "/acceptChangeUserInfo", method = RequestMethod.POST)
