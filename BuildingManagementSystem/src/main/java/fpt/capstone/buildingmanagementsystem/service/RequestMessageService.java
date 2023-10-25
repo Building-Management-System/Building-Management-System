@@ -54,7 +54,8 @@ public class RequestMessageService {
     @Autowired
     private LeaveRequestFormRepository leaveRequestFormRepository;
 
-    public List<Map<RequestMessageResponse, Object>> getAllAttendanceMessageByRequestId(String requestId) {
+    //    List<Map<RequestMessageResponse, Object>>
+    public List<Object> getAllAttendanceMessageByRequestId(String requestId) {
         RequestTicket requestTicket = requestTicketRepository.findById(requestId)
                 .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
 
@@ -67,6 +68,9 @@ public class RequestMessageService {
             messageResponse.setCreateDate(requestMessage.getCreateDate());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
+            messageResponse.setImageSender(requestMessage.getSender().getImage());
+            messageResponse.setTitle(requestTicket.getTitle());
+            messageResponse.setRequestTicketStatus(requestTicket.getStatus());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
             messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
             messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
@@ -75,6 +79,7 @@ public class RequestMessageService {
                 messageResponse.setReceiverId(requestMessage.getReceiver().getUserId());
                 messageResponse.setReceiverFirstName(requestMessage.getReceiver().getFirstName());
                 messageResponse.setReceiverLastName(requestMessage.getReceiver().getLastName());
+                messageResponse.setImageReceiver(requestMessage.getReceiver().getImage());
             }
             messageResponses.add(messageResponse);
         });
@@ -120,10 +125,10 @@ public class RequestMessageService {
                         (left, right) -> right,
                         LinkedHashMap::new
                 ));
-        return List.of(responseObjectMap);
+        return new ArrayList<>(responseObjectMap.values());
     }
 
-    public List<Map<RequestMessageResponse, Object>> getAllRoomBookingMessageByRequestId(String requestId) {
+    public List<Object> getAllRoomBookingMessageByRequestId(String requestId) {
         RequestTicket requestTicket = requestTicketRepository.findById(requestId)
                 .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
 
@@ -136,7 +141,10 @@ public class RequestMessageService {
             messageResponse.setRequestMessageId(requestMessage.getRequestMessageId());
             messageResponse.setCreateDate(requestMessage.getCreateDate());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
+            messageResponse.setTitle(requestTicket.getTitle());
+            messageResponse.setRequestTicketStatus(requestTicket.getStatus());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
+            messageResponse.setImageSender(requestMessage.getSender().getImage());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
             messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
             messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
@@ -145,6 +153,7 @@ public class RequestMessageService {
                 messageResponse.setReceiverId(requestMessage.getReceiver().getUserId());
                 messageResponse.setReceiverFirstName(requestMessage.getReceiver().getFirstName());
                 messageResponse.setReceiverLastName(requestMessage.getReceiver().getLastName());
+                messageResponse.setImageReceiver(requestMessage.getReceiver().getImage());
             }
             messageResponses.add(messageResponse);
         });
@@ -208,11 +217,11 @@ public class RequestMessageService {
                         (left, right) -> right,
                         LinkedHashMap::new
                 ));
-        return List.of(responseObjectMap);
+        return new ArrayList<>(responseObjectMap.values());
 
     }
 
-    public List<Map<RequestMessageResponse, Object>> getAllLeaveMessageByRequestId(String requestId) {
+    public List<Object> getAllLeaveMessageByRequestId(String requestId) {
         RequestTicket requestTicket = requestTicketRepository.findById(requestId)
                 .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
 
@@ -225,6 +234,9 @@ public class RequestMessageService {
             messageResponse.setCreateDate(requestMessage.getCreateDate());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
+            messageResponse.setImageSender(requestMessage.getSender().getImage());
+            messageResponse.setTitle(requestTicket.getTitle());
+            messageResponse.setRequestTicketStatus(requestTicket.getStatus());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
             messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
             messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
@@ -233,6 +245,7 @@ public class RequestMessageService {
                 messageResponse.setReceiverId(requestMessage.getReceiver().getUserId());
                 messageResponse.setReceiverFirstName(requestMessage.getReceiver().getFirstName());
                 messageResponse.setReceiverLastName(requestMessage.getReceiver().getLastName());
+                messageResponse.setImageReceiver(requestMessage.getReceiver().getImage());
             }
             messageResponses.add(messageResponse);
         });
@@ -283,10 +296,10 @@ public class RequestMessageService {
                         (left, right) -> right,
                         LinkedHashMap::new
                 ));
-        return List.of(responseObjectMap);
+        return new ArrayList<>(responseObjectMap.values());
     }
 
-    public List<Map<RequestMessageResponse, Object>> getAllOtherMessageByRequestId(String requestId) {
+    public List<Object> getAllOtherMessageByRequestId(String requestId) {
         RequestTicket requestTicket = requestTicketRepository.findById(requestId)
                 .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
 
@@ -299,7 +312,9 @@ public class RequestMessageService {
             messageResponse.setRequestMessageId(requestMessage.getRequestMessageId());
             messageResponse.setCreateDate(requestMessage.getCreateDate());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
+            messageResponse.setRequestTicketStatus(requestTicket.getStatus());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
+            messageResponse.setImageSender(requestMessage.getSender().getImage());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
             messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
             messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
@@ -308,6 +323,7 @@ public class RequestMessageService {
                 messageResponse.setReceiverId(requestMessage.getReceiver().getUserId());
                 messageResponse.setReceiverFirstName(requestMessage.getReceiver().getFirstName());
                 messageResponse.setReceiverLastName(requestMessage.getReceiver().getLastName());
+                messageResponse.setImageReceiver(requestMessage.getReceiver().getImage());
             }
             messageResponses.add(messageResponse);
         });
@@ -334,7 +350,7 @@ public class RequestMessageService {
                         (left, right) -> right,
                         LinkedHashMap::new
                 ));
-        return List.of(responseObjectMap);
+        return new ArrayList<>(responseObjectMap.values());
     }
 
 }

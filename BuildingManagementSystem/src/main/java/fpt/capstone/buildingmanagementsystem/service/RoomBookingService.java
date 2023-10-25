@@ -13,6 +13,8 @@ import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.RoomBookingRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
+import fpt.capstone.buildingmanagementsystem.model.request.RoomBookingRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendRoomBookingRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.RoomBookingResponse;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
@@ -32,8 +34,10 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateTime;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartTimeAndEndTime;
@@ -64,10 +68,13 @@ public class RoomBookingService {
     @Autowired
     RoomBookingFormRoomRepository roomBookingRoomRepository;
 
+    @Autowired
+    RequestOtherService requestOtherService;
+
 
 //    private static final TopicEnum ROOM_BOOKING = TopicEnum.ROOM_REQUEST;
 
-        @Transactional
+    @Transactional
     public boolean getRoomBookingForm(SendRoomBookingRequest sendRoomBookingRequest) {
         try {
             if (sendRoomBookingRequest.getUserId() != null
@@ -85,7 +92,6 @@ public class RoomBookingService {
                             .orElseThrow(() -> new BadRequest("not_found_receiver_department"));
                     Department senderDepartment = departmentRepository.findByDepartmentId(sendRoomBookingRequest.getDepartmentSenderId())
                             .orElseThrow(() -> new BadRequest("not_found_sender_department"));
-
 
                     String ticketId = "RB_" + Until.generateId();
                     String requestTicketId = "RB_" + Until.generateId();
@@ -153,6 +159,7 @@ public class RoomBookingService {
             throw new RuntimeException(e);
         }
     }
+
     public boolean getRoomBookingFormExistRequest(SendRoomBookingRequest sendRoomBookingRequest) {
         try {
             if (sendRoomBookingRequest.getUserId() != null
@@ -172,9 +179,25 @@ public class RoomBookingService {
                             .orElseThrow(() -> new BadRequest("not_found_sender_department"));
                     Optional<RequestTicket> requestTicket = requestTicketRepository.findByRequestId(sendRoomBookingRequest.getRequestId());
                     if (requestTicket.isPresent()) {
+                        List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(requestTicket.get());
+                        String sender_id = requestMessageOptional.get(0).getSender().getUserId();
+                        if (requestMessageOptional.get(0).getReceiver() != null) {
+                            String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
+                            if (Objects.equals(sendRoomBookingRequest.getUserId(), sender_id)) {
+                                sendRoomBookingRequest.setReceiverId(receiverId);
+                            } else {
+                                sendRoomBookingRequest.setReceiverId(sender_id);
+                            }
+                        }
+                        RequestStatus status = requestTicket.get().getStatus();
+                        if (!status.equals(ANSWERED) && !Objects.equals(sender_id, sendRoomBookingRequest.getUserId())) {
+                            requestTicket.get().setStatus(ANSWERED);
+                            requestTicketRepository.save(requestTicket.get());
+                        }
+                        String time = Until.generateRealTime();
                         saveRoomBookingMessage(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicket.get());
-                        ticketRepository.updateTicketTime(Until.generateRealTime(),requestTicket.get().getTicketRequest().getTicketId());
-                        requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(),sendRoomBookingRequest.getRequestId());
+                        ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
+                        requestTicketRepository.updateTicketRequestTime(time, sendRoomBookingRequest.getRequestId());
                         return true;
                     } else {
                         throw new BadRequest("not_found_request");
@@ -250,25 +273,32 @@ public class RoomBookingService {
 
     @Transactional
     public boolean acceptBooking(String roomBookingFormRoomId) {
+        RoomBookingRequestForm roomBookingRequestForm = roomBookingFormRepository.findById(roomBookingFormRoomId)
+                .orElseThrow(() -> new BadRequest("Not_found_form"));
+
+        RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+
+        RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+        Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
+                .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(requestMessage.getReceiver().getUserId())
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Approve Booking Room")
+                .content("Approve Booking Room")
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
+
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
-            RoomBookingRequestForm roomBookingRequestForm = roomBookingFormRepository.findById(roomBookingFormRoomId)
-                    .orElseThrow(() -> new BadRequest("Not_found_form"));
-
-            RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
-                    .orElseThrow(() -> new BadRequest("Not_found_request_message"));
-
-            RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
-                    .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
-
-            Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
-                    .orElseThrow(() -> new BadRequest("Not_found_ticket"));
-
-            ticket.setUpdateDate(Until.generateRealTime());
-            ticket.setStatus(true);
-            requestTicket.setUpdateDate(Until.generateRealTime());
-            requestTicket.setStatus(RequestStatus.CLOSED);
-            requestMessage.setUpdateDate(Until.generateRealTime());
-
             roomBookingRequestForm.setStatus(true);
             roomBookingFormRepository.saveAndFlush(roomBookingRequestForm);
             requestMessageRepository.saveAndFlush(requestMessage);
@@ -278,5 +308,46 @@ public class RoomBookingService {
         } catch (Exception e) {
             throw new ServerError("Fail");
         }
+    }
+
+    @Transactional
+    public boolean rejectRoomBooking(RoomBookingRequest roomBookingFormRoom) {
+        RoomBookingRequestForm roomBookingRequestForm = roomBookingFormRepository.findById(roomBookingFormRoom.getRoomBookingFormRoomId())
+                .orElseThrow(() -> new BadRequest("Not_found_form"));
+
+        RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+
+        RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+        Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
+                .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(requestMessage.getReceiver().getUserId())
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Reject Booking Room")
+                .content(roomBookingFormRoom.getContent())
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
+
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
+        try {
+            requestMessageRepository.saveAndFlush(requestMessage);
+            requestTicketRepository.saveAndFlush(requestTicket);
+            ticketRepository.save(ticket);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("Fail");
+        }
+    }
+
+    private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
+        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
     }
 }

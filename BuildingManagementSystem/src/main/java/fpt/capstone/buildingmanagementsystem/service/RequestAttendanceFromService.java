@@ -11,7 +11,10 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.AttendanceRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.AttendanceMessageRequest;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.SendAttendanceFormRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.repository.AttendanceRequestFormRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
@@ -25,8 +28,11 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.ATTENDANCE_REQUEST;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
@@ -52,6 +58,9 @@ public class RequestAttendanceFromService {
 
     @Autowired
     TicketRepository ticketRepository;
+
+    @Autowired
+    RequestOtherService requestOtherService;
 
     public boolean getAttendanceUser(SendAttendanceFormRequest sendAttendanceFormRequest) {
         try {
@@ -131,9 +140,25 @@ public class RequestAttendanceFromService {
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendAttendanceFormRequest.getDepartmentId());
                     Optional<RequestTicket> request = requestTicketRepository.findByRequestId(sendAttendanceFormRequest.getRequestId());
                     if (send_user.isPresent() && department.isPresent() && request.isPresent()) {
+                        List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(request.get());
+                        String senderId = requestMessageOptional.get(0).getSender().getUserId();
+                        if (requestMessageOptional.get(0).getReceiver() != null) {
+                            String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
+                            if (Objects.equals(sendAttendanceFormRequest.getUserId(), senderId)) {
+                                sendAttendanceFormRequest.setReceivedId(receiverId);
+                            } else {
+                                sendAttendanceFormRequest.setReceivedId(senderId);
+                            }
+                        }
+                        RequestStatus status = request.get().getStatus();
+                        if (!status.equals(ANSWERED) && !Objects.equals(senderId, sendAttendanceFormRequest.getUserId())) {
+                            request.get().setStatus(ANSWERED);
+                            requestTicketRepository.save(request.get());
+                        }
                         saveAttendanceMessage(sendAttendanceFormRequest, send_user, department, request.get());
-                        ticketRepository.updateTicketTime(Until.generateRealTime(), request.get().getTicketRequest().getTicketId());
-                        requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(), sendAttendanceFormRequest.getRequestId());
+                        String time = Until.generateRealTime();
+                        ticketRepository.updateTicketTime(time, request.get().getTicketRequest().getTicketId());
+                        requestTicketRepository.updateTicketRequestTime(time, sendAttendanceFormRequest.getRequestId());
                         return true;
                     } else {
                         throw new NotFound("not_found");
@@ -194,21 +219,87 @@ public class RequestAttendanceFromService {
         Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
                 .orElseThrow(() -> new BadRequest("Not_found_ticket"));
 
-            ticket.setUpdateDate(Until.generateRealTime());
-            ticket.setStatus(true);
-            requestTicket.setUpdateDate(Until.generateRealTime());
-            requestTicket.setStatus(RequestStatus.CLOSED);
-            requestMessage.setUpdateDate(Until.generateRealTime());
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(requestMessage.getReceiver().getUserId())
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Approve attendance request")
+                .content("Approve attendance request")
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
 
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
             attendanceRequestForm.setStatus(true);
             attendanceRequestFormRepository.save(attendanceRequestForm);
             requestMessageRepository.saveAndFlush(requestMessage);
-            requestTicketRepository.saveAndFlush(requestTicket);
+            requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
+        }
+    }
+
+
+
+    @Transactional
+    public boolean rejectAttendanceRequest(AttendanceMessageRequest attendanceMessageRequest) {
+        AttendanceRequestForm roomBookingRequestForm = attendanceRequestFormRepository.findById(attendanceMessageRequest.getAttendanceRequestId())
+                .orElseThrow(() -> new BadRequest("Not_found_form"));
+
+        RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+
+        RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+        Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
+                .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(requestMessage.getReceiver().getUserId())
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Reject Attendance request")
+                .content(attendanceMessageRequest.getContent())
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
+
+        try {
+            requestMessageRepository.saveAndFlush(requestMessage);
+            requestTicketRepository.saveAll(requestTickets);
+            ticketRepository.save(ticket);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("Fail");
+        }
+    }
+
+    private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
+        executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
+    }
+
+    static void executeDuplicate(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest, RequestOtherService requestOtherService, RequestTicketRepository requestTicketRepository) {
+        requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
+
+        if (!requestTickets.isEmpty()) {
+            requestTickets.forEach(request -> {
+                request.setUpdateDate(Until.generateRealTime());
+                request.setStatus(RequestStatus.CLOSED);
+                request.setUpdateDate(Until.generateRealTime());
+            });
+            ticket.setUpdateDate(Until.generateRealTime());
+            ticket.setStatus(true);
+        } else {
+            throw new BadRequest("Not_fount_request_in_ticket");
         }
     }
 }

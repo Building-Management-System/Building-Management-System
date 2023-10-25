@@ -1,6 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
-import fpt.capstone.buildingmanagementsystem.model.request.RoomBookingIdRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.RoomBookingRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.RoomBookingResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.RoomResponse;
 import fpt.capstone.buildingmanagementsystem.service.RoomBookingService;
@@ -41,7 +41,12 @@ public class RoomController {
     }
 
     @PostMapping("acceptBookRoom")
-    public boolean acceptBookRoom(@RequestBody RoomBookingIdRequest roomBookingFormRoomId) {
+    public boolean acceptBookRoom(@RequestBody RoomBookingRequest roomBookingFormRoomId) {
         return roomBookingService.acceptBooking(roomBookingFormRoomId.getRoomBookingFormRoomId());
+    }
+
+    @PostMapping("rejectBookRoom")
+    public boolean rejectBookRoom(@RequestBody RoomBookingRequest roomBookingFormRoomId) {
+        return roomBookingService.rejectRoomBooking(roomBookingFormRoomId);
     }
 }

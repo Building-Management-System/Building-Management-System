@@ -5,7 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LeaveMessageRequest {
-    private String leaveRequestId;
-    private String content;
+public class RoomBookingRequest {
+    String roomBookingFormRoomId;
+
+    String content;
 }

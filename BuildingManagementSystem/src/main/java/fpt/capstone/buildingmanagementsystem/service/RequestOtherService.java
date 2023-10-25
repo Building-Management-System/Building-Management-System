@@ -4,16 +4,29 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.OtherRequestMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
-import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.LeaveRequestForm;
+import fpt.capstone.buildingmanagementsystem.model.entity.Department;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
+import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.OtherRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.SendLeaveFormRequest;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.OtherRequestFormRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.OTHER_REQUEST;
 
@@ -33,15 +46,16 @@ public class RequestOtherService {
     DepartmentRepository departmentRepository;
     @Autowired
     UserRepository userRepository;
+
     public boolean getOtherFormUser(SendOtherFormRequest sendOtherFormRequest) {
         try {
-            if (sendOtherFormRequest.getContent() != null&&
-                    sendOtherFormRequest.getDepartmentId() != null&&
+            if (sendOtherFormRequest.getContent() != null &&
+                    sendOtherFormRequest.getDepartmentId() != null &&
                     sendOtherFormRequest.getTitle() != null
             ) {
-                Optional<User> send_user= userRepository.findByUserId(sendOtherFormRequest.getUserId());
-                Optional<Department> department= departmentRepository.findByDepartmentId(sendOtherFormRequest.getDepartmentId());
-                if(send_user.isPresent()&&department.isPresent()) {
+                Optional<User> send_user = userRepository.findByUserId(sendOtherFormRequest.getUserId());
+                Optional<Department> department = departmentRepository.findByDepartmentId(sendOtherFormRequest.getDepartmentId());
+                if (send_user.isPresent() && department.isPresent()) {
                     String id_ticket = "OR_" + Until.generateId();
                     String id_request_ticket = "OR_" + Until.generateId();
                     //
@@ -51,7 +65,7 @@ public class RequestOtherService {
                     //
                     saveOtherRequest(sendOtherFormRequest, send_user, department, id_request_ticket, ticket);
                     return true;
-                }else {
+                } else {
                     throw new NotFound("not_found");
                 }
             } else {
@@ -61,22 +75,23 @@ public class RequestOtherService {
             throw new ServerError("fail");
         }
     }
+
     public boolean getOtherFormUserExistTicket(SendOtherFormRequest sendOtherFormRequest) {
         try {
-            if (sendOtherFormRequest.getContent() != null&&
-                    sendOtherFormRequest.getDepartmentId() != null&&
-                    sendOtherFormRequest.getTitle() != null&&
-                    sendOtherFormRequest.getTicketId()!=null
+            if (sendOtherFormRequest.getContent() != null &&
+                    sendOtherFormRequest.getDepartmentId() != null &&
+                    sendOtherFormRequest.getTitle() != null &&
+                    sendOtherFormRequest.getTicketId() != null
             ) {
-                Optional<User> send_user= userRepository.findByUserId(sendOtherFormRequest.getUserId());
-                Optional<Department> department= departmentRepository.findByDepartmentId(sendOtherFormRequest.getDepartmentId());
+                Optional<User> send_user = userRepository.findByUserId(sendOtherFormRequest.getUserId());
+                Optional<Department> department = departmentRepository.findByDepartmentId(sendOtherFormRequest.getDepartmentId());
                 Optional<Ticket> ticket = ticketRepository.findByTicketId(sendOtherFormRequest.getTicketId());
-                if(send_user.isPresent()&&department.isPresent()&&ticket.isPresent()) {
+                if (send_user.isPresent() && department.isPresent() && ticket.isPresent()) {
                     String id_request_ticket = "OR_" + Until.generateId();
                     saveOtherRequest(sendOtherFormRequest, send_user, department, id_request_ticket, ticket.get());
-                    ticketRepository.updateTicketTime(Until.generateRealTime(),sendOtherFormRequest.getTicketId());
+                    ticketRepository.updateTicketTime(Until.generateRealTime(), sendOtherFormRequest.getTicketId());
                     return true;
-                }else {
+                } else {
                     throw new NotFound("not_found");
                 }
             } else {
@@ -86,21 +101,38 @@ public class RequestOtherService {
             throw new ServerError("fail");
         }
     }
+
     public boolean getOtherFormUserExistRequest(SendOtherFormRequest sendOtherFormRequest) {
         try {
-            if (sendOtherFormRequest.getContent() != null&&
-                    sendOtherFormRequest.getDepartmentId() != null&&
-                    sendOtherFormRequest.getRequestId()!=null
+            if (sendOtherFormRequest.getContent() != null &&
+                    sendOtherFormRequest.getDepartmentId() != null &&
+                    sendOtherFormRequest.getRequestId() != null
             ) {
-                Optional<User> send_user= userRepository.findByUserId(sendOtherFormRequest.getUserId());
-                Optional<Department> department= departmentRepository.findByDepartmentId(sendOtherFormRequest.getDepartmentId());
+                Optional<User> send_user = userRepository.findByUserId(sendOtherFormRequest.getUserId());
+                Optional<Department> department = departmentRepository.findByDepartmentId(sendOtherFormRequest.getDepartmentId());
                 Optional<RequestTicket> requestTicket = requestTicketRepository.findByRequestId(sendOtherFormRequest.getRequestId());
-                if(send_user.isPresent()&&department.isPresent()&&requestTicket.isPresent()) {
+                if (send_user.isPresent() && department.isPresent() && requestTicket.isPresent()) {
+                    List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(requestTicket.get());
+                    String senderId = requestMessageOptional.get(0).getSender().getUserId();
+                    if (requestMessageOptional.get(0).getReceiver() != null) {
+                        String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
+                        if (Objects.equals(sendOtherFormRequest.getUserId(), senderId)) {
+                            sendOtherFormRequest.setReceivedId(receiverId);
+                        } else {
+                            sendOtherFormRequest.setReceivedId(senderId);
+                        }
+                    }
+                    RequestStatus status = requestTicket.get().getStatus();
+                    if (!status.equals(ANSWERED) && !Objects.equals(senderId, sendOtherFormRequest.getUserId())) {
+                        requestTicket.get().setStatus(ANSWERED);
+                        requestTicketRepository.save(requestTicket.get());
+                    }
+                    String time = Until.generateRealTime();
                     saveOtherMessage(sendOtherFormRequest, send_user, department, requestTicket.get());
-                    ticketRepository.updateTicketTime(Until.generateRealTime(),requestTicket.get().getTicketRequest().getTicketId());
-                    requestTicketRepository.updateTicketRequestTime(Until.generateRealTime(),sendOtherFormRequest.getRequestId());
+                    ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
+                    requestTicketRepository.updateTicketRequestTime(time, sendOtherFormRequest.getRequestId());
                     return true;
-                }else {
+                } else {
                     throw new NotFound("not_found");
                 }
             } else {
@@ -122,16 +154,72 @@ public class RequestOtherService {
         RequestMessage requestMessage = RequestMessage.builder().createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())
                 .sender(send_user.get()).request(requestTicket).department(department.get()).build();
-        if (sendOtherFormRequest.getReceivedId() != null){
+        if (sendOtherFormRequest.getReceivedId() != null) {
             Optional<User> receive_user = userRepository.findByUserId(sendOtherFormRequest.getReceivedId());
             requestMessage.setReceiver(receive_user.get());
         }
-        OtherRequest otherRequest=otherRequestMapper.convert(sendOtherFormRequest);
+        OtherRequest otherRequest = otherRequestMapper.convert(sendOtherFormRequest);
         otherRequest.setTopic(OTHER_REQUEST);
         otherRequest.setRequestMessage(requestMessage);
         otherRequest.setStatus(false);
         requestTicketRepository.save(requestTicket);
         requestMessageRepository.save(requestMessage);
         otherRequestFormRepository.save(otherRequest);
+    }
+
+    //other k co tin nhan
+//    @Transactional
+//    public boolean acceptOtherRequest(String otherRequestId) {
+//        OtherRequest otherRequest = otherRequestFormRepository.findById(otherRequestId)
+//                .orElseThrow(() -> new BadRequest("Not_found_form"));
+//
+//        RequestMessage requestMessage = requestMessageRepository.findById(otherRequest.getRequestMessage().getRequestMessageId())
+//                .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+//
+//        RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
+//                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+//
+//        Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
+//                .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+//
+//        ticket.setUpdateDate(Until.generateRealTime());
+//        ticket.setStatus(true);
+//        requestTicket.setUpdateDate(Until.generateRealTime());
+//        requestTicket.setStatus(RequestStatus.CLOSED);
+//        requestMessage.setUpdateDate(Until.generateRealTime());
+//        try {
+//            otherRequest.setStatus(true);
+//            otherRequestFormRepository.save(otherRequest);
+//            requestMessageRepository.saveAndFlush(requestMessage);
+//            requestTicketRepository.saveAndFlush(requestTicket);
+//            ticketRepository.save(ticket);
+//            return true;
+//        } catch (Exception e) {
+//            throw new ServerError("Fail");
+//        }
+//    }
+
+    public boolean closeOtherRequest(String ticketId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        if (requestTickets.isEmpty()) {
+            throw new BadRequest("Not_fount_request_in ticket");
+        }
+        requestTickets.forEach(request -> {
+            request.setUpdateDate(Until.generateRealTime());
+            request.setStatus(RequestStatus.CLOSED);
+            request.setUpdateDate(Until.generateRealTime());
+        });
+        ticket.setUpdateDate(Until.generateRealTime());
+        ticket.setStatus(true);
+        try {
+            requestTicketRepository.saveAll(requestTickets);
+            ticketRepository.save(ticket);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("Fail");
+        }
     }
 }

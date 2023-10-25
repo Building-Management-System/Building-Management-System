@@ -5,6 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RoomBookingIdRequest {
-    String roomBookingFormRoomId;
+public class OtherFormRequest {
+    private String ticketId;
 }
