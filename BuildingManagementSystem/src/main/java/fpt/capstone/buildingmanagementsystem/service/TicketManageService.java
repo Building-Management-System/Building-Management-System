@@ -34,12 +34,12 @@ import static java.util.stream.Collectors.groupingBy;
 public class TicketManageService {
 
     @Autowired
-    private TicketRepositoryv2 ticketRepository;
+    private TicketRepositoryv2 ticketRepositoryv2;
 
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    TicketRepository ticketRepository2;
+    TicketRepository ticketRepository;
     @Autowired
     RequestTicketRepository requestTicketRepository;
     @Autowired
@@ -47,7 +47,7 @@ public class TicketManageService {
 
     public List<TicketRequestResponse> getAllTickets() {
         List<TicketRequestResponse> ticketRequestResponses = new ArrayList<>();
-        Map<String, List<TicketDto>> ticketDtos = ticketRepository.getAllTicketRequest()
+        Map<String, List<TicketDto>> ticketDtos = ticketRepositoryv2.getAllTicketRequest()
                 .stream()
                 .collect(groupingBy(TicketDto::getTicketId, Collectors.toList()));
 
@@ -69,7 +69,7 @@ public class TicketManageService {
 
     public List<TicketRequestResponseV2> getAllTicketsBySenderId(String senderId) {
         List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
-        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepository.getTicketRequestv2()
+        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepositoryv2.getTicketRequestv2()
                 .stream()
                 .filter(ticketRequestDto -> ticketRequestDto.getSenderId().equals(senderId))
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
@@ -98,7 +98,7 @@ public class TicketManageService {
 
     public List<TicketRequestResponseV2> getAllTicketsByHr() {
         List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
-        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepository.getTicketRequestByHr()
+        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepositoryv2.getTicketRequestByHr()
                 .stream()
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
 
@@ -107,7 +107,7 @@ public class TicketManageService {
 
     public List<TicketRequestResponseV2> getAllTicketsBySecurity() {
         List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
-        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepository.getTicketRequestBySecurity()
+        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepositoryv2.getTicketRequestBySecurity()
                 .stream()
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
         return getTicketRequestResponse(responseV2s, ticketDtos);
@@ -115,7 +115,7 @@ public class TicketManageService {
 
     public List<TicketRequestResponseV2> getAllTicketsByAdmin() {
         List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
-        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepository.getTicketRequestByAdmin()
+        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepositoryv2.getTicketRequestByAdmin()
                 .stream()
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
         return getTicketRequestResponse(responseV2s, ticketDtos);
@@ -125,7 +125,7 @@ public class TicketManageService {
         List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
         List<User> manager = userRepository.getManagerByDepartment(departmentName);
         if (manager.isEmpty()) return new ArrayList<>();
-        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepository.getTicketRequestByDepartmentManager(manager.get(0).getUserId())
+        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepositoryv2.getTicketRequestByDepartmentManager(manager.get(0).getUserId())
                 .stream()
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
         return getTicketRequestResponse(responseV2s, ticketDtos);
@@ -156,7 +156,7 @@ public class TicketManageService {
             requestTicketRepository.save(requestTicket);
             if (requestTicketRepository.findByRequestId(changeReceiveIdRequest.getRequestId()).isPresent()) {
                 String ticketId = requestTicketRepository.findByRequestId(changeReceiveIdRequest.getRequestId()).get().getTicketRequest().getTicketId();
-                ticketRepository2.updateTicketTime(time, ticketId);
+                ticketRepository.updateTicketTime(time, ticketId);
                 return true;
             } else {
                 throw new NotFound("request_ticket_not_found");
