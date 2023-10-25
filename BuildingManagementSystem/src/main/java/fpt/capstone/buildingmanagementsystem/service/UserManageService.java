@@ -63,14 +63,18 @@ public class UserManageService {
                     changeUserInfoRequest.getGender() != null &&
                     changeUserInfoRequest.getCity() != null &&
                     changeUserInfoRequest.getTelephoneNumber() != null &&
-                    changeUserInfoRequest.getDateOfBirth() != null &&
-                    file != null
+                    changeUserInfoRequest.getDateOfBirth() != null
             ) {
-                String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
-                List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
-                String name = "avatar_" + UUID.randomUUID() + "." + stringList.get(1);
-                Bucket bucket = StorageClient.getInstance().bucket();
-                bucket.create(name, file.getBytes(), file.getContentType());
+                String name = "avatar_" + UUID.randomUUID();
+                if (!file.isEmpty()) {
+                    String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
+                    List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
+                    name = name + "." + stringList.get(stringList.size()-1);
+                    Bucket bucket = StorageClient.getInstance().bucket();
+                    bucket.create(name, file.getBytes(), file.getContentType());
+                } else {
+                    name = userRepository.findByUserId(changeUserInfoRequest.getUserId()).get().getImage();
+                }
                 if (!userPendingRepository.existsById(userId)) {
                     Optional<UserPendingStatus> userPendingStatus = userPendingStatusRepository.findByUserPendingStatusId("1");
                     UserPending userPending = userPendingMapper.convertRegisterAccount(changeUserInfoRequest);
@@ -101,13 +105,19 @@ public class UserManageService {
                     throw new NotFound("user_not_found");
                 }
                 Optional<User> user = userRepository.findByUserId(userId);
-                String oldImage = user.get().getImage();
-                Bucket bucket = StorageClient.getInstance().bucket();
-                Blob blob = bucket.get(oldImage);
-                if (blob != null) {
-                    blob.delete();
-                }
                 Optional<UserPending> userPending = userPendingRepository.findById(userId);
+                if(!userPending.isPresent()||!user.isPresent()){
+                    throw new NotFound("not_found");
+                }
+                String oldImage = user.get().getImage();
+                String newImage= userPending.get().getImage();
+                if(!Objects.equals(newImage, oldImage)) {
+                    Bucket bucket = StorageClient.getInstance().bucket();
+                    Blob blob = bucket.get(oldImage);
+                    if (blob != null) {
+                        blob.delete();
+                    }
+                }
                 userRepository.updateAcceptUserInfo(userPending.get().getFirstName(), userPending.get().getLastName(), userPending.get().getGender()
                         , userPending.get().getDateOfBirth(), userPending.get().getTelephoneNumber()
                         , userPending.get().getCity(), userPending.get().getCity(), userPending.get().getEmail()
@@ -168,11 +178,11 @@ public class UserManageService {
             if (userRepository.findByUserId(userId).isPresent()) {
                 Department department = userRepository.findByUserId(userId).get().getDepartment();
                 List<User> userOfDepartment = userRepository.findAllByDepartment(department);
-                String managerId=null;
-                for(int i=0;i<userOfDepartment.size();i++) {
+                String managerId = null;
+                for (int i = 0; i < userOfDepartment.size(); i++) {
                     Optional<Account> account = accountRepository.findByAccountId(userOfDepartment.get(i).getUserId());
-                    if(Objects.equals(account.get().getRole().getRoleId(), "3")){
-                        managerId=account.get().getAccountId();
+                    if (Objects.equals(account.get().getRole().getRoleId(), "3")) {
+                        managerId = account.get().getAccountId();
                     }
                 }
                 ManagerInfoResponse managerInfoResponse = ManagerInfoResponse.builder().managerDepartmentId(department.getDepartmentId())
