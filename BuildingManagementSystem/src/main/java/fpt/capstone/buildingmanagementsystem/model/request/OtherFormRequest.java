@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OtherFormRequest {
-    private String otherRequestId;
+    private String ticketId;
 }

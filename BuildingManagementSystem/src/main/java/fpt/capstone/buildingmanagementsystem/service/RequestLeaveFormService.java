@@ -11,7 +11,9 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.LeaveRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.LeaveMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendLeaveFormRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.LeaveRequestFormRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
@@ -50,6 +52,9 @@ public class RequestLeaveFormService {
     DepartmentRepository departmentRepository;
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    RequestOtherService requestOtherService;
 
     public boolean getLeaveFormUser(SendLeaveFormRequest sendLeaveFormRequest) {
         try {
@@ -138,11 +143,11 @@ public class RequestLeaveFormService {
                     if (send_user.isPresent() && department.isPresent() && requestTicket.isPresent()) {
                         List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(requestTicket.get());
                         String sender_id = requestMessageOptional.get(0).getSender().getUserId();
-                        if(requestMessageOptional.get(0).getReceiver()!=null) {
+                        if (requestMessageOptional.get(0).getReceiver() != null) {
                             String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
                             if (Objects.equals(sendLeaveFormRequest.getUserId(), sender_id)) {
                                 sendLeaveFormRequest.setReceivedId(receiverId);
-                            }else {
+                            } else {
                                 sendLeaveFormRequest.setReceivedId(sender_id);
                             }
                         }
@@ -151,7 +156,7 @@ public class RequestLeaveFormService {
                             requestTicket.get().setStatus(ANSWERED);
                             requestTicketRepository.save(requestTicket.get());
                         }
-                        String time=Until.generateRealTime();
+                        String time = Until.generateRealTime();
                         saveLeaveMessage(sendLeaveFormRequest, send_user, department, requestTicket.get());
                         ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
                         requestTicketRepository.updateTicketRequestTime(time, sendLeaveFormRequest.getRequestId());
@@ -225,17 +230,26 @@ public class RequestLeaveFormService {
         Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
                 .orElseThrow(() -> new BadRequest("Not_found_ticket"));
 
-        ticket.setUpdateDate(Until.generateRealTime());
-        ticket.setStatus(true);
-        requestTicket.setUpdateDate(Until.generateRealTime());
-        requestTicket.setStatus(RequestStatus.CLOSED);
-        requestMessage.setUpdateDate(Until.generateRealTime());
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(requestMessage.getReceiver().getUserId())
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Approve Leave Request")
+                .content("Approve Leave Request")
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
+
+        requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
 
         try {
             leaveRequestForm.setStatus(true);
             leaveRequestFormRepository.save(leaveRequestForm);
             requestMessageRepository.saveAndFlush(requestMessage);
-            requestTicketRepository.saveAndFlush(requestTicket);
+            requestTicketRepository.saveAll(requestTickets);
             ticketRepository.saveAndFlush(ticket);
             return true;
         } catch (Exception e) {
@@ -244,8 +258,8 @@ public class RequestLeaveFormService {
     }
 
     @Transactional
-    public boolean rejectLeaveRequest(String leaveRequestId) {
-        LeaveRequestForm roomBookingRequestForm = leaveRequestFormRepository.findById(leaveRequestId)
+    public boolean rejectLeaveRequest(LeaveMessageRequest leaveMessageRequest) {
+        LeaveRequestForm roomBookingRequestForm = leaveRequestFormRepository.findById(leaveMessageRequest.getLeaveRequestId())
                 .orElseThrow(() -> new BadRequest("Not_found_form"));
 
         RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
@@ -256,18 +270,33 @@ public class RequestLeaveFormService {
 
         Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
                 .orElseThrow(() -> new BadRequest("Not_found_ticket"));
-        ticket.setUpdateDate(Until.generateRealTime());
-        ticket.setStatus(true);
-        requestTicket.setUpdateDate(Until.generateRealTime());
-        requestTicket.setStatus(RequestStatus.CLOSED);
-        requestMessage.setUpdateDate(Until.generateRealTime());
+
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(requestMessage.getReceiver().getUserId())
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Reject Leave Request")
+                .content(leaveMessageRequest.getContent())
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
+
+        requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
+
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
             requestMessageRepository.saveAndFlush(requestMessage);
-            requestTicketRepository.saveAndFlush(requestTicket);
+            requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
         }
+    }
+
+    private void executeRequestDecision(List<RequestTicket> requestTickets,Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
+        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
     }
 }

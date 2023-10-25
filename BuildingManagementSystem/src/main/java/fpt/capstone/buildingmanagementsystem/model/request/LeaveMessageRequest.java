@@ -7,4 +7,5 @@ import lombok.Setter;
 @Setter
 public class LeaveMessageRequest {
     private String leaveRequestId;
+    private String content;
 }

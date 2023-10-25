@@ -11,7 +11,9 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.AttendanceRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.AttendanceMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendAttendanceFormRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.repository.AttendanceRequestFormRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
@@ -55,6 +57,9 @@ public class RequestAttendanceFromService {
 
     @Autowired
     TicketRepository ticketRepository;
+
+    @Autowired
+    RequestOtherService requestOtherService;
 
     public boolean getAttendanceUser(SendAttendanceFormRequest sendAttendanceFormRequest) {
         try {
@@ -213,17 +218,24 @@ public class RequestAttendanceFromService {
         Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
                 .orElseThrow(() -> new BadRequest("Not_found_ticket"));
 
-        ticket.setUpdateDate(Until.generateRealTime());
-        ticket.setStatus(true);
-        requestTicket.setUpdateDate(Until.generateRealTime());
-        requestTicket.setStatus(RequestStatus.CLOSED);
-        requestMessage.setUpdateDate(Until.generateRealTime());
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(requestMessage.getReceiver().getUserId())
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Approve attendance request")
+                .content("Approve attendance request")
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
 
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
             attendanceRequestForm.setStatus(true);
             attendanceRequestFormRepository.save(attendanceRequestForm);
             requestMessageRepository.saveAndFlush(requestMessage);
-            requestTicketRepository.saveAndFlush(requestTicket);
+            requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
             return true;
         } catch (Exception e) {
@@ -231,9 +243,11 @@ public class RequestAttendanceFromService {
         }
     }
 
+
+
     @Transactional
-    public boolean rejectAttendanceRequest(String attendanceRequestFormId) {
-        AttendanceRequestForm roomBookingRequestForm = attendanceRequestFormRepository.findById(attendanceRequestFormId)
+    public boolean rejectAttendanceRequest(AttendanceMessageRequest attendanceMessageRequest) {
+        AttendanceRequestForm roomBookingRequestForm = attendanceRequestFormRepository.findById(attendanceMessageRequest.getAttendanceRequestId())
                 .orElseThrow(() -> new BadRequest("Not_found_form"));
 
         RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
@@ -244,18 +258,47 @@ public class RequestAttendanceFromService {
 
         Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
                 .orElseThrow(() -> new BadRequest("Not_found_ticket"));
-        ticket.setUpdateDate(Until.generateRealTime());
-        ticket.setStatus(true);
-        requestTicket.setUpdateDate(Until.generateRealTime());
-        requestTicket.setStatus(RequestStatus.CLOSED);
-        requestMessage.setUpdateDate(Until.generateRealTime());
+
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(requestMessage.getReceiver().getUserId())
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Reject Attendance request")
+                .content(attendanceMessageRequest.getContent())
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
+
         try {
             requestMessageRepository.saveAndFlush(requestMessage);
-            requestTicketRepository.saveAndFlush(requestTicket);
+            requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
+        }
+    }
+
+    private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
+        executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
+    }
+
+    static void executeDuplicate(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest, RequestOtherService requestOtherService, RequestTicketRepository requestTicketRepository) {
+        requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
+
+        if (!requestTickets.isEmpty()) {
+            requestTickets.forEach(request -> {
+                request.setUpdateDate(Until.generateRealTime());
+                request.setStatus(RequestStatus.CLOSED);
+                request.setUpdateDate(Until.generateRealTime());
+            });
+            ticket.setUpdateDate(Until.generateRealTime());
+            ticket.setStatus(true);
+        } else {
+            throw new BadRequest("Not_fount_request_in_ticket");
         }
     }
 }

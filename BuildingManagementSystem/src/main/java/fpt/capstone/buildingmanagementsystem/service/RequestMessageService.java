@@ -68,7 +68,9 @@ public class RequestMessageService {
             messageResponse.setCreateDate(requestMessage.getCreateDate());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
+            messageResponse.setImageSender(requestMessage.getSender().getImage());
             messageResponse.setTitle(requestTicket.getTitle());
+            messageResponse.setRequestTicketStatus(requestTicket.getStatus());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
             messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
             messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
@@ -77,6 +79,7 @@ public class RequestMessageService {
                 messageResponse.setReceiverId(requestMessage.getReceiver().getUserId());
                 messageResponse.setReceiverFirstName(requestMessage.getReceiver().getFirstName());
                 messageResponse.setReceiverLastName(requestMessage.getReceiver().getLastName());
+                messageResponse.setImageReceiver(requestMessage.getReceiver().getImage());
             }
             messageResponses.add(messageResponse);
         });
@@ -138,8 +141,10 @@ public class RequestMessageService {
             messageResponse.setRequestMessageId(requestMessage.getRequestMessageId());
             messageResponse.setCreateDate(requestMessage.getCreateDate());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
-            messageResponse.setSenderId(requestMessage.getSender().getUserId());
             messageResponse.setTitle(requestTicket.getTitle());
+            messageResponse.setRequestTicketStatus(requestTicket.getStatus());
+            messageResponse.setSenderId(requestMessage.getSender().getUserId());
+            messageResponse.setImageSender(requestMessage.getSender().getImage());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
             messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
             messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
@@ -148,6 +153,7 @@ public class RequestMessageService {
                 messageResponse.setReceiverId(requestMessage.getReceiver().getUserId());
                 messageResponse.setReceiverFirstName(requestMessage.getReceiver().getFirstName());
                 messageResponse.setReceiverLastName(requestMessage.getReceiver().getLastName());
+                messageResponse.setImageReceiver(requestMessage.getReceiver().getImage());
             }
             messageResponses.add(messageResponse);
         });
@@ -228,7 +234,9 @@ public class RequestMessageService {
             messageResponse.setCreateDate(requestMessage.getCreateDate());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
+            messageResponse.setImageSender(requestMessage.getSender().getImage());
             messageResponse.setTitle(requestTicket.getTitle());
+            messageResponse.setRequestTicketStatus(requestTicket.getStatus());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
             messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
             messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
@@ -237,6 +245,7 @@ public class RequestMessageService {
                 messageResponse.setReceiverId(requestMessage.getReceiver().getUserId());
                 messageResponse.setReceiverFirstName(requestMessage.getReceiver().getFirstName());
                 messageResponse.setReceiverLastName(requestMessage.getReceiver().getLastName());
+                messageResponse.setImageReceiver(requestMessage.getReceiver().getImage());
             }
             messageResponses.add(messageResponse);
         });
@@ -303,7 +312,9 @@ public class RequestMessageService {
             messageResponse.setRequestMessageId(requestMessage.getRequestMessageId());
             messageResponse.setCreateDate(requestMessage.getCreateDate());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
+            messageResponse.setRequestTicketStatus(requestTicket.getStatus());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
+            messageResponse.setImageSender(requestMessage.getSender().getImage());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());
             messageResponse.setSenderLastName(requestMessage.getSender().getLastName());
             messageResponse.setRequestId(requestMessage.getRequest().getRequestId());
@@ -312,6 +323,7 @@ public class RequestMessageService {
                 messageResponse.setReceiverId(requestMessage.getReceiver().getUserId());
                 messageResponse.setReceiverFirstName(requestMessage.getReceiver().getFirstName());
                 messageResponse.setReceiverLastName(requestMessage.getReceiver().getLastName());
+                messageResponse.setImageReceiver(requestMessage.getReceiver().getImage());
             }
             messageResponses.add(messageResponse);
         });
