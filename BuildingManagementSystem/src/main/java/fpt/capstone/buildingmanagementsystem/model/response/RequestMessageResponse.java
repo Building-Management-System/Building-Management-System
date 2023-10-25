@@ -18,17 +18,21 @@ public class RequestMessageResponse {
 
     private String attachmentMessageId;
 
-    private String senderId;
-
     private String title;
 
     private RequestStatus requestTicketStatus;
+
+    private String senderId;
+
+    private String imageSender;
 
     private String senderFirstName;
 
     private String senderLastName;
 
     private String receiverId;
+
+    private String imageReceiver;
 
     private String receiverFirstName;
 
