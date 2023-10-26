@@ -304,7 +304,7 @@ public class RoomBookingService {
             listBooking.remove(roomBookingRequestForm);
             List<RoomBookingFormRoom> list=roomBookingRoomRepository.findByRoomRequestFormInAndRoom(listBooking,room);
             List<RoomBookingRequest> newlist=new ArrayList<>();
-            list.forEach(element-> newlist.add(new RoomBookingRequest(element.getRoomRequestForm().getRoomBookingRequestId(),"Reject Booking Room")));
+            list.forEach(element-> newlist.add(new RoomBookingRequest(element.getRoomRequestForm().getRoomBookingRequestId(),"Reject Because This Room Is Already Booked")));
             newlist.forEach(element-> rejectRoomBooking2(element,requestMessage.getReceiver().getUserId()));
             return true;
         } catch (Exception e) {
