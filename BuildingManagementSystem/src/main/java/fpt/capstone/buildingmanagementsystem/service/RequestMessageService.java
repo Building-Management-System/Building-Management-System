@@ -313,6 +313,7 @@ public class RequestMessageService {
             messageResponse.setCreateDate(requestMessage.getCreateDate());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
             messageResponse.setRequestTicketStatus(requestTicket.getStatus());
+            messageResponse.setTitle(requestTicket.getTitle());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
             messageResponse.setImageSender(requestMessage.getSender().getImage());
             messageResponse.setSenderFirstName(requestMessage.getSender().getFirstName());

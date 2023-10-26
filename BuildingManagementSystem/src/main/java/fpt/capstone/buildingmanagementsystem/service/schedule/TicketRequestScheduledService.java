@@ -35,8 +35,8 @@ public class TicketRequestScheduledService {
     private static final int day = 1000 * 60 * 60 * 24;
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
 
-    //(cron = "* /* * * *")
-    @Scheduled(cron = "* /* * * * *")
+    //(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "15 * * * * ?")
     public void closeTicketUpTime() {
         closeTicketWithAnsweredRequests();
     }
@@ -55,13 +55,13 @@ public class TicketRequestScheduledService {
                     //3 * day
                     if (instantDate.getTime() - updateDate.getTime() >= day) {
                         ticket.setStatus(false);
-                        logger.info("run-done");
+                        logger.info("run-done" + ticket.getTicketId());
+//                        ticketRepository.saveAndFlush(ticket);
                     }
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
             }
         });
-        ticketRepository.saveAll(tickets);
     }
 }
