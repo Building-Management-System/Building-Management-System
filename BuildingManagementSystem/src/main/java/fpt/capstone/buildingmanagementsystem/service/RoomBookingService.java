@@ -3,6 +3,7 @@ package fpt.capstone.buildingmanagementsystem.service;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
+import fpt.capstone.buildingmanagementsystem.model.dto.RoomBookingDTO;
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
@@ -17,15 +18,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.RoomBookingRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendRoomBookingRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.RoomBookingResponse;
-import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RoomBookingFormRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RoomBookingFormRepositoryV2;
-import fpt.capstone.buildingmanagementsystem.repository.RoomBookingFormRoomRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RoomRepository;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,7 +41,6 @@ public class RoomBookingService {
 
     @Autowired
     private RoomRepository roomRepository;
-
     @Autowired
     TicketRepository ticketRepository;
     @Autowired
@@ -99,7 +92,7 @@ public class RoomBookingService {
                     Ticket ticket = Ticket.builder()
                             .ticketId(ticketId)
                             .topic(TopicEnum.ROOM_REQUEST)
-                            .status(false)
+                            .status(true)
                             .createDate(Until.generateRealTime())
                             .updateDate(Until.generateRealTime())
                             .build();
@@ -296,7 +289,6 @@ public class RoomBookingService {
                 .build();
 
         List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
-
         executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
             roomBookingRequestForm.setStatus(true);
@@ -304,6 +296,16 @@ public class RoomBookingService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);
             ticketRepository.save(ticket);
+            Room room= roomBookingRoomRepository.findByRoomRequestForm(roomBookingRequestForm).getRoom();
+            String startTime=roomBookingRequestForm.getStartTime();
+            String endTime=roomBookingRequestForm.getEndTime();
+            List<RoomBookingRequestForm> listBooking=roomBookingFormRepository.findByStartTimeAndEndTime(startTime,endTime);
+            listBooking.remove(roomBookingRequestForm);
+            List<RoomBookingFormRoom> list=roomBookingRoomRepository.findByRoomRequestFormInAndRoom(listBooking,room);
+            System.out.println(list.size());
+            List<RoomBookingRequest> newlist=new ArrayList<>();
+            list.forEach(element-> newlist.add(new RoomBookingRequest(element.getRoomRequestForm().getRoomBookingRequestId(),"Reject Booking Room")));
+            newlist.forEach(this::rejectRoomBooking);
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");

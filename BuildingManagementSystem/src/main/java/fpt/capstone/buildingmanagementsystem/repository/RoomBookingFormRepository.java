@@ -3,7 +3,11 @@ package fpt.capstone.buildingmanagementsystem.repository;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.RoomBookingRequestForm;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -11,5 +15,6 @@ import java.util.List;
 public interface RoomBookingFormRepository extends JpaRepository<RoomBookingRequestForm, String> {
 
     List<RoomBookingRequestForm> findByRequestMessageIn(List<RequestMessage> requestMessages);
+    List<RoomBookingRequestForm> findByStartTimeAndEndTime(String startTime,String endTime);
 
 }
