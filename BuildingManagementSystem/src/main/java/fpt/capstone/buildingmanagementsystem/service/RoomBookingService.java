@@ -3,7 +3,6 @@ package fpt.capstone.buildingmanagementsystem.service;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
-import fpt.capstone.buildingmanagementsystem.model.dto.RoomBookingDTO;
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
