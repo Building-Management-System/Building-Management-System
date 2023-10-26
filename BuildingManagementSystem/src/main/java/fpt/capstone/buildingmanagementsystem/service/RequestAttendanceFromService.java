@@ -297,7 +297,7 @@ public class RequestAttendanceFromService {
                 request.setUpdateDate(Until.generateRealTime());
             });
             ticket.setUpdateDate(Until.generateRealTime());
-            ticket.setStatus(true);
+            ticket.setStatus(false);
         } else {
             throw new BadRequest("Not_fount_request_in_ticket");
         }

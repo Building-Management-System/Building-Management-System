@@ -302,24 +302,50 @@ public class RoomBookingService {
             String endTime=roomBookingRequestForm.getEndTime();
             List<RoomBookingRequestForm> listBooking=roomBookingFormRepository.findByStartTimeAndEndTime(startTime,endTime);
             listBooking.remove(roomBookingRequestForm);
-            for(int i=0; i<listBooking.size();i++){
-                RequestMessage requestMessage2 = requestMessageRepository.findById(listBooking.get(i).getRequestMessage().getRequestMessageId())
-                        .orElseThrow(() -> new BadRequest("Not_found_request_message"));
-                RequestTicket requestTicket2 = requestTicketRepository.findById(requestMessage2.getRequest().getRequestId())
-                        .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
-                ChangeReceiveIdRequest changeReceiveIdRequest= new ChangeReceiveIdRequest(requestTicket2.getRequestId(),requestMessage.getReceiver().getUserId());
-                ticketManageService.changeReceiveId(changeReceiveIdRequest);
-            }
             List<RoomBookingFormRoom> list=roomBookingRoomRepository.findByRoomRequestFormInAndRoom(listBooking,room);
             List<RoomBookingRequest> newlist=new ArrayList<>();
-            list.forEach(element-> newlist.add(new RoomBookingRequest(element.getRoomRequestForm().getRoomBookingRequestId(),"Reject Booking Room")));
-            newlist.forEach(this::rejectRoomBooking);
+            list.forEach(element-> newlist.add(new RoomBookingRequest(element.getRoomRequestForm().getRoomBookingRequestId(),"Reject Because This Room Is Already Booked")));
+            newlist.forEach(element-> rejectRoomBooking2(element,requestMessage.getReceiver().getUserId()));
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
         }
     }
+    public boolean rejectRoomBooking2(RoomBookingRequest roomBookingFormRoom,String receiverId) {
+        RoomBookingRequestForm roomBookingRequestForm = roomBookingFormRepository.findById(roomBookingFormRoom.getRoomBookingFormRoomId())
+                .orElseThrow(() -> new BadRequest("Not_found_form"));
 
+        RequestMessage requestMessage = requestMessageRepository.findById(roomBookingRequestForm.getRequestMessage().getRequestMessageId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+
+        RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
+                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+
+        Ticket ticket = ticketRepository.findById(requestTicket.getTicketRequest().getTicketId())
+                .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+
+        SendOtherFormRequest sendOtherFormRequest = SendOtherFormRequest.builder()
+                .userId(receiverId)
+                .ticketId(ticket.getTicketId())
+                .requestId(requestTicket.getRequestId())
+                .title("Reject Booking Room")
+                .content(roomBookingFormRoom.getContent())
+                .departmentId(requestMessage.getDepartment().getDepartmentId())
+                .receivedId(requestMessage.getSender().getUserId())
+                .build();
+
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
+
+        executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
+        try {
+            requestMessageRepository.saveAndFlush(requestMessage);
+            requestTicketRepository.saveAndFlush(requestTicket);
+            ticketRepository.save(ticket);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("Fail");
+        }
+    }
     @Transactional
     public boolean rejectRoomBooking(RoomBookingRequest roomBookingFormRoom) {
         RoomBookingRequestForm roomBookingRequestForm = roomBookingFormRepository.findById(roomBookingFormRoom.getRoomBookingFormRoomId())
