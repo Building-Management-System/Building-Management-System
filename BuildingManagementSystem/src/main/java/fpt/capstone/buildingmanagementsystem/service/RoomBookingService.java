@@ -13,6 +13,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.RoomBookingRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangeReceiveIdRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.RoomBookingRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendRoomBookingRequest;
@@ -53,7 +54,8 @@ public class RoomBookingService {
 
     @Autowired
     RoomBookingFormRepository roomBookingFormRepository;
-
+    @Autowired
+    TicketManageService ticketManageService;
     @Autowired
     RoomBookingFormRepositoryV2 roomFormRepositoryV2;
 
@@ -299,9 +301,16 @@ public class RoomBookingService {
             String startTime=roomBookingRequestForm.getStartTime();
             String endTime=roomBookingRequestForm.getEndTime();
             List<RoomBookingRequestForm> listBooking=roomBookingFormRepository.findByStartTimeAndEndTime(startTime,endTime);
+            for(int i=0; i<listBooking.size();i++){
+                RequestMessage requestMessage2 = requestMessageRepository.findById(listBooking.get(i).getRequestMessage().getRequestMessageId())
+                        .orElseThrow(() -> new BadRequest("Not_found_request_message"));
+                RequestTicket requestTicket2 = requestTicketRepository.findById(requestMessage2.getRequest().getRequestId())
+                        .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
+                ChangeReceiveIdRequest changeReceiveIdRequest= new ChangeReceiveIdRequest(requestTicket2.getRequestId(),requestMessage.getReceiver().getUserId());
+                ticketManageService.changeReceiveId(changeReceiveIdRequest);
+            }
             listBooking.remove(roomBookingRequestForm);
             List<RoomBookingFormRoom> list=roomBookingRoomRepository.findByRoomRequestFormInAndRoom(listBooking,room);
-            System.out.println(list.size());
             List<RoomBookingRequest> newlist=new ArrayList<>();
             list.forEach(element-> newlist.add(new RoomBookingRequest(element.getRoomRequestForm().getRoomBookingRequestId(),"Reject Booking Room")));
             newlist.forEach(this::rejectRoomBooking);
