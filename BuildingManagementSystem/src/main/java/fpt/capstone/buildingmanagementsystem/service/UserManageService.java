@@ -9,16 +9,30 @@ import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.UserMapper;
 import fpt.capstone.buildingmanagementsystem.mapper.UserPendingMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
+import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.UserPending;
 import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.AcceptChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
-import fpt.capstone.buildingmanagementsystem.model.response.*;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.model.response.GetAllUserInfoPending;
+import fpt.capstone.buildingmanagementsystem.model.response.GetUserInfoResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.HrDepartmentResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.ManagerInfoResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.ReceiveIdAndDepartmentIdResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
+import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserPendingRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserPendingStatusRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.service.schedule.TicketRequestScheduledService;
 import fpt.capstone.buildingmanagementsystem.until.Until;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +66,9 @@ public class UserManageService {
     @Autowired
     UserPendingStatusRepository userPendingStatusRepository;
 
+    private static final Logger logger = LoggerFactory.getLogger(TicketRequestScheduledService.class);
+
+
     public boolean ChangeUserInfo(String data, MultipartFile file) {
         try {
             ChangeUserInfoRequest changeUserInfoRequest = new ObjectMapper().readValue(data, ChangeUserInfoRequest.class);
@@ -66,10 +83,10 @@ public class UserManageService {
                     changeUserInfoRequest.getDateOfBirth() != null
             ) {
                 String name = "avatar_" + UUID.randomUUID();
-                if (file!=null) {
+                if (file != null) {
                     String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
                     List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
-                    name = name + "." + stringList.get(stringList.size()-1);
+                    name = name + "." + stringList.get(stringList.size() - 1);
                     Bucket bucket = StorageClient.getInstance().bucket();
                     bucket.create(name, file.getBytes(), file.getContentType());
                 } else {
@@ -106,12 +123,12 @@ public class UserManageService {
                 }
                 Optional<User> user = userRepository.findByUserId(userId);
                 Optional<UserPending> userPending = userPendingRepository.findById(userId);
-                if(!userPending.isPresent()||!user.isPresent()){
+                if (!userPending.isPresent() || !user.isPresent()) {
                     throw new NotFound("not_found");
                 }
                 String oldImage = user.get().getImage();
-                String newImage= userPending.get().getImage();
-                if(!Objects.equals(newImage, oldImage)) {
+                String newImage = userPending.get().getImage();
+                if (!Objects.equals(newImage, oldImage)) {
                     Bucket bucket = StorageClient.getInstance().bucket();
                     Blob blob = bucket.get(oldImage);
                     if (blob != null) {
@@ -132,15 +149,16 @@ public class UserManageService {
             throw new ServerError("fail");
         }
     }
+
     public boolean RejectChangeUserInfo(GetUserInfoRequest getUserInfoRequest) {
         try {
-           if(getUserInfoRequest.getUserId()!=null){
-               if (userPendingRepository.existsById(getUserInfoRequest.getUserId())) {
-                   userPendingRepository.updateStatus("3", getUserInfoRequest.getUserId());
-                   return true;
-               } else {
-               throw new NotFound("user_not_found");
-           }
+            if (getUserInfoRequest.getUserId() != null) {
+                if (userPendingRepository.existsById(getUserInfoRequest.getUserId())) {
+                    userPendingRepository.updateStatus("3", getUserInfoRequest.getUserId());
+                    return true;
+                } else {
+                    throw new NotFound("user_not_found");
+                }
             } else {
                 throw new BadRequest("request_fail");
             }
@@ -179,14 +197,7 @@ public class UserManageService {
         List<UserInfoResponse> userInfoResponses = new ArrayList<>();
         List<User> users = userRepository.findAll();
         if (users.isEmpty()) return userInfoResponses;
-        users.forEach(user -> {
-            UserInfoResponse userInfoResponse = new UserInfoResponse();
-            BeanUtils.copyProperties(user, userInfoResponse);
-            userInfoResponse.setAccountId(user.getUserId());
-            userInfoResponse.setRoleName(user.getAccount().getRole().getRoleName());
-            userInfoResponses.add(userInfoResponse);
-        });
-        return userInfoResponses;
+        return getUserInfoResponses(userInfoResponses, users);
     }
 
     public ReceiveIdAndDepartmentIdResponse getReceiveIdAndDepartmentId(String userId) {
@@ -216,5 +227,23 @@ public class UserManageService {
         } else {
             throw new BadRequest("request_fail");
         }
+    }
+
+    public List<UserInfoResponse> getManagerByDepartmentId(String departmentId) {
+        List<UserInfoResponse> userInfoResponses = new ArrayList<>();
+        List<User> users = userRepository.getManagerByDepartmentId(departmentId);
+        logger.info(""+users.size());
+        return getUserInfoResponses(userInfoResponses, users);
+    }
+
+    private List<UserInfoResponse> getUserInfoResponses(List<UserInfoResponse> userInfoResponses, List<User> users) {
+        users.forEach(u -> {
+            UserInfoResponse response = new UserInfoResponse();
+            BeanUtils.copyProperties(u, response);
+            response.setAccountId(u.getUserId());
+            response.setRoleName(u.getAccount().getRole().getRoleName());
+            userInfoResponses.add(response);
+        });
+        return userInfoResponses;
     }
 }

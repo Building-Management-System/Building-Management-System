@@ -40,4 +40,12 @@ public interface UserRepository extends JpaRepository<User, String> {
             "JOIN department d ON d.department_id = u.department_id\n" +
             "WHERE d.department_name LIKE :department AND role_name LIKE 'manager'", nativeQuery = true)
     List<User> getManagerByDepartment(@Param("department") String departmentName);
+
+    @Query(value = "SELECT *\n" +
+            "FROM user u\n" +
+            "JOIN department d ON d.department_id = u.department_id\n" +
+            "JOIN account a ON a.account_id = u.user_id\n" +
+            "JOIN role r ON r.role_id = a.role_id\n" +
+            "WHERE d.department_id = :departmentId AND a.role_id = 3;", nativeQuery = true)
+    List<User> getManagerByDepartmentId(@Param("departmentId") String departmentId);
 }
