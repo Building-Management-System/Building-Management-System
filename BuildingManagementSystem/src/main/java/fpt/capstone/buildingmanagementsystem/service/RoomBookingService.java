@@ -301,6 +301,7 @@ public class RoomBookingService {
             String startTime=roomBookingRequestForm.getStartTime();
             String endTime=roomBookingRequestForm.getEndTime();
             List<RoomBookingRequestForm> listBooking=roomBookingFormRepository.findByStartTimeAndEndTime(startTime,endTime);
+            listBooking.remove(roomBookingRequestForm);
             for(int i=0; i<listBooking.size();i++){
                 RequestMessage requestMessage2 = requestMessageRepository.findById(listBooking.get(i).getRequestMessage().getRequestMessageId())
                         .orElseThrow(() -> new BadRequest("Not_found_request_message"));
@@ -309,7 +310,6 @@ public class RoomBookingService {
                 ChangeReceiveIdRequest changeReceiveIdRequest= new ChangeReceiveIdRequest(requestTicket2.getRequestId(),requestMessage.getReceiver().getUserId());
                 ticketManageService.changeReceiveId(changeReceiveIdRequest);
             }
-            listBooking.remove(roomBookingRequestForm);
             List<RoomBookingFormRoom> list=roomBookingRoomRepository.findByRoomRequestFormInAndRoom(listBooking,room);
             List<RoomBookingRequest> newlist=new ArrayList<>();
             list.forEach(element-> newlist.add(new RoomBookingRequest(element.getRoomRequestForm().getRoomBookingRequestId(),"Reject Booking Room")));
