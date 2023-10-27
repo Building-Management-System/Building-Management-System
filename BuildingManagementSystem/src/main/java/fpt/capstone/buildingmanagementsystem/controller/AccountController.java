@@ -52,6 +52,10 @@ public class AccountController {
     public boolean resetPassword(@RequestBody ResetPasswordRequest resetPassword) throws Exception {
         return accountManageService.resetPassword(resetPassword);
     }
+    @RequestMapping(value = "/deleteAccount", method = RequestMethod.POST)
+    public boolean deleteAccount(@RequestBody DeleteAccount deleteAccount) throws Exception {
+        return accountManageService.deleteAccount(deleteAccount.getUsername());
+    }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest authenticationRequest) throws Exception {

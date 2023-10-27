@@ -36,7 +36,5 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     int updateRoleAccount(@Param(value = "role_id") String role_id, @Param(value = "account_id") String account_id);
 
     List<Account> findAll();
-
-
-
+    int deleteAccountByUsername(String username);
 }

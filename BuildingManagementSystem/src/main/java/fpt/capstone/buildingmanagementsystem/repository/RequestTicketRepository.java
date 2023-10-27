@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.repository;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
 import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,5 +24,5 @@ public interface RequestTicketRepository extends JpaRepository<RequestTicket, St
     int updateTicketRequestTime(@Param(value = "update_date") String update_date, @Param(value = "request_id") String request_id);
 
     List<RequestTicket> findByTicketRequest(Ticket tickets);
-
+    List<RequestTicket> findAllByUser(User user);
 }

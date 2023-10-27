@@ -10,9 +10,6 @@ import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
 import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.request.*;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAllAccountResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.HrDepartmentResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.ManagerInfoResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.ReceiveIdAndDepartmentIdResponse;
 import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import fpt.capstone.buildingmanagementsystem.until.EmailSender;
@@ -23,7 +20,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +30,16 @@ import static fpt.capstone.buildingmanagementsystem.until.Until.getRandomString;
 
 @Service
 public class AccountManageService implements UserDetailsService {
+    @Autowired
+    DailyLogRepository dailyLogRepository;
+    @Autowired
+    OverTimeRepository overTimeRepository;
+    @Autowired
+    ChatMessageRepository chatMessageRepository;
+    @Autowired
+    RequestTicketRepository requestTicketRepository;
+    @Autowired
+    RequestMessageRepository requestMessageRepository;
     @Autowired
     DepartmentRepository departmentRepository;
     @Autowired
@@ -237,6 +243,38 @@ public class AccountManageService implements UserDetailsService {
         Optional<Account> userAccount = accountRepository.findByUsername(username);
         Optional<Role> role = roleRepository.findByRoleId(userAccount.get().getRole().getRoleId());
         return roleMapper.convertRegisterAccount(role.get());
+    }
+    public boolean deleteAccount(String username) {
+        if(username!=null) {
+            Optional<Account> userAccount = accountRepository.findByUsername(username);
+            if (userAccount.isPresent()) {
+                User user = userAccount.get().getUser();
+                user.setAccount(null);
+                List<RequestTicket> checkpoint1 = requestTicketRepository.findAllByUser(user);
+                List<RequestMessage> checkpoint2 = requestMessageRepository.findAllBySender(user);
+                List<RequestMessage> checkpoint3 = requestMessageRepository.findAllByReceiver(user);
+                List<OvertimeLog> checkpoint4 = overTimeRepository.findAllByUser(user);
+                List<ChatMessage> checkpoint5 = chatMessageRepository.findAllBySender(user);
+                List<ChatMessage> checkpoint6 = chatMessageRepository.findAllByReceiver(user);
+                List<DailyLog> checkpoint7 = dailyLogRepository.findAllByUser(user);
+                if (checkpoint1.size() == 0 &&
+                        checkpoint2.size() == 0
+                        && checkpoint3.size() == 0
+                        && checkpoint4.size() == 0
+                        && checkpoint5.size() == 0
+                        && checkpoint6.size() == 0
+                        && checkpoint7.size() == 0) {
+                    accountRepository.delete(userAccount.get());
+                    return true;
+                } else {
+                    throw new ServerError("can_not_delete");
+                }
+            } else {
+                throw new NotFound("username_not_found");
+            }
+        } else {
+            throw new BadRequest("username_is_null");
+        }
     }
 
     public RoleDto getGettingRole2(GetUserInfoRequest getUserInfoRequest) {
