@@ -232,7 +232,7 @@ public class UserManageService {
     public List<UserInfoResponse> getManagerByDepartmentId(String departmentId) {
         List<UserInfoResponse> userInfoResponses = new ArrayList<>();
         List<User> users = userRepository.getManagerByDepartmentId(departmentId);
-        logger.info(""+users.size());
+        logger.info("" + users.size());
         return getUserInfoResponses(userInfoResponses, users);
     }
 

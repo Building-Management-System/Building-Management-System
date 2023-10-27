@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DepartmentService {
@@ -19,5 +20,15 @@ public class DepartmentService {
         List<Department> departmentList = departmentRepository.findAll();
         List<DepartmentResponse> responseList= departmentMapper.convert(departmentList);
         return responseList;
+    }
+
+    public List<DepartmentResponse> getDepartmentByManagerRole() {
+        return departmentRepository.getDepartmentWithManagerRole()
+                .stream()
+                .map(department -> new DepartmentResponse(
+                        department.getDepartmentId(),
+                        department.getDepartmentName()
+                )).collect(Collectors.toList());
+
     }
 }
