@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,10 +22,10 @@ public class RequestMessage {
     private String requestMessageId;
 
     @Column
-    private String createDate;
+    private Date createDate;
 
     @Column
-    private String updateDate;
+    private Date updateDate;
     @Column
     private String attachmentMessageId;
 

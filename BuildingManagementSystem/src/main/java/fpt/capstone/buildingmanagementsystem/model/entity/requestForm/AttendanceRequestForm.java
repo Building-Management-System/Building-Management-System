@@ -16,6 +16,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.sql.Date;
+import java.sql.Time;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,13 +33,13 @@ public class AttendanceRequestForm {
     )
     private String attendanceRequestId;
     @Column
-    private String manualDate;
+    private Date manualDate;
 
     @Column
-    private String manualFirstEntry;
+    private Time manualFirstEntry;
 
     @Column
-    private String manualLastExit;
+    private Time manualLastExit;
 
     @Column
     private String content;

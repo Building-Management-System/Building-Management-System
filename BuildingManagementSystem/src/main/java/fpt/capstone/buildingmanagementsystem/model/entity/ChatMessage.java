@@ -14,7 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.time.Instant;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -45,10 +45,10 @@ public class ChatMessage {
     private String message;
 
     @Column(name = "createAt")
-    private String createAt;
+    private Date createAt;
 
     @Column(name = "updateAt")
-    private String updateAt;
+    private Date updateAt;
 
     @Column(name = "status")
     private String status;

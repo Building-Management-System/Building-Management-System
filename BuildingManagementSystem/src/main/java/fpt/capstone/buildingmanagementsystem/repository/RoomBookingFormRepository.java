@@ -9,12 +9,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 @Repository
 public interface RoomBookingFormRepository extends JpaRepository<RoomBookingRequestForm, String> {
 
     List<RoomBookingRequestForm> findByRequestMessageIn(List<RequestMessage> requestMessages);
-    List<RoomBookingRequestForm> findByStartTimeAndEndTime(String startTime,String endTime);
+    List<RoomBookingRequestForm> findByStartTimeAndEndTime(Date startTime, Date endTime);
 
 }

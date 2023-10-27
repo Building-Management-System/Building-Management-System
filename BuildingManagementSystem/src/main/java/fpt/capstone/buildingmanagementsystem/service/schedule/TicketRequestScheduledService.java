@@ -6,17 +6,14 @@ import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
 import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.EXECUTING;
@@ -33,7 +30,6 @@ public class TicketRequestScheduledService {
     private static final Logger logger = LoggerFactory.getLogger(TicketRequestScheduledService.class);
 
     private static final int day = 1000 * 60 * 60 * 24;
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
 
     //(cron = "0 0 1 * * ?")
     //0 */5 * ? * *
@@ -50,17 +46,13 @@ public class TicketRequestScheduledService {
                             requestTicket.getStatus().equals(RequestStatus.PENDING))
                     .collect(Collectors.toList());
             if (requestTickets.isEmpty()) {
-                try {
-                    Date updateDate = formatter.parse(ticket.getUpdateDate());
-                    Date instantDate = formatter.parse(Until.generateRealTime());
-                    //3 * day
-                    if (instantDate.getTime() - updateDate.getTime() >= day) {
-                        ticket.setStatus(false);
-                        logger.info("run-done" + ticket.getTicketId());
+                Date updateDate = Until.generateRealTime();
+                Date instantDate = Until.generateRealTime();
+                //3 * day
+                if (instantDate.getTime() - updateDate.getTime() >= day) {
+                    ticket.setStatus(false);
+                    logger.info("run-done" + ticket.getTicketId());
 //                        ticketRepository.saveAndFlush(ticket);
-                    }
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
                 }
             }
         });

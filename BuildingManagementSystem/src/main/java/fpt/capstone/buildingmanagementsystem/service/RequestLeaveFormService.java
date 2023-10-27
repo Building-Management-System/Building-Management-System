@@ -23,9 +23,9 @@ import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import javax.transaction.Transactional;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -156,7 +156,7 @@ public class RequestLeaveFormService {
                             requestTicket.get().setStatus(ANSWERED);
                             requestTicketRepository.save(requestTicket.get());
                         }
-                        String time = Until.generateRealTime();
+                        Date time = Until.generateRealTime();
                         saveLeaveMessage(sendLeaveFormRequest, send_user, department, requestTicket.get());
                         ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
                         requestTicketRepository.updateTicketRequestTime(time, sendLeaveFormRequest.getRequestId());
@@ -183,11 +183,11 @@ public class RequestLeaveFormService {
                 , sendLeaveFormRequest.getToDate());
     }
 
-    private void saveLeaveRequest(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) {
+    private void saveLeaveRequest(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) throws ParseException {
         RequestTicket requestTicket = RequestTicket.builder()
                 .requestId(id_request_ticket)
-                .createDate(Until.generateRealTime().toString())
-                .updateDate(Until.generateRealTime().toString())
+                .createDate(Until.generateRealTime())
+                .updateDate(Until.generateRealTime())
                 .status(PENDING)
                 .ticketRequest(ticket)
                 .title(sendLeaveFormRequest.getTitle())
@@ -195,7 +195,7 @@ public class RequestLeaveFormService {
         saveLeaveMessage(sendLeaveFormRequest, send_user, department, requestTicket);
     }
 
-    private void saveLeaveMessage(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) {
+    private void saveLeaveMessage(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) throws ParseException {
         RequestMessage requestMessage = RequestMessage.builder()
                 .createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())
@@ -296,7 +296,7 @@ public class RequestLeaveFormService {
         }
     }
 
-    private void executeRequestDecision(List<RequestTicket> requestTickets,Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
+    private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
         RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
     }
 }
