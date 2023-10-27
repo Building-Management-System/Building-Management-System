@@ -22,6 +22,7 @@ import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -127,7 +128,7 @@ public class RequestOtherService {
                         requestTicket.get().setStatus(ANSWERED);
                         requestTicketRepository.save(requestTicket.get());
                     }
-                    String time = Until.generateRealTime();
+                    Date time = Until.generateRealTime();
                     saveOtherMessage(sendOtherFormRequest, send_user, department, requestTicket.get());
                     ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
                     requestTicketRepository.updateTicketRequestTime(time, sendOtherFormRequest.getRequestId());

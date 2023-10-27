@@ -55,10 +55,10 @@ public class User {
     String image;
     @NotNull
     @Column(name = "created_date")
-    public String createdDate;
+    public Date createdDate;
     @NotNull
     @Column(name = "updated_date")
-    public String updatedDate;
+    public Date updatedDate;
 
     @OneToOne
     @MapsId

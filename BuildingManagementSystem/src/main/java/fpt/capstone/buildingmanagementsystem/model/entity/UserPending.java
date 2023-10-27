@@ -11,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 @Entity
 @Data
@@ -50,7 +51,7 @@ public class UserPending {
     String image;
     @NotNull
     @Column(name = "created_date")
-    String createdDate;
+    Date createdDate;
     @NotNull
     @ManyToOne
     @JoinColumn(name = "user_pending_status_id")

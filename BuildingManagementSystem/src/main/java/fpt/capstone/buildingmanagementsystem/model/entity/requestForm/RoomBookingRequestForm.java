@@ -17,6 +17,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.sql.Date;
+import java.sql.Time;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -39,13 +41,13 @@ public class RoomBookingRequestForm {
     private String content;
 
     @Column
-    private String bookingDate;
+    private Date bookingDate;
 
     @Column
-    private String startTime;
+    private Time startTime;
 
     @Column
-    private String endTime;
+    private Time endTime;
 
     @Column
     private boolean status;

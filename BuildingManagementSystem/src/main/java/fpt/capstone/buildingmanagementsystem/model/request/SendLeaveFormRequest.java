@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
+
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -13,8 +16,8 @@ public class SendLeaveFormRequest {
     String requestId;
     String title;
     String content;
-    String fromDate;
-    String toDate;
+    Date fromDate;
+    Date toDate;
     boolean halfDay;
     int durationEvaluation;
     String departmentId;

@@ -17,6 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.sql.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,10 +35,10 @@ public class LeaveRequestForm {
     private String leaveRequestId;
 
     @Column
-    private String fromDate;
+    private Date fromDate;
 
     @Column
-    private String toDate;
+    private Date toDate;
 
     @Column
     private boolean halfDay;

@@ -40,13 +40,13 @@ public class DailyLog {
     private String dailyId;
 
     @Column(name = "date")
-    private String date;
+    private Date date;
 
     @Column(name = "first_entry")
-    private String firstEntry;
+    private Time firstEntry;
 
     @Column(name = "last_exit")
-    private String lastExit;
+    private Time lastExit;
 
     @Column(name = "morning_total")
     private float morningTotal;

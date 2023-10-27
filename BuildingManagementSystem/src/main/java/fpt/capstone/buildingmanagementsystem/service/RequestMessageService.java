@@ -65,7 +65,7 @@ public class RequestMessageService {
         requestMessages.forEach(requestMessage -> {
             RequestMessageResponse messageResponse = new RequestMessageResponse();
             messageResponse.setRequestMessageId(requestMessage.getRequestMessageId());
-            messageResponse.setCreateDate(requestMessage.getCreateDate());
+            messageResponse.setCreateDate(requestMessage.getCreateDate().toString());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
             messageResponse.setImageSender(requestMessage.getSender().getImage());
@@ -95,9 +95,9 @@ public class RequestMessageService {
         List<AttendanceFormResponse> attendanceRequests = attendanceRequestFormRepository.findByRequestMessageIn(requestMessages)
                 .stream().map(form -> new AttendanceFormResponse(
                         form.getAttendanceRequestId(),
-                        form.getManualDate(),
-                        form.getManualFirstEntry(),
-                        form.getManualLastExit(),
+                        form.getManualDate().toString(),
+                        form.getManualFirstEntry().toString(),
+                        form.getManualLastExit().toString(),
                         form.getContent(),
                         form.getRequestMessage().getRequestMessageId(),
                         form.getTopic()
@@ -139,7 +139,7 @@ public class RequestMessageService {
         requestMessages.forEach(requestMessage -> {
             RequestMessageResponse messageResponse = new RequestMessageResponse();
             messageResponse.setRequestMessageId(requestMessage.getRequestMessageId());
-            messageResponse.setCreateDate(requestMessage.getCreateDate());
+            messageResponse.setCreateDate(requestMessage.getCreateDate().toString());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
             messageResponse.setTitle(requestTicket.getTitle());
             messageResponse.setRequestTicketStatus(requestTicket.getStatus());
@@ -183,9 +183,9 @@ public class RequestMessageService {
                     .roomBookingRequestId(v.getRoomBookingRequestId())
                     .title(v.getTitle())
                     .content(v.getContent())
-                    .bookingDate(v.getBookingDate())
-                    .startDate(v.getStartTime())
-                    .endDate(v.getEndTime())
+                    .bookingDate(v.getBookingDate().toString())
+                    .startDate(v.getStartTime().toString())
+                    .endDate(v.getEndTime().toString())
                     .senderDepartment(v.getDepartmentSender())
                     .topic(v.getTopic())
                     .roomId(k.getRoom().getRoomId())
@@ -231,7 +231,7 @@ public class RequestMessageService {
         requestMessages.forEach(requestMessage -> {
             RequestMessageResponse messageResponse = new RequestMessageResponse();
             messageResponse.setRequestMessageId(requestMessage.getRequestMessageId());
-            messageResponse.setCreateDate(requestMessage.getCreateDate());
+            messageResponse.setCreateDate(requestMessage.getCreateDate().toString());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
             messageResponse.setSenderId(requestMessage.getSender().getUserId());
             messageResponse.setImageSender(requestMessage.getSender().getImage());
@@ -263,8 +263,8 @@ public class RequestMessageService {
                 .forEach(leave -> {
                     LeaveRequestResponse leaveRequestResponse = LeaveRequestResponse.builder()
                             .leaveRequestId(leave.getLeaveRequestId())
-                            .fromDate(leave.getFromDate())
-                            .toDate(leave.getToDate())
+                            .fromDate(leave.getFromDate().toString())
+                            .toDate(leave.getToDate().toString())
                             .halfDay(leave.isHalfDay())
                             .durationEvaluation(leave.getDurationEvaluation())
                             .content(leave.getContent())
@@ -310,7 +310,7 @@ public class RequestMessageService {
         requestMessages.forEach(requestMessage -> {
             RequestMessageResponse messageResponse = new RequestMessageResponse();
             messageResponse.setRequestMessageId(requestMessage.getRequestMessageId());
-            messageResponse.setCreateDate(requestMessage.getCreateDate());
+            messageResponse.setCreateDate(requestMessage.getCreateDate().toString());
             messageResponse.setAttachmentMessageId(requestMessage.getAttachmentMessageId());
             messageResponse.setRequestTicketStatus(requestTicket.getStatus());
             messageResponse.setTitle(requestTicket.getTitle());

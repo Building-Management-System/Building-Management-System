@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -195,7 +196,7 @@ public class RoomBookingService {
                             requestTicket.get().setStatus(ANSWERED);
                             requestTicketRepository.save(requestTicket.get());
                         }
-                        String time = Until.generateRealTime();
+                        Date time = Until.generateRealTime();
                         saveRoomBookingMessage(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicket.get());
                         ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
                         requestTicketRepository.updateTicketRequestTime(time, sendRoomBookingRequest.getRequestId());
@@ -304,21 +305,22 @@ public class RoomBookingService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);
             ticketRepository.save(ticket);
-            Room room= roomBookingRoomRepository.findByRoomRequestForm(roomBookingRequestForm).getRoom();
-            String startTime=roomBookingRequestForm.getStartTime();
-            String endTime=roomBookingRequestForm.getEndTime();
-            List<RoomBookingRequestForm> listBooking=roomBookingFormRepository.findByStartTimeAndEndTime(startTime,endTime);
+            Room room = roomBookingRoomRepository.findByRoomRequestForm(roomBookingRequestForm).getRoom();
+            Date startTime = roomBookingRequestForm.getStartTime();
+            Date endTime = roomBookingRequestForm.getEndTime();
+            List<RoomBookingRequestForm> listBooking = roomBookingFormRepository.findByStartTimeAndEndTime(startTime, endTime);
             listBooking.remove(roomBookingRequestForm);
-            List<RoomBookingFormRoom> list=roomBookingRoomRepository.findByRoomRequestFormInAndRoom(listBooking,room);
-            List<RoomBookingRequest> newlist=new ArrayList<>();
-            list.forEach(element-> newlist.add(new RoomBookingRequest(element.getRoomRequestForm().getRoomBookingRequestId(),"Reject Because This Room Is Already Booked")));
-            newlist.forEach(element-> rejectRoomBooking2(element,requestMessage.getReceiver().getUserId()));
+            List<RoomBookingFormRoom> list = roomBookingRoomRepository.findByRoomRequestFormInAndRoom(listBooking, room);
+            List<RoomBookingRequest> newlist = new ArrayList<>();
+            list.forEach(element -> newlist.add(new RoomBookingRequest(element.getRoomRequestForm().getRoomBookingRequestId(), "Reject Because This Room Is Already Booked")));
+            newlist.forEach(element -> rejectRoomBooking2(element, requestMessage.getReceiver().getUserId()));
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
         }
     }
-    public boolean rejectRoomBooking2(RoomBookingRequest roomBookingFormRoom,String receiverId) {
+
+    public void rejectRoomBooking2(RoomBookingRequest roomBookingFormRoom, String receiverId) {
         RoomBookingRequestForm roomBookingRequestForm = roomBookingFormRepository.findById(roomBookingFormRoom.getRoomBookingFormRoomId())
                 .orElseThrow(() -> new BadRequest("Not_found_form"));
 
@@ -348,11 +350,11 @@ public class RoomBookingService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);
             ticketRepository.save(ticket);
-            return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
         }
     }
+
     @Transactional
     public boolean rejectRoomBooking(RoomBookingRequest roomBookingFormRoom) {
         RoomBookingRequestForm roomBookingRequestForm = roomBookingFormRepository.findById(roomBookingFormRoom.getRoomBookingFormRoomId())
