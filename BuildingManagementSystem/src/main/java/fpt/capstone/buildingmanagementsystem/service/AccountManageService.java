@@ -1,9 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
-import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
-import fpt.capstone.buildingmanagementsystem.exception.ForbiddenError;
-import fpt.capstone.buildingmanagementsystem.exception.NotFound;
-import fpt.capstone.buildingmanagementsystem.exception.ServerError;
+import fpt.capstone.buildingmanagementsystem.exception.*;
 import fpt.capstone.buildingmanagementsystem.mapper.AccountMapper;
 import fpt.capstone.buildingmanagementsystem.mapper.RoleMapper;
 import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
@@ -93,7 +90,7 @@ public class AccountManageService implements UserDetailsService {
                                 accountRepository.save(newAccount);
                                 userRepository.save(user);
                             } else {
-                                throw new BadRequest("department_exist_manager");
+                                throw new Conflict("department_exist_manager");
                             }
                         }else {
                             accountRepository.save(newAccount);
