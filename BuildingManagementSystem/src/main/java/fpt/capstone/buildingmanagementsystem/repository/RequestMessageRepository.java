@@ -22,7 +22,6 @@ public interface RequestMessageRepository extends JpaRepository<RequestMessage, 
     @Query(value = "UPDATE request_message SET receiver_id = :receiver_id,update_date = :update_date" +
             " where request_id = :request_id", nativeQuery = true)
     int updateTicketRequestTime(@Param(value = "receiver_id") String receiver_id, @Param(value = "update_date") Date update_date, @Param(value = "request_id") String request_id);
-    int updateTicketRequestTime(@Param(value = "receiver_id") String receiver_id,@Param(value = "update_date") String update_date, @Param(value = "request_id") String request_id);
     List<RequestMessage> findAllByReceiver(User user);
     List<RequestMessage> findAllBySender(User user);
 

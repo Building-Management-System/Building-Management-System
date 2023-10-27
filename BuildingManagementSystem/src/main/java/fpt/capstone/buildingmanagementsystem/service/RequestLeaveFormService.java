@@ -23,7 +23,6 @@ import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import javax.transaction.Transactional;
 import java.text.ParseException;
 import java.util.Date;
@@ -184,7 +183,7 @@ public class RequestLeaveFormService {
                 , sendLeaveFormRequest.getToDate());
     }
 
-    private void saveLeaveRequest(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) {
+    private void saveLeaveRequest(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) throws ParseException {
         RequestTicket requestTicket = RequestTicket.builder()
                 .requestId(id_request_ticket)
                 .createDate(Until.generateRealTime())
@@ -196,7 +195,7 @@ public class RequestLeaveFormService {
         saveLeaveMessage(sendLeaveFormRequest, send_user, department, requestTicket);
     }
 
-    private void saveLeaveMessage(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) {
+    private void saveLeaveMessage(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) throws ParseException {
         RequestMessage requestMessage = RequestMessage.builder()
                 .createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())

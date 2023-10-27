@@ -3,6 +3,7 @@ package fpt.capstone.buildingmanagementsystem.service;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
+import fpt.capstone.buildingmanagementsystem.mapper.RoomBookingRequestMapper;
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
@@ -47,6 +48,8 @@ import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateSt
 @Service
 public class RoomBookingService {
 
+    @Autowired
+    RoomBookingRequestMapper roomBookingRequestMapper;
     @Autowired
     private RoomRepository roomRepository;
     @Autowired
@@ -224,7 +227,7 @@ public class RoomBookingService {
                 validateStartTimeAndEndTime(sendRoomBookingRequest.getStartTime(), sendRoomBookingRequest.getEndTime());
     }
 
-    private void saveRoomBookingRequest(SendRoomBookingRequest sendRoomBookingRequest, Room room, User user, Department receiverDepartment, Department senderDepartment, String requestTicketId, Ticket ticket) {
+    private void saveRoomBookingRequest(SendRoomBookingRequest sendRoomBookingRequest, Room room, User user, Department receiverDepartment, Department senderDepartment, String requestTicketId, Ticket ticket) throws ParseException {
         RequestTicket requestTicket = RequestTicket.builder()
                 .requestId(requestTicketId)
                 .createDate(Until.generateRealTime())
@@ -238,7 +241,7 @@ public class RoomBookingService {
         saveRoomBookingMessage(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicket);
     }
 
-    private void saveRoomBookingMessage(SendRoomBookingRequest sendRoomBookingRequest, Room room, User user, Department receiverDepartment, Department senderDepartment, RequestTicket requestTicket) {
+    private void saveRoomBookingMessage(SendRoomBookingRequest sendRoomBookingRequest, Room room, User user, Department receiverDepartment, Department senderDepartment, RequestTicket requestTicket) throws ParseException {
         RequestMessage requestMessage = RequestMessage.builder()
                 .createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())
@@ -253,8 +256,7 @@ public class RoomBookingService {
             requestMessage.setReceiver(receiver);
         }
 
-        RoomBookingRequestForm roomBookingForm = new RoomBookingRequestForm();
-        BeanUtils.copyProperties(sendRoomBookingRequest, roomBookingForm);
+        RoomBookingRequestForm roomBookingForm = roomBookingRequestMapper.convert(sendRoomBookingRequest);
         roomBookingForm.setStatus(false);
         roomBookingForm.setDepartmentSender(senderDepartment);
         roomBookingForm.setRequestMessage(requestMessage);

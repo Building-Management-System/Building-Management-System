@@ -22,9 +22,9 @@ public class SendRoomBookingRequest {
     private int roomId;
     private String title;
     private String content;
-    private Date bookingDate;
-    private Time startTime;
-    private Time endTime;
+    private String bookingDate;
+    private String startTime;
+    private String endTime;
     String receiverId;
     String departmentReceiverId;
 }

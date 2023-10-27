@@ -181,14 +181,14 @@ public class RequestAttendanceFromService {
                 validateStartTimeAndEndTime(sendAttendanceFormRequest.getManualFirstEntry(), sendAttendanceFormRequest.getManualLastExit());
     }
 
-    private void saveAttendanceRequest(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) {
+    private void saveAttendanceRequest(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) throws ParseException {
         RequestTicket requestTicket = RequestTicket.builder().requestId(id_request_ticket).createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())
                 .status(PENDING).ticketRequest(ticket).title(sendAttendanceFormRequest.getTitle()).user(send_user.get()).build();
         saveAttendanceMessage(sendAttendanceFormRequest, send_user, department, requestTicket);
     }
 
-    private void saveAttendanceMessage(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) {
+    private void saveAttendanceMessage(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) throws ParseException {
         RequestMessage requestMessage = RequestMessage.builder().createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())
                 .sender(send_user.get()).request(requestTicket).department(department.get()).build();

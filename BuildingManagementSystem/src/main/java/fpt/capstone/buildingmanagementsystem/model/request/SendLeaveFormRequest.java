@@ -16,8 +16,8 @@ public class SendLeaveFormRequest {
     String requestId;
     String title;
     String content;
-    Date fromDate;
-    Date toDate;
+    String fromDate;
+    String toDate;
     boolean halfDay;
     int durationEvaluation;
     String departmentId;

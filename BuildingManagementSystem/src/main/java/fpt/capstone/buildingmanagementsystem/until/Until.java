@@ -27,6 +27,12 @@ public class Until {
             throw new RuntimeException(e);
         }
     }
+    public static java.sql.Date convertStringToDate(String date) throws ParseException {
+        return new java.sql.Date(new SimpleDateFormat("yyyy-MM-dd").parse(date).getTime());
+    }
+    public static java.sql.Time convertStringToTime(String date) throws ParseException {
+        return new java.sql.Time(new SimpleDateFormat("HH:mm:ss").parse(date).getTime());
+    }
 
     public static String encodePassword(String password) {
         return new PasswordEncode().passwordEncoder().encode(password);
