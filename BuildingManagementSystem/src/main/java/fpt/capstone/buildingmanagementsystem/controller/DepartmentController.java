@@ -24,4 +24,9 @@ public class DepartmentController {
     public List<DepartmentResponse> getDepartmentByManagerRole() {
         return departmentService.getDepartmentByManagerRole();
     }
+
+    @GetMapping("/getDepartmentWithManager")
+    public List<DepartmentResponse> getDepartmentHaveManager() {
+        return departmentService.getDepartmentHaveManager();
+    }
 }

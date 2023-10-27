@@ -22,4 +22,6 @@ public interface DepartmentRepository extends JpaRepository<Department, String> 
             "WHERE a.role_id = 3\n" +
             "GROUP BY d.department_id, d.department_name;", nativeQuery = true)
     List<Department> getDepartmentWithManagerRole();
+
+
 }

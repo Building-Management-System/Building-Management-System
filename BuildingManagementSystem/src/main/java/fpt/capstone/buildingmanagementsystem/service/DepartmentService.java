@@ -16,10 +16,10 @@ public class DepartmentService {
     DepartmentRepository departmentRepository;
     @Autowired
     DepartmentMapper departmentMapper;
-    public List<DepartmentResponse> getAllDepartment(){
+
+    public List<DepartmentResponse> getAllDepartment() {
         List<Department> departmentList = departmentRepository.findAll();
-        List<DepartmentResponse> responseList= departmentMapper.convert(departmentList);
-        return responseList;
+        return departmentMapper.convert(departmentList);
     }
 
     public List<DepartmentResponse> getDepartmentByManagerRole() {
@@ -30,5 +30,15 @@ public class DepartmentService {
                         department.getDepartmentName()
                 )).collect(Collectors.toList());
 
+    }
+
+    public List<DepartmentResponse> getDepartmentHaveManager() {
+        return departmentRepository.findAll()
+                .stream().filter(department ->
+                        !department.getDepartmentName().equals("security") &&
+                                !department.getDepartmentName().equals("human resources") &&
+                                !department.getDepartmentName().equals("Admin")
+                ).map(department -> new DepartmentResponse(department.getDepartmentId(), department.getDepartmentName()))
+                .collect(Collectors.toList());
     }
 }
