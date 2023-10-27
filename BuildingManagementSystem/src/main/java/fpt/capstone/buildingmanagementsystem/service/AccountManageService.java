@@ -7,10 +7,33 @@ import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.AccountMapper;
 import fpt.capstone.buildingmanagementsystem.mapper.RoleMapper;
 import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
-import fpt.capstone.buildingmanagementsystem.model.request.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
+import fpt.capstone.buildingmanagementsystem.model.entity.ChatMessage;
+import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.Department;
+import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
+import fpt.capstone.buildingmanagementsystem.model.entity.Role;
+import fpt.capstone.buildingmanagementsystem.model.entity.Status;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangePasswordRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangeRoleRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangeStatusAccountRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.ResetPasswordRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAllAccountResponse;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
+import fpt.capstone.buildingmanagementsystem.repository.ChatMessageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
+import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import fpt.capstone.buildingmanagementsystem.until.EmailSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +43,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -95,7 +119,7 @@ public class AccountManageService implements UserDetailsService {
                             } else {
                                 throw new BadRequest("department_exist_manager");
                             }
-                        }else {
+                        } else {
                             accountRepository.save(newAccount);
                             userRepository.save(user);
                         }
@@ -186,17 +210,19 @@ public class AccountManageService implements UserDetailsService {
         try {
             String accountId = changeRoleRequest.getAccountId();
             if (accountId != null && changeRoleRequest.getRoleName() != null) {
-                if (!accountRepository.existsById(changeRoleRequest.getAccountId())) {
-                    throw new NotFound("user_not_found");
-                }
-                String oldRole = accountRepository.findByAccountId(accountId).get().getRole().getRoleName();
+
+                String oldRole = accountRepository.findByAccountId(accountId)
+                        .orElseThrow(() -> new BadRequest("Not_found_account"))
+                        .getRole()
+                        .getRoleName();
                 if (!oldRole.equals(changeRoleRequest.getRoleName())) {
-                    Optional<Role> role = roleRepository.findByRoleName(changeRoleRequest.getRoleName());
-                    if (!role.isPresent()) {
-                        throw new NotFound("role_not_found");
-                    }
-                    String newRoleId = role.get().getRoleId();
-                    Department department = userRepository.findByUserId(changeRoleRequest.accountId).get().getDepartment();
+                    Role role = roleRepository.findByRoleName(changeRoleRequest.getRoleName())
+                            .orElseThrow(() -> new BadRequest("Not_found_role"));
+
+                    String newRoleId = role.getRoleId();
+                    Department department = departmentRepository.findByDepartmentId(changeRoleRequest.departmentId)
+                            .orElseThrow(() -> new BadRequest("Not_found_department"));
+
                     if (Objects.equals(changeRoleRequest.getRoleName(), "manager")) {
                         if (checkManagerOfDepartment(department.getDepartmentName())) {
                             accountRepository.updateRoleAccount(newRoleId, accountId);
@@ -206,6 +232,7 @@ public class AccountManageService implements UserDetailsService {
                         }
                     }
                     accountRepository.updateRoleAccount(newRoleId, accountId);
+                    accountRepository.updateDepartmentUser(department.getDepartmentId(), accountId);
                     return true;
                 } else {
                     throw new BadRequest("new_role_existed");
@@ -244,8 +271,9 @@ public class AccountManageService implements UserDetailsService {
         Optional<Role> role = roleRepository.findByRoleId(userAccount.get().getRole().getRoleId());
         return roleMapper.convertRegisterAccount(role.get());
     }
+
     public boolean deleteAccount(String username) {
-        if(username!=null) {
+        if (username != null) {
             Optional<Account> userAccount = accountRepository.findByUsername(username);
             if (userAccount.isPresent()) {
                 User user = userAccount.get().getUser();

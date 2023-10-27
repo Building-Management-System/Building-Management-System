@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class ChangeRoleRequest {
     public String accountId;
     public String roleName;
+    public String departmentId;
 }
