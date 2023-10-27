@@ -14,6 +14,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -30,10 +31,10 @@ public class RequestTicket {
     private String title;
 
     @Column
-    private String createDate;
+    private Date createDate;
 
     @Column
-    private String updateDate;
+    private Date updateDate;
 
     @Column
     @Enumerated(EnumType.STRING)

@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Date;
+import java.sql.Time;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -19,9 +22,9 @@ public class SendRoomBookingRequest {
     private int roomId;
     private String title;
     private String content;
-    private String bookingDate;
-    private String startTime;
-    private String endTime;
+    private Date bookingDate;
+    private Time startTime;
+    private Time endTime;
     String receiverId;
     String departmentReceiverId;
 }

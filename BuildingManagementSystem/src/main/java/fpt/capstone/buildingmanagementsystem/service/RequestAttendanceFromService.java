@@ -12,7 +12,6 @@ import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.AttendanceRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.AttendanceMessageRequest;
-import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.SendAttendanceFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.repository.AttendanceRequestFormRepository;
@@ -28,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -156,7 +156,7 @@ public class RequestAttendanceFromService {
                             requestTicketRepository.save(request.get());
                         }
                         saveAttendanceMessage(sendAttendanceFormRequest, send_user, department, request.get());
-                        String time = Until.generateRealTime();
+                        Date time = Until.generateRealTime();
                         ticketRepository.updateTicketTime(time, request.get().getTicketRequest().getTicketId());
                         requestTicketRepository.updateTicketRequestTime(time, sendAttendanceFormRequest.getRequestId());
                         return true;
@@ -243,7 +243,6 @@ public class RequestAttendanceFromService {
             throw new ServerError("Fail");
         }
     }
-
 
 
     @Transactional

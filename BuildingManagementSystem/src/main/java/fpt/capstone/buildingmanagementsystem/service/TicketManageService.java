@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -148,7 +149,7 @@ public class TicketManageService {
             if (!userRepository.findByUserId(changeReceiveIdRequest.getReceiverId()).isPresent()) {
                 throw new NotFound("receiver_id_not_found");
             }
-            String time = Until.generateRealTime();
+            Date time = Until.generateRealTime();
             requestMessageRepository.updateTicketRequestTime(changeReceiveIdRequest.getReceiverId(), time, changeReceiveIdRequest.getRequestId());
             RequestTicket requestTicket = requestTicketRepository.findByRequestId(changeReceiveIdRequest.getRequestId()).get();
             requestTicket.setStatus(EXECUTING);
