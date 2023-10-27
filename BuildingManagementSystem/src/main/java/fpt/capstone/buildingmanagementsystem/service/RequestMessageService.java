@@ -191,6 +191,7 @@ public class RequestMessageService {
                     .roomId(k.getRoom().getRoomId())
                     .roomName(k.getRoom().getRoomName())
                     .requestMessageId(v.getRequestMessage().getRequestMessageId())
+                    .status(v.isStatus())
                     .build();
             roomBookingResponses.add(roomBookingResponse);
 

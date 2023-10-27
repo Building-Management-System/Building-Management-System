@@ -47,6 +47,7 @@ public class TicketManageService {
     @Autowired
     RequestMessageRepository requestMessageRepository;
 
+    @Deprecated
     public List<TicketRequestResponse> getAllTickets() {
         List<TicketRequestResponse> ticketRequestResponses = new ArrayList<>();
         Map<String, List<TicketDto>> ticketDtos = ticketRepositoryv2.getAllTicketRequest()

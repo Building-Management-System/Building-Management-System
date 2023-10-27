@@ -25,4 +25,5 @@ public class RoomBookingResponseV2 {
     private int roomId;
     private String roomName;
     private String requestMessageId;
+    private boolean status;
 }
