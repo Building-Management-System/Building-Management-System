@@ -33,8 +33,7 @@ import java.util.Optional;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.LEAVE_REQUEST;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartDateAndEndDate;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.*;
 
 @Service
 public class RequestLeaveFormService {
