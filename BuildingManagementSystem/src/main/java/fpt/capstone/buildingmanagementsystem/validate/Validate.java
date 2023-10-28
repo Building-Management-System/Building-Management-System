@@ -42,7 +42,7 @@ public class Validate {
         Date endDate1 = dateFormat.parse(endDate.toString());
         Timestamp timestampStartTime = new java.sql.Timestamp(startDate1.getTime());
         Timestamp timestampEndTime = new java.sql.Timestamp(endDate1.getTime());
-        if(timestampEndTime.getTime()-timestampStartTime.getTime()<=0){
+        if(timestampEndTime.getTime()-timestampStartTime.getTime()<0){
             return false;
         }
         return true;
