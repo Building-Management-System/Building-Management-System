@@ -38,7 +38,7 @@ public class Account {
     public Date updatedDate;
     @NotNull
     @Column(name = "created_by")
-    public String createdBy;
+    public String createdBy = "unknown";
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private User user;

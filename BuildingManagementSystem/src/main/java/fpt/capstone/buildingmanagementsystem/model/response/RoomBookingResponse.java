@@ -16,4 +16,5 @@ public class RoomBookingResponse {
     private String departmentId;
     private Date bookingDate;
     private int roomId;
+    private String bookingStatus;
 }

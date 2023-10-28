@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface RoomBookingFormRepositoryV2 {
 
-    List<RoomBookingResponse> getAllBookedRoom();
+    List<RoomBookingResponse> getPendingAndAcceptedRoom();
 
 }

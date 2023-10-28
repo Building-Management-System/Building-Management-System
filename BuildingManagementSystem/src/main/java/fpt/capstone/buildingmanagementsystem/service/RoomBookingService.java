@@ -29,7 +29,6 @@ import fpt.capstone.buildingmanagementsystem.repository.RoomRepository;
 import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +41,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
-import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateTime;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartTimeAndEndTime;
@@ -273,8 +271,8 @@ public class RoomBookingService {
         roomBookingRoomRepository.save(roomBookingFormRoom);
     }
 
-    public List<RoomBookingResponse> getAllBookedRoom() {
-        return roomFormRepositoryV2.getAllBookedRoom();
+    public List<RoomBookingResponse> getPendingAndAcceptedRoom() {
+        return roomFormRepositoryV2.getPendingAndAcceptedRoom();
     }
 
     @Transactional
