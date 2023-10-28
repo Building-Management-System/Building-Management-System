@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.model.entity.requestForm;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RoomBookingStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -50,7 +51,8 @@ public class RoomBookingRequestForm {
     private Time endTime;
 
     @Column
-    private boolean status;
+    @Enumerated(EnumType.STRING)
+    private RoomBookingStatus status;
 
     @ManyToOne
     @JoinColumn(name = "departmentSenderId")

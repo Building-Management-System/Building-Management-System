@@ -13,6 +13,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.RoomBookingRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RoomBookingStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
 import fpt.capstone.buildingmanagementsystem.model.request.RoomBookingRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
@@ -41,6 +42,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateTime;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartTimeAndEndTime;
@@ -257,7 +259,7 @@ public class RoomBookingService {
         }
 
         RoomBookingRequestForm roomBookingForm = roomBookingRequestMapper.convert(sendRoomBookingRequest);
-        roomBookingForm.setStatus(false);
+        roomBookingForm.setStatus(RoomBookingStatus.PENDING);
         roomBookingForm.setDepartmentSender(senderDepartment);
         roomBookingForm.setRequestMessage(requestMessage);
         roomBookingForm.setTopic(TopicEnum.ROOM_REQUEST);
@@ -302,7 +304,7 @@ public class RoomBookingService {
         List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
         executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
-            roomBookingRequestForm.setStatus(true);
+            roomBookingRequestForm.setStatus(RoomBookingStatus.ACCEPTED);
             roomBookingFormRepository.saveAndFlush(roomBookingRequestForm);
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);
@@ -344,11 +346,12 @@ public class RoomBookingService {
                 .departmentId(requestMessage.getDepartment().getDepartmentId())
                 .receivedId(requestMessage.getSender().getUserId())
                 .build();
-
         List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
 
         executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
+            roomBookingRequestForm.setStatus(RoomBookingStatus.REJECTED);
+            roomBookingFormRepository.saveAndFlush(roomBookingRequestForm);
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);
             ticketRepository.save(ticket);
@@ -380,11 +383,12 @@ public class RoomBookingService {
                 .departmentId(requestMessage.getDepartment().getDepartmentId())
                 .receivedId(requestMessage.getSender().getUserId())
                 .build();
-
         List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequest(ticket);
 
         executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
+            roomBookingRequestForm.setStatus(RoomBookingStatus.REJECTED);
+            roomBookingFormRepository.saveAndFlush(roomBookingRequestForm);
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);
             ticketRepository.save(ticket);

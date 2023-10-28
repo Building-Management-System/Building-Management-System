@@ -36,6 +36,9 @@ public class Account {
     @NotNull
     @Column(name = "updated_date")
     public Date updatedDate;
+    @NotNull
+    @Column(name = "created_by")
+    public String createdBy;
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private User user;
