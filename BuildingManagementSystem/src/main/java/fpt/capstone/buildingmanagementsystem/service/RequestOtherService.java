@@ -214,7 +214,7 @@ public class RequestOtherService {
             request.setUpdateDate(Until.generateRealTime());
         });
         ticket.setUpdateDate(Until.generateRealTime());
-        ticket.setStatus(true);
+        ticket.setStatus(false);
         try {
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
