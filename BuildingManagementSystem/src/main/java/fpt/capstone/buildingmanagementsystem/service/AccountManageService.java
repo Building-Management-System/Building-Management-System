@@ -225,19 +225,21 @@ public class AccountManageService implements UserDetailsService {
                             .orElseThrow(() -> new BadRequest("Not_found_role"));
 
                     String newRoleId = role.getRoleId();
-                    Department department = departmentRepository.findByDepartmentId(changeRoleRequest.departmentId)
-                            .orElseThrow(() -> new BadRequest("Not_found_department"));
 
-                    if (Objects.equals(changeRoleRequest.getRoleName(), "manager")) {
+                    if (Objects.equals(changeRoleRequest.getRoleName(), "manager") ||
+                            Objects.equals(changeRoleRequest.getRoleName(), "employee")) {
+                        Department department = departmentRepository.findByDepartmentId(changeRoleRequest.departmentId)
+                                .orElseThrow(() -> new BadRequest("Not_found_department"));
+
                         if (checkManagerOfDepartment(department.getDepartmentName())) {
                             accountRepository.updateRoleAccount(newRoleId, accountId);
+                            accountRepository.updateDepartmentUser(department.getDepartmentId(), accountId);
                             return true;
                         } else {
                             throw new BadRequest("department_exist_manager");
                         }
                     }
                     accountRepository.updateRoleAccount(newRoleId, accountId);
-                    accountRepository.updateDepartmentUser(department.getDepartmentId(), accountId);
                     return true;
                 } else {
                     throw new BadRequest("new_role_existed");
