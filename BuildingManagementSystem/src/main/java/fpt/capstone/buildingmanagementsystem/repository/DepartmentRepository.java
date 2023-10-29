@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.repository;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
+import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -22,6 +23,7 @@ public interface DepartmentRepository extends JpaRepository<Department, String> 
             "WHERE a.role_id = 3\n" +
             "GROUP BY d.department_id, d.department_name;", nativeQuery = true)
     List<Department> getDepartmentWithManagerRole();
+    List<Department> findAll();
 
 
 }

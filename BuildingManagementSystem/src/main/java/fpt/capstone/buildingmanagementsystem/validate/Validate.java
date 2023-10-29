@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.validate;
 
+import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.stereotype.Component;
 
 import java.sql.Time;
@@ -36,6 +37,7 @@ public class Validate {
         }
         return true;
     }
+
     public static boolean validateStartDateAndEndDate(String startDate, String endDate) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate1 = dateFormat.parse(startDate.toString());
@@ -44,6 +46,39 @@ public class Validate {
         Timestamp timestampEndTime = new java.sql.Timestamp(endDate1.getTime());
         if(timestampEndTime.getTime()-timestampStartTime.getTime()<0){
             return false;
+        }
+        return true;
+    }
+    public static boolean checkDateLeave(String startDate) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date realDate = Until.generateDate();
+        Date startDate1 = dateFormat.parse(startDate.toString());
+        Timestamp timestampStartTime = new java.sql.Timestamp(startDate1.getTime());
+        Timestamp timestampRealDate = new java.sql.Timestamp(realDate.getTime());
+        if(timestampStartTime.getTime()-timestampRealDate.getTime()<0){
+            return false;
+        }
+        return true;
+    }
+    public static boolean checkDateBookingRoom(String startDate,String startTime) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        Date realDate = Until.generateDate();
+        Date startDate1 = dateFormat.parse(startDate.toString());
+        Date realtime =Until.generateTime();
+        Date startTime1 = timeFormat.parse(startTime.toString());
+        Timestamp timestampStartDate = new java.sql.Timestamp(startDate1.getTime());
+        Timestamp timestampRealDate = new java.sql.Timestamp(realDate.getTime());
+        Timestamp timestampStartTime = new java.sql.Timestamp(startTime1.getTime());
+        Timestamp timestampRealTime = new java.sql.Timestamp(realtime.getTime());
+        if(timestampStartDate.getTime()-timestampRealDate.getTime()<0){
+            return false;
+        }
+        if(timestampStartDate.getTime()-timestampRealDate.getTime()==0){
+            if(timestampStartTime.getTime()-timestampRealTime.getTime()<0){
+                return false;
+            }
+            return true;
         }
         return true;
     }

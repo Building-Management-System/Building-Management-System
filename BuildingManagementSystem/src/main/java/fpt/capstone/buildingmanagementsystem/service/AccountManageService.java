@@ -98,29 +98,37 @@ public class AccountManageService implements UserDetailsService {
 
     public boolean saveNewAccount(RegisterRequest registerRequest) {
         try {
-            if (registerRequest.getPassword() != null && registerRequest.getUsername() != null) {
+            if (registerRequest.getPassword() != null && registerRequest.getUsername() != null
+                    && registerRequest.getRole() != null&& registerRequest.getDepartmentName() != null) {
                 if (!accountRepository.existsByUsername(registerRequest.getUsername())) {
                     Optional<Role> role = roleRepository.findByRoleName(registerRequest.getRole());
                     Optional<Department> department = departmentRepository.findByDepartmentName(registerRequest.getDepartmentName());
                     if (role.isPresent() && department.isPresent()) {
                         Optional<Status> status = statusRepository.findByStatusId("1");
                         Account newAccount = accountMapper.convertRegisterAccount(registerRequest, status.get(), role.get());
-                        User user = User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
-                                .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
-                                        generateRealTime()).image("unknown").updatedDate(generateRealTime()).account(newAccount).department(department.get())
-                                .build();
-                        if (Objects.equals(registerRequest.getRole(), "manager")) {
-                            if (checkManagerOfDepartment(registerRequest.getDepartmentName())) {
+                        Optional<Account> hr = accountRepository.findByAccountId(registerRequest.getHrId());
+                        if (hr.isPresent() || registerRequest.getRole().equals("hr")) {
+                            hr.ifPresent(account -> newAccount.setCreatedBy(account.getUsername()));
+                            User user = User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
+                                    .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
+                                            generateRealTime()).image("unknown").updatedDate(generateRealTime()).account(newAccount).department(department.get())
+                                    .build();
+                            if (Objects.equals(registerRequest.getRole(), "manager")) {
+                                if (checkManagerOfDepartment(registerRequest.getDepartmentName())) {
+                                    accountRepository.save(newAccount);
+                                    userRepository.save(user);
+                                } else {
+                                    throw new Conflict("department_exist_manager");
+                                }
+                            } else {
                                 accountRepository.save(newAccount);
                                 userRepository.save(user);
-                            } else {
-                                throw new Conflict("department_exist_manager");
                             }
-                        } else {
-                            accountRepository.save(newAccount);
-                            userRepository.save(user);
+                            return true;
                         }
-                        return true;
+                        else {
+                            throw new NotFound("hr_id_not_found");
+                        }
                     } else {
                         throw new NotFound("not_found");
                     }
@@ -269,7 +277,7 @@ public class AccountManageService implements UserDetailsService {
         return roleMapper.convertRegisterAccount(role.get());
     }
 
-    public boolean deleteAccount(String username) {
+    public boolean deleteAccount(String username,String hrId) {
         if (username != null) {
             Optional<Account> userAccount = accountRepository.findByUsername(username);
             if (userAccount.isPresent()) {
@@ -288,7 +296,8 @@ public class AccountManageService implements UserDetailsService {
                         && checkpoint4.size() == 0
                         && checkpoint5.size() == 0
                         && checkpoint6.size() == 0
-                        && checkpoint7.size() == 0) {
+                        && checkpoint7.size() == 0
+                && hrId.equals(accountRepository.findByUsername(userAccount.get().getCreatedBy()).get().getAccountId())) {
                     accountRepository.delete(userAccount.get());
                     return true;
                 } else {

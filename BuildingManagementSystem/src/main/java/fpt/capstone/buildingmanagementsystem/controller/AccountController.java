@@ -54,7 +54,7 @@ public class AccountController {
     }
     @RequestMapping(value = "/deleteAccount", method = RequestMethod.POST)
     public boolean deleteAccount(@RequestBody DeleteAccount deleteAccount) throws Exception {
-        return accountManageService.deleteAccount(deleteAccount.getUsername());
+        return accountManageService.deleteAccount(deleteAccount.getUsername(),deleteAccount.getHrId());
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)

@@ -41,9 +41,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateTime;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartTimeAndEndTime;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.*;
 
 @Service
 public class RoomBookingService {
@@ -224,7 +222,8 @@ public class RoomBookingService {
         return validateDateFormat(sendRoomBookingRequest.getBookingDate()) &&
                 validateDateTime(sendRoomBookingRequest.getStartTime()) &&
                 validateDateTime(sendRoomBookingRequest.getEndTime()) &&
-                validateStartTimeAndEndTime(sendRoomBookingRequest.getStartTime(), sendRoomBookingRequest.getEndTime());
+                validateStartTimeAndEndTime(sendRoomBookingRequest.getStartTime(), sendRoomBookingRequest.getEndTime())&&
+        checkDateBookingRoom(sendRoomBookingRequest.getBookingDate(),sendRoomBookingRequest.getStartTime());
     }
 
     private void saveRoomBookingRequest(SendRoomBookingRequest sendRoomBookingRequest, Room room, User user, Department receiverDepartment, Department senderDepartment, String requestTicketId, Ticket ticket) throws ParseException {
@@ -263,7 +262,7 @@ public class RoomBookingService {
         roomBookingForm.setTopic(TopicEnum.ROOM_REQUEST);
         requestTicketRepository.saveAndFlush(requestTicket);
         requestMessageRepository.saveAndFlush(requestMessage);
-        roomBookingFormRepository.saveAndFlush(roomBookingForm);
+        roomBookingFormRepository.save(roomBookingForm);
 
         RoomBookingFormRoom roomBookingFormRoom = new RoomBookingFormRoom();
         roomBookingFormRoom.setRoomRequestForm(roomBookingForm);
