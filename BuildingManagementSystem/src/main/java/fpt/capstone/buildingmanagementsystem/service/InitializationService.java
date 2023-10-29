@@ -1,14 +1,22 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
+import fpt.capstone.buildingmanagementsystem.mapper.AccountMapper;
 import fpt.capstone.buildingmanagementsystem.model.entity.*;
+import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
 import fpt.capstone.buildingmanagementsystem.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 
 @Service
 public class InitializationService {
+    @Autowired
+    AccountMapper accountMapper;
     @Autowired
     RoomRepository roomRepository;
     @Autowired
@@ -19,14 +27,18 @@ public class InitializationService {
     UserPendingStatusRepository userPendingStatusRepository;
     @Autowired
     DepartmentRepository departmentRepository;
+    @Autowired
+    AccountRepository accountRepository;
+    @Autowired
+    UserRepository userRepository;
     public void init() {
-        int check1=roleRepository.findAll().size();
-        int check2=statusRepository.findAll().size();
-        int check3=userPendingStatusRepository.findAll().size();
-        int check4=departmentRepository.findAll().size();
-        int check5=roomRepository.findAll().size();
-
-        if(check1==0&check2==0&&check3==0&&check4==0&&check5==0) {
+        int check1 = roleRepository.findAll().size();
+        int check2 = statusRepository.findAll().size();
+        int check3 = userPendingStatusRepository.findAll().size();
+        int check4 = departmentRepository.findAll().size();
+        int check5 = roomRepository.findAll().size();
+        int check6 = accountRepository.findAll().size();
+        if (check1 == 0 & check2 == 0 && check3 == 0 && check4 == 0 && check5 == 0 && check6 == 0) {
             List<Role> roleList = new ArrayList<>();
             List<Status> statusList = new ArrayList<>();
             List<UserPendingStatus> userPendingStatusList = new ArrayList<>();
@@ -70,15 +82,23 @@ public class InitializationService {
             departmentList.add(department7);
             departmentList.add(department8);
             departmentList.add(department9);
-            for(int i=1;i<10;i++) {
-                Room room = new Room(i, "R10"+i);
+            for (int i = 1; i < 10; i++) {
+                Room room = new Room(i, "R10" + i);
                 roomList.add(room);
             }
+            RegisterRequest registerRequest = new RegisterRequest("demo", "123", "hr", "human resources", "");
+            Account newAccount = accountMapper.convertRegisterAccount(registerRequest, status2, role1);
+            User user = User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
+                    .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
+                            generateRealTime()).image("unknown").updatedDate(generateRealTime()).department(department3)
+                    .build();
+            user.setAccount(newAccount);
             roleRepository.saveAll(roleList);
             statusRepository.saveAll(statusList);
             userPendingStatusRepository.saveAll(userPendingStatusList);
             departmentRepository.saveAll(departmentList);
             roomRepository.saveAll(roomList);
+            userRepository.save(user);
         }
     }
 }

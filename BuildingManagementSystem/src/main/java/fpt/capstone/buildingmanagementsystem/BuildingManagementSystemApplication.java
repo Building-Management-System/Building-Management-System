@@ -9,8 +9,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 //@EnableScheduling
 public class BuildingManagementSystemApplication {
     public static void main(String[] args) {
-        ConfigurableApplicationContext context = SpringApplication.run(BuildingManagementSystemApplication.class, args);
+        ConfigurableApplicationContext context = SpringApplication.run(BuildingManagementSystemApplication.class);
         InitializationService initDB = context.getBean(InitializationService.class);
         initDB.init();
     }
+
 }

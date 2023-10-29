@@ -99,7 +99,8 @@ public class AccountManageService implements UserDetailsService {
     public boolean saveNewAccount(RegisterRequest registerRequest) {
         try {
             if (registerRequest.getPassword() != null && registerRequest.getUsername() != null
-                    && registerRequest.getRole() != null&& registerRequest.getDepartmentName() != null) {
+                    && registerRequest.getRole() != null&& registerRequest.getDepartmentName() != null
+                    &&registerRequest.getHrId() != null) {
                 if (!accountRepository.existsByUsername(registerRequest.getUsername())) {
                     Optional<Role> role = roleRepository.findByRoleName(registerRequest.getRole());
                     Optional<Department> department = departmentRepository.findByDepartmentName(registerRequest.getDepartmentName());
@@ -299,6 +300,7 @@ public class AccountManageService implements UserDetailsService {
                         && checkpoint5.size() == 0
                         && checkpoint6.size() == 0
                         && checkpoint7.size() == 0
+                && accountRepository.findByUsername(userAccount.get().getCreatedBy()).isPresent()
                 && hrId.equals(accountRepository.findByUsername(userAccount.get().getCreatedBy()).get().getAccountId())) {
                     accountRepository.delete(userAccount.get());
                     return true;
@@ -345,6 +347,11 @@ public class AccountManageService implements UserDetailsService {
         List<GetAllAccountResponse> getAllAccountResponses = new ArrayList<>();
         if (account.size() == 0) {
             return getAllAccountResponses;
+        }
+        for(int i=0;i<account.size();i++){
+            if(account.get(i).getCreatedBy()==null) {
+                account.remove(account.get(i));
+            }
         }
         account.forEach(element -> getAllAccountResponses.add(accountMapper.convertGetAllAccount(element)));
         return getAllAccountResponses;
