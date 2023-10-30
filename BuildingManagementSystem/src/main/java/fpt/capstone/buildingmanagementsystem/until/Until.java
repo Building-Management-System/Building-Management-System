@@ -62,8 +62,7 @@ public class Until {
         long timeInMillis = date.getTime();
         Time oldTime= new Time(timeInMillis);
         LocalTime localTime = oldTime.toLocalTime();
-        LocalTime newLocalTime = localTime.plusHours(1);
-        return Time.valueOf(newLocalTime);
+        return Time.valueOf(localTime);
     }
 
     public static String encodePassword(String password) {
