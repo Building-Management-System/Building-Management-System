@@ -237,7 +237,7 @@ public class AccountManageService implements UserDetailsService {
                             accountRepository.updateDepartmentUser(department.getDepartmentId(), accountId);
                             return true;
                         } else {
-                            throw new BadRequest("department_exist_manager");
+                            throw new Conflict("department_exist_manager");
                         }
                     }
                     accountRepository.updateRoleAccount(newRoleId, accountId);
@@ -246,7 +246,7 @@ public class AccountManageService implements UserDetailsService {
                     throw new BadRequest("new_role_existed");
                 }
             } else {
-                throw new BadRequest("request_fail");
+                throw new ServerError("request_fail");
             }
         } catch (ServerError e) {
             throw new ServerError("fail");
