@@ -99,8 +99,8 @@ public class AccountManageService implements UserDetailsService {
     public boolean saveNewAccount(RegisterRequest registerRequest) {
         try {
             if (registerRequest.getPassword() != null && registerRequest.getUsername() != null
-                    && registerRequest.getRole() != null&& registerRequest.getDepartmentName() != null
-                    &&registerRequest.getHrId() != null) {
+                    && registerRequest.getRole() != null && registerRequest.getDepartmentName() != null
+                    && registerRequest.getHrId() != null) {
                 if (!accountRepository.existsByUsername(registerRequest.getUsername())) {
                     Optional<Role> role = roleRepository.findByRoleName(registerRequest.getRole());
                     Optional<Department> department = departmentRepository.findByDepartmentName(registerRequest.getDepartmentName());
@@ -126,8 +126,7 @@ public class AccountManageService implements UserDetailsService {
                                 userRepository.save(user);
                             }
                             return true;
-                        }
-                        else {
+                        } else {
                             throw new NotFound("hr_id_not_found");
                         }
                     } else {
@@ -217,34 +216,26 @@ public class AccountManageService implements UserDetailsService {
             String accountId = changeRoleRequest.getAccountId();
             if (accountId != null && changeRoleRequest.getRoleName() != null) {
 
-                String oldRole = accountRepository.findByAccountId(accountId)
-                        .orElseThrow(() -> new BadRequest("Not_found_account"))
-                        .getRole()
-                        .getRoleName();
-                if (!oldRole.equals(changeRoleRequest.getRoleName())) {
-                    Role role = roleRepository.findByRoleName(changeRoleRequest.getRoleName())
-                            .orElseThrow(() -> new BadRequest("Not_found_role"));
+                Role role = roleRepository.findByRoleName(changeRoleRequest.getRoleName())
+                        .orElseThrow(() -> new BadRequest("Not_found_role"));
 
-                    String newRoleId = role.getRoleId();
+                String newRoleId = role.getRoleId();
 
-                    if (Objects.equals(changeRoleRequest.getRoleName(), "manager") ||
-                            Objects.equals(changeRoleRequest.getRoleName(), "employee")) {
-                        Department department = departmentRepository.findByDepartmentId(changeRoleRequest.departmentId)
-                                .orElseThrow(() -> new BadRequest("Not_found_department"));
+                if (Objects.equals(changeRoleRequest.getRoleName(), "manager") ||
+                        Objects.equals(changeRoleRequest.getRoleName(), "employee")) {
+                    Department department = departmentRepository.findByDepartmentId(changeRoleRequest.departmentId)
+                            .orElseThrow(() -> new BadRequest("Not_found_department"));
 
-                        if (checkManagerOfDepartment(department.getDepartmentName())) {
-                            accountRepository.updateRoleAccount(newRoleId, accountId);
-                            accountRepository.updateDepartmentUser(department.getDepartmentId(), accountId);
-                            return true;
-                        } else {
-                            throw new Conflict("department_exist_manager");
-                        }
+                    if (checkManagerOfDepartment(department.getDepartmentName())) {
+                        accountRepository.updateRoleAccount(newRoleId, accountId);
+                        accountRepository.updateDepartmentUser(department.getDepartmentId(), accountId);
+                        return true;
+                    } else {
+                        throw new Conflict("department_exist_manager");
                     }
-                    accountRepository.updateRoleAccount(newRoleId, accountId);
-                    return true;
-                } else {
-                    throw new BadRequest("new_role_existed");
                 }
+                accountRepository.updateRoleAccount(newRoleId, accountId);
+                return true;
             } else {
                 throw new ServerError("request_fail");
             }
@@ -280,7 +271,7 @@ public class AccountManageService implements UserDetailsService {
         return roleMapper.convertRegisterAccount(role.get());
     }
 
-    public boolean deleteAccount(String username,String hrId) {
+    public boolean deleteAccount(String username, String hrId) {
         if (username != null) {
             Optional<Account> userAccount = accountRepository.findByUsername(username);
             if (userAccount.isPresent()) {
@@ -300,8 +291,8 @@ public class AccountManageService implements UserDetailsService {
                         && checkpoint5.size() == 0
                         && checkpoint6.size() == 0
                         && checkpoint7.size() == 0
-                && accountRepository.findByUsername(userAccount.get().getCreatedBy()).isPresent()
-                && hrId.equals(accountRepository.findByUsername(userAccount.get().getCreatedBy()).get().getAccountId())) {
+                        && accountRepository.findByUsername(userAccount.get().getCreatedBy()).isPresent()
+                        && hrId.equals(accountRepository.findByUsername(userAccount.get().getCreatedBy()).get().getAccountId())) {
                     accountRepository.delete(userAccount.get());
                     return true;
                 } else {
@@ -348,8 +339,8 @@ public class AccountManageService implements UserDetailsService {
         if (account.size() == 0) {
             return getAllAccountResponses;
         }
-        for(int i=0;i<account.size();i++){
-            if(account.get(i).getCreatedBy()==null) {
+        for (int i = 0; i < account.size(); i++) {
+            if (account.get(i).getCreatedBy() == null) {
                 account.remove(account.get(i));
             }
         }
