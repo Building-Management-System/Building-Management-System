@@ -65,7 +65,7 @@ public class NotificationService {
                 }
                 if (uploadDate != null && buttonStatus.equals("save")) {
                     notification.setNotificationStatus(SCHEDULED);
-                } else {
+                } if (buttonStatus.equals("upload")){
                     notification.setNotificationStatus(DRAFT);
                 }
                 setUploadDate(uploadDate, notification);
