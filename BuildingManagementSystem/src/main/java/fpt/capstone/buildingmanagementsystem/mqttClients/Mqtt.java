@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.mqttClients;
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -18,10 +19,14 @@ import org.springframework.messaging.MessagingException;
 
 @Configuration
 public class Mqtt {
-    String uri="tcp://20.219.150.116:61613";
-    String username="admin";
-    String pass = "password";
-    String clientId="mqttx_e9b67c51";
+    @Value("${mqtt.server}")
+    String uri;
+    @Value("${mqtt.username}")
+    String username;
+    @Value("${mqtt.password}")
+    String pass;
+    @Value("${mqtt.id}")
+    String clientId;
     @Bean
     public MqttPahoClientFactory mqttPahoClientFactory() {
         DefaultMqttPahoClientFactory factory= new DefaultMqttPahoClientFactory();
