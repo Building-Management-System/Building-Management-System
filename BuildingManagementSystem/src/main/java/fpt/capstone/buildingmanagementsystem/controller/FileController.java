@@ -1,5 +1,8 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Bucket;
+import com.google.firebase.cloud.StorageClient;
 import fpt.capstone.buildingmanagementsystem.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,4 +28,13 @@ public class FileController {
     public ResponseEntity<?> getFile(@PathVariable String id) {
         return fileService.getFile(id);
     }
+    @GetMapping("/cleanFirebase/{name}")
+    public void cleanFirebase(@PathVariable String name) {
+        Bucket bucket = StorageClient.getInstance().bucket();
+        Blob blob = bucket.get(name);
+        if (blob != null) {
+            blob.delete();
+        }
+    }
+
 }
