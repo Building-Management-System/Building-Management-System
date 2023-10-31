@@ -1,23 +1,24 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.cloud.storage.Bucket;
+import com.google.firebase.cloud.StorageClient;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.NotificationMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
-import fpt.capstone.buildingmanagementsystem.model.entity.NotificationReceiver;
-import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.request.SaveNotificationRequest;
-import fpt.capstone.buildingmanagementsystem.repository.NotificationReceiverRepository;
-import fpt.capstone.buildingmanagementsystem.repository.NotificationRepository;
-import fpt.capstone.buildingmanagementsystem.repository.UnreadMarkRepository;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.until.Until;
+import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
-import java.util.Optional;
+import java.text.ParseException;
+import java.util.*;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus.*;
 
@@ -33,53 +34,116 @@ public class NotificationService {
     NotificationRepository notificationRepository;
     @Autowired
     UnreadMarkRepository unreadMarkRepository;
-    public boolean saveNotification(String data, MultipartFile[] image, MultipartFile[] file) throws IOException {
+    @Autowired
+    NotificationImageRepository notificationImageRepository;
+    @Autowired
+    NotificationFileRepository notificationFileRepository;
+    @Autowired
+    FileService fileService;
+
+    public boolean saveNotification(String data, MultipartFile[] image, MultipartFile[] file) {
         try {
+            List<NotificationReceiver> notificationReceiverList = new ArrayList<>();
+            List<UnreadMark> unreadMarkList = new ArrayList<>();
+            List<NotificationImage> listImage = new ArrayList<>();
+            List<Optional<User>> receivers = new ArrayList<>();
+
             SaveNotificationRequest saveNotificationRequest = new ObjectMapper().readValue(data, SaveNotificationRequest.class);
-            String userId= saveNotificationRequest.getUserId();
-            String receiverId= saveNotificationRequest.getReceiverId();
-            String title= saveNotificationRequest.getTitle();
-            String content= saveNotificationRequest.getContent();
-            String uploadDate= saveNotificationRequest.getUploadDate();
-            String buttonStatus= saveNotificationRequest.getButtonStatus();
-            boolean sendAllStatus= saveNotificationRequest.isSendAllStatus();
-            if (userId != null && title != null && content != null) {
-                if(receiverId != null || sendAllStatus){
-                    Notification notification= notificationMapper.convert(saveNotificationRequest);
-                    if(uploadDate==null && buttonStatus.equals("save")) {
-                        notification.setNotificationStatus(UPLOADED);
-                    }
-                    if(uploadDate!=null && buttonStatus.equals("save")) {
-                        notification.setNotificationStatus(SCHEDULED);
-                    }else {
-                        notification.setNotificationStatus(DRAFT);
-                    }
-                    Optional<User> user=userRepository.findByUserId(saveNotificationRequest.getUserId());
-                    Optional<User> receiver=userRepository.findByUserId(saveNotificationRequest.getReceiverId());
-                    if(user.isPresent()&&receiver.isPresent()){
-                        notification.setCreatedBy(user.get());
-                        notificationRepository.save(notification);
-                        saveNotificationReceiver(sendAllStatus, notification, receiver);
-                        return true;
-                    }else {
-                        throw new NotFound("not_found");
-                    }
+            String userId = saveNotificationRequest.getUserId();
+            List<String> receiverId = saveNotificationRequest.getReceiverId();
+            String title = saveNotificationRequest.getTitle();
+            String content = saveNotificationRequest.getContent();
+            String uploadDate = saveNotificationRequest.getUploadDatePlan();
+            String buttonStatus = saveNotificationRequest.getButtonStatus();
+            boolean sendAllStatus = saveNotificationRequest.isSendAllStatus();
+
+            if ((userId != null && title != null && content != null) &&
+                    ((!receiverId.isEmpty() && !sendAllStatus) || (receiverId.isEmpty() && sendAllStatus))) {
+                Notification notification = notificationMapper.convert(saveNotificationRequest);
+                if (uploadDate == null && buttonStatus.equals("save")) {
+                    notification.setNotificationStatus(UPLOADED);
+                }
+                if (uploadDate != null && buttonStatus.equals("save")) {
+                    notification.setNotificationStatus(SCHEDULED);
                 } else {
-                    throw new BadRequest("request_fail");
+                    notification.setNotificationStatus(DRAFT);
+                }
+                setUploadDate(uploadDate, notification);
+                Optional<User> sender = userRepository.findByUserId(saveNotificationRequest.getUserId());
+                receiverId.forEach(element -> receivers.add(userRepository.findByUserId(element)));
+                if (sender.isPresent()) {
+                    notification.setCreatedBy(sender.get());
+                    notificationRepository.save(notification);
+                    saveImageAndFileAndReceiver(image, file, sendAllStatus, notification, receivers, notificationReceiverList, unreadMarkList, listImage);
+                    return true;
+                } else {
+                    throw new NotFound("not_found");
                 }
             } else {
                 throw new BadRequest("request_fail");
             }
-        } catch (Exception e) {
+        } catch (ServerError | IOException | ParseException e) {
             throw new ServerError("fail");
         }
     }
 
-    private void saveNotificationReceiver(boolean sendAllStatus, Notification notification, Optional<User> receiver) {
-        NotificationReceiver notificationReceiver= new NotificationReceiver();
+    private static void setUploadDate(String uploadDate, Notification notification) throws ParseException {
+        if(uploadDate !=null) {
+            if (Validate.validateDateAndTime(uploadDate) && Validate.checkUploadDateRealTime(uploadDate)) {
+                notification.setUploadDate(Until.convertStringToDateTime(uploadDate));
+            } else {
+                throw new BadRequest("request_fail");
+            }
+        }
+    }
+
+    private void saveImageAndFileAndReceiver(MultipartFile[] image, MultipartFile[] file, boolean sendAllStatus, Notification notification, List<Optional<User>> receivers, List<NotificationReceiver> notificationReceiverList, List<UnreadMark> unreadMarkList, List<NotificationImage> listImage) throws IOException {
+        if (receivers.size() > 0) {
+            receivers.forEach(receiver -> notificationReceiverList.add(
+                    setNotificationReceiver(sendAllStatus, notification, receiver)));
+            notificationReceiverRepository.saveAll(notificationReceiverList);
+            receivers.forEach(receiver -> unreadMarkList.add(
+                    setUnreadMark(notification, receiver)));
+            unreadMarkRepository.saveAll(unreadMarkList);
+        } else {
+            notificationReceiverRepository.save(setNotificationReceiver(sendAllStatus, notification, Optional.empty()));
+        }
+        if (file.length > 0) {
+            notificationFileRepository.saveAll(fileService.store(file, notification));
+        }
+        if (image.length > 0) {
+            String imageName = "notification_" + UUID.randomUUID();
+            setListImage(image, notification, listImage, imageName);
+            notificationImageRepository.saveAll(listImage);
+        }
+    }
+
+    private static void setListImage(MultipartFile[] image, Notification notification, List<NotificationImage> listImage, String imageName) throws IOException {
+        for (MultipartFile multipartFile : image) {
+            String[] subFileName = Objects.requireNonNull(multipartFile.getOriginalFilename()).split("\\.");
+            List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
+            imageName = imageName + "." + stringList.get(stringList.size() - 1);
+            Bucket bucket = StorageClient.getInstance().bucket();
+            bucket.create(imageName, multipartFile.getBytes(), multipartFile.getContentType());
+            NotificationImage notificationImage = new NotificationImage();
+            notificationImage.setImageFileName(imageName);
+            notificationImage.setNotification(notification);
+            listImage.add(notificationImage);
+        }
+    }
+
+    private NotificationReceiver setNotificationReceiver(boolean sendAllStatus, Notification notification, Optional<User> receiver) {
+        NotificationReceiver notificationReceiver = new NotificationReceiver();
         notificationReceiver.setNotification(notification);
-        notificationReceiver.setReceiver(receiver.get());
+        receiver.ifPresent(notificationReceiver::setReceiver);
         notificationReceiver.setSendAllStatus(sendAllStatus);
-        notificationReceiverRepository.save(notificationReceiver);
+        return notificationReceiver;
+    }
+
+    private UnreadMark setUnreadMark(Notification notification, Optional<User> receiver) {
+        UnreadMark unreadMark = new UnreadMark();
+        unreadMark.setNotification(notification);
+        receiver.ifPresent(unreadMark::setUser);
+        return unreadMark;
     }
 }

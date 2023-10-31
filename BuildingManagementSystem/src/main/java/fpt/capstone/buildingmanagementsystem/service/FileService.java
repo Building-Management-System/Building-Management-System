@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
+import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
 import fpt.capstone.buildingmanagementsystem.model.entity.NotificationFile;
 import fpt.capstone.buildingmanagementsystem.model.response.FileResponse;
 import fpt.capstone.buildingmanagementsystem.repository.FileRepository;
@@ -13,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -23,21 +25,19 @@ public class FileService {
     @Autowired
     FileRepository fileRepository;
 
-    public ResponseEntity<?> store(MultipartFile file) {
-        try {
-            String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-            NotificationFile fileDb = NotificationFile.builder()
-                    .name(fileName)
-                    .type(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
-
-            fileRepository.save(fileDb);
-            return ResponseEntity.status(HttpStatus.OK).body("Upload success: " + fileDb.getName());
-
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Upload fail: " + file.getOriginalFilename());
-        }
+    public List<NotificationFile> store(MultipartFile[] file,Notification notification) throws IOException {
+        List<NotificationFile> list= new ArrayList<>();
+            for(MultipartFile multipartFile : file) {
+                String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+                NotificationFile fileDb = NotificationFile.builder()
+                        .name(fileName)
+                        .type(multipartFile.getContentType())
+                        .data(multipartFile.getBytes())
+                        .build();
+                fileDb.setNotification(notification);
+                list.add(fileDb);
+            }
+            return list;
     }
 
     public ResponseEntity<?> getALlFiles() {
