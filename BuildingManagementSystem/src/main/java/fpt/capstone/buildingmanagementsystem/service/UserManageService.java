@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 
@@ -252,7 +253,9 @@ public class UserManageService {
         return userInfoResponses;
     }
 
-    public List<UserAccountResponse> getUserAccount() {
-        return userRepositoryV2.getUserAccount();
+    public List<UserAccountResponse> getUserAccount(String userId) {
+        return userRepositoryV2.getUserAccount().stream()
+                .filter(user -> !user.getAccountId().equals(userId))
+                .collect(Collectors.toList());
     }
 }

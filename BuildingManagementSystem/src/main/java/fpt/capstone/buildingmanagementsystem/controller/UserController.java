@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -60,7 +61,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/getUserAccount", method = RequestMethod.GET)
-    public List<UserAccountResponse> getUserAccount() {
-        return userManageService.getUserAccount();
+    public List<UserAccountResponse> getUserAccount(@RequestParam("userId") String userId) {
+        return userManageService.getUserAccount(userId);
     }
 }
