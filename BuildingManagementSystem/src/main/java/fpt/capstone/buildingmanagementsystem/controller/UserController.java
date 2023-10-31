@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.controller;
 
 import fpt.capstone.buildingmanagementsystem.model.request.AcceptChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.UserAccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.service.UserManageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,5 +57,10 @@ public class UserController {
     @RequestMapping(value = "/getManagerByDepartment", method = RequestMethod.GET)
     public List<UserInfoResponse> getManager(@RequestParam("department") String departmentId) {
         return userManageService.getManagerByDepartmentId(departmentId);
+    }
+
+    @RequestMapping(value = "/getUserAccount", method = RequestMethod.GET)
+    public List<UserAccountResponse> getUserAccount() {
+        return userManageService.getUserAccount();
     }
 }

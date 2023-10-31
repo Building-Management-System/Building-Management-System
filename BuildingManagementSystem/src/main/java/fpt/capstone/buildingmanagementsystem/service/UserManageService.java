@@ -22,6 +22,7 @@ import fpt.capstone.buildingmanagementsystem.model.response.GetUserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.HrDepartmentResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ManagerInfoResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ReceiveIdAndDepartmentIdResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.UserAccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
@@ -29,6 +30,7 @@ import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserPendingRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserPendingStatusRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepositoryV2;
 import fpt.capstone.buildingmanagementsystem.service.schedule.TicketRequestScheduledService;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.slf4j.Logger;
@@ -65,6 +67,9 @@ public class UserManageService {
     UserPendingMapper userPendingMapper;
     @Autowired
     UserPendingStatusRepository userPendingStatusRepository;
+
+    @Autowired
+    UserRepositoryV2 userRepositoryV2;
 
     private static final Logger logger = LoggerFactory.getLogger(TicketRequestScheduledService.class);
 
@@ -245,5 +250,9 @@ public class UserManageService {
             userInfoResponses.add(response);
         });
         return userInfoResponses;
+    }
+
+    public List<UserAccountResponse> getUserAccount() {
+        return userRepositoryV2.getUserAccount();
     }
 }
