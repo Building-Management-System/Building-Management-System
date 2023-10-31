@@ -31,10 +31,6 @@ public class NotificationReceiver {
     private boolean sendAllStatus;
 
     @ManyToOne
-    @JoinColumn(name = "departmentId")
-    private Department department;
-
-    @ManyToOne
     @JoinColumn(name = "receiverId")
     private User receiver;
 
