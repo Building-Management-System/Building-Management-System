@@ -54,6 +54,12 @@ public class Until {
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         return new java.sql.Date(dateConvert.getTime());
     }
+    public static Date convertStringToDateTime(String date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+        java.util.Date dateConvert = sdf.parse(date);
+        return dateConvert;
+    }
     // cần check lại khi deploy lên host
     public static java.sql.Time convertStringToTime(String time) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");

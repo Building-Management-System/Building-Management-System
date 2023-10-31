@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 public class Validate {
     public static final String DATE_FORMAT="^\\d{4}\\-(0[1-9]|1[0-2])\\-(0[1-9]|1\\d|2\\d|3[01])$";
     public static final String TIME_FORMAT="^(2[0-3]|1[0-9]||0[0-9])\\:([0-5][0-9]|)\\:([0-5][0-9]|)$";
+    public static final String DATE_TIME_FORMAT="^\\d{4}\\-(0[1-9]|1[0-2])\\-(0[1-9]|1\\d|2\\d|3[01])\\s(2[0-3]|1[0-9]||0[0-9])\\:([0-5][0-9]|)\\:([0-5][0-9]|)$";
     public static boolean validateDateFormat(String date){
         if(Pattern.matches(DATE_FORMAT,date.toString())){
             return true;
@@ -22,6 +23,12 @@ public class Validate {
     }
     public static boolean validateDateTime(String time){
         if(Pattern.matches(TIME_FORMAT,time.toString())){
+            return true;
+        }
+        return false;
+    }
+    public static boolean validateDateAndTime(String datetime){
+        if(Pattern.matches(DATE_TIME_FORMAT,datetime.toString())){
             return true;
         }
         return false;
@@ -52,6 +59,17 @@ public class Validate {
     public static boolean checkDateLeave(String startDate) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date realDate = Until.generateDate();
+        Date startDate1 = dateFormat.parse(startDate.toString());
+        Timestamp timestampStartTime = new java.sql.Timestamp(startDate1.getTime());
+        Timestamp timestampRealDate = new java.sql.Timestamp(realDate.getTime());
+        if(timestampStartTime.getTime()-timestampRealDate.getTime()<0){
+            return false;
+        }
+        return true;
+    }
+    public static boolean checkUploadDateRealTime(String startDate) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date realDate = Until.generateRealTime();
         Date startDate1 = dateFormat.parse(startDate.toString());
         Timestamp timestampStartTime = new java.sql.Timestamp(startDate1.getTime());
         Timestamp timestampRealDate = new java.sql.Timestamp(realDate.getTime());
