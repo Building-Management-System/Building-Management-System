@@ -30,11 +30,16 @@ public class NotificationServiceV2 {
     @Autowired
     private NotificationImageRepository notificationImageRepository;
 
-    //todo: filter hidden notification
     public NotificationTitleResponse getAllNotificationByUser(String userId) {
 
+        Map<String, Notification> hiddenNotification = notificationRepository.getHiddenNotificationByUserId(userId)
+                .stream()
+                .collect(Collectors.toMap(Notification::getNotificationId, Function.identity()));
+
         List<NotificationResponse> notifications = notificationRepository.getNotificationByUserId(userId)
-                .stream().map(notification -> new NotificationResponse(
+                .stream()
+                .filter(notification -> !hiddenNotification.containsKey(notification.getNotificationId()))
+                .map(notification -> new NotificationResponse(
                         notification.getNotificationId(),
                         notification.getTitle(),
                         notification.getUploadDate(),
