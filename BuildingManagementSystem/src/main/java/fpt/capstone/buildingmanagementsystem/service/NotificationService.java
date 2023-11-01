@@ -60,12 +60,12 @@ public class NotificationService {
             if ((userId != null && title != null && content != null) &&
                     ((!receiverId.isEmpty() && !sendAllStatus) || (receiverId.isEmpty() && sendAllStatus))) {
                 Notification notification = notificationMapper.convert(saveNotificationRequest);
-                if (uploadDate == null && buttonStatus.equals("save")) {
+                if (uploadDate == null && buttonStatus.equals("upload")) {
                     notification.setNotificationStatus(UPLOADED);
                 }
-                if (uploadDate != null && buttonStatus.equals("save")) {
+                if (uploadDate != null && buttonStatus.equals("upload")) {
                     notification.setNotificationStatus(SCHEDULED);
-                } if (buttonStatus.equals("upload")){
+                } if (buttonStatus.equals("save")){
                     notification.setNotificationStatus(DRAFT);
                 }
                 setUploadDate(uploadDate, notification);
