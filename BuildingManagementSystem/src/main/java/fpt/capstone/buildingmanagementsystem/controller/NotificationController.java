@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationTitleResponse;
 import fpt.capstone.buildingmanagementsystem.service.NotificationService;
 import fpt.capstone.buildingmanagementsystem.service.NotificationServiceV2;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -31,5 +34,10 @@ public class NotificationController {
     @GetMapping("/getNotificationByUserId")
     public NotificationTitleResponse getAllNotificationByUser(@RequestParam("userId") String userId) {
         return notificationServiceV2.getAllNotificationByUser(userId);
+    }
+
+    @GetMapping("/getListNotificationByUserId")
+    public List<NotificationDetailResponse> getListNotificationByUserId(@RequestParam("userId") String userId) {
+        return notificationServiceV2.getListNotificationByUserId(userId);
     }
 }
