@@ -1,5 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
+import fpt.capstone.buildingmanagementsystem.model.request.PersonalPriorityRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.UnReadRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationTitleResponse;
 import fpt.capstone.buildingmanagementsystem.service.NotificationService;
@@ -8,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,5 +43,15 @@ public class NotificationController {
     @GetMapping("/getListNotificationByUserId")
     public List<NotificationDetailResponse> getListNotificationByUserId(@RequestParam("userId") String userId) {
         return notificationServiceV2.getListNotificationByUserId(userId);
+    }
+
+    @PostMapping("/markToRead")
+    public boolean markToReadByNotification(@RequestBody UnReadRequest unReadRequest) {
+        return notificationService.markAsRead(unReadRequest.getNotificationId(), unReadRequest.getUserId());
+    }
+
+    @PostMapping("/setPersonalPriority")
+    public boolean setPersonalPriority(@RequestBody PersonalPriorityRequest personalPriorityRequest) {
+        return notificationService.setPersonalPriority(personalPriorityRequest.getNotificationId(), personalPriorityRequest.getUserId());
     }
 }

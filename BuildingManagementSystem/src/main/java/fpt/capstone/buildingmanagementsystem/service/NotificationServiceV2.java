@@ -1,14 +1,19 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
+import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
 import fpt.capstone.buildingmanagementsystem.model.entity.NotificationFile;
 import fpt.capstone.buildingmanagementsystem.model.entity.NotificationImage;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationFileResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationImageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationTitleResponse;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationFileRepository;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationImageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class NotificationServiceV2 {
@@ -29,6 +36,9 @@ public class NotificationServiceV2 {
 
     @Autowired
     private NotificationImageRepository notificationImageRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public NotificationTitleResponse getAllNotificationByUser(String userId) {
 
@@ -57,6 +67,9 @@ public class NotificationServiceV2 {
 
     public List<NotificationDetailResponse> getListNotificationByUserId(String userId) {
 
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFound("not_found_user"));
+
         Map<String, Notification> hiddenNotification = notificationRepository.getHiddenNotificationByUserId(userId)
                 .stream()
                 .collect(Collectors.toMap(Notification::getNotificationId, Function.identity()));
@@ -65,11 +78,13 @@ public class NotificationServiceV2 {
                 .stream().filter(notification -> !hiddenNotification.containsKey(notification.getNotificationId()))
                 .collect(Collectors.toList());
 
-        Map<String, NotificationFile> files = notificationFileRepository.findByNotificationIn(notifications)
-                .stream().collect(Collectors.toMap(file -> file.getNotification().getNotificationId(), Function.identity()));
+        Map<String, List<NotificationFile>> files = notificationFileRepository.findByNotificationIn(notifications)
+                .stream()
+                .collect(groupingBy(file -> file.getNotification().getNotificationId(), Collectors.toList()));
 
-        Map<String, NotificationImage> images = notificationImageRepository.findByNotificationIn(notifications)
-                .stream().collect(Collectors.toMap(image -> image.getNotification().getNotificationId(), Function.identity()));
+        Map<String, List<NotificationImage>> images = notificationImageRepository.findByNotificationIn(notifications)
+                .stream()
+                .collect(groupingBy(image -> image.getNotification().getNotificationId(), Collectors.toList()));
 
         Map<String, Notification> personalPriorities = notificationRepository.getPersonalPriorityByUserId(userId)
                 .stream().collect(Collectors.toMap(Notification::getNotificationId, Function.identity()));
@@ -85,6 +100,7 @@ public class NotificationServiceV2 {
             detailResponse.setNotificationStatus(notification.getNotificationStatus());
             detailResponse.setPriority(notification.isPriority());
             detailResponse.setCreatorId(notification.getCreatedBy().getUserId());
+            detailResponse.setDepartmentUpload(user.getDepartment());
             detailResponse.setCreatorFirstName(notification.getCreatedBy().getFirstName());
             detailResponse.setCreatorLastName(notification.getCreatedBy().getLastName());
             detailResponse.setReadStatus(true);
@@ -100,15 +116,23 @@ public class NotificationServiceV2 {
                 response.setReadStatus(false);
             }
             if (files.containsKey(response.getNotificationId())) {
-                response.setFileId(files.get(response.getNotificationId()).getFileId());
-                response.setFileName(files.get(response.getNotificationId()).getName());
-                response.setType(files.get(response.getNotificationId()).getType());
+                List<NotificationFileResponse> notificationFiles = files.get(response.getNotificationId())
+                        .stream()
+                        .map(file -> new NotificationFileResponse(
+                                file.getFileId(),
+                                file.getName(),
+                                file.getType()
+                        )).collect(Collectors.toList());
+                response.setNotificationFiles(notificationFiles);
             }
             if (images.containsKey(response.getNotificationId())) {
-                response.setImageId(images.get(response.getNotificationId()).getImageId());
-                response.setImageFileName(images.get(response.getNotificationId()).getImageFileName());
+                List<NotificationImageResponse> notificationImages = images.get(response.getNotificationId())
+                        .stream()
+                        .map(image -> new NotificationImageResponse(image.getImageId(), image.getImageFileName()))
+                        .collect(Collectors.toList());
+                response.setNotificationImages(notificationImages);
             }
-            if(personalPriorities.containsKey(response.getNotificationId())) {
+            if (personalPriorities.containsKey(response.getNotificationId())) {
                 response.setPersonalPriority(true);
             }
         });
