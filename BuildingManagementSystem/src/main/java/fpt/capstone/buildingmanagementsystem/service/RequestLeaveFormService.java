@@ -73,7 +73,7 @@ public class RequestLeaveFormService {
                         Ticket ticket = Ticket.builder()
                                 .ticketId(id_ticket)
                                 .topic(LEAVE_REQUEST)
-                                .status(false)
+                                .status(true)
                                 .createDate(Until.generateRealTime())
                                 .updateDate(Until.generateRealTime())
                                 .build();

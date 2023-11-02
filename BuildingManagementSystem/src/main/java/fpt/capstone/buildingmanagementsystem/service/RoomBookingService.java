@@ -99,7 +99,7 @@ public class RoomBookingService {
                     Ticket ticket = Ticket.builder()
                             .ticketId(ticketId)
                             .topic(TopicEnum.ROOM_REQUEST)
-                            .status(false)
+                            .status(true)
                             .createDate(Until.generateRealTime())
                             .updateDate(Until.generateRealTime())
                             .build();

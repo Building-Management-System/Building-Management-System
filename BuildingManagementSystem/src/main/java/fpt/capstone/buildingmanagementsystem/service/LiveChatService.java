@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,6 +98,50 @@ public class LiveChatService {
                         chatMessage.getCreateAt(),
                         chatMessage.getUpdateAt()
                 ));
+            } else {
+                throw new BadRequest("request_fail");
+            }
+        } catch (Exception e) {
+            throw new ServerError("fail");
+        }
+    }
+
+    public ResponseEntity<?> createChat3(String data, MultipartFile file){
+        try {
+            ChatMessageRequest2 chatMessageRequest2 = new ObjectMapper().readValue(data, ChatMessageRequest2.class);
+            if (chatMessageRequest2.getFrom() != null && chatMessageRequest2.getTo() != null && file != null) {
+                if (file.getSize() > 10485760) {
+                    User from = userRepository.findByUserId(chatMessageRequest2.getFrom())
+                            .orElseThrow(Exception::new);
+                    User to = userRepository.findByUserId(chatMessageRequest2.getTo())
+                            .orElseThrow(Exception::new);
+
+                    String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
+                    List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
+                    String name = "livechat_" + UUID.randomUUID() + "." + stringList.get(1);
+                    Bucket bucket = StorageClient.getInstance().bucket();
+                    bucket.create(name, file.getBytes(), file.getContentType());
+
+                    ChatMessage chatMessage = ChatMessage.builder()
+                            .sender(from)
+                            .receiver(to)
+                            .message(name)
+                            .createAt(Until.generateRealTime())
+                            .updateAt(Until.generateRealTime())
+                            .type("file")
+                            .build();
+                    chatMessageRepository.save(chatMessage);
+                    return ResponseEntity.ok().body(new ChatMessageResponse(
+                            List.of(from.getUserId(), to.getUserId()),
+                            from.getUserId(),
+                            to.getUserId(),
+                            name, "file",
+                            chatMessage.getCreateAt(),
+                            chatMessage.getUpdateAt()
+                    ));
+                } else {
+                    throw new BadRequest("file_oversize");
+                }
             } else {
                 throw new BadRequest("request_fail");
             }
