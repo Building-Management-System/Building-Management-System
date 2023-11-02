@@ -50,6 +50,11 @@ public class NotificationController {
         return notificationService.markAsRead(unReadRequest.getNotificationId(), unReadRequest.getUserId());
     }
 
+    @PostMapping("/markToUnRead")
+    public boolean markToUnReadByNotification(@RequestBody UnReadRequest unReadRequest) {
+        return notificationService.markAsUnRead(unReadRequest.getNotificationId(), unReadRequest.getUserId());
+    }
+
     @PostMapping("/setPersonalPriority")
     public boolean setPersonalPriority(@RequestBody PersonalPriorityRequest personalPriorityRequest) {
         return notificationService.setPersonalPriority(personalPriorityRequest.getNotificationId(), personalPriorityRequest.getUserId());

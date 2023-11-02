@@ -290,6 +290,15 @@ public class RequestAttendanceFromService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
+            automaticNotificationService.sendApprovalRequestNotification(
+                    new ApprovalNotificationRequest(
+                            ticket.getTicketId(),
+                            requestMessage.getReceiver(),
+                            requestMessage.getSender(),
+                            ticket.getTopic(),
+                            false,
+                            attendanceMessageRequest.getContent()
+                    ));
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");

@@ -11,6 +11,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.LeaveRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.LeaveMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendLeaveFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
@@ -23,6 +24,7 @@ import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import javax.transaction.Transactional;
 import java.text.ParseException;
 import java.util.Date;
@@ -54,6 +56,9 @@ public class RequestLeaveFormService {
 
     @Autowired
     RequestOtherService requestOtherService;
+
+    @Autowired
+    AutomaticNotificationService automaticNotificationService;
 
     public boolean getLeaveFormUser(SendLeaveFormRequest sendLeaveFormRequest) {
         try {
@@ -179,7 +184,7 @@ public class RequestLeaveFormService {
     private static boolean checkValidate(SendLeaveFormRequest sendLeaveFormRequest) throws ParseException {
         return validateDateFormat(sendLeaveFormRequest.getFromDate()) &&
                 validateDateFormat(sendLeaveFormRequest.getToDate()) && validateStartDateAndEndDate(sendLeaveFormRequest.getFromDate()
-                , sendLeaveFormRequest.getToDate()) && checkDateLeave(sendLeaveFormRequest.getFromDate()) ;
+                , sendLeaveFormRequest.getToDate()) && checkDateLeave(sendLeaveFormRequest.getFromDate());
     }
 
     private void saveLeaveRequest(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) throws ParseException {
@@ -250,6 +255,15 @@ public class RequestLeaveFormService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.saveAndFlush(ticket);
+            automaticNotificationService.sendApprovalRequestNotification(
+                    new ApprovalNotificationRequest(
+                            ticket.getTicketId(),
+                            requestMessage.getReceiver(),
+                            requestMessage.getSender(),
+                            ticket.getTopic(),
+                            true,
+                            null
+                    ));
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -289,6 +303,16 @@ public class RequestLeaveFormService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
+            automaticNotificationService.sendApprovalRequestNotification(
+                    new ApprovalNotificationRequest(
+                            ticket.getTicketId(),
+                            requestMessage.getReceiver(),
+                            requestMessage.getSender(),
+                            ticket.getTopic(),
+                            false,
+                            leaveMessageRequest.getContent()
+
+                    ));
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
