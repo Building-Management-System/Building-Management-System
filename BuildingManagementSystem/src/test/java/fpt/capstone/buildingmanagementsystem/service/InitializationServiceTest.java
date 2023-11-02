@@ -66,4 +66,4 @@ class InitializationServiceTest {
         Assertions.assertEquals(List.of(new DayOff("dayOffId", 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0, new Account("accountId", "username", "password", new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 16).getTime(), new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 16).getTime(), "createdBy", null, new Status("statusId", "statusName"), new Role("roleId", "roleName")))), result);
     }
 }
-//pass1
+//pass2
