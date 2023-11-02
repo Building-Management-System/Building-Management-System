@@ -187,6 +187,26 @@ public class NotificationService {
         }
     }
 
+    public boolean markAsUnRead(String notificationId, String userId) {
+
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new BadRequest("Not_found_notification"));
+
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequest("Not_found_user"));
+
+        UnreadMark unreadMark = UnreadMark.builder()
+                .notification(notification)
+                .user(user)
+                .build();
+        try {
+            unreadMarkRepository.save(unreadMark);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("fail");
+        }
+    }
+
     public boolean setPersonalPriority(String notificationId, String userId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new BadRequest("Not_found_notification"));

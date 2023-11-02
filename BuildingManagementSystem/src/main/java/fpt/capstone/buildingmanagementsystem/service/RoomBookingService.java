@@ -15,6 +15,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.RoomBookin
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RoomBookingStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
+import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.RoomBookingRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendRoomBookingRequest;
@@ -74,6 +75,8 @@ public class RoomBookingService {
     @Autowired
     RequestOtherService requestOtherService;
 
+    @Autowired
+    AutomaticNotificationService automaticNotificationService;
 
 //    private static final TopicEnum ROOM_BOOKING = TopicEnum.ROOM_REQUEST;
 
@@ -306,6 +309,15 @@ public class RoomBookingService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);
             ticketRepository.save(ticket);
+            automaticNotificationService.sendApprovalRequestNotification(
+                    new ApprovalNotificationRequest(
+                            ticket.getTicketId(),
+                            requestMessage.getReceiver(),
+                            requestMessage.getSender(),
+                            ticket.getTopic(),
+                            true,
+                            null
+                    ));
             Room room = roomBookingRoomRepository.findByRoomRequestForm(roomBookingRequestForm).getRoom();
             Date startTime = roomBookingRequestForm.getStartTime();
             Date endTime = roomBookingRequestForm.getEndTime();
@@ -352,6 +364,15 @@ public class RoomBookingService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);
             ticketRepository.save(ticket);
+            automaticNotificationService.sendApprovalRequestNotification(
+                    new ApprovalNotificationRequest(
+                            ticket.getTicketId(),
+                            requestMessage.getReceiver(),
+                            requestMessage.getSender(),
+                            ticket.getTopic(),
+                            false,
+                            roomBookingFormRoom.getContent()
+                    ));
         } catch (Exception e) {
             throw new ServerError("Fail");
         }
@@ -389,6 +410,15 @@ public class RoomBookingService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAndFlush(requestTicket);
             ticketRepository.save(ticket);
+            automaticNotificationService.sendApprovalRequestNotification(
+                    new ApprovalNotificationRequest(
+                            ticket.getTicketId(),
+                            requestMessage.getReceiver(),
+                            requestMessage.getSender(),
+                            ticket.getTopic(),
+                            false,
+                            roomBookingFormRoom.getContent()
+                    ));
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
