@@ -5,6 +5,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
 import fpt.capstone.buildingmanagementsystem.model.entity.NotificationFile;
 import fpt.capstone.buildingmanagementsystem.model.entity.NotificationImage;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationFileResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationImageResponse;
@@ -138,5 +139,23 @@ public class NotificationServiceV2 {
         });
 
         return notificationDetailResponses;
+    }
+
+    public List<NotificationDetailResponse> getListUploadedNotificationByUserId(String userId) {
+        return getListNotificationByUserId(userId)
+                .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.UPLOADED))
+                .collect(Collectors.toList());
+    }
+
+    public List<NotificationDetailResponse> getListDraftNotificationByUserId(String userId) {
+        return getListNotificationByUserId(userId)
+                .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.DRAFT))
+                .collect(Collectors.toList());
+    }
+
+    public List<NotificationDetailResponse> getListScheduledNotificationByUserId(String userId) {
+        return getListNotificationByUserId(userId)
+                .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.SCHEDULED))
+                .collect(Collectors.toList());
     }
 }

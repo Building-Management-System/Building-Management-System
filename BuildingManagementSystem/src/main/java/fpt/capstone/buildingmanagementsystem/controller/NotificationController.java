@@ -44,6 +44,20 @@ public class NotificationController {
     public List<NotificationDetailResponse> getListNotificationByUserId(@RequestParam("userId") String userId) {
         return notificationServiceV2.getListNotificationByUserId(userId);
     }
+    @GetMapping("/getListUploadedNotification")
+    public List<NotificationDetailResponse> getListUploadedNotificationByUserId(@RequestParam("userId") String userId) {
+        return notificationServiceV2.getListUploadedNotificationByUserId(userId);
+    }
+
+    @GetMapping("/getListDraftNotification")
+    public List<NotificationDetailResponse> getListDraftNotificationByUserId(@RequestParam("userId") String userId) {
+        return notificationServiceV2.getListDraftNotificationByUserId(userId);
+    }
+
+    @GetMapping("/getListScheduledNotification")
+    public List<NotificationDetailResponse> getListScheduledNotificationByUserId(@RequestParam("userId") String userId) {
+        return notificationServiceV2.getListScheduledNotificationByUserId(userId);
+    }
 
     @PostMapping("/markToRead")
     public boolean markToReadByNotification(@RequestBody UnReadRequest unReadRequest) {
