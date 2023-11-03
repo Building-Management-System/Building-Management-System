@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus.DRAFT;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus.SCHEDULED;
@@ -134,23 +136,31 @@ public class NotificationService {
             notificationFileRepository.saveAll(fileService.store(file, notification));
         }
         if (image.length > 0) {
-            String imageName = "notification_" + UUID.randomUUID();
-            setListImage(image, notification, listImage, imageName);
+            setListImage(image, notification, listImage);
             notificationImageRepository.saveAll(listImage);
         }
     }
 
-    private static void setListImage(MultipartFile[] image, Notification notification, List<NotificationImage> listImage, String imageName) throws IOException {
+    private static void setListImage(MultipartFile[] image, Notification notification, List<NotificationImage> listImage) throws IOException {
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
         for (MultipartFile multipartFile : image) {
-            String[] subFileName = Objects.requireNonNull(multipartFile.getOriginalFilename()).split("\\.");
-            List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
-            imageName = imageName + "." + stringList.get(stringList.size() - 1);
-            Bucket bucket = StorageClient.getInstance().bucket();
-            bucket.create(imageName, multipartFile.getBytes(), multipartFile.getContentType());
-            NotificationImage notificationImage = new NotificationImage();
-            notificationImage.setImageFileName(imageName);
-            notificationImage.setNotification(notification);
-            listImage.add(notificationImage);
+            executorService.submit(() -> {
+                String imageName = "notification_" + UUID.randomUUID();
+                String[] subFileName = Objects.requireNonNull(multipartFile.getOriginalFilename()).split("\\.");
+                List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
+                imageName = imageName + "." + stringList.get(stringList.size() - 1);
+                Bucket bucket = StorageClient.getInstance().bucket();
+                try {
+                    bucket.create(imageName, multipartFile.getBytes(), multipartFile.getContentType());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                NotificationImage notificationImage = new NotificationImage();
+                notificationImage.setImageFileName(imageName);
+                notificationImage.setNotification(notification);
+                listImage.add(notificationImage);
+            });
+            executorService.shutdown();
         }
     }
 
