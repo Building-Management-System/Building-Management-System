@@ -160,8 +160,8 @@ public class NotificationService {
                 notificationImage.setNotification(notification);
                 listImage.add(notificationImage);
             });
-            executorService.shutdown();
         }
+        executorService.shutdown();
     }
 
     private NotificationReceiver setNotificationReceiver(boolean sendAllStatus, Notification notification, Optional<User> receiver) {
