@@ -137,28 +137,27 @@ public class NotificationService {
         }
         if (image.length > 0) {
             setListImage(image, notification, listImage);
-            notificationImageRepository.saveAll(listImage);
         }
     }
 
-    private static void setListImage(MultipartFile[] image, Notification notification, List<NotificationImage> listImage) throws IOException {
+    private void setListImage(MultipartFile[] image, Notification notification, List<NotificationImage> listImage) throws IOException {
         ExecutorService executorService = Executors.newFixedThreadPool(5);
-        for (MultipartFile multipartFile : image) {
+        for (int i = 0; i < image.length; i++) {
+            int finalI = i;
+            byte[] imageBytes = image[finalI].getBytes();
             executorService.submit(() -> {
                 String imageName = "notification_" + UUID.randomUUID();
-                String[] subFileName = Objects.requireNonNull(multipartFile.getOriginalFilename()).split("\\.");
+                String[] subFileName = Objects.requireNonNull(image[finalI].getOriginalFilename()).split("\\.");
                 List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
                 imageName = imageName + "." + stringList.get(stringList.size() - 1);
                 Bucket bucket = StorageClient.getInstance().bucket();
-                try {
-                    bucket.create(imageName, multipartFile.getBytes(), multipartFile.getContentType());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                bucket.create(imageName, imageBytes, image[finalI].getContentType());
+                System.out.println(imageName+finalI);
                 NotificationImage notificationImage = new NotificationImage();
                 notificationImage.setImageFileName(imageName);
                 notificationImage.setNotification(notification);
                 listImage.add(notificationImage);
+                notificationImageRepository.saveAndFlush(notificationImage);
             });
         }
         executorService.shutdown();
