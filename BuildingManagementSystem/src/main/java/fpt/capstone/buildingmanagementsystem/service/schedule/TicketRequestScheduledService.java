@@ -31,7 +31,7 @@ public class TicketRequestScheduledService {
 
     private static final int day = 1000 * 60 * 60 * 24;
 
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 30000)
     public void closeTicketUpTime() {
         closeTicketWithAnsweredRequests();
     }
@@ -51,7 +51,7 @@ public class TicketRequestScheduledService {
                     if (instantDate.getTime() - updateDate.getTime() >= day) {
                         ticket.setStatus(false);
                         logger.info("run-done " + ticket.getTicketId());
-//                        ticketRepository.saveAndFlush(ticket);
+                        ticketRepository.saveAndFlush(ticket);
                     }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
