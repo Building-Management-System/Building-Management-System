@@ -31,10 +31,6 @@ public class TicketRequestScheduledService {
 
     private static final int day = 1000 * 60 * 60 * 24;
 
-    //(cron = "0 0 1 * * ?")
-    //0 */5 * ? * *
-    //
-    //0 */3 * ? * *
     @Scheduled(fixedRate = 10000)
     public void closeTicketUpTime() {
         closeTicketWithAnsweredRequests();
@@ -47,14 +43,18 @@ public class TicketRequestScheduledService {
                     .stream().filter(requestTicket -> requestTicket.getStatus().equals(EXECUTING) ||
                             requestTicket.getStatus().equals(RequestStatus.PENDING))
                     .collect(Collectors.toList());
-            if (requestTickets.isEmpty()) {
-                Date updateDate = Until.generateRealTime();
-                Date instantDate = Until.generateRealTime();
-                //3 * day
-                if (instantDate.getTime() - updateDate.getTime() >= day) {
-                    ticket.setStatus(false);
-                    logger.info("run-done" + ticket.getTicketId());
+            if (requestTickets.isEmpty() && ticket.isStatus()) {
+                try {
+                    Date updateDate = ticket.getUpdateDate();
+                    Date instantDate = Until.generateRealTime();
+                    //3 * day
+                    if (instantDate.getTime() - updateDate.getTime() >= day) {
+                        ticket.setStatus(false);
+                        logger.info("run-done " + ticket.getTicketId());
 //                        ticketRepository.saveAndFlush(ticket);
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
