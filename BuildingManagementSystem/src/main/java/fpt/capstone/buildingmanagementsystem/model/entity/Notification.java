@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.model.entity;
 
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Entity(name = "Notification")
 public class Notification {
     @Id

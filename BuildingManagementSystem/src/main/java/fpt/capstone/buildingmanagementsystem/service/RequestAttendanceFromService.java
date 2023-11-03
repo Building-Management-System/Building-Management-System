@@ -11,6 +11,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.AttendanceRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.AttendanceMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendAttendanceFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
@@ -61,6 +62,9 @@ public class RequestAttendanceFromService {
 
     @Autowired
     RequestOtherService requestOtherService;
+
+    @Autowired
+    AutomaticNotificationService automaticNotificationService;
 
     public boolean getAttendanceUser(SendAttendanceFormRequest sendAttendanceFormRequest) {
         try {
@@ -238,6 +242,16 @@ public class RequestAttendanceFromService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
+
+            automaticNotificationService.sendApprovalRequestNotification(
+                    new ApprovalNotificationRequest(
+                            ticket.getTicketId(),
+                            requestMessage.getReceiver(),
+                            requestMessage.getSender(),
+                            ticket.getTopic(),
+                            true,
+                            null
+                    ));
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -276,6 +290,15 @@ public class RequestAttendanceFromService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
+            automaticNotificationService.sendApprovalRequestNotification(
+                    new ApprovalNotificationRequest(
+                            ticket.getTicketId(),
+                            requestMessage.getReceiver(),
+                            requestMessage.getSender(),
+                            ticket.getTopic(),
+                            false,
+                            attendanceMessageRequest.getContent()
+                    ));
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
