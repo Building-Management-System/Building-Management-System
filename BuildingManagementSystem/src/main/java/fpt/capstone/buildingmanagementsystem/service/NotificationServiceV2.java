@@ -158,4 +158,10 @@ public class NotificationServiceV2 {
                 .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.SCHEDULED))
                 .collect(Collectors.toList());
     }
+
+    public NotificationDetailResponse getNotificationByUserIdAndNotificationId(String userId, String notificationId) {
+        return getListNotificationByUserId(userId)
+                .stream().filter(notification -> notification.getNotificationId().equals(notificationId))
+                .collect(Collectors.toList()).get(0);
+    }
 }
