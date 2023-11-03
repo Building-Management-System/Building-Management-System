@@ -35,7 +35,7 @@ public class TicketRequestScheduledService {
     //0 */5 * ? * *
     //
     //0 */3 * ? * *
-    @Scheduled(cron = "*/0.2 * * * *")
+    @Scheduled(fixedRate = 10000)
     public void closeTicketUpTime() {
         closeTicketWithAnsweredRequests();
     }
