@@ -2,8 +2,6 @@ package fpt.capstone.buildingmanagementsystem.validate;
 
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.stereotype.Component;
-
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
