@@ -4,9 +4,11 @@ import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
 import fpt.capstone.buildingmanagementsystem.model.entity.NotificationFile;
 import fpt.capstone.buildingmanagementsystem.model.entity.NotificationImage;
+import fpt.capstone.buildingmanagementsystem.model.entity.PersonalPriority;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponseV2;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationFileResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationImageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationResponse;
@@ -14,6 +16,7 @@ import fpt.capstone.buildingmanagementsystem.model.response.NotificationTitleRes
 import fpt.capstone.buildingmanagementsystem.repository.NotificationFileRepository;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationImageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationRepository;
+import fpt.capstone.buildingmanagementsystem.repository.PersonalPriorityRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,6 +45,9 @@ public class NotificationServiceV2 {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PersonalPriorityRepository personalPriorityRepository;
+
     public NotificationTitleResponse getAllNotificationByUser(String userId) {
 
         Map<String, Notification> hiddenNotification = notificationRepository.getHiddenNotificationByUserId(userId)
@@ -54,7 +61,9 @@ public class NotificationServiceV2 {
                         notification.getNotificationId(),
                         notification.getTitle(),
                         notification.getUploadDate(),
-                        true
+                        true,
+                        notification.getCreatedBy().getUserId(),
+                        notification.getCreatedBy().getDepartment()
                 )).collect(Collectors.toList());
 
         Map<String, Notification> unreadNotification = notificationRepository.getUnreadMarkNotificationByUserId(userId)
@@ -66,10 +75,52 @@ public class NotificationServiceV2 {
         return new NotificationTitleResponse(notifications.size(), notifications);
     }
 
-    public List<NotificationDetailResponse> getListNotificationByUserId(String userId) {
-
+    public NotificationDetailResponseV2 getNotificationByUserIdAndNotificationId(String userId, String notificationId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new NotFound("not_found_user"));
+
+        List<Notification> hiddenNotification = notificationRepository.getHiddenNotificationByUserIdAndNotification(userId, notificationId);
+        if (!hiddenNotification.isEmpty()) {
+            throw new NotFound("Not_found_notification");
+        }
+        Notification notification = notificationRepository.getNotificationByUserIdAndNotificationId(userId, notificationId)
+                .orElseThrow(() -> new NotFound("not_found_notification"));
+
+        List<NotificationFileResponse> notificationFiles = notificationFileRepository.findByNotification(notification)
+                .stream().map(file -> new NotificationFileResponse(
+                        file.getFileId(),
+                        file.getData(),
+                        file.getName(),
+                        file.getType()
+                )).collect(Collectors.toList());
+        List<NotificationImageResponse> notificationImages = notificationImageRepository.findByNotification(notification)
+                .stream()
+                .map(image -> new NotificationImageResponse(image.getImageId(), image.getImageFileName()))
+                .collect(Collectors.toList());
+
+        Optional<PersonalPriority> personalPriority = personalPriorityRepository.findByNotificationAndUser(notification, user);
+
+        NotificationDetailResponseV2 notificationDetailResponse = NotificationDetailResponseV2.builder()
+                .notificationId(notificationId)
+                .title(notification.getTitle())
+                .content(notification.getContent())
+                .uploadDate(notification.getUploadDate())
+                .notificationStatus(notification.getNotificationStatus())
+                .priority(notification.isPriority())
+                .creatorId(notification.getCreatedBy().getUserId())
+                .creatorFirstName(notification.getCreatedBy().getFirstName())
+                .creatorLastName(notification.getCreatedBy().getLastName())
+                .notificationFiles(notificationFiles)
+                .notificationImages(notificationImages)
+                .build();
+        if (personalPriority.isPresent()) {
+            notificationDetailResponse.setPersonalPriority(true);
+        }
+
+        return notificationDetailResponse;
+    }
+
+    public List<NotificationDetailResponse> getListNotificationByUserId(String userId) {
 
         Map<String, Notification> hiddenNotification = notificationRepository.getHiddenNotificationByUserId(userId)
                 .stream()
@@ -101,7 +152,7 @@ public class NotificationServiceV2 {
             detailResponse.setNotificationStatus(notification.getNotificationStatus());
             detailResponse.setPriority(notification.isPriority());
             detailResponse.setCreatorId(notification.getCreatedBy().getUserId());
-            detailResponse.setDepartmentUpload(user.getDepartment());
+            detailResponse.setDepartmentUpload(notification.getCreatedBy().getDepartment());
             detailResponse.setCreatorFirstName(notification.getCreatedBy().getFirstName());
             detailResponse.setCreatorLastName(notification.getCreatedBy().getLastName());
             detailResponse.setReadStatus(true);
@@ -121,6 +172,7 @@ public class NotificationServiceV2 {
                         .stream()
                         .map(file -> new NotificationFileResponse(
                                 file.getFileId(),
+                                file.getData(),
                                 file.getName(),
                                 file.getType()
                         )).collect(Collectors.toList());
@@ -159,9 +211,4 @@ public class NotificationServiceV2 {
                 .collect(Collectors.toList());
     }
 
-    public NotificationDetailResponse getNotificationByUserIdAndNotificationId(String userId, String notificationId) {
-        return getListNotificationByUserId(userId)
-                .stream().filter(notification -> notification.getNotificationId().equals(notificationId))
-                .collect(Collectors.toList()).get(0);
-    }
 }

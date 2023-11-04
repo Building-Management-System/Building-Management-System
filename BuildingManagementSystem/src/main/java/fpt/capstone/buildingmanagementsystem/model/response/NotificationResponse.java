@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.model.response;
 
+import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,5 +20,9 @@ public class NotificationResponse {
     private Date uploadDate;
 
     private boolean readStatus;
+
+    private String userId;
+
+    private Department department;
 
 }

@@ -11,4 +11,6 @@ import java.util.List;
 public interface NotificationImageRepository extends JpaRepository<NotificationImage,String> {
 
     List<NotificationImage> findByNotificationIn(List<Notification> notifications);
+
+    List<NotificationImage> findByNotification(Notification notification);
 }

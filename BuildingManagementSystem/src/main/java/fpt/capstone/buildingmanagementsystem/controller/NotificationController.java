@@ -4,6 +4,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.NotificationDetailReq
 import fpt.capstone.buildingmanagementsystem.model.request.PersonalPriorityRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.UnReadRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponseV2;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationTitleResponse;
 import fpt.capstone.buildingmanagementsystem.service.NotificationService;
 import fpt.capstone.buildingmanagementsystem.service.NotificationServiceV2;
@@ -75,8 +76,8 @@ public class NotificationController {
         return notificationService.setPersonalPriority(personalPriorityRequest.getNotificationId(), personalPriorityRequest.getUserId());
     }
 
-    @PostMapping("/getNotificationDetail")
-    public NotificationDetailResponse getNotificationByUserIdAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
+    @PostMapping("/getNotificationDetailByReceiver")
+    public NotificationDetailResponseV2 getNotificationByUserIdAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
         return notificationServiceV2.getNotificationByUserIdAndNotificationId(detailRequest.getUserId(), detailRequest.getNotificationId());
     }
 }
