@@ -49,6 +49,8 @@ public class NotificationService {
 
     @Autowired
     PersonalPriorityRepository personalPriorityRepository;
+    @Autowired
+    private AccountRepository accountRepository;
 
     public boolean saveNotification(String data, MultipartFile[] image, MultipartFile[] file) {
         try {
@@ -106,7 +108,6 @@ public class NotificationService {
             }
         }
     }
-
     private void saveImageAndFileAndReceiver(MultipartFile[] image, MultipartFile[] file, boolean sendAllStatus, Notification notification, List<Optional<User>> receivers, List<NotificationReceiver> notificationReceiverList, List<UnreadMark> unreadMarkList, List<NotificationImage> listImage) throws IOException {
         if (receivers.size() > 0) {
             receivers.forEach(receiver -> notificationReceiverList.add(
@@ -115,7 +116,20 @@ public class NotificationService {
             receivers.forEach(receiver -> unreadMarkList.add(
                     setUnreadMark(notification, receiver)));
             unreadMarkRepository.saveAll(unreadMarkList);
-        } else {
+        }
+        if (sendAllStatus && receivers.size() == 0) {
+            ExecutorService executorService = Executors.newFixedThreadPool(5);
+            UnreadMark unreadMark = new UnreadMark();
+            unreadMark.setNotification(notification);
+            List<User> list = userRepository.findAll();
+            for (User user : list) {
+                executorService.submit(() -> {
+                unreadMark.setUser(user);
+                unreadMarkList.add(unreadMark);
+                });
+            }
+            unreadMarkRepository.saveAll(unreadMarkList);
+            executorService.shutdown();
             notificationReceiverRepository.save(setNotificationReceiver(sendAllStatus, notification, Optional.empty()));
         }
         if (file.length > 0) {
@@ -247,5 +261,9 @@ public class NotificationService {
         } else {
             throw new BadRequest("request_fail");
         }
+    }
+
+    public boolean notificationHidden(String notificationId, String userId) {
+        return true;
     }
 }
