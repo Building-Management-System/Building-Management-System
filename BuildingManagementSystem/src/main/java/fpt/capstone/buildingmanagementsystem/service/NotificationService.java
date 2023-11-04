@@ -4,46 +4,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
+import fpt.capstone.buildingmanagementsystem.exception.Conflict;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.NotificationMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
-import fpt.capstone.buildingmanagementsystem.model.entity.NotificationImage;
-import fpt.capstone.buildingmanagementsystem.model.entity.NotificationReceiver;
-import fpt.capstone.buildingmanagementsystem.model.entity.PersonalPriority;
-import fpt.capstone.buildingmanagementsystem.model.entity.UnreadMark;
-import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.request.SaveNotificationRequest;
-import fpt.capstone.buildingmanagementsystem.repository.NotificationFileRepository;
-import fpt.capstone.buildingmanagementsystem.repository.NotificationImageRepository;
-import fpt.capstone.buildingmanagementsystem.repository.NotificationReceiverRepository;
-import fpt.capstone.buildingmanagementsystem.repository.NotificationRepository;
-import fpt.capstone.buildingmanagementsystem.repository.PersonalPriorityRepository;
-import fpt.capstone.buildingmanagementsystem.repository.UnreadMarkRepository;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus.DRAFT;
-import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus.SCHEDULED;
-import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus.UPLOADED;
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus.*;
 
 @Service
 public class NotificationService {
+    @Autowired
+    NotificationHiddenRepository notificationHiddenRepository;
     @Autowired
     NotificationReceiverRepository notificationReceiverRepository;
     @Autowired
@@ -63,6 +49,8 @@ public class NotificationService {
 
     @Autowired
     PersonalPriorityRepository personalPriorityRepository;
+    @Autowired
+    private AccountRepository accountRepository;
 
     public boolean saveNotification(String data, MultipartFile[] image, MultipartFile[] file) {
         try {
@@ -120,7 +108,6 @@ public class NotificationService {
             }
         }
     }
-
     private void saveImageAndFileAndReceiver(MultipartFile[] image, MultipartFile[] file, boolean sendAllStatus, Notification notification, List<Optional<User>> receivers, List<NotificationReceiver> notificationReceiverList, List<UnreadMark> unreadMarkList, List<NotificationImage> listImage) throws IOException {
         if (receivers.size() > 0) {
             receivers.forEach(receiver -> notificationReceiverList.add(
@@ -129,7 +116,20 @@ public class NotificationService {
             receivers.forEach(receiver -> unreadMarkList.add(
                     setUnreadMark(notification, receiver)));
             unreadMarkRepository.saveAll(unreadMarkList);
-        } else {
+        }
+        if (sendAllStatus && receivers.size() == 0) {
+            ExecutorService executorService = Executors.newFixedThreadPool(5);
+            UnreadMark unreadMark = new UnreadMark();
+            unreadMark.setNotification(notification);
+            List<User> list = userRepository.findAll();
+            for (User user : list) {
+                executorService.submit(() -> {
+                unreadMark.setUser(user);
+                unreadMarkList.add(unreadMark);
+                });
+            }
+            unreadMarkRepository.saveAll(unreadMarkList);
+            executorService.shutdown();
             notificationReceiverRepository.save(setNotificationReceiver(sendAllStatus, notification, Optional.empty()));
         }
         if (file.length > 0) {
@@ -152,7 +152,7 @@ public class NotificationService {
                 imageName = imageName + "." + stringList.get(stringList.size() - 1);
                 Bucket bucket = StorageClient.getInstance().bucket();
                 bucket.create(imageName, imageBytes, image[finalI].getContentType());
-                System.out.println(imageName+finalI);
+                System.out.println(imageName + finalI);
                 NotificationImage notificationImage = new NotificationImage();
                 notificationImage.setImageFileName(imageName);
                 notificationImage.setNotification(notification);
@@ -233,5 +233,37 @@ public class NotificationService {
         } catch (Exception e) {
             throw new ServerError("fail");
         }
+    }
+
+    @Transactional
+    public boolean deleteNotification(String notificationId, String userId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new BadRequest("Not_found_notification"));
+        userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequest("Not_found_user"));
+        if (userId.equals(notification.getCreatedBy().getUserId())) {
+            try {
+                if (!notification.getNotificationStatus().equals(UPLOADED)) {
+                    notificationHiddenRepository.deleteAllByNotification_NotificationId(notificationId);
+                    notificationFileRepository.deleteAllByNotification_NotificationId(notificationId);
+                    notificationImageRepository.deleteAllByNotification_NotificationId(notificationId);
+                    personalPriorityRepository.deleteAllByNotification_NotificationId(notificationId);
+                    unreadMarkRepository.deleteAllByNotification_NotificationId(notificationId);
+                    notificationReceiverRepository.deleteAllByNotification_NotificationId(notificationId);
+                    notificationRepository.delete(notification);
+                    return true;
+                } else {
+                    throw new Conflict("Notification_Upload");
+                }
+            } catch (Exception e) {
+                throw new ServerError("fail");
+            }
+        } else {
+            throw new BadRequest("request_fail");
+        }
+    }
+
+    public boolean notificationHidden(String notificationId, String userId) {
+        return true;
     }
 }

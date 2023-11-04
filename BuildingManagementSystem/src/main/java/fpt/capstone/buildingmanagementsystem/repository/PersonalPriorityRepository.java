@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface PersonalPriorityRepository extends JpaRepository<PersonalPriority, String> {
 
     Optional<PersonalPriority> findByNotificationAndUser(Notification notification, User user);
+    void deleteAllByNotification_NotificationId(String id);
+
 }

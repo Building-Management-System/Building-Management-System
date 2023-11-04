@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,19 +27,25 @@ public class FileService {
     @Autowired
     FileRepository fileRepository;
 
-    public List<NotificationFile> store(MultipartFile[] file,Notification notification) throws IOException {
-        List<NotificationFile> list= new ArrayList<>();
-            for(MultipartFile multipartFile : file) {
+    public List<NotificationFile> store(MultipartFile[] file, Notification notification) throws IOException {
+        List<NotificationFile> list = new ArrayList<>();
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        for (MultipartFile multipartFile : file) {
+            byte[] imageBytes = multipartFile.getBytes();
+            executorService.submit(() -> {
                 String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
                 NotificationFile fileDb = NotificationFile.builder()
                         .name(fileName)
                         .type(multipartFile.getContentType())
-                        .data(multipartFile.getBytes())
+                        .data(imageBytes)
                         .build();
                 fileDb.setNotification(notification);
                 list.add(fileDb);
-            }
-            return list;
+                System.out.println(fileName);
+            });
+        }
+        executorService.shutdown();
+        return list;
     }
 
     public ResponseEntity<?> getALlFiles() {

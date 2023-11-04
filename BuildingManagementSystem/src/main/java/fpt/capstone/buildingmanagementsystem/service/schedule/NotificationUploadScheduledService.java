@@ -15,13 +15,15 @@ public class NotificationUploadScheduledService {
     @Scheduled(cron = "0 0/2 * * * ?")
     public void getAllNotificationScheduled(){
         List<Notification> notificationList= notificationRepository.findAllByNotificationStatus(SCHEDULED);
-        for(Notification notification:notificationList) {
-            Timer timer = new Timer();
-            Date scheduledTime = new Date();
-            scheduledTime.setTime(notification.getUploadDate().getTime());
-            notification.setNotificationStatus(UPLOADED);
-            UpdateUploadDate uploadDate=new UpdateUploadDate(notification,notificationRepository);
-            timer.schedule(uploadDate, scheduledTime);
+        if(notificationList.size()>0) {
+            for (Notification notification : notificationList) {
+                Timer timer = new Timer();
+                Date scheduledTime = new Date();
+                scheduledTime.setTime(notification.getUploadDate().getTime());
+                notification.setNotificationStatus(UPLOADED);
+                UpdateUploadDate uploadDate = new UpdateUploadDate(notification, notificationRepository);
+                timer.schedule(uploadDate, scheduledTime);
+            }
         }
     }
 }

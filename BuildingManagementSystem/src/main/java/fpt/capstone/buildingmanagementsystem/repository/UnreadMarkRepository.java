@@ -11,4 +11,6 @@ import java.util.Optional;
 @Repository
 public interface UnreadMarkRepository extends JpaRepository<UnreadMark, String> {
     Optional<UnreadMark> findByNotificationAndUser(Notification notification, User user);
+    void deleteAllByNotification_NotificationId(String id);
+
 }
