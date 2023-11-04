@@ -90,4 +90,8 @@ public class NotificationController {
     public NotificationDetailResponseV2 getNotificationByCreatorAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
         return notificationServiceV2.getNotificationDetailByCreator(detailRequest.getUserId(), detailRequest.getNotificationId());
     }
+    @PostMapping("/deleteNotification")
+    public boolean deleteNotification(@RequestBody PersonalPriorityRequest deleteNotification) {
+        return notificationService.deleteNotification(deleteNotification.getNotificationId(), deleteNotification.getUserId());
+    }
 }

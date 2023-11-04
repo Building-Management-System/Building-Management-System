@@ -13,4 +13,6 @@ public interface NotificationImageRepository extends JpaRepository<NotificationI
     List<NotificationImage> findByNotificationIn(List<Notification> notifications);
 
     List<NotificationImage> findByNotification(Notification notification);
+    void deleteAllByNotification_NotificationId(String id);
+
 }
