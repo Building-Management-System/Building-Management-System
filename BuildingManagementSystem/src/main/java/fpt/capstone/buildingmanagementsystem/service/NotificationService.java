@@ -108,6 +108,7 @@ public class NotificationService {
             }
         }
     }
+
     private void saveImageAndFileAndReceiver(MultipartFile[] image, MultipartFile[] file, boolean sendAllStatus, Notification notification, List<Optional<User>> receivers, List<NotificationReceiver> notificationReceiverList, List<UnreadMark> unreadMarkList, List<NotificationImage> listImage) throws IOException {
         if (receivers.size() > 0) {
             receivers.forEach(receiver -> notificationReceiverList.add(
@@ -119,16 +120,16 @@ public class NotificationService {
         }
         if (sendAllStatus && receivers.size() == 0) {
             ExecutorService executorService = Executors.newFixedThreadPool(5);
-            UnreadMark unreadMark = new UnreadMark();
-            unreadMark.setNotification(notification);
             List<User> list = userRepository.findAll();
             for (User user : list) {
                 executorService.submit(() -> {
-                unreadMark.setUser(user);
-                unreadMarkList.add(unreadMark);
+                    UnreadMark unreadMark = new UnreadMark();
+                    unreadMark.setNotification(notification);
+                    unreadMark.setUser(user);
+                    unreadMarkList.add(unreadMark);
+                    unreadMarkRepository.save(unreadMark);
                 });
             }
-            unreadMarkRepository.saveAll(unreadMarkList);
             executorService.shutdown();
             notificationReceiverRepository.save(setNotificationReceiver(sendAllStatus, notification, Optional.empty()));
         }
