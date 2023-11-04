@@ -75,7 +75,17 @@ public class NotificationServiceV2 {
         return new NotificationTitleResponse(notifications.size(), notifications);
     }
 
-    public NotificationDetailResponseV2 getNotificationByUserIdAndNotificationId(String userId, String notificationId) {
+    public NotificationDetailResponseV2 getNotificationDetailByCreator(String creatorId, String notificationId) {
+        User user = userRepository.findByUserId(creatorId)
+                .orElseThrow(() -> new NotFound("not_found_user"));
+
+        Notification notification = notificationRepository.findByCreatedByAndNotificationId(user, notificationId)
+                .orElseThrow(() -> new NotFound("not_found_notification"));
+
+        return getNotificationDetail(notificationId, user, notification);
+    }
+
+    public NotificationDetailResponseV2 getNotificationDetailByUserIdAndNotificationId(String userId, String notificationId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new NotFound("not_found_user"));
 
@@ -86,38 +96,7 @@ public class NotificationServiceV2 {
         Notification notification = notificationRepository.getNotificationByUserIdAndNotificationId(userId, notificationId)
                 .orElseThrow(() -> new NotFound("not_found_notification"));
 
-        List<NotificationFileResponse> notificationFiles = notificationFileRepository.findByNotification(notification)
-                .stream().map(file -> new NotificationFileResponse(
-                        file.getFileId(),
-                        file.getData(),
-                        file.getName(),
-                        file.getType()
-                )).collect(Collectors.toList());
-        List<NotificationImageResponse> notificationImages = notificationImageRepository.findByNotification(notification)
-                .stream()
-                .map(image -> new NotificationImageResponse(image.getImageId(), image.getImageFileName()))
-                .collect(Collectors.toList());
-
-        Optional<PersonalPriority> personalPriority = personalPriorityRepository.findByNotificationAndUser(notification, user);
-
-        NotificationDetailResponseV2 notificationDetailResponse = NotificationDetailResponseV2.builder()
-                .notificationId(notificationId)
-                .title(notification.getTitle())
-                .content(notification.getContent())
-                .uploadDate(notification.getUploadDate())
-                .notificationStatus(notification.getNotificationStatus())
-                .priority(notification.isPriority())
-                .creatorId(notification.getCreatedBy().getUserId())
-                .creatorFirstName(notification.getCreatedBy().getFirstName())
-                .creatorLastName(notification.getCreatedBy().getLastName())
-                .notificationFiles(notificationFiles)
-                .notificationImages(notificationImages)
-                .build();
-        if (personalPriority.isPresent()) {
-            notificationDetailResponse.setPersonalPriority(true);
-        }
-
-        return notificationDetailResponse;
+        return getNotificationDetail(notificationId, user, notification);
     }
 
     public List<NotificationDetailResponse> getListNotificationByCreator(String userId) {
@@ -220,4 +199,40 @@ public class NotificationServiceV2 {
 
         return notificationDetailResponses;
     }
+
+    private NotificationDetailResponseV2 getNotificationDetail(String notificationId, User user, Notification notification) {
+        List<NotificationFileResponse> notificationFiles = notificationFileRepository.findByNotification(notification)
+                .stream().map(file -> new NotificationFileResponse(
+                        file.getFileId(),
+                        file.getData(),
+                        file.getName(),
+                        file.getType()
+                )).collect(Collectors.toList());
+        List<NotificationImageResponse> notificationImages = notificationImageRepository.findByNotification(notification)
+                .stream()
+                .map(image -> new NotificationImageResponse(image.getImageId(), image.getImageFileName()))
+                .collect(Collectors.toList());
+
+        Optional<PersonalPriority> personalPriority = personalPriorityRepository.findByNotificationAndUser(notification, user);
+
+        NotificationDetailResponseV2 notificationDetailResponse = NotificationDetailResponseV2.builder()
+                .notificationId(notificationId)
+                .title(notification.getTitle())
+                .content(notification.getContent())
+                .uploadDate(notification.getUploadDate())
+                .notificationStatus(notification.getNotificationStatus())
+                .priority(notification.isPriority())
+                .creatorId(notification.getCreatedBy().getUserId())
+                .creatorFirstName(notification.getCreatedBy().getFirstName())
+                .creatorLastName(notification.getCreatedBy().getLastName())
+                .notificationFiles(notificationFiles)
+                .notificationImages(notificationImages)
+                .build();
+        if (personalPriority.isPresent()) {
+            notificationDetailResponse.setPersonalPriority(true);
+        }
+
+        return notificationDetailResponse;
+    }
+
 }

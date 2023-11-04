@@ -1,15 +1,13 @@
 package fpt.capstone.buildingmanagementsystem.repository;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,4 +68,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
             "WHERE pp.user_id LIKE :userId", nativeQuery = true)
     List<Notification> getPersonalPriorityByUserId(@Param("userId") String userId);
     List<Notification> findAllByNotificationStatus(NotificationStatus notificationStatus);
+
+    Optional<Notification>  findByCreatedByAndNotificationId(User user, String notificationId);
+
 }

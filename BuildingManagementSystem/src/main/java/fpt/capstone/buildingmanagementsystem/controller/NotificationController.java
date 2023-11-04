@@ -83,6 +83,11 @@ public class NotificationController {
 
     @PostMapping("/getNotificationDetailByReceiver")
     public NotificationDetailResponseV2 getNotificationByUserIdAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
-        return notificationServiceV2.getNotificationByUserIdAndNotificationId(detailRequest.getUserId(), detailRequest.getNotificationId());
+        return notificationServiceV2.getNotificationDetailByUserIdAndNotificationId(detailRequest.getUserId(), detailRequest.getNotificationId());
+    }
+
+    @PostMapping("/getNotificationDetailByCreator")
+    public NotificationDetailResponseV2 getNotificationByCreatorAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
+        return notificationServiceV2.getNotificationDetailByCreator(detailRequest.getUserId(), detailRequest.getNotificationId());
     }
 }
