@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -67,7 +68,10 @@ public class Validate {
     }
     public static boolean checkUploadDateRealTime(String startDate) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date realDate = Until.generateRealTime();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.MINUTE, 4);
+        Date realDate = calendar.getTime();
         Date startDate1 = dateFormat.parse(startDate.toString());
         Timestamp timestampStartTime = new java.sql.Timestamp(startDate1.getTime());
         Timestamp timestampRealDate = new java.sql.Timestamp(realDate.getTime());
