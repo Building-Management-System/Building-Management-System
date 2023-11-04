@@ -139,13 +139,19 @@ public class NotificationServiceV2 {
         return getNotificationDetailResponses(userId, notifications);
     }
 
-    public List<NotificationDetailResponse> getListDraftNotificationByUserId(String userId) {
+    public List<NotificationDetailResponse> getListUploadedNotificationByCreator(String userId) {
         return getListNotificationByCreator(userId)
                 .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.DRAFT))
                 .collect(Collectors.toList());
     }
 
-    public List<NotificationDetailResponse> getListScheduledNotificationByUserId(String userId) {
+    public List<NotificationDetailResponse> getListDraftNotificationByCreator(String userId) {
+        return getListNotificationByCreator(userId)
+                .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.DRAFT))
+                .collect(Collectors.toList());
+    }
+
+    public List<NotificationDetailResponse> getListScheduledNotificationByCreator(String userId) {
         return getListNotificationByCreator(userId)
                 .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.SCHEDULED))
                 .collect(Collectors.toList());
