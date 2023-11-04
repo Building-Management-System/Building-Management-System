@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -170,7 +172,9 @@ public class NotificationServiceV2 {
         Map<String, Notification> unreadNotification = notificationRepository.getUnreadMarkNotificationByUserId(userId)
                 .stream().collect(Collectors.toMap(Notification::getNotificationId, Function.identity()));
 
-        notificationDetailResponses.forEach(response -> {
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
+
+        notificationDetailResponses.forEach(response -> executorService.submit(() -> {
             if (unreadNotification.containsKey(response.getNotificationId())) {
                 response.setReadStatus(false);
             }
@@ -195,7 +199,7 @@ public class NotificationServiceV2 {
             if (personalPriorities.containsKey(response.getNotificationId())) {
                 response.setPersonalPriority(true);
             }
-        });
+        }));
 
         return notificationDetailResponses;
     }
