@@ -103,7 +103,10 @@ public class NotificationServiceV2 {
 
     public List<NotificationDetailResponse> getListNotificationByCreator(String userId) {
 
-        List<Notification> notifications = notificationRepository.getNotificationByCreator(userId);
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFound("not_found_user"));
+
+        List<Notification> notifications = notificationRepository.findByCreatedBy(user);
 
         return getNotificationDetailResponses(userId, notifications);
     }
@@ -200,7 +203,7 @@ public class NotificationServiceV2 {
                 response.setPersonalPriority(true);
             }
         }));
-
+        executorService.shutdown();
         return notificationDetailResponses;
     }
 

@@ -34,14 +34,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
             "FROM notification n\n" +
             "         JOIN notification_receiver nr ON n.notification_id = nr.notification_id\n" +
             "         LEFT JOIN user u ON u.user_id = nr.receiver_id\n" +
-            "WHERE n.user_id LIKE :userId", nativeQuery = true)
-    List<Notification> getNotificationByCreator(@Param("userId") String userId);
-
-
-    @Query(value = "SELECT n.*\n" +
-            "FROM notification n\n" +
-            "         JOIN notification_receiver nr ON n.notification_id = nr.notification_id\n" +
-            "         LEFT JOIN user u ON u.user_id = nr.receiver_id\n" +
             "WHERE (nr.receiver_id LIKE :userId AND n.notification_id LIKE :notificationId)\n" +
             "   OR (nr.send_all_status IS TRUE AND n.notification_id LIKE :notificationId)\n" +
             "AND n.notification_status LIKE 'UPLOADED'", nativeQuery = true)
@@ -71,4 +63,12 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
 
     Optional<Notification>  findByCreatedByAndNotificationId(User user, String notificationId);
 
+    List<Notification> findByCreatedBy(User user);
+
+    @Query(value = "SELECT *\n" +
+            "FROM notification n\n" +
+            "JOIN user u ON u.user_id = n.user_id\n" +
+            "JOIN department d ON d.department_id = u.department_id\n" +
+            "WHERE d.department_id LIKE :departmentId", nativeQuery = true)
+    List<Notification> getNotificationByDepartment(@Param("departmentId") String departmentId);
 }
