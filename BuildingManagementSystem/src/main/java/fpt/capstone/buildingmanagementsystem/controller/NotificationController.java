@@ -42,9 +42,9 @@ public class NotificationController {
         return notificationServiceV2.getAllNotificationByUser(userId);
     }
 
-    @GetMapping("/getListNotificationByUserId")
+    @GetMapping("/getListNotificationByCreator")
     public List<NotificationDetailResponse> getListNotificationByUserId(@RequestParam("userId") String userId) {
-        return notificationServiceV2.getListNotificationByUserId(userId);
+        return notificationServiceV2.getListNotificationByCreator(userId);
     }
     @GetMapping("/getListUploadedNotification")
     public List<NotificationDetailResponse> getListUploadedNotificationByUserId(@RequestParam("userId") String userId) {

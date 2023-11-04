@@ -120,8 +120,14 @@ public class NotificationServiceV2 {
         return notificationDetailResponse;
     }
 
-    public List<NotificationDetailResponse> getListNotificationByUserId(String userId) {
+    public List<NotificationDetailResponse> getListNotificationByCreator(String userId) {
 
+        List<Notification> notifications = notificationRepository.getNotificationByCreator(userId);
+
+        return getNotificationDetailResponses(userId, notifications);
+    }
+
+    public List<NotificationDetailResponse> getListUploadedNotificationByUserId(String userId) {
         Map<String, Notification> hiddenNotification = notificationRepository.getHiddenNotificationByUserId(userId)
                 .stream()
                 .collect(Collectors.toMap(Notification::getNotificationId, Function.identity()));
@@ -130,6 +136,22 @@ public class NotificationServiceV2 {
                 .stream().filter(notification -> !hiddenNotification.containsKey(notification.getNotificationId()))
                 .collect(Collectors.toList());
 
+        return getNotificationDetailResponses(userId, notifications);
+    }
+
+    public List<NotificationDetailResponse> getListDraftNotificationByUserId(String userId) {
+        return getListNotificationByCreator(userId)
+                .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.DRAFT))
+                .collect(Collectors.toList());
+    }
+
+    public List<NotificationDetailResponse> getListScheduledNotificationByUserId(String userId) {
+        return getListNotificationByCreator(userId)
+                .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.SCHEDULED))
+                .collect(Collectors.toList());
+    }
+
+    private List<NotificationDetailResponse> getNotificationDetailResponses(String userId, List<Notification> notifications) {
         Map<String, List<NotificationFile>> files = notificationFileRepository.findByNotificationIn(notifications)
                 .stream()
                 .collect(groupingBy(file -> file.getNotification().getNotificationId(), Collectors.toList()));
@@ -192,23 +214,4 @@ public class NotificationServiceV2 {
 
         return notificationDetailResponses;
     }
-
-    public List<NotificationDetailResponse> getListUploadedNotificationByUserId(String userId) {
-        return getListNotificationByUserId(userId)
-                .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.UPLOADED))
-                .collect(Collectors.toList());
-    }
-
-    public List<NotificationDetailResponse> getListDraftNotificationByUserId(String userId) {
-        return getListNotificationByUserId(userId)
-                .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.DRAFT))
-                .collect(Collectors.toList());
-    }
-
-    public List<NotificationDetailResponse> getListScheduledNotificationByUserId(String userId) {
-        return getListNotificationByUserId(userId)
-                .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.SCHEDULED))
-                .collect(Collectors.toList());
-    }
-
 }
