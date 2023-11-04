@@ -80,4 +80,8 @@ public class NotificationController {
     public NotificationDetailResponseV2 getNotificationByUserIdAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
         return notificationServiceV2.getNotificationByUserIdAndNotificationId(detailRequest.getUserId(), detailRequest.getNotificationId());
     }
+    @PostMapping("/deleteNotification")
+    public boolean deleteNotification(@RequestBody PersonalPriorityRequest deleteNotification) {
+        return notificationService.deleteNotification(deleteNotification.getNotificationId(), deleteNotification.getUserId());
+    }
 }
