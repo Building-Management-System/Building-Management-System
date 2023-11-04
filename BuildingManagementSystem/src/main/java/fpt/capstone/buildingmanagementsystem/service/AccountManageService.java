@@ -10,9 +10,6 @@ import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
 import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.request.*;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAllAccountResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.HrDepartmentResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.ManagerInfoResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.ReceiveIdAndDepartmentIdResponse;
 import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import fpt.capstone.buildingmanagementsystem.until.EmailSender;
@@ -78,13 +75,15 @@ public class AccountManageService implements UserDetailsService {
                     if (role.isPresent() && department.isPresent()) {
                         Optional<Status> status = statusRepository.findByStatusId("1");
                         Account newAccount = accountMapper.convertRegisterAccount(registerRequest, status.get(), role.get());
-                        accountRepository.save(newAccount);
-                        User user= User.builder().userId(newAccount.getAccountId()).city("unknown").country("unknown").email("unknown").firstName("unknown")
+
+                        User user= User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
                                 .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
                                         generateRealTime()).image("unknown").updatedDate(generateRealTime()).account(newAccount).department(department.get())
                                 .build();
-                        System.out.println(user);
-                        userRepository.save(user);
+
+                        newAccount.setUser(user);
+                        accountRepository.saveAndFlush(newAccount);
+//                      userRepository.save(user);
                         return true;
                     } else {
                         throw new NotFound("not_found");
@@ -231,5 +230,19 @@ public class AccountManageService implements UserDetailsService {
     public String getAccountId(String username) {
         Optional<Account> userAccount = accountRepository.findByUsername(username);
         return userAccount.get().getAccountId();
+    }
+
+    public RoleDto getGettingRole2(GetUserInfoRequest getUserInfoRequest) {
+        if (getUserInfoRequest.getUserId() != null) {
+            Optional<Account> userAccount = accountRepository.findByAccountId(getUserInfoRequest.getUserId());
+            if (userAccount.isPresent()) {
+                Optional<Role> role = roleRepository.findByRoleId(userAccount.get().getRole().getRoleId());
+                return roleMapper.convertRegisterAccount(role.get());
+            } else {
+                throw new NotFound("user_not_found");
+            }
+        } else {
+            throw new BadRequest("request_fail");
+        }
     }
 }
