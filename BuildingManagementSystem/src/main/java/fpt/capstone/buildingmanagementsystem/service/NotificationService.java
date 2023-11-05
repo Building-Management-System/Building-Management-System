@@ -160,8 +160,10 @@ public class NotificationService {
                     notificationReceiverRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
                     notificationFileRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
                     ExecutorService executorService = Executors.newFixedThreadPool(5);
-                    for (String deleteId : deleteFile) {
-                        notificationFileRepository.deleteByFileId(deleteId);
+                    if (deleteFile.size() > 0) {
+                        for (String deleteId : deleteFile) {
+                            notificationFileRepository.deleteByFileId(deleteId);
+                        }
                     }
                     for (String s : deleteImage) {
                         notificationImageRepository.deleteByImageFileName(s);
@@ -393,10 +395,10 @@ public class NotificationService {
                 .notification(notification)
                 .build();
         try {
-            if(!notification.isPriority()) {
+            if (!notification.isPriority()) {
                 notificationHiddenRepository.save(personalPriority);
                 return true;
-            }else{
+            } else {
                 throw new Conflict("fail");
             }
         } catch (Exception e) {
