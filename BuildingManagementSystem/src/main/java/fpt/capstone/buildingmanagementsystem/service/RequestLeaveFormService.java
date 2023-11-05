@@ -27,10 +27,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
@@ -69,8 +66,15 @@ public class RequestLeaveFormService {
                     sendLeaveFormRequest.getToDate() != null
             ) {
                 if (checkValidate(sendLeaveFormRequest)) {
+                    List<User> listUserReceiver= new ArrayList<>();
                     Optional<User> send_user = userRepository.findByUserId(sendLeaveFormRequest.getUserId());
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendLeaveFormRequest.getDepartmentId());
+                    if(sendLeaveFormRequest.getReceivedId()!=null) {
+                        Optional<User> receive_user = userRepository.findByUserId(sendLeaveFormRequest.getReceivedId());
+                        listUserReceiver.add(receive_user.get());
+                    }else{
+                        listUserReceiver= userRepository.findAllByDepartment(department.get());
+                    }
                     if (send_user.isPresent() && department.isPresent()) {
                         String id_ticket = "LV_" + Until.generateId();
                         String id_request_ticket = "LV_" + Until.generateId();
@@ -83,6 +87,16 @@ public class RequestLeaveFormService {
                                 .build();
                         ticketRepository.save(ticket);
                         saveLeaveRequest(sendLeaveFormRequest, send_user, department, id_request_ticket, ticket);
+                        for(User receive_user:listUserReceiver) {
+                            automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
+                                    ticket.getTicketId(),
+                                    send_user.get(),
+                                    receive_user,
+                                    ticket.getTopic(),
+                                    true,
+                                    null
+                            ));
+                        }
                         return true;
                     } else {
                         throw new NotFound("not_found");

@@ -11,6 +11,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.OtherRequest;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.OtherRequestFormRepository;
@@ -22,10 +23,7 @@ import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
@@ -47,15 +45,23 @@ public class RequestOtherService {
     DepartmentRepository departmentRepository;
     @Autowired
     UserRepository userRepository;
-
+    @Autowired
+    AutomaticNotificationService automaticNotificationService;
     public boolean getOtherFormUser(SendOtherFormRequest sendOtherFormRequest) {
         try {
             if (sendOtherFormRequest.getContent() != null &&
                     sendOtherFormRequest.getDepartmentId() != null &&
                     sendOtherFormRequest.getTitle() != null
             ) {
+                List<User> listUserReceiver= new ArrayList<>();
                 Optional<User> send_user = userRepository.findByUserId(sendOtherFormRequest.getUserId());
                 Optional<Department> department = departmentRepository.findByDepartmentId(sendOtherFormRequest.getDepartmentId());
+                if(sendOtherFormRequest.getReceivedId()!=null) {
+                    Optional<User> receive_user = userRepository.findByUserId(sendOtherFormRequest.getReceivedId());
+                    listUserReceiver.add(receive_user.get());
+                }else{
+                    listUserReceiver= userRepository.findAllByDepartment(department.get());
+                }
                 if (send_user.isPresent() && department.isPresent()) {
                     String id_ticket = "OR_" + Until.generateId();
                     String id_request_ticket = "OR_" + Until.generateId();
@@ -65,6 +71,16 @@ public class RequestOtherService {
                     ticketRepository.save(ticket);
                     //
                     saveOtherRequest(sendOtherFormRequest, send_user, department, id_request_ticket, ticket);
+                    for(User receive_user:listUserReceiver) {
+                        automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
+                                ticket.getTicketId(),
+                                send_user.get(),
+                                receive_user,
+                                ticket.getTopic(),
+                                true,
+                                null
+                        ));
+                    }
                     return true;
                 } else {
                     throw new NotFound("not_found");

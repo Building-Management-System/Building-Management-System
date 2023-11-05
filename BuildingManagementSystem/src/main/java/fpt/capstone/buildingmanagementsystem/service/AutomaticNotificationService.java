@@ -73,4 +73,41 @@ public class AutomaticNotificationService {
             throw new ServerError("Fail");
         }
     }
+    public void sendApprovalTicketNotification(ApprovalNotificationRequest request) {
+
+        String notificationTitle = "[SYSTEM] You have a new ticket request.";
+
+        String notificationContent = "" +
+                "Ticket Id: " + request.getTicketId() + "\n" +
+                "Topic: " + request.getTopic() + "\n";
+
+        Notification notification = Notification.builder()
+                .title(notificationTitle)
+                .content(notificationContent)
+                .notificationStatus(NotificationStatus.UPLOADED)
+                .priority(false)
+                .createDate(Until.generateRealTime())
+                .updateDate(Until.generateRealTime())
+                .uploadDate(Until.generateRealTime())
+                .createdBy(request.getSensor())
+                .build();
+
+        UnreadMark unreadMark = UnreadMark.builder()
+                .notification(notification)
+                .user(request.getReceiver())
+                .build();
+
+        NotificationReceiver notificationReceiver = NotificationReceiver.builder()
+                .notification(notification)
+                .receiver(request.getReceiver())
+                .build();
+
+        try {
+            notificationRepository.saveAndFlush(notification);
+            unreadMarkRepository.save(unreadMark);
+            notificationReceiverRepository.save(notificationReceiver);
+        }catch (Exception e) {
+            throw new ServerError("Fail");
+        }
+    }
 }
