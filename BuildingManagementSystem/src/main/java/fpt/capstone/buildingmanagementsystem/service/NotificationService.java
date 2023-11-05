@@ -18,6 +18,7 @@ import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
@@ -175,12 +176,14 @@ public class NotificationService {
             }
         }
     }
+
     private void saveImageAndFileAndReceiver(MultipartFile[] image, MultipartFile[] file, boolean sendAllStatus, Notification notification, List<Optional<User>> receivers, List<NotificationReceiver> notificationReceiverList, List<UnreadMark> unreadMarkList, List<NotificationImage> listImage) throws IOException {
         saveFileAndReceiver(file, sendAllStatus, notification, receivers, notificationReceiverList, unreadMarkList);
         if (image.length > 0) {
             setListImage(image, notification, listImage);
         }
     }
+
     private void saveFileAndReceiver(MultipartFile[] file, boolean sendAllStatus, Notification notification, List<Optional<User>> receivers, List<NotificationReceiver> notificationReceiverList, List<UnreadMark> unreadMarkList) throws IOException {
         if (receivers.size() > 0) {
             receivers.forEach(receiver -> notificationReceiverList.add(
@@ -315,8 +318,9 @@ public class NotificationService {
         userRepository.findByUserId(userId)
                 .orElseThrow(() -> new BadRequest("Not_found_user"));
         if (userId.equals(notification.getCreatedBy().getUserId())) {
-            try {
-                if (!notification.getNotificationStatus().equals(UPLOADED)) {
+
+            if (!notification.getNotificationStatus().equals(UPLOADED)) {
+                try {
                     notificationHiddenRepository.deleteAllByNotification_NotificationId(notificationId);
                     notificationFileRepository.deleteAllByNotification_NotificationId(notificationId);
                     notificationImageRepository.deleteAllByNotification_NotificationId(notificationId);
@@ -325,11 +329,11 @@ public class NotificationService {
                     notificationReceiverRepository.deleteAllByNotification_NotificationId(notificationId);
                     notificationRepository.delete(notification);
                     return true;
-                } else {
-                    throw new Conflict("Notification_Upload");
+                } catch (Exception e) {
+                    throw new ServerError("fail");
                 }
-            } catch (Exception e) {
-                throw new ServerError("fail");
+            } else {
+                throw new Conflict("Notification_Upload");
             }
         } else {
             throw new BadRequest("request_fail");
