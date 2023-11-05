@@ -4,7 +4,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.NotificationDetailReq
 import fpt.capstone.buildingmanagementsystem.model.request.PersonalPriorityRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.UnReadRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponseV2;
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponseForDetail;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationTitleResponse;
 import fpt.capstone.buildingmanagementsystem.service.NotificationService;
 import fpt.capstone.buildingmanagementsystem.service.NotificationServiceV2;
@@ -82,16 +82,17 @@ public class NotificationController {
     }
 
     @PostMapping("/getNotificationDetailByReceiver")
-    public NotificationDetailResponseV2 getNotificationByUserIdAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
+    public NotificationDetailResponseForDetail getNotificationByUserIdAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
         return notificationServiceV2.getNotificationDetailByUserIdAndNotificationId(detailRequest.getUserId(), detailRequest.getNotificationId());
     }
 
     @PostMapping("/getNotificationDetailByCreator")
-    public NotificationDetailResponseV2 getNotificationByCreatorAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
+    public NotificationDetailResponseForDetail getNotificationByCreatorAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
         return notificationServiceV2.getNotificationDetailByCreator(detailRequest.getUserId(), detailRequest.getNotificationId());
     }
-    @PostMapping("/deleteNotification")
-    public boolean deleteNotification(@RequestBody PersonalPriorityRequest deleteNotification) {
-        return notificationService.deleteNotification(deleteNotification.getNotificationId(), deleteNotification.getUserId());
-    }
+
+//    @PostMapping("getNotificationByDepartment")
+//    public List<NotificationDetailResponseForDetail> getListScheduledNotificationByDepartmentOfCreator(@RequestBody NotificationDetailRequest detailRequest) {
+//        return notificationServiceV2.getListScheduledNotificationByDepartmentOfCreator(detailRequest.getUserId());
+//    }
 }

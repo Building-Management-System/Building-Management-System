@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.model.response;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationViewer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,14 +25,8 @@ public class NotificationDetailResponse {
     private NotificationStatus notificationStatus;
     private boolean priority;
     private String creatorId;
-    private String creatorFirstName;
-    private String creatorLastName;
     private Department departmentUpload;
     private boolean readStatus;
     private boolean personalPriority;
-
-    private List<NotificationFileResponse> notificationFiles;
-
-    private List<NotificationImageResponse> notificationImages;
-
+    private NotificationViewer viewAs;
 }

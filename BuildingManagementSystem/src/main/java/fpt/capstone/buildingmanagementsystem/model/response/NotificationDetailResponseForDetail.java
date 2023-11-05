@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class NotificationDetailResponseV2 {
+public class NotificationDetailResponseForDetail {
 
     private String notificationId;
     private String title;
