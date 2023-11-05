@@ -4,6 +4,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.NotificationDetailReq
 import fpt.capstone.buildingmanagementsystem.model.request.PersonalPriorityRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.UnReadRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponseForCreator;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponseForDetail;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationTitleResponse;
 import fpt.capstone.buildingmanagementsystem.service.NotificationService;
@@ -87,12 +88,12 @@ public class NotificationController {
     }
 
     @PostMapping("/getNotificationDetailByCreator")
-    public NotificationDetailResponseForDetail getNotificationByCreatorAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
+    public NotificationDetailResponseForCreator getNotificationByCreatorAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
         return notificationServiceV2.getNotificationDetailByCreator(detailRequest.getUserId(), detailRequest.getNotificationId());
     }
 
-//    @PostMapping("getNotificationByDepartment")
-//    public List<NotificationDetailResponseForDetail> getListScheduledNotificationByDepartmentOfCreator(@RequestBody NotificationDetailRequest detailRequest) {
-//        return notificationServiceV2.getListScheduledNotificationByDepartmentOfCreator(detailRequest.getUserId());
-//    }
+    @GetMapping("getNotificationByDepartment")
+    public List<NotificationDetailResponse> getListScheduledNotificationByDepartmentOfCreator(@RequestParam("userId") String userId) {
+        return notificationServiceV2.getListScheduledNotificationByDepartmentOfCreator(userId);
+    }
 }

@@ -1,6 +1,5 @@
 package fpt.capstone.buildingmanagementsystem.model.response;
 
-import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,20 +15,23 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class NotificationDetailResponseForDetail {
-
+public class NotificationDetailResponseForCreator {
     private String notificationId;
     private String title;
     private String content;
+    private Date createDate;
+    private Date updateDate;
     private Date uploadDate;
     private NotificationStatus notificationStatus;
     private boolean priority;
     private String creatorId;
     private String creatorFirstName;
     private String creatorLastName;
-    private Department creatorDepartment;
     private String creatorImage;
-    private boolean personalPriority;
+
+    private boolean sendAll;
+
+    private List<UserAccountResponse> receiver;
 
     private List<NotificationFileResponse> notificationFiles;
 
