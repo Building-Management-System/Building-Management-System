@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -94,8 +93,8 @@ public class NotificationServiceV2 {
 
         List<UserAccountResponse> notificationReceivers = new ArrayList<>();
         receiverRepository.findByNotification(notification)
-                .forEach(receiver -> ex.submit(() ->{
-                    UserAccountResponse userAccountResponse =  new UserAccountResponse(
+                .forEach(receiver -> ex.submit(() -> {
+                    UserAccountResponse userAccountResponse = new UserAccountResponse(
                             receiver.getReceiver().getUserId(),
                             receiver.getReceiver().getFirstName() + " " + receiver.getReceiver().getLastName(),
                             receiver.getReceiver().getDepartment().getDepartmentId(),
@@ -148,22 +147,22 @@ public class NotificationServiceV2 {
         List<NotificationFileResponse> notificationFiles = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-         notificationFileRepository.findByNotification(notification).forEach(file ->  executorService.submit(() ->{
-                     NotificationFileResponse response = new NotificationFileResponse(
-                             file.getFileId(),
-                             file.getData(),
-                             file.getName(),
-                             file.getType()
-                     );
-                     notificationFiles.add(response);
-                 }));
+        notificationFileRepository.findByNotification(notification).forEach(file -> executorService.submit(() -> {
+            NotificationFileResponse response = new NotificationFileResponse(
+                    file.getFileId(),
+                    file.getData(),
+                    file.getName(),
+                    file.getType()
+            );
+            notificationFiles.add(response);
+        }));
 
         List<NotificationImageResponse> notificationImages = notificationImageRepository.findByNotification(notification)
                 .stream()
                 .map(image -> new NotificationImageResponse(image.getImageId(), image.getImageFileName()))
                 .collect(Collectors.toList());
 
-        Optional<PersonalPriority> personalPriority = personalPriorityRepository.findByNotificationAndUser(notification, user);
+        List<PersonalPriority> personalPriority = personalPriorityRepository.findByNotificationAndUser(notification, user);
 
         NotificationDetailResponseForDetail notificationDetailResponse = NotificationDetailResponseForDetail.builder()
                 .notificationId(notificationId)
@@ -179,7 +178,7 @@ public class NotificationServiceV2 {
                 .notificationFiles(notificationFiles)
                 .notificationImages(notificationImages)
                 .build();
-        if (personalPriority.isPresent()) {
+        if (!personalPriority.isEmpty()) {
             notificationDetailResponse.setPersonalPriority(true);
         }
         executorService.shutdown();
@@ -262,7 +261,7 @@ public class NotificationServiceV2 {
         ExecutorService executorService = Executors.newFixedThreadPool(5);
 
         notificationDetailResponses.forEach(response -> executorService.submit(() -> {
-            if(images.containsKey(response.getNotificationId())) {
+            if (images.containsKey(response.getNotificationId())) {
                 response.setContainImage(true);
             }
             if (files.containsKey(response.getNotificationId())) {

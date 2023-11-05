@@ -9,10 +9,23 @@ import fpt.capstone.buildingmanagementsystem.exception.Conflict;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.NotificationMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
+import fpt.capstone.buildingmanagementsystem.model.entity.NotificationHidden;
+import fpt.capstone.buildingmanagementsystem.model.entity.NotificationImage;
+import fpt.capstone.buildingmanagementsystem.model.entity.NotificationReceiver;
+import fpt.capstone.buildingmanagementsystem.model.entity.PersonalPriority;
+import fpt.capstone.buildingmanagementsystem.model.entity.UnreadMark;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.request.SaveNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.UpdateNotificationRequest;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.repository.NotificationFileRepository;
+import fpt.capstone.buildingmanagementsystem.repository.NotificationHiddenRepository;
+import fpt.capstone.buildingmanagementsystem.repository.NotificationImageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.NotificationReceiverRepository;
+import fpt.capstone.buildingmanagementsystem.repository.NotificationRepository;
+import fpt.capstone.buildingmanagementsystem.repository.PersonalPriorityRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UnreadMarkRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +35,18 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus.*;
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus.DRAFT;
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus.SCHEDULED;
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus.UPLOADED;
 
 @Service
 public class NotificationService {
@@ -286,6 +306,24 @@ public class NotificationService {
                 .build();
         try {
             unreadMarkRepository.save(unreadMark);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("fail");
+        }
+    }
+
+    public boolean unsetPersonalPriority(String notificationId, String userId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new BadRequest("Not_found_notification"));
+
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequest("Not_found_user"));
+
+        List<PersonalPriority> personalPriority = personalPriorityRepository.findByNotificationAndUser(notification, user);
+
+        try {
+            if (personalPriority.isEmpty()) return false;
+            personalPriorityRepository.deleteAll(personalPriority);
             return true;
         } catch (Exception e) {
             throw new ServerError("fail");

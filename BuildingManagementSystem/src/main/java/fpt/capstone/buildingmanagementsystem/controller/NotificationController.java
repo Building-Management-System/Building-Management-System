@@ -86,6 +86,12 @@ public class NotificationController {
     public boolean setPersonalPriority(@RequestBody PersonalPriorityRequest personalPriorityRequest) {
         return notificationService.setPersonalPriority(personalPriorityRequest.getNotificationId(), personalPriorityRequest.getUserId());
     }
+
+    @PostMapping("/unsetPersonalPriority")
+    public boolean unsetPersonalPriority(@RequestBody PersonalPriorityRequest personalPriorityRequest) {
+        return notificationService.unsetPersonalPriority(personalPriorityRequest.getNotificationId(), personalPriorityRequest.getUserId());
+    }
+
     @PostMapping("/getNotificationDetailByReceiver")
     public NotificationDetailResponseForDetail getNotificationByUserIdAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
         return notificationServiceV2.getNotificationDetailByUserIdAndNotificationId(detailRequest.getUserId(), detailRequest.getNotificationId());
