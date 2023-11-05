@@ -287,7 +287,9 @@ public class NotificationServiceV2 {
 
         List<Notification> notifications = notificationRepository.getNotificationByDepartment(user.getDepartment().getDepartmentId());
 
-        return getNotificationResponsesOfList(userId, notifications, NotificationViewer.SENDER);
+        return getNotificationResponsesOfList(userId, notifications, NotificationViewer.SENDER)
+                .stream().filter(response -> response.getNotificationStatus().equals(NotificationStatus.SCHEDULED))
+                .collect(Collectors.toList());
 
     }
 
