@@ -25,8 +25,7 @@ public class NotificationDetailResponseForCreator {
     private NotificationStatus notificationStatus;
     private boolean priority;
     private String creatorId;
-    private String creatorFirstName;
-    private String creatorLastName;
+    private String userName;
     private String creatorImage;
 
     private boolean sendAll;
