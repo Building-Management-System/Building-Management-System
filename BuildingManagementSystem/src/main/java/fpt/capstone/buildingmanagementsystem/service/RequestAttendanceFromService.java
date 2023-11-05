@@ -28,10 +28,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
@@ -77,6 +74,13 @@ public class RequestAttendanceFromService {
                 if (checkValidate(sendAttendanceFormRequest)) {
                     Optional<User> send_user = userRepository.findByUserId(sendAttendanceFormRequest.getUserId());
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendAttendanceFormRequest.getDepartmentId());
+                    List<User> listUserReceiver= new ArrayList<>();
+                    if(sendAttendanceFormRequest.getReceivedId()!=null) {
+                        Optional<User> receive_user = userRepository.findByUserId(sendAttendanceFormRequest.getReceivedId());
+                        listUserReceiver.add(receive_user.get());
+                    }else{
+                        listUserReceiver= userRepository.findAllByDepartment(department.get());
+                    }
                     if (send_user.isPresent() && department.isPresent()) {
                         String id_ticket = "AT_" + Until.generateId();
                         String id_request_ticket = "AT_" + Until.generateId();
@@ -84,6 +88,16 @@ public class RequestAttendanceFromService {
                                 .updateDate(Until.generateRealTime()).build();
                         ticketRepository.save(ticket);
                         saveAttendanceRequest(sendAttendanceFormRequest, send_user, department, id_request_ticket, ticket);
+                        for(User receive_user:listUserReceiver) {
+                            automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
+                                    ticket.getTicketId(),
+                                    send_user.get(),
+                                    receive_user,
+                                    ticket.getTopic(),
+                                    true,
+                                    null
+                            ));
+                        }
                         return true;
                     } else {
                         throw new NotFound("not_found");
@@ -140,6 +154,7 @@ public class RequestAttendanceFromService {
                     sendAttendanceFormRequest.getRequestId() != null
             ) {
                 if (checkValidate(sendAttendanceFormRequest)) {
+
                     Optional<User> send_user = userRepository.findByUserId(sendAttendanceFormRequest.getUserId());
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendAttendanceFormRequest.getDepartmentId());
                     Optional<RequestTicket> request = requestTicketRepository.findByRequestId(sendAttendanceFormRequest.getRequestId());

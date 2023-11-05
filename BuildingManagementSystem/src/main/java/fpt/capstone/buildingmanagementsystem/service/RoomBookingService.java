@@ -90,6 +90,7 @@ public class RoomBookingService {
                     && sendRoomBookingRequest.getEndTime() != null
                     && sendRoomBookingRequest.getDepartmentReceiverId() != null) {
                 if (checkValidate(sendRoomBookingRequest)) {
+                    List<User> listUserReceiver= new ArrayList<>();
                     Room room = roomRepository.findById(sendRoomBookingRequest.getRoomId())
                             .orElseThrow(() -> new BadRequest("not_found_room"));
                     User user = userRepository.findByUserId(sendRoomBookingRequest.getUserId())
@@ -101,7 +102,12 @@ public class RoomBookingService {
 
                     String ticketId = "RB_" + Until.generateId();
                     String requestTicketId = "RB_" + Until.generateId();
-
+                    if(sendRoomBookingRequest.getReceiverId()!=null) {
+                        Optional<User> receive_user = userRepository.findByUserId(sendRoomBookingRequest.getReceiverId());
+                        listUserReceiver.add(receive_user.get());
+                    }else{
+                        listUserReceiver= userRepository.findAllByDepartment(receiverDepartment);
+                    }
                     Ticket ticket = Ticket.builder()
                             .ticketId(ticketId)
                             .topic(TopicEnum.ROOM_REQUEST)
@@ -111,6 +117,16 @@ public class RoomBookingService {
                             .build();
                     ticketRepository.save(ticket);
                     saveRoomBookingRequest(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicketId, ticket);
+                    for(User receive_user:listUserReceiver) {
+                        automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
+                                ticket.getTicketId(),
+                                user,
+                                receive_user,
+                                ticket.getTopic(),
+                                true,
+                                null
+                        ));
+                    }
                     return true;
                 } else {
                     throw new BadRequest("date_time_input_wrong");
