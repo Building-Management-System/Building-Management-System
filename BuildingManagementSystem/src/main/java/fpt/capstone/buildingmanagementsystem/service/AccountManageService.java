@@ -327,7 +327,13 @@ public class AccountManageService implements UserDetailsService {
         for (int i = 0; i < userOfDepartment.size(); i++) {
             Optional<Account> account = accountRepository.findByAccountId(userOfDepartment.get(i).getUserId());
             if (Objects.equals(account.get().getRole().getRoleId(), "3")) {
-                checkPoint = false;
+                if(Objects.equals(account.get().getStatus().getStatusId(), "1")) {
+                    checkPoint = false;
+                }else{
+                    Role role= roleRepository.findByRoleId(account.get().getRole().getRoleId()).get();
+                    account.get().setRole(role);
+                 //   account.Re=
+                }
             }
         }
         return checkPoint;
