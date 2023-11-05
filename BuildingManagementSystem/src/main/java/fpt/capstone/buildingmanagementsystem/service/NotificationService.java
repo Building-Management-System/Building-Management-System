@@ -352,8 +352,12 @@ public class NotificationService {
                 .notification(notification)
                 .build();
         try {
-            notificationHiddenRepository.save(personalPriority);
-            return true;
+            if(!notification.isPriority()) {
+                notificationHiddenRepository.save(personalPriority);
+                return true;
+            }else{
+                throw new Conflict("fail");
+            }
         } catch (Exception e) {
             throw new ServerError("fail");
         }
