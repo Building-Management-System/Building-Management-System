@@ -154,12 +154,11 @@ public class NotificationService {
                 Optional<User> sender = userRepository.findByUserId(updateNotificationRequest.getUserId());
                 receiverId.forEach(element -> receivers.add(userRepository.findByUserId(element)));
                 if (sender.isPresent()) {
+                    notification.setCreateDate(notificationRepository.findByNotificationId(updateNotificationRequest.getNotificationId()).getCreateDate());
                     notification.setCreatedBy(sender.get());
                     notificationRepository.save(notification);
                     unreadMarkRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
                     notificationReceiverRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
-                    notificationFileRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
-                    ExecutorService executorService = Executors.newFixedThreadPool(5);
                     if (deleteFile.size() > 0) {
                         for (String deleteId : deleteFile) {
                             notificationFileRepository.deleteByFileId(deleteId);
@@ -168,6 +167,7 @@ public class NotificationService {
                     for (String s : deleteImage) {
                         notificationImageRepository.deleteByImageFileName(s);
                     }
+                    ExecutorService executorService = Executors.newFixedThreadPool(5);
                     for (int i = 0; i < deleteImage.size(); i++) {
                         int finalI = i;
                         executorService.submit(() -> {
@@ -208,8 +208,8 @@ public class NotificationService {
             setListImage(image, notification, listImage);
         }
     }
-
-    private void saveFileAndReceiver(MultipartFile[] file, boolean sendAllStatus, Notification notification, List<Optional<User>> receivers, List<NotificationReceiver> notificationReceiverList, List<UnreadMark> unreadMarkList) throws IOException {
+    @Transactional
+    public void saveFileAndReceiver(MultipartFile[] file, boolean sendAllStatus, Notification notification, List<Optional<User>> receivers, List<NotificationReceiver> notificationReceiverList, List<UnreadMark> unreadMarkList) throws IOException {
         if (receivers.size() > 0) {
             receivers.forEach(receiver -> notificationReceiverList.add(
                     setNotificationReceiver(sendAllStatus, notification, receiver)));
@@ -234,7 +234,7 @@ public class NotificationService {
             notificationReceiverRepository.save(setNotificationReceiver(sendAllStatus, notification, Optional.empty()));
         }
         if (file.length > 0) {
-            notificationFileRepository.saveAll(fileService.store(file, notification));
+            fileService.store(file, notification);
         }
     }
 

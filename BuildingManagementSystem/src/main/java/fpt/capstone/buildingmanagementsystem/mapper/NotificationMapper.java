@@ -17,7 +17,6 @@ public abstract class NotificationMapper {
     })
     public abstract Notification convert(SaveNotificationRequest saveNotificationRequest) throws ParseException;
     @Mappings({
-            @Mapping(target = "createDate", expression = "java(fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime())"),
             @Mapping(target = "updateDate", expression = "java(fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime())")
     })
     public abstract Notification convert(UpdateNotificationRequest updateNotificationRequest) throws ParseException;
