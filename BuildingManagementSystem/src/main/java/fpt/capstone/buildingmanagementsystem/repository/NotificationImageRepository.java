@@ -15,4 +15,6 @@ public interface NotificationImageRepository extends JpaRepository<NotificationI
     List<NotificationImage> findByNotification(Notification notification);
     void deleteAllByNotification_NotificationId(String id);
 
+
+    void deleteByImageFileName(String imageName);
 }

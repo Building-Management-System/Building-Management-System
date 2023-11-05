@@ -1,9 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.model.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
@@ -16,6 +13,7 @@ import javax.persistence.ManyToOne;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Entity(name = "notificationHidden")
 public class NotificationHidden {
     @Id
