@@ -34,13 +34,13 @@ public class AutomaticNotificationService {
         String notificationTitle = "[SYSTEM] New update about "+request.getTopic()+" request";
 
         String notificationContent = "" +
-                "Ticket Id: " + request.getTicketId() + "\n" +
-                "Topic: " + request.getTopic() + "\n";
+                "Ticket Id: " + request.getTicketId() + "<br>" +
+                "Topic: " + request.getTopic() + "<br>";
         if(request.isDecision()) {
             notificationContent += "Status: Accepted";
         } else {
             notificationContent += "" +
-                    "Status: Rejected\n" +
+                    "Status: Rejected <br>" +
                     "Reason: " + request.getReason();
         }
 
@@ -78,7 +78,7 @@ public class AutomaticNotificationService {
         String notificationTitle = "[SYSTEM] You have a new ticket request.";
 
         String notificationContent = "" +
-                "Ticket Id: " + request.getTicketId() + "\n" +
+                "Ticket Id: " + request.getTicketId() + "<br>" +
                 "Topic: " + request.getTopic() + "\n";
 
         Notification notification = Notification.builder()
