@@ -110,4 +110,8 @@ public class NotificationController {
     public boolean setNotificationHidden(@RequestBody PersonalPriorityRequest setNotificationHidden) {
         return notificationService.notificationHidden(setNotificationHidden.getNotificationId(), setNotificationHidden.getUserId());
     }
+    @PostMapping("/deleteNotification")
+    public boolean deleteNotification(@RequestBody PersonalPriorityRequest deleteNotification) {
+        return notificationService.deleteNotification(deleteNotification.getNotificationId(), deleteNotification.getUserId());
+    }
 }
