@@ -131,7 +131,7 @@ public class NotificationService {
             String userId = updateNotificationRequest.getUserId();
             List<String> receiverId = updateNotificationRequest.getReceiverId();
             List<String> deleteImage = updateNotificationRequest.getDeleteImage();
-            List<String> deleteFile = updateNotificationRequest.getDeleteImage();
+            List<String> deleteFile = updateNotificationRequest.getDeleteFileId();
             String title = updateNotificationRequest.getTitle();
             String content = updateNotificationRequest.getContent();
             String uploadDate = updateNotificationRequest.getUploadDatePlan();
