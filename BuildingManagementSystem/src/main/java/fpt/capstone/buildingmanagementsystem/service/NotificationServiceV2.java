@@ -2,6 +2,8 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
+import fpt.capstone.buildingmanagementsystem.model.entity.NotificationFile;
+import fpt.capstone.buildingmanagementsystem.model.entity.NotificationImage;
 import fpt.capstone.buildingmanagementsystem.model.entity.PersonalPriority;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
@@ -143,13 +145,19 @@ public class NotificationServiceV2 {
         Notification notification = notificationRepository.getNotificationByUserIdAndNotificationId(userId, notificationId)
                 .orElseThrow(() -> new NotFound("not_found_notification"));
 
-        List<NotificationFileResponse> notificationFiles = notificationFileRepository.findByNotification(notification)
-                .stream().map(file -> new NotificationFileResponse(
-                        file.getFileId(),
-                        file.getData(),
-                        file.getName(),
-                        file.getType()
-                )).collect(Collectors.toList());
+        List<NotificationFileResponse> notificationFiles = new ArrayList<>();
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
+
+         notificationFileRepository.findByNotification(notification).forEach(file ->  executorService.submit(() ->{
+                     NotificationFileResponse response = new NotificationFileResponse(
+                             file.getFileId(),
+                             file.getData(),
+                             file.getName(),
+                             file.getType()
+                     );
+                     notificationFiles.add(response);
+                 }));
+
         List<NotificationImageResponse> notificationImages = notificationImageRepository.findByNotification(notification)
                 .stream()
                 .map(image -> new NotificationImageResponse(image.getImageId(), image.getImageFileName()))
@@ -174,7 +182,7 @@ public class NotificationServiceV2 {
         if (personalPriority.isPresent()) {
             notificationDetailResponse.setPersonalPriority(true);
         }
-
+        executorService.shutdown();
         return notificationDetailResponse;
     }
 
@@ -202,7 +210,7 @@ public class NotificationServiceV2 {
 
     public List<NotificationDetailResponse> getListUploadedNotificationByCreator(String userId) {
         return getListNotificationByCreator(userId)
-                .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.DRAFT))
+                .stream().filter(notification -> notification.getNotificationStatus().equals(NotificationStatus.UPLOADED))
                 .collect(Collectors.toList());
     }
 
@@ -224,6 +232,12 @@ public class NotificationServiceV2 {
                 .stream().collect(Collectors.toMap(Notification::getNotificationId, Function.identity()));
 
         List<NotificationDetailResponse> notificationDetailResponses = new ArrayList<>();
+
+        Map<String, NotificationImage> images = notificationImageRepository.getFirstByNotificationIn(notifications)
+                .stream().collect(Collectors.toMap(image -> image.getNotification().getNotificationId(), Function.identity()));
+
+        Map<String, NotificationFile> files = notificationFileRepository.findFirstByNotificationIn(notifications)
+                .stream().collect(Collectors.toMap(file -> file.getNotification().getNotificationId(), Function.identity()));
 
         ExecutorService ex = Executors.newFixedThreadPool(5);
 
@@ -248,6 +262,12 @@ public class NotificationServiceV2 {
         ExecutorService executorService = Executors.newFixedThreadPool(5);
 
         notificationDetailResponses.forEach(response -> executorService.submit(() -> {
+            if(images.containsKey(response.getNotificationId())) {
+                response.setContainImage(true);
+            }
+            if (files.containsKey(response.getNotificationId())) {
+                response.setContainFile(true);
+            }
             if (unreadNotification.containsKey(response.getNotificationId())) {
                 response.setReadStatus(false);
             }
@@ -256,6 +276,7 @@ public class NotificationServiceV2 {
             }
         }));
         executorService.shutdown();
+        ex.shutdown();
         return notificationDetailResponses.stream()
                 .sorted(Comparator.comparing(NotificationDetailResponse::isPriority))
                 .collect(Collectors.toList());

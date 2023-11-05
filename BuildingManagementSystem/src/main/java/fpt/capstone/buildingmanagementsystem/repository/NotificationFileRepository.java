@@ -10,9 +10,9 @@ import java.util.List;
 @Repository
 public interface NotificationFileRepository extends JpaRepository<NotificationFile,String> {
 
-    List<NotificationFile> findByNotificationIn(List<Notification> notifications);
-
     List<NotificationFile> findByNotification(Notification notification);
     void deleteAllByNotification_NotificationId(String id);
+
+    List<NotificationFile> findFirstByNotificationIn(List<Notification> notifications);
 
 }

@@ -29,4 +29,6 @@ public class NotificationDetailResponse {
     private boolean readStatus;
     private boolean personalPriority;
     private NotificationViewer viewAs;
+    private boolean containFile;
+    private boolean containImage;
 }
