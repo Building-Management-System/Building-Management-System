@@ -131,6 +131,7 @@ public class NotificationService {
             String userId = updateNotificationRequest.getUserId();
             List<String> receiverId = updateNotificationRequest.getReceiverId();
             List<String> deleteImage = updateNotificationRequest.getDeleteImage();
+            List<String> deleteFile = updateNotificationRequest.getDeleteImage();
             String title = updateNotificationRequest.getTitle();
             String content = updateNotificationRequest.getContent();
             String uploadDate = updateNotificationRequest.getUploadDatePlan();
@@ -157,9 +158,13 @@ public class NotificationService {
                     notificationRepository.save(notification);
                     unreadMarkRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
                     notificationReceiverRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
-                    notificationReceiverRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
                     notificationFileRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
                     ExecutorService executorService = Executors.newFixedThreadPool(5);
+                    if (deleteFile.size() > 0) {
+                        for (String deleteId : deleteFile) {
+                            notificationFileRepository.deleteByFileId(deleteId);
+                        }
+                    }
                     for (String s : deleteImage) {
                         notificationImageRepository.deleteByImageFileName(s);
                     }
@@ -390,10 +395,10 @@ public class NotificationService {
                 .notification(notification)
                 .build();
         try {
-            if(!notification.isPriority()) {
+            if (!notification.isPriority()) {
                 notificationHiddenRepository.save(personalPriority);
                 return true;
-            }else{
+            } else {
                 throw new Conflict("fail");
             }
         } catch (Exception e) {
