@@ -41,7 +41,6 @@ public class FileService {
                         .build();
                 fileDb.setNotification(notification);
                 list.add(fileDb);
-                System.out.println(fileName);
             });
         }
         executorService.shutdown();

@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
@@ -10,6 +11,7 @@ import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.NotificationMapper;
 import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.request.SaveNotificationRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.UpdateNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import fpt.capstone.buildingmanagementsystem.validate.Validate;
@@ -49,8 +51,6 @@ public class NotificationService {
 
     @Autowired
     PersonalPriorityRepository personalPriorityRepository;
-    @Autowired
-    private AccountRepository accountRepository;
 
     public boolean saveNotification(String data, MultipartFile[] image, MultipartFile[] file) {
         try {
@@ -99,6 +99,74 @@ public class NotificationService {
         }
     }
 
+    @Transactional
+    public boolean changeNotification(String data, MultipartFile[] image, MultipartFile[] file) {
+        try {
+            List<NotificationReceiver> notificationReceiverList = new ArrayList<>();
+            List<UnreadMark> unreadMarkList = new ArrayList<>();
+            List<NotificationImage> listImage = new ArrayList<>();
+            List<Optional<User>> receivers = new ArrayList<>();
+
+            UpdateNotificationRequest updateNotificationRequest = new ObjectMapper().readValue(data, UpdateNotificationRequest.class);
+            String userId = updateNotificationRequest.getUserId();
+            List<String> receiverId = updateNotificationRequest.getReceiverId();
+            List<String> deleteImage = updateNotificationRequest.getDeleteImage();
+            String title = updateNotificationRequest.getTitle();
+            String content = updateNotificationRequest.getContent();
+            String uploadDate = updateNotificationRequest.getUploadDatePlan();
+            String buttonStatus = updateNotificationRequest.getButtonStatus();
+            boolean sendAllStatus = updateNotificationRequest.isSendAllStatus();
+
+            if ((userId != null && title != null && content != null) &&
+                    ((!receiverId.isEmpty() && !sendAllStatus) || (receiverId.isEmpty() && sendAllStatus))) {
+                Notification notification = notificationMapper.convert(updateNotificationRequest);
+                if (uploadDate == null && buttonStatus.equals("upload")) {
+                    notification.setNotificationStatus(UPLOADED);
+                }
+                if (uploadDate != null && buttonStatus.equals("upload")) {
+                    notification.setNotificationStatus(SCHEDULED);
+                }
+                if (buttonStatus.equals("save")) {
+                    notification.setNotificationStatus(DRAFT);
+                }
+                setUploadDate(uploadDate, notification);
+                Optional<User> sender = userRepository.findByUserId(updateNotificationRequest.getUserId());
+                receiverId.forEach(element -> receivers.add(userRepository.findByUserId(element)));
+                if (sender.isPresent()) {
+                    notification.setCreatedBy(sender.get());
+                    notificationRepository.save(notification);
+                    unreadMarkRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
+                    notificationReceiverRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
+                    notificationReceiverRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
+                    notificationFileRepository.deleteAllByNotification_NotificationId(notification.getNotificationId());
+                    ExecutorService executorService = Executors.newFixedThreadPool(5);
+                    for (String s : deleteImage) {
+                        notificationImageRepository.deleteByImageFileName(s);
+                    }
+                    for (int i = 0; i < deleteImage.size(); i++) {
+                        int finalI = i;
+                        executorService.submit(() -> {
+                            Bucket bucket = StorageClient.getInstance().bucket();
+                            Blob blob = bucket.get(deleteImage.get(finalI));
+                            if (blob != null) {
+                                blob.delete();
+                            }
+                        });
+                    }
+                    executorService.shutdown();
+                    saveImageAndFileAndReceiver(image, file, sendAllStatus, notification, receivers, notificationReceiverList, unreadMarkList, listImage);
+                    return true;
+                } else {
+                    throw new NotFound("not_found");
+                }
+            } else {
+                throw new BadRequest("request_fail");
+            }
+        } catch (ServerError | IOException | ParseException e) {
+            throw new ServerError("fail");
+        }
+    }
+
     private static void setUploadDate(String uploadDate, Notification notification) throws ParseException {
         if (uploadDate != null) {
             if (Validate.validateDateAndTime(uploadDate) && Validate.checkUploadDateRealTime(uploadDate)) {
@@ -110,6 +178,13 @@ public class NotificationService {
     }
 
     private void saveImageAndFileAndReceiver(MultipartFile[] image, MultipartFile[] file, boolean sendAllStatus, Notification notification, List<Optional<User>> receivers, List<NotificationReceiver> notificationReceiverList, List<UnreadMark> unreadMarkList, List<NotificationImage> listImage) throws IOException {
+        saveFileAndReceiver(file, sendAllStatus, notification, receivers, notificationReceiverList, unreadMarkList);
+        if (image.length > 0) {
+            setListImage(image, notification, listImage);
+        }
+    }
+
+    private void saveFileAndReceiver(MultipartFile[] file, boolean sendAllStatus, Notification notification, List<Optional<User>> receivers, List<NotificationReceiver> notificationReceiverList, List<UnreadMark> unreadMarkList) throws IOException {
         if (receivers.size() > 0) {
             receivers.forEach(receiver -> notificationReceiverList.add(
                     setNotificationReceiver(sendAllStatus, notification, receiver)));
@@ -136,9 +211,6 @@ public class NotificationService {
         if (file.length > 0) {
             notificationFileRepository.saveAll(fileService.store(file, notification));
         }
-        if (image.length > 0) {
-            setListImage(image, notification, listImage);
-        }
     }
 
     private void setListImage(MultipartFile[] image, Notification notification, List<NotificationImage> listImage) throws IOException {
@@ -147,21 +219,24 @@ public class NotificationService {
             int finalI = i;
             byte[] imageBytes = image[finalI].getBytes();
             executorService.submit(() -> {
-                String imageName = "notification_" + UUID.randomUUID();
-                String[] subFileName = Objects.requireNonNull(image[finalI].getOriginalFilename()).split("\\.");
-                List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
-                imageName = imageName + "." + stringList.get(stringList.size() - 1);
-                Bucket bucket = StorageClient.getInstance().bucket();
-                bucket.create(imageName, imageBytes, image[finalI].getContentType());
-                System.out.println(imageName + finalI);
-                NotificationImage notificationImage = new NotificationImage();
-                notificationImage.setImageFileName(imageName);
-                notificationImage.setNotification(notification);
-                listImage.add(notificationImage);
-                notificationImageRepository.saveAndFlush(notificationImage);
+                saveImageToDB(image, notification, listImage, finalI, imageBytes);
             });
         }
         executorService.shutdown();
+    }
+
+    private void saveImageToDB(MultipartFile[] image, Notification notification, List<NotificationImage> listImage, int finalI, byte[] imageBytes) {
+        String imageName = "notification_" + UUID.randomUUID();
+        String[] subFileName = Objects.requireNonNull(image[finalI].getOriginalFilename()).split("\\.");
+        List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
+        imageName = imageName + "." + stringList.get(stringList.size() - 1);
+        Bucket bucket = StorageClient.getInstance().bucket();
+        bucket.create(imageName, imageBytes, image[finalI].getContentType());
+        NotificationImage notificationImage = new NotificationImage();
+        notificationImage.setImageFileName(imageName);
+        notificationImage.setNotification(notification);
+        listImage.add(notificationImage);
+        notificationImageRepository.saveAndFlush(notificationImage);
     }
 
     private NotificationReceiver setNotificationReceiver(boolean sendAllStatus, Notification notification, Optional<User> receiver) {
@@ -243,8 +318,9 @@ public class NotificationService {
         userRepository.findByUserId(userId)
                 .orElseThrow(() -> new BadRequest("Not_found_user"));
         if (userId.equals(notification.getCreatedBy().getUserId())) {
-            try {
-                if (!notification.getNotificationStatus().equals(UPLOADED)) {
+
+            if (!notification.getNotificationStatus().equals(UPLOADED)) {
+                try {
                     notificationHiddenRepository.deleteAllByNotification_NotificationId(notificationId);
                     notificationFileRepository.deleteAllByNotification_NotificationId(notificationId);
                     notificationImageRepository.deleteAllByNotification_NotificationId(notificationId);
@@ -253,11 +329,11 @@ public class NotificationService {
                     notificationReceiverRepository.deleteAllByNotification_NotificationId(notificationId);
                     notificationRepository.delete(notification);
                     return true;
-                } else {
-                    throw new Conflict("Notification_Upload");
+                } catch (Exception e) {
+                    throw new ServerError("fail");
                 }
-            } catch (Exception e) {
-                throw new ServerError("fail");
+            } else {
+                throw new Conflict("Notification_Upload");
             }
         } else {
             throw new BadRequest("request_fail");
@@ -265,6 +341,21 @@ public class NotificationService {
     }
 
     public boolean notificationHidden(String notificationId, String userId) {
-        return true;
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new BadRequest("Not_found_notification"));
+
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequest("Not_found_user"));
+
+        NotificationHidden personalPriority = NotificationHidden.builder()
+                .user(user)
+                .notification(notification)
+                .build();
+        try {
+            notificationHiddenRepository.save(personalPriority);
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("fail");
+        }
     }
 }

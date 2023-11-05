@@ -37,6 +37,11 @@ public class NotificationController {
     @RequestParam(value = "file[]", required = false) MultipartFile[] file) throws Exception {
         return notificationService.saveNotification(data, image,file);
     }
+    @RequestMapping(path = "/editNotification", method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public boolean editNotification(@RequestParam("data") String data, @RequestParam(value = "image[]", required = false) MultipartFile[] image,
+                                       @RequestParam(value = "file[]", required = false) MultipartFile[] file) throws Exception {
+        return notificationService.changeNotification(data, image,file);
+    }
 
     @GetMapping("/getNotificationByUserId")
     public NotificationTitleResponse getAllNotificationByUser(@RequestParam("userId") String userId) {
@@ -81,7 +86,6 @@ public class NotificationController {
     public boolean setPersonalPriority(@RequestBody PersonalPriorityRequest personalPriorityRequest) {
         return notificationService.setPersonalPriority(personalPriorityRequest.getNotificationId(), personalPriorityRequest.getUserId());
     }
-
     @PostMapping("/getNotificationDetailByReceiver")
     public NotificationDetailResponseForDetail getNotificationByUserIdAndNotificationId(@RequestBody NotificationDetailRequest detailRequest) {
         return notificationServiceV2.getNotificationDetailByUserIdAndNotificationId(detailRequest.getUserId(), detailRequest.getNotificationId());
@@ -95,5 +99,9 @@ public class NotificationController {
     @GetMapping("getNotificationByDepartment")
     public List<NotificationDetailResponse> getListScheduledNotificationByDepartmentOfCreator(@RequestParam("userId") String userId) {
         return notificationServiceV2.getListScheduledNotificationByDepartmentOfCreator(userId);
+    }
+    @PostMapping("/setNotificationHidden")
+    public boolean setNotificationHidden(@RequestBody PersonalPriorityRequest setNotificationHidden) {
+        return notificationService.notificationHidden(setNotificationHidden.getNotificationId(), setNotificationHidden.getUserId());
     }
 }
