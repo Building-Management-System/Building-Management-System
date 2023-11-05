@@ -96,7 +96,7 @@ public class NotificationServiceV2 {
                 .forEach(receiver -> ex.submit(() -> {
                     UserAccountResponse userAccountResponse = new UserAccountResponse(
                             receiver.getReceiver().getUserId(),
-                            receiver.getReceiver().getFirstName() + " " + receiver.getReceiver().getLastName(),
+                            receiver.getReceiver().getAccount().username,
                             receiver.getReceiver().getDepartment().getDepartmentId(),
                             receiver.getReceiver().getDepartment().getDepartmentName()
                     );
