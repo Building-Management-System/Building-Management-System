@@ -17,6 +17,7 @@ public class UpdateNotificationRequest {
     String title;
     boolean sendAllStatus;
     List<String> deleteImage;
+    List<String> deleteFileId;
     List<String> receiverId;
     boolean priority;
     String content;
