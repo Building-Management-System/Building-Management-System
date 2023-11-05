@@ -330,9 +330,9 @@ public class AccountManageService implements UserDetailsService {
                 if(Objects.equals(account.get().getStatus().getStatusId(), "1")) {
                     checkPoint = false;
                 }else{
-                    Role role= roleRepository.findByRoleId(account.get().getRole().getRoleId()).get();
+                    Role role= roleRepository.findByRoleName("employee").get();
                     account.get().setRole(role);
-                 //   account.Re=
+                    accountRepository.save(account.get());
                 }
             }
         }
