@@ -21,6 +21,8 @@ import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ResetPasswordRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAllAccountResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.RequestMessageResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponseV2;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.ChatMessageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
@@ -41,10 +43,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 import static fpt.capstone.buildingmanagementsystem.until.Until.getRandomString;
@@ -350,7 +350,14 @@ public class AccountManageService implements UserDetailsService {
                 account.remove(account.get(i));
             }
         }
-        account.forEach(element -> getAllAccountResponses.add(accountMapper.convertGetAllAccount(element)));
+        account=account.stream()
+                .sorted((Comparator.comparing(Account::getCreatedBy).reversed()))
+                .collect(Collectors.toList());
+        account.forEach(element ->{
+                GetAllAccountResponse get=accountMapper.convertGetAllAccount(element);
+                get.setDepartmentName(element.getUser().getDepartment().getDepartmentName());
+                getAllAccountResponses.add(get);
+        });
         return getAllAccountResponses;
     }
 
