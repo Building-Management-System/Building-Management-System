@@ -27,8 +27,7 @@ public class FileService {
     @Autowired
     FileRepository fileRepository;
 
-    public List<NotificationFile> store(MultipartFile[] file, Notification notification) throws IOException {
-        List<NotificationFile> list = new ArrayList<>();
+    public void store(MultipartFile[] file, Notification notification) throws IOException {
         ExecutorService executorService = Executors.newFixedThreadPool(5);
         for (MultipartFile multipartFile : file) {
             byte[] imageBytes = multipartFile.getBytes();
@@ -40,11 +39,10 @@ public class FileService {
                         .data(imageBytes)
                         .build();
                 fileDb.setNotification(notification);
-                list.add(fileDb);
+                fileRepository.save(fileDb);
             });
         }
         executorService.shutdown();
-        return list;
     }
 
     public ResponseEntity<?> getALlFiles() {

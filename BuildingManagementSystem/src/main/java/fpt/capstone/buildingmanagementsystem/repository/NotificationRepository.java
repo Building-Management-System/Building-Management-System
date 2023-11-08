@@ -63,7 +63,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
     Optional<Notification>  findByCreatedByAndNotificationId(User user, String notificationId);
 
     List<Notification> findByCreatedBy(User user);
-
+    Notification findByNotificationId(String id);
     @Query(value = "SELECT *\n" +
             "FROM notification n\n" +
             "JOIN user u ON u.user_id = n.user_id\n" +
