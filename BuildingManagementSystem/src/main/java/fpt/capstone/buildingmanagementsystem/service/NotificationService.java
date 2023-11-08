@@ -92,6 +92,7 @@ public class NotificationService {
                 Notification notification = notificationMapper.convert(saveNotificationRequest);
                 if (uploadDate == null && buttonStatus.equals("upload")) {
                     notification.setNotificationStatus(UPLOADED);
+                    notification.setUpdateDate(Until.generateDate());
                 }
                 if (uploadDate != null && buttonStatus.equals("upload")) {
                     notification.setNotificationStatus(SCHEDULED);
