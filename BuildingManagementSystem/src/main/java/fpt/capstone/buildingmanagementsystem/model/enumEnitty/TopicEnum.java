@@ -4,7 +4,10 @@ public enum TopicEnum {
 
     ATTENDANCE_REQUEST,
     LEAVE_REQUEST,
+
     OVERTIME_REQUEST,
+
+    LATE_REQUEST,
     ROOM_REQUEST,
     OTHER_REQUEST
 }
