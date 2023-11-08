@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.service.schedule;
 import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationRepository;
+import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class NotificationUploadScheduledService {
                 Date scheduledTime = new Date();
                 scheduledTime.setTime(notification.getUploadDate().getTime());
                 notification.setNotificationStatus(UPLOADED);
+                notification.setUpdateDate(Until.generateRealTime());
                 UpdateUploadDate uploadDate = new UpdateUploadDate(notification, notificationRepository);
                 timer.schedule(uploadDate, scheduledTime);
             }

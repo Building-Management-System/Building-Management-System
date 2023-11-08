@@ -92,7 +92,7 @@ public class NotificationService {
                 Notification notification = notificationMapper.convert(saveNotificationRequest);
                 if (uploadDate == null && buttonStatus.equals("upload")) {
                     notification.setNotificationStatus(UPLOADED);
-                    notification.setUpdateDate(Until.generateDate());
+                    notification.setUploadDate(notification.getCreateDate());
                 }
                 if (uploadDate != null && buttonStatus.equals("upload")) {
                     notification.setNotificationStatus(SCHEDULED);
@@ -143,7 +143,7 @@ public class NotificationService {
                 Notification notification = notificationMapper.convert(updateNotificationRequest);
                 if (uploadDate == null && buttonStatus.equals("upload")) {
                     notification.setNotificationStatus(UPLOADED);
-                    notification.setUpdateDate(Until.generateDate());
+                    notification.setUploadDate(notification.getCreateDate());
                 }
                 if (uploadDate != null && buttonStatus.equals("upload")) {
                     notification.setNotificationStatus(SCHEDULED);
