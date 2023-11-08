@@ -1,10 +1,16 @@
 package fpt.capstone.buildingmanagementsystem;
 
 import fpt.capstone.buildingmanagementsystem.service.InitializationService;
+import org.apache.tomcat.util.descriptor.web.SecurityConstraint;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import javax.naming.Context;
 
 @SpringBootApplication
 @EnableScheduling
@@ -14,5 +20,4 @@ public class BuildingManagementSystemApplication {
         InitializationService initDB = context.getBean(InitializationService.class);
         initDB.init();
     }
-
 }
