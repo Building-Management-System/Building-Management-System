@@ -17,7 +17,7 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:5173","https://frabjous-mochi-6eeee2.netlify.app",
-                                "http://20.239.93.98:5173")
+                                "http://20.239.93.98:5173","https://bmscapstone.azurewebsites.net")
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*");
             }
