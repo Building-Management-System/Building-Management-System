@@ -120,6 +120,8 @@ public class NotificationServiceV2 {
                 .notificationId(notificationId)
                 .title(notification.getTitle())
                 .content(notification.getContent())
+                .createDate(notification.getCreateDate())
+                .updateDate(notification.getUpdateDate())
                 .uploadDate(notification.getUploadDate())
                 .notificationStatus(notification.getNotificationStatus())
                 .priority(notification.isPriority())
@@ -170,6 +172,7 @@ public class NotificationServiceV2 {
                 .notificationId(notificationId)
                 .title(notification.getTitle())
                 .content(notification.getContent())
+                .createdDate(notification.getCreateDate())
                 .uploadDate(notification.getUploadDate())
                 .notificationStatus(notification.getNotificationStatus())
                 .priority(notification.isPriority())
@@ -249,6 +252,7 @@ public class NotificationServiceV2 {
             detailResponse.setNotificationId(notification.getNotificationId());
             detailResponse.setTitle(notification.getTitle());
             detailResponse.setContent(notification.getContent());
+            detailResponse.setCreatedDate(notification.getCreateDate());
             detailResponse.setUploadDate(notification.getUploadDate());
             detailResponse.setNotificationStatus(notification.getNotificationStatus());
             detailResponse.setPriority(notification.isPriority());
