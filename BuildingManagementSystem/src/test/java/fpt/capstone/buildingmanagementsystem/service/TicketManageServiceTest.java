@@ -131,5 +131,3 @@ class TicketManageServiceTest {
         ticketManageService.closeAllTicketWhenAcceptEvaluate("employeeId", 0, 0);
     }
 }
-
-//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme
