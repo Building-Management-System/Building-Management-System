@@ -21,6 +21,7 @@ public class NotificationDetailResponse {
     private String notificationId;
     private String title;
     private String content;
+    private Date createdDate;
     private Date uploadDate;
     private NotificationStatus notificationStatus;
     private boolean priority;
