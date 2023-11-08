@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.model.response;
 
+import fpt.capstone.buildingmanagementsystem.model.entity.Role;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,6 +27,9 @@ public class NotificationDetailResponseForCreator {
     private boolean priority;
     private String creatorId;
     private String userName;
+    private String firstName;
+    private String lastName;
+    private Role role;
     private String creatorImage;
 
     private boolean sendAll;
