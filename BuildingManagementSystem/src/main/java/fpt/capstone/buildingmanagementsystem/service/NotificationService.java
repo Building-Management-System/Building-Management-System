@@ -78,7 +78,6 @@ public class NotificationService {
             List<UnreadMark> unreadMarkList = new ArrayList<>();
             List<NotificationImage> listImage = new ArrayList<>();
             List<Optional<User>> receivers = new ArrayList<>();
-
             SaveNotificationRequest saveNotificationRequest = new ObjectMapper().readValue(data, SaveNotificationRequest.class);
             String userId = saveNotificationRequest.getUserId();
             List<String> receiverId = saveNotificationRequest.getReceiverId();
@@ -143,6 +142,7 @@ public class NotificationService {
                 Notification notification = notificationMapper.convert(updateNotificationRequest);
                 if (uploadDate == null && buttonStatus.equals("upload")) {
                     notification.setNotificationStatus(UPLOADED);
+                    notification.setUpdateDate(Until.generateDate());
                 }
                 if (uploadDate != null && buttonStatus.equals("upload")) {
                     notification.setNotificationStatus(SCHEDULED);
