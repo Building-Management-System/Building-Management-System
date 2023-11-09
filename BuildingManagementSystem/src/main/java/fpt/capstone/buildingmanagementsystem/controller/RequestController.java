@@ -19,6 +19,8 @@ public class RequestController {
     @Autowired
     RequestLeaveFormService requestLeaveFormService;
     @Autowired
+    RequestLateFormService requestLateFormService;
+    @Autowired
     UserManageService userManageService;
     @Autowired
     RoomBookingService roomBookingService;
@@ -88,5 +90,17 @@ public class RequestController {
     @PostMapping("/overTimeFormExistRequest")
     public boolean requestOverTimeExistRequest(@RequestBody SendOvertimeFormRequest sendOvertimeFormRequest) {
         return requestOvertimeFormService.getOvertimeExistRequest(sendOvertimeFormRequest);
+    }
+    @PostMapping("/lateForm")
+    public boolean requestLateFormForm(@RequestBody SendLateFormRequest sendLateFormRequest) {
+        return requestLateFormService.getLateFormUser(sendLateFormRequest);
+    }
+    @PostMapping("/lateFormExistTicket")
+    public boolean requestLateFormExistTicket(@RequestBody SendLateFormRequest sendLateFormRequest) {
+        return requestLateFormService.getLateFormUserExistTicket(sendLateFormRequest);
+    }
+    @PostMapping("/lateFormExistRequest")
+    public boolean requestLateFormExistRequest(@RequestBody SendLateFormRequest sendLateFormRequest) {
+        return requestLateFormService.getLateFormUserExistRequest(sendLateFormRequest);
     }
 }
