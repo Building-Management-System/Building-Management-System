@@ -44,6 +44,7 @@ public class OvertimeRequestForm {
     private Time toTime;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private TopicOvertime topicOvertime;
 
     @Column

@@ -1,16 +1,8 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
-import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.SendAttendanceFormRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.SendLeaveFormRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.SendRoomBookingRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.*;
 import fpt.capstone.buildingmanagementsystem.model.response.ReceiveIdAndDepartmentIdResponse;
-import fpt.capstone.buildingmanagementsystem.service.RequestAttendanceFromService;
-import fpt.capstone.buildingmanagementsystem.service.RequestLeaveFormService;
-import fpt.capstone.buildingmanagementsystem.service.RequestOtherService;
-import fpt.capstone.buildingmanagementsystem.service.RoomBookingService;
-import fpt.capstone.buildingmanagementsystem.service.UserManageService;
+import fpt.capstone.buildingmanagementsystem.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,10 +20,10 @@ public class RequestController {
     RequestLeaveFormService requestLeaveFormService;
     @Autowired
     UserManageService userManageService;
-
     @Autowired
     RoomBookingService roomBookingService;
-
+    @Autowired
+    RequestOvertimeFormService requestOvertimeFormService;
     @PostMapping("/getReceiveIdAndDepartmentId")
     public ReceiveIdAndDepartmentIdResponse getReceiveIdAndDepartmentId(@RequestBody GetUserInfoRequest getUserId) {
         return userManageService.getReceiveIdAndDepartmentId(getUserId.getUserId());
@@ -84,5 +76,17 @@ public class RequestController {
     @PostMapping("/otherFormExistRequest")
     public boolean requestOtherFormExistRequest(@RequestBody SendOtherFormRequest sendOtherFormRequest) {
         return requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
+    }
+    @PostMapping("/overTimeForm")
+    public boolean requestOverTimeForm(@RequestBody SendOvertimeFormRequest sendOvertimeFormRequest) {
+        return requestOvertimeFormService.getOvertimeFormUser(sendOvertimeFormRequest);
+    }
+    @PostMapping("/overTimeFormExistTicket")
+    public boolean requestOverTimeExistTicket(@RequestBody SendOvertimeFormRequest sendOvertimeFormRequest) {
+        return requestOvertimeFormService.getOvertimeExistTicket(sendOvertimeFormRequest);
+    }
+    @PostMapping("/overTimeFormExistRequest")
+    public boolean requestOverTimeExistRequest(@RequestBody SendOvertimeFormRequest sendOvertimeFormRequest) {
+        return requestOvertimeFormService.getOvertimeExistRequest(sendOvertimeFormRequest);
     }
 }
