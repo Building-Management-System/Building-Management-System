@@ -26,6 +26,16 @@ public class RequestMessageController {
         return requestMessageService.getAllRoomBookingMessageByRequestId(requestId);
     }
 
+    @GetMapping("getOverTimeMessage")
+    List<Object> getAllOvertimeRequestMessageByRequestId(@RequestParam("request_id") String requestId) {
+        return requestMessageService.getAllOvertimeRequestMessageByRequestId(requestId);
+    }
+
+    @GetMapping("getLateRequestMessage")
+    List<Object> getAllLateRequestMessageByRequestId(@RequestParam("request_id") String requestId) {
+        return requestMessageService.getAllLateRequestMessageByRequestId(requestId);
+    }
+
     @GetMapping("getLeaveMessage")
     List<Object> getAllLeaveMessageByRequestId(@RequestParam("request_id") String requestId) {
         return requestMessageService.getAllLeaveMessageByRequestId(requestId);

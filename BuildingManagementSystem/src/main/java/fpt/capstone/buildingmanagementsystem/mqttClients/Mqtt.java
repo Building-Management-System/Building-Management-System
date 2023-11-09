@@ -12,10 +12,10 @@
 //import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 //import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 //import org.springframework.integration.mqtt.support.MqttHeaders;
-//import org.springframework.messaging.Message;
 //import org.springframework.messaging.MessageChannel;
 //import org.springframework.messaging.MessageHandler;
-//import org.springframework.messaging.MessagingException;
+//
+//import java.util.Objects;
 //
 //@Configuration
 //public class Mqtt {
@@ -54,15 +54,12 @@
 //    @Bean
 //    @ServiceActivator(inputChannel = "mqttInputChannel")
 //    public MessageHandler handler(){
-//        return new MessageHandler() {
-//            @Override
-//            public void handleMessage(Message<?> message) throws MessagingException {
-//                String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC).toString();
-//                if(topic.equals("mqtt/face/2032105/Rec")){
-//                    System.out.println("This is out of topic");
-//                }
-//                System.out.println(message.getPayload());
+//        return message -> {
+//            String topic = Objects.requireNonNull(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC)).toString();
+//            if(topic.equals("mqtt/face/2032105/Rec")){
+//                System.out.println("This is out of topic");
 //            }
+//            System.out.println(message.getPayload());
 //        };
 //    }
 //}

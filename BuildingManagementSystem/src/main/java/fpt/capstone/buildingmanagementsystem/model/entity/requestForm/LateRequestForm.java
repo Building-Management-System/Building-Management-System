@@ -1,7 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.model.entity.requestForm;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
-import fpt.capstone.buildingmanagementsystem.model.enumEnitty.LateDuration;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.LateType;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
 import lombok.AllArgsConstructor;
@@ -35,10 +34,11 @@ public class LateRequestForm {
     private String lateRequestId;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private LateType lateType;
 
     @Column
-    private LateDuration lateDuration;
+    private int lateDuration;
 
     @Column
     private Date requestDate;
