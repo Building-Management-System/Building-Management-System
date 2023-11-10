@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -17,8 +16,8 @@ public class OvertimeRequestController {
     OvertimeRequestFormService overtimeRequestFormService;
 
     @PostMapping("acceptOvertimeRequest")
-    public boolean acceptOvertimeRequest(@RequestParam("overtimeRequestId") String overtimeRequestId) {
-        return overtimeRequestFormService.acceptOvertimeRequest(overtimeRequestId);
+    public boolean acceptOvertimeRequest(@RequestBody OvertimeMessageRequest overtimeMessageRequest) {
+        return overtimeRequestFormService.acceptOvertimeRequest(overtimeMessageRequest.getOverTimeRequestId());
     }
 
     @PostMapping("rejectOvertimeRequest")

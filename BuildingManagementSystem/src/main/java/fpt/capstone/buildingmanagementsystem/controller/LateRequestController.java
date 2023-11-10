@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -16,8 +15,8 @@ public class LateRequestController {
     LateRequestService lateRequestService;
 
     @PostMapping("acceptLateRequest")
-    public boolean acceptLateRequest(@RequestParam("lateRequestId") String lateRequestId) {
-        return lateRequestService.acceptLateRequest(lateRequestId);
+    public boolean acceptLateRequest(@RequestBody LateMessageRequest lateMessageRequest) {
+        return lateRequestService.acceptLateRequest(lateMessageRequest.getLateMessageRequestId());
     }
 
     @PostMapping("rejectLateRequest")
