@@ -20,8 +20,6 @@ import java.util.*;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.LATE_REQUEST;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.checkDateLeave;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
 
 
 @Service
@@ -52,41 +50,37 @@ public class RequestLateFormService {
                     sendLateFormRequest.getLateType() != null &&
                     sendLateFormRequest.getLateDuration() != null
             ) {
-                if (checkValidate(sendLateFormRequest)) {
-                    List<User> listUserReceiver = new ArrayList<>();
-                    Optional<User> send_user = userRepository.findByUserId(sendLateFormRequest.getUserId());
-                    Optional<Department> department = departmentRepository.findByDepartmentId(sendLateFormRequest.getDepartmentId());
-                    if (sendLateFormRequest.getReceivedId() != null) {
-                        Optional<User> receive_user = userRepository.findByUserId(sendLateFormRequest.getReceivedId());
-                        listUserReceiver.add(receive_user.get());
-                    } else {
-                        listUserReceiver = userRepository.findAllByDepartment(department.get());
-                    }
-                    if (send_user.isPresent() && department.isPresent()) {
-                        String id_ticket = "LT_" + Until.generateId();
-                        String id_request_ticket = "LT_" + Until.generateId();
-                        //
-                        Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(LATE_REQUEST).status(true).createDate(Until.generateRealTime())
-                                .updateDate(Until.generateRealTime()).build();
-                        ticketRepository.save(ticket);
-                        //
-                        saveLateFormRequest(sendLateFormRequest, send_user, department, id_request_ticket, ticket);
-                        for (User receive_user : listUserReceiver) {
-                            automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
-                                    ticket.getTicketId(),
-                                    send_user.get(),
-                                    receive_user,
-                                    ticket.getTopic(),
-                                    true,
-                                    null
-                            ));
-                        }
-                        return true;
-                    } else {
-                        throw new NotFound("not_found");
-                    }
+                List<User> listUserReceiver = new ArrayList<>();
+                Optional<User> send_user = userRepository.findByUserId(sendLateFormRequest.getUserId());
+                Optional<Department> department = departmentRepository.findByDepartmentId(sendLateFormRequest.getDepartmentId());
+                if (sendLateFormRequest.getReceivedId() != null) {
+                    Optional<User> receive_user = userRepository.findByUserId(sendLateFormRequest.getReceivedId());
+                    listUserReceiver.add(receive_user.get());
                 } else {
-                    throw new BadRequest("date_time_input_wrong");
+                    listUserReceiver = userRepository.findAllByDepartment(department.get());
+                }
+                if (send_user.isPresent() && department.isPresent()) {
+                    String id_ticket = "LT_" + Until.generateId();
+                    String id_request_ticket = "LT_" + Until.generateId();
+                    //
+                    Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(LATE_REQUEST).status(true).createDate(Until.generateRealTime())
+                            .updateDate(Until.generateRealTime()).build();
+                    ticketRepository.save(ticket);
+                    //
+                    saveLateFormRequest(sendLateFormRequest, send_user, department, id_request_ticket, ticket);
+                    for (User receive_user : listUserReceiver) {
+                        automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
+                                ticket.getTicketId(),
+                                send_user.get(),
+                                receive_user,
+                                ticket.getTopic(),
+                                true,
+                                null
+                        ));
+                    }
+                    return true;
+                } else {
+                    throw new NotFound("not_found");
                 }
             } else {
                 throw new BadRequest("request_fail");
@@ -106,20 +100,16 @@ public class RequestLateFormService {
                     sendLateFormRequest.getLateType() != null &&
                     sendLateFormRequest.getLateDuration() != null
             ) {
-                if (checkValidate(sendLateFormRequest)) {
-                    Optional<User> send_user = userRepository.findByUserId(sendLateFormRequest.getUserId());
-                    Optional<Department> department = departmentRepository.findByDepartmentId(sendLateFormRequest.getDepartmentId());
-                    Optional<Ticket> ticket = ticketRepository.findByTicketId(sendLateFormRequest.getTicketId());
-                    if (send_user.isPresent() && department.isPresent() && ticket.isPresent()) {
-                        String id_request_ticket = "LT_" + Until.generateId();
-                        saveLateFormRequest(sendLateFormRequest, send_user, department, id_request_ticket, ticket.get());
-                        ticketRepository.updateTicketTime(Until.generateRealTime(), sendLateFormRequest.getTicketId());
-                        return true;
-                    } else {
-                        throw new NotFound("not_found");
-                    }
+                Optional<User> send_user = userRepository.findByUserId(sendLateFormRequest.getUserId());
+                Optional<Department> department = departmentRepository.findByDepartmentId(sendLateFormRequest.getDepartmentId());
+                Optional<Ticket> ticket = ticketRepository.findByTicketId(sendLateFormRequest.getTicketId());
+                if (send_user.isPresent() && department.isPresent() && ticket.isPresent()) {
+                    String id_request_ticket = "LT_" + Until.generateId();
+                    saveLateFormRequest(sendLateFormRequest, send_user, department, id_request_ticket, ticket.get());
+                    ticketRepository.updateTicketTime(Until.generateRealTime(), sendLateFormRequest.getTicketId());
+                    return true;
                 } else {
-                    throw new BadRequest("date_time_input_wrong");
+                    throw new NotFound("not_found");
                 }
             } else {
                 throw new BadRequest("request_fail");
@@ -138,36 +128,32 @@ public class RequestLateFormService {
                     sendLateFormRequest.getLateType() != null &&
                     sendLateFormRequest.getLateDuration() != null
             ) {
-                if (checkValidate(sendLateFormRequest)) {
-                    Optional<User> send_user = userRepository.findByUserId(sendLateFormRequest.getUserId());
-                    Optional<Department> department = departmentRepository.findByDepartmentId(sendLateFormRequest.getDepartmentId());
-                    Optional<RequestTicket> requestTicket = requestTicketRepository.findByRequestId(sendLateFormRequest.getRequestId());
-                    if (send_user.isPresent() && department.isPresent() && requestTicket.isPresent()) {
-                        List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(requestTicket.get());
-                        String senderId = requestMessageOptional.get(0).getSender().getUserId();
-                        if (requestMessageOptional.get(0).getReceiver() != null) {
-                            String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
-                            if (Objects.equals(sendLateFormRequest.getUserId(), senderId)) {
-                                sendLateFormRequest.setReceivedId(receiverId);
-                            } else {
-                                sendLateFormRequest.setReceivedId(senderId);
-                            }
+                Optional<User> send_user = userRepository.findByUserId(sendLateFormRequest.getUserId());
+                Optional<Department> department = departmentRepository.findByDepartmentId(sendLateFormRequest.getDepartmentId());
+                Optional<RequestTicket> requestTicket = requestTicketRepository.findByRequestId(sendLateFormRequest.getRequestId());
+                if (send_user.isPresent() && department.isPresent() && requestTicket.isPresent()) {
+                    List<RequestMessage> requestMessageOptional = requestMessageRepository.findByRequest(requestTicket.get());
+                    String senderId = requestMessageOptional.get(0).getSender().getUserId();
+                    if (requestMessageOptional.get(0).getReceiver() != null) {
+                        String receiverId = requestMessageOptional.get(0).getReceiver().getUserId();
+                        if (Objects.equals(sendLateFormRequest.getUserId(), senderId)) {
+                            sendLateFormRequest.setReceivedId(receiverId);
+                        } else {
+                            sendLateFormRequest.setReceivedId(senderId);
                         }
-                        RequestStatus status = requestTicket.get().getStatus();
-                        if (!status.equals(ANSWERED) && !Objects.equals(senderId, sendLateFormRequest.getUserId())) {
-                            requestTicket.get().setStatus(ANSWERED);
-                            requestTicketRepository.save(requestTicket.get());
-                        }
-                        Date time = Until.generateRealTime();
-                        saveLateFormMessage(sendLateFormRequest, send_user, department, requestTicket.get());
-                        ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
-                        requestTicketRepository.updateTicketRequestTime(time, sendLateFormRequest.getRequestId());
-                        return true;
-                    } else {
-                        throw new NotFound("not_found");
                     }
+                    RequestStatus status = requestTicket.get().getStatus();
+                    if (!status.equals(ANSWERED) && !Objects.equals(senderId, sendLateFormRequest.getUserId())) {
+                        requestTicket.get().setStatus(ANSWERED);
+                        requestTicketRepository.save(requestTicket.get());
+                    }
+                    Date time = Until.generateRealTime();
+                    saveLateFormMessage(sendLateFormRequest, send_user, department, requestTicket.get());
+                    ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
+                    requestTicketRepository.updateTicketRequestTime(time, sendLateFormRequest.getRequestId());
+                    return true;
                 } else {
-                    throw new BadRequest("date_time_input_wrong");
+                    throw new NotFound("not_found");
                 }
             } else {
                 throw new BadRequest("request_fail");
@@ -182,10 +168,6 @@ public class RequestLateFormService {
                 .updateDate(Until.generateRealTime())
                 .status(PENDING).ticketRequest(ticket).title(sendLateFormRequest.getTitle()).user(send_user.get()).build();
         saveLateFormMessage(sendLateFormRequest, send_user, department, requestTicket);
-    }
-
-    private static boolean checkValidate(SendLateFormRequest sendLateFormRequest) throws ParseException {
-        return validateDateFormat(sendLateFormRequest.getRequestDate()) && checkDateLeave(sendLateFormRequest.getRequestDate());
     }
 
     private void saveLateFormMessage(SendLateFormRequest sendLateFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) throws ParseException {
