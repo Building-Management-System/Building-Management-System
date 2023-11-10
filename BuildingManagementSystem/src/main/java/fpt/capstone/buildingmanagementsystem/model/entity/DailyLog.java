@@ -39,7 +39,8 @@ public class DailyLog {
 
     @Column(name = "date")
     private Date date;
-
+    @Column(name = "month")
+    private int month;
     @Column
     private Time checkin;
 
@@ -56,7 +57,10 @@ public class DailyLog {
     private double afternoonTotal;
 
     @Column
-    private boolean authorizedLate;
+    private boolean lateCheckin;
+
+    @Column
+    private boolean earlyCheckout;
 
     @Column
     private double permittedLeave;

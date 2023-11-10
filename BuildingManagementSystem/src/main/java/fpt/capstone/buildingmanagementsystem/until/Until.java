@@ -60,6 +60,11 @@ public class Until {
         java.util.Date dateConvert = sdf.parse(date);
         return dateConvert;
     }
+    public static Calendar convertDateToCalender(Date date) throws ParseException {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar;
+    }
     // cần check lại khi deploy lên host
     public static java.sql.Time convertStringToTime(String time) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");

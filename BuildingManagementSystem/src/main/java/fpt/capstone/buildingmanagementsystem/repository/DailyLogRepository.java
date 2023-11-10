@@ -13,8 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface DailyLogRepository extends JpaRepository<DailyLog, Long> {
-    @Query(value = "select * from daily_log where user_id = :user_id order by date Desc", nativeQuery = true)
-    List<DailyLog> getAttendanceUser(String user_id);
+    List<DailyLog> findByUser_UserIdAndMonth(String user_id,int month);
     @Query(value = "select * from daily_log where user_id = :user_id and date = :date", nativeQuery = true)
     Optional<DailyLog> getAttendanceDetailByUserIdAndDate(String user_id, String date);
     List<DailyLog> findAllByUser(User user);

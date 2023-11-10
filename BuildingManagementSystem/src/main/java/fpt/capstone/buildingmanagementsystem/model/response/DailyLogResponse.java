@@ -1,0 +1,27 @@
+package fpt.capstone.buildingmanagementsystem.model.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.sql.Time;
+import java.util.Calendar;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class DailyLogResponse {
+    private String dailyId;
+    private String dateDaily;
+    private Time checkin;
+    private Time checkout;
+    private double totalAttendance;
+    private double morningTotal;
+    private double afternoonTotal;
+    private boolean lateCheckin;
+    private boolean earlyCheckout;
+    private double permittedLeave;
+    private double nonPermittedLeave;
+    private boolean Violate;
+    private double outsideWork;
+    private double paidDay;
+}
