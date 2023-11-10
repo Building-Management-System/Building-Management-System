@@ -3,7 +3,6 @@ package fpt.capstone.buildingmanagementsystem.model.entity;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,7 +26,6 @@ import java.sql.Time;
 @Getter
 @Setter
 @Builder
-@Data
 @Entity(name = "daily_log")
 public class DailyLog {
     @Id
@@ -42,38 +40,44 @@ public class DailyLog {
     @Column(name = "date")
     private Date date;
 
-    @Column(name = "first_entry")
-    private Time firstEntry;
+    @Column
+    private Time checkin;
 
-    @Column(name = "last_exit")
-    private Time lastExit;
+    @Column
+    private Time checkout;
 
-    @Column(name = "morning_total")
-    private float morningTotal;
+    @Column
+    private double totalAttendance;
 
-    @Column(name = "afternoon_total")
-    private float afternoonTotal;
+    @Column
+    private double morningTotal;
 
-    @Column(name = "permitted_leave")
-    private float permittedLeave;
+    @Column
+    private double afternoonTotal;
 
-    @Column(name = "non_permitted_leave")
-    private float nonPermittedLeave;
+    @Column
+    private boolean authorizedLate;
+
+    @Column
+    private double permittedLeave;
+
+    @Column
+    private double nonPermittedLeave;
+
+    @Column
+    private boolean Violate;
+
+    @Column
+    private double outsideWork;
+
+    @Column
+    private double paidDay;
 
     @Column(name = "date_type")
     @Enumerated(EnumType.STRING)
     private DateType dateType;
 
-    @Column(name = "total_time")
-    private float totalTime;
-
-    @Column(name = "outside_time")
-    private float outsideTime;
-
-    @Column(name = "inside_time")
-    private float insideTime;
-
-    @Column(name = "description")
+    @Column
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)

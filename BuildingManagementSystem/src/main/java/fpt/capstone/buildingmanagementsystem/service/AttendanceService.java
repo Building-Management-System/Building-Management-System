@@ -15,7 +15,6 @@ import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
 import java.util.List;
 
 
@@ -47,7 +46,8 @@ public class AttendanceService {
     public AttendanceDetailResponse getAttendanceDetail(String user_id, String date) {
         if (user_id != null) {
             try {
-                DailyLog dailyLogs = dailyLogRepository.getAttendanceDetail(user_id, date);
+                DailyLog dailyLogs = dailyLogRepository.getAttendanceDetailByUserIdAndDate(user_id, date)
+                        .orElseThrow(() -> new BadRequest("not_found"));
                 OvertimeLog overtimeLog = overTimeRepository.getAttendanceDetail(user_id, date);
                 OverTimeDetailResponse overTimeDetailResponse = overtimeLogMapper.convertGetAttendanceUserDetailResponse(overtimeLog);
                 DailyDetailResponse dailyDetailResponse = dailyLogMapper.convertGetAttendanceUserDetailResponse(dailyLogs);
