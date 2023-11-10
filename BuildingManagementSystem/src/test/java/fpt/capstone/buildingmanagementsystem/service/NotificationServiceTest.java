@@ -113,5 +113,3 @@ class NotificationServiceTest {
         notificationService.deleteFromHiddenNotification(new User("userId", "firstName", "lastName", "gender", "dateOfBirth", "telephoneNumber", "address", "country", "city", "email", "AcceptedBy", new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 46).getTime(), "image", new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 46).getTime(), new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 46).getTime(), new Account("accountId", "username", "password", new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 46).getTime(), new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 46).getTime(), "createdBy", null, new Status("statusId", "statusName"), new Role("roleId", "roleName")), new Department("departmentId", "departmentName")));
     }
 }
-
-//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme
