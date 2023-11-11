@@ -37,7 +37,7 @@ public class AttendanceService {
     OverTimeRepository overTimeRepository;
     @Autowired
     ControlLogLcdRepository controlLogLcdRepository;
-    public GetAttendanceUserResponse getAttendanceUser(String user_id, int month) {
+    public GetAttendanceUserResponse getAttendanceUser(String user_id, int month, String year) {
         try {
             double totalAttendance = 0.0;
             double morningTotal = 0.0;
@@ -53,7 +53,7 @@ public class AttendanceService {
             String formattedDate = null;
             List<DailyLogResponse> list = new ArrayList<>();
             if (user_id != null) {
-                List<DailyLog> dailyLogs = dailyLogRepository.findByUser_UserIdAndMonth(user_id, month);
+                List<DailyLog> dailyLogs = dailyLogRepository.getByUserIdAndMonthAndYear(user_id, month,year);
                 if (dailyLogs.size() > 0) {
                     for (DailyLog dailyLog : dailyLogs) {
                         totalAttendance = totalAttendance + dailyLog.getTotalAttendance();

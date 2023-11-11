@@ -14,7 +14,8 @@ import java.util.Optional;
 
 @Repository
 public interface DailyLogRepository extends JpaRepository<DailyLog, Long> {
-    List<DailyLog> findByUser_UserIdAndMonth(String user_id,int month);
+    @Query(value = "select * from daily_log where user_id = :user_id and month = :month and year(date)  = :year", nativeQuery = true)
+    List<DailyLog> getByUserIdAndMonthAndYear(String user_id,int month,String year);
     @Query(value = "select * from daily_log where user_id = :user_id and date = :date", nativeQuery = true)
     Optional<DailyLog> getAttendanceDetailByUserIdAndDate(String user_id, String date);
     List<DailyLog> findAllByUser(User user);
