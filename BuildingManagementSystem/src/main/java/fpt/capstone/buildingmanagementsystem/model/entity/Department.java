@@ -18,11 +18,6 @@ import javax.persistence.Id;
 @Entity
 public class Department {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
     private String departmentId;
 
     @Column

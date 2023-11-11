@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,10 +25,10 @@ public class Ticket {
     private String ticketId;
 
     @Column
-    private String createDate;
+    private Date createDate;
 
     @Column
-    private String updateDate;
+    private Date updateDate;
 
     @Column
     private boolean status;

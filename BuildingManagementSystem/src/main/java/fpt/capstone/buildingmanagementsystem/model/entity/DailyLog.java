@@ -3,7 +3,6 @@ package fpt.capstone.buildingmanagementsystem.model.entity;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,7 +26,6 @@ import java.sql.Time;
 @Getter
 @Setter
 @Builder
-@Data
 @Entity(name = "daily_log")
 public class DailyLog {
     @Id
@@ -36,48 +34,77 @@ public class DailyLog {
             name = "UUID",
             strategy = "org.hibernate.id.UUIDGenerator"
     )
-    @Column(name = "daily_log_id")
     private String dailyId;
 
     @Column(name = "date")
-    private String date;
+    private Date date;
+    @Column(name = "month")
+    private int month;
+    @Column
+    private Time checkin;
 
-    @Column(name = "first_entry")
-    private String firstEntry;
+    @Column
+    private Time checkout;
 
-    @Column(name = "last_exit")
-    private String lastExit;
+    @Column
+    private double totalAttendance;
 
-    @Column(name = "morning_total")
-    private float morningTotal;
+    @Column
+    private double morningTotal;
 
-    @Column(name = "afternoon_total")
-    private float afternoonTotal;
+    @Column
+    private double afternoonTotal;
 
-    @Column(name = "permitted_leave")
-    private float permittedLeave;
+    @Column
+    private boolean lateCheckin;
 
-    @Column(name = "non_permitted_leave")
-    private float nonPermittedLeave;
+    @Column
+    private boolean earlyCheckout;
+
+    @Column
+    private double permittedLeave;
+
+    @Column
+    private double nonPermittedLeave;
+
+    @Column
+    private boolean Violate;
+
+    @Column
+    private double outsideWork;
+
+    @Column
+    private double paidDay;
 
     @Column(name = "date_type")
     @Enumerated(EnumType.STRING)
     private DateType dateType;
 
-    @Column(name = "total_time")
-    private float totalTime;
-
-    @Column(name = "outside_time")
-    private float outsideTime;
-
-    @Column(name = "inside_time")
-    private float insideTime;
-
-    @Column(name = "description")
+    @Column
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
+    @Override
+    public String toString() {
+        return "DailyLog{" +
+                "dailyId='" + dailyId + '\'' +
+                ", date=" + date +
+                ", checkin=" + checkin +
+                ", checkout=" + checkout +
+                ", totalAttendance=" + totalAttendance +
+                ", morningTotal=" + morningTotal +
+                ", afternoonTotal=" + afternoonTotal +
+                ", lateCheckin=" + lateCheckin +
+                ", earlyCheckout=" + earlyCheckout +
+                ", permittedLeave=" + permittedLeave +
+                ", nonPermittedLeave=" + nonPermittedLeave +
+                ", Violate=" + Violate +
+                ", outsideWork=" + outsideWork +
+                ", paidDay=" + paidDay +
+                ", dateType=" + dateType +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

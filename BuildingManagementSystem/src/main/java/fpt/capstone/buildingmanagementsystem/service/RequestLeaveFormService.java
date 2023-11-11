@@ -11,6 +11,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.LeaveRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.LeaveMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendLeaveFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
@@ -26,15 +27,12 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.LEAVE_REQUEST;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartDateAndEndDate;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.*;
 
 @Service
 public class RequestLeaveFormService {
@@ -56,6 +54,9 @@ public class RequestLeaveFormService {
     @Autowired
     RequestOtherService requestOtherService;
 
+    @Autowired
+    AutomaticNotificationService automaticNotificationService;
+
     public boolean getLeaveFormUser(SendLeaveFormRequest sendLeaveFormRequest) {
         try {
             if (sendLeaveFormRequest.getContent() != null &&
@@ -65,8 +66,15 @@ public class RequestLeaveFormService {
                     sendLeaveFormRequest.getToDate() != null
             ) {
                 if (checkValidate(sendLeaveFormRequest)) {
+                    List<User> listUserReceiver= new ArrayList<>();
                     Optional<User> send_user = userRepository.findByUserId(sendLeaveFormRequest.getUserId());
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendLeaveFormRequest.getDepartmentId());
+                    if(sendLeaveFormRequest.getReceivedId()!=null) {
+                        Optional<User> receive_user = userRepository.findByUserId(sendLeaveFormRequest.getReceivedId());
+                        listUserReceiver.add(receive_user.get());
+                    }else{
+                        listUserReceiver= userRepository.findAllByDepartment(department.get());
+                    }
                     if (send_user.isPresent() && department.isPresent()) {
                         String id_ticket = "LV_" + Until.generateId();
                         String id_request_ticket = "LV_" + Until.generateId();
@@ -79,6 +87,16 @@ public class RequestLeaveFormService {
                                 .build();
                         ticketRepository.save(ticket);
                         saveLeaveRequest(sendLeaveFormRequest, send_user, department, id_request_ticket, ticket);
+                        for(User receive_user:listUserReceiver) {
+                            automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
+                                    ticket.getTicketId(),
+                                    send_user.get(),
+                                    receive_user,
+                                    ticket.getTopic(),
+                                    true,
+                                    null
+                            ));
+                        }
                         return true;
                     } else {
                         throw new NotFound("not_found");
@@ -156,7 +174,7 @@ public class RequestLeaveFormService {
                             requestTicket.get().setStatus(ANSWERED);
                             requestTicketRepository.save(requestTicket.get());
                         }
-                        String time = Until.generateRealTime();
+                        Date time = Until.generateRealTime();
                         saveLeaveMessage(sendLeaveFormRequest, send_user, department, requestTicket.get());
                         ticketRepository.updateTicketTime(time, requestTicket.get().getTicketRequest().getTicketId());
                         requestTicketRepository.updateTicketRequestTime(time, sendLeaveFormRequest.getRequestId());
@@ -180,14 +198,14 @@ public class RequestLeaveFormService {
     private static boolean checkValidate(SendLeaveFormRequest sendLeaveFormRequest) throws ParseException {
         return validateDateFormat(sendLeaveFormRequest.getFromDate()) &&
                 validateDateFormat(sendLeaveFormRequest.getToDate()) && validateStartDateAndEndDate(sendLeaveFormRequest.getFromDate()
-                , sendLeaveFormRequest.getToDate());
+                , sendLeaveFormRequest.getToDate()) && checkDateLeave(sendLeaveFormRequest.getFromDate());
     }
 
-    private void saveLeaveRequest(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) {
+    private void saveLeaveRequest(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) throws ParseException {
         RequestTicket requestTicket = RequestTicket.builder()
                 .requestId(id_request_ticket)
-                .createDate(Until.generateRealTime().toString())
-                .updateDate(Until.generateRealTime().toString())
+                .createDate(Until.generateRealTime())
+                .updateDate(Until.generateRealTime())
                 .status(PENDING)
                 .ticketRequest(ticket)
                 .title(sendLeaveFormRequest.getTitle())
@@ -195,7 +213,7 @@ public class RequestLeaveFormService {
         saveLeaveMessage(sendLeaveFormRequest, send_user, department, requestTicket);
     }
 
-    private void saveLeaveMessage(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) {
+    private void saveLeaveMessage(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) throws ParseException {
         RequestMessage requestMessage = RequestMessage.builder()
                 .createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())
@@ -251,6 +269,15 @@ public class RequestLeaveFormService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.saveAndFlush(ticket);
+            automaticNotificationService.sendApprovalRequestNotification(
+                    new ApprovalNotificationRequest(
+                            ticket.getTicketId(),
+                            requestMessage.getReceiver(),
+                            requestMessage.getSender(),
+                            ticket.getTopic(),
+                            true,
+                            null
+                    ));
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -290,13 +317,23 @@ public class RequestLeaveFormService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
+            automaticNotificationService.sendApprovalRequestNotification(
+                    new ApprovalNotificationRequest(
+                            ticket.getTicketId(),
+                            requestMessage.getReceiver(),
+                            requestMessage.getSender(),
+                            ticket.getTopic(),
+                            false,
+                            leaveMessageRequest.getContent()
+
+                    ));
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
         }
     }
 
-    private void executeRequestDecision(List<RequestTicket> requestTickets,Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
+    private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
         RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
     }
 }

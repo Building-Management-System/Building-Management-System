@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.model.response;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RoomBookingStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,4 +26,5 @@ public class RoomBookingResponseV2 {
     private int roomId;
     private String roomName;
     private String requestMessageId;
+    private RoomBookingStatus status;
 }

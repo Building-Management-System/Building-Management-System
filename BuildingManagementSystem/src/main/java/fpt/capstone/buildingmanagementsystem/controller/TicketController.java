@@ -22,6 +22,7 @@ public class TicketController {
     private TicketManageService ticketManageService;
 
     @GetMapping("/ticketRequest")
+    @Deprecated
     public List<TicketRequestResponse> getAllTicketAndRequest() {
         return ticketManageService.getAllTickets();
     }

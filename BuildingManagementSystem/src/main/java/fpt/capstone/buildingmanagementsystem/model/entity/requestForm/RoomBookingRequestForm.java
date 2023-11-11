@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.model.entity.requestForm;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RoomBookingStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,6 +18,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.sql.Date;
+import java.sql.Time;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -39,16 +42,17 @@ public class RoomBookingRequestForm {
     private String content;
 
     @Column
-    private String bookingDate;
+    private Date bookingDate;
 
     @Column
-    private String startTime;
+    private Time startTime;
 
     @Column
-    private String endTime;
+    private Time endTime;
 
     @Column
-    private boolean status;
+    @Enumerated(EnumType.STRING)
+    private RoomBookingStatus status;
 
     @ManyToOne
     @JoinColumn(name = "departmentSenderId")

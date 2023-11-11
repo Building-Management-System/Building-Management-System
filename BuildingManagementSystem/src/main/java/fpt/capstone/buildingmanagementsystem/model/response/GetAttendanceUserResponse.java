@@ -1,16 +1,20 @@
 package fpt.capstone.buildingmanagementsystem.model.response;
 
+import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.sql.Date;
 import java.sql.Time;
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetAttendanceUserResponse{
-    private String date;
-    private String firstEntry;
-    private String lastExit;
-    private float totalTime;
+    String username;
+    String department;
+    String date;
+    TotalAttendanceUser totalAttendanceUser;
+    List<DailyLogResponse> dailyLogList;
 }

@@ -32,10 +32,12 @@ public class Account {
     public String password;
     @NotNull
     @Column(name = "created_date")
-    public String createdDate;
+    public Date createdDate;
     @NotNull
     @Column(name = "updated_date")
-    public String updatedDate;
+    public Date updatedDate;
+    @Column(name = "created_by")
+    public String createdBy;
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private User user;

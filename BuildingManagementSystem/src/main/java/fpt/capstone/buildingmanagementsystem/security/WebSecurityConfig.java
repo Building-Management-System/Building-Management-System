@@ -12,6 +12,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import java.util.logging.Filter;
 
 @Configuration
 @EnableWebSecurity
@@ -39,14 +44,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-            httpSecurity.csrf().disable()
-                    .authorizeRequests().antMatchers("/login","/register","/resetPassword", "/getAllUserInfo").permitAll()
-                    .anyRequest().authenticated().and().exceptionHandling().accessDeniedPage("/deny").and().
-                    exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-            httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                    .httpBasic()
-                    .and()
-                    .authorizeRequests().anyRequest().authenticated().and().cors();
-        }
+        httpSecurity.csrf().disable()
+                .authorizeRequests().antMatchers("/login", "/register", "/resetPassword", "/getAllUserInfo").permitAll()
+                .anyRequest().authenticated().and().exceptionHandling().accessDeniedPage("/deny").and().
+                exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .httpBasic()
+                .and()
+                .authorizeRequests().anyRequest().authenticated().and().cors();
     }
+}

@@ -1,18 +1,43 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
-import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
-import fpt.capstone.buildingmanagementsystem.exception.ForbiddenError;
-import fpt.capstone.buildingmanagementsystem.exception.NotFound;
-import fpt.capstone.buildingmanagementsystem.exception.ServerError;
+import fpt.capstone.buildingmanagementsystem.exception.*;
 import fpt.capstone.buildingmanagementsystem.mapper.AccountMapper;
 import fpt.capstone.buildingmanagementsystem.mapper.RoleMapper;
 import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
-import fpt.capstone.buildingmanagementsystem.model.request.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
+import fpt.capstone.buildingmanagementsystem.model.entity.ChatMessage;
+import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.Department;
+import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
+import fpt.capstone.buildingmanagementsystem.model.entity.Role;
+import fpt.capstone.buildingmanagementsystem.model.entity.Status;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangePasswordRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangeRoleRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangeStatusAccountRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.ResetPasswordRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.AccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAllAccountResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.RequestMessageResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponseV2;
+import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
+import fpt.capstone.buildingmanagementsystem.repository.ChatMessageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
+import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import fpt.capstone.buildingmanagementsystem.until.EmailSender;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,16 +46,24 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 import static fpt.capstone.buildingmanagementsystem.until.Until.getRandomString;
 
 @Service
 public class AccountManageService implements UserDetailsService {
+    @Autowired
+    DailyLogRepository dailyLogRepository;
+    @Autowired
+    OverTimeRepository overTimeRepository;
+    @Autowired
+    ChatMessageRepository chatMessageRepository;
+    @Autowired
+    RequestTicketRepository requestTicketRepository;
+    @Autowired
+    RequestMessageRepository requestMessageRepository;
     @Autowired
     DepartmentRepository departmentRepository;
     @Autowired
@@ -68,23 +101,37 @@ public class AccountManageService implements UserDetailsService {
 
     public boolean saveNewAccount(RegisterRequest registerRequest) {
         try {
-            if (registerRequest.getPassword() != null && registerRequest.getUsername() != null) {
+            if (registerRequest.getPassword() != null && registerRequest.getUsername() != null
+                    && registerRequest.getRole() != null && registerRequest.getDepartmentName() != null
+                    && registerRequest.getHrId() != null) {
                 if (!accountRepository.existsByUsername(registerRequest.getUsername())) {
                     Optional<Role> role = roleRepository.findByRoleName(registerRequest.getRole());
                     Optional<Department> department= departmentRepository.findByDepartmentName(registerRequest.getDepartmentName());
                     if (role.isPresent() && department.isPresent()) {
                         Optional<Status> status = statusRepository.findByStatusId("1");
                         Account newAccount = accountMapper.convertRegisterAccount(registerRequest, status.get(), role.get());
-
-                        User user= User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
-                                .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
-                                        generateRealTime()).image("unknown").updatedDate(generateRealTime()).account(newAccount).department(department.get())
-                                .build();
-
-                        newAccount.setUser(user);
-                        accountRepository.saveAndFlush(newAccount);
-//                      userRepository.save(user);
-                        return true;
+                        Optional<Account> hr = accountRepository.findByAccountId(registerRequest.getHrId());
+                        if (hr.isPresent() || registerRequest.getRole().equals("hr")) {
+                            hr.ifPresent(account -> newAccount.setCreatedBy(account.getUsername()));
+                            User user = User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
+                                    .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
+                                            generateRealTime()).image("unknown").updatedDate(generateRealTime()).account(newAccount).department(department.get())
+                                    .build();
+                            if (Objects.equals(registerRequest.getRole(), "manager")) {
+                                if (checkManagerOfDepartment(registerRequest.getDepartmentName())) {
+                                    newAccount.setUser(user);
+                                    accountRepository.saveAndFlush(newAccount);
+                                } else {
+                                    throw new Conflict("department_exist_manager");
+                                }
+                            } else {
+                                newAccount.setUser(user);
+                                accountRepository.saveAndFlush(newAccount);
+                            }
+                            return true;
+                        } else {
+                            throw new NotFound("hr_id_not_found");
+                        }
                     } else {
                         throw new NotFound("not_found");
                     }
@@ -170,24 +217,29 @@ public class AccountManageService implements UserDetailsService {
         try {
             String accountId=changeRoleRequest.getAccountId();
             if (accountId != null && changeRoleRequest.getRoleName() != null) {
-                if (!accountRepository.existsById(changeRoleRequest.getAccountId())) {
-                    throw new NotFound("user_not_found");
-                }
-                String oldRole = accountRepository.findByAccountId(accountId).get().getRole().getRoleName();
-                if (!oldRole.equals(changeRoleRequest.getRoleName())) {
-                    Optional<Role> role = roleRepository.findByRoleName(changeRoleRequest.getRoleName());
-                    if (!role.isPresent()) {
-                        throw new NotFound("role_not_found");
+
+                Role role = roleRepository.findByRoleName(changeRoleRequest.getRoleName())
+                        .orElseThrow(() -> new BadRequest("Not_found_role"));
+
+                String newRoleId = role.getRoleId();
+
+                if (Objects.equals(changeRoleRequest.getRoleName(), "manager") ||
+                        Objects.equals(changeRoleRequest.getRoleName(), "employee")) {
+                    Department department = departmentRepository.findByDepartmentId(changeRoleRequest.departmentId)
+                            .orElseThrow(() -> new BadRequest("Not_found_department"));
+
+                    if (checkManagerOfDepartment(department.getDepartmentName())) {
+                        accountRepository.updateRoleAccount(newRoleId, accountId);
+                        accountRepository.updateDepartmentUser(department.getDepartmentId(), accountId);
+                        return true;
+                    } else {
+                        throw new Conflict("department_exist_manager");
                     }
-                    String newRoleId = role.get().getRoleId();
-                    accountRepository.updateRoleAccount(newRoleId,accountId);
-                    return true;
                 }
-                else{
-                    throw new BadRequest("new_role_existed");
-                }
+                accountRepository.updateRoleAccount(newRoleId, accountId);
+                return true;
             } else {
-                throw new BadRequest("request_fail");
+                throw new ServerError("request_fail");
             }
         } catch (ServerError e) {
             throw new ServerError("fail");
@@ -218,18 +270,40 @@ public class AccountManageService implements UserDetailsService {
         Optional<Role> role = roleRepository.findByRoleId(userAccount.get().getRole().getRoleId());
         return roleMapper.convertRegisterAccount(role.get());
     }
-    public List<GetAllAccountResponse> getGetAllAccount() {
-        List<Account> account = accountRepository.findAll();
-        List<GetAllAccountResponse> getAllAccountResponses = new ArrayList<>();
-        if (account.size()==0) {
-            return getAllAccountResponses;
+
+    public boolean deleteAccount(String username, String hrId) {
+        if (username != null) {
+            Optional<Account> userAccount = accountRepository.findByUsername(username);
+            if (userAccount.isPresent()) {
+                User user = userAccount.get().getUser();
+                user.setAccount(null);
+                List<RequestTicket> checkpoint1 = requestTicketRepository.findAllByUser(user);
+                List<RequestMessage> checkpoint2 = requestMessageRepository.findAllBySender(user);
+                List<RequestMessage> checkpoint3 = requestMessageRepository.findAllByReceiver(user);
+                List<OvertimeLog> checkpoint4 = overTimeRepository.findAllByUser(user);
+                List<ChatMessage> checkpoint5 = chatMessageRepository.findAllBySender(user);
+                List<ChatMessage> checkpoint6 = chatMessageRepository.findAllByReceiver(user);
+                List<DailyLog> checkpoint7 = dailyLogRepository.findAllByUser(user);
+                if (checkpoint1.size() == 0 &&
+                        checkpoint2.size() == 0
+                        && checkpoint3.size() == 0
+                        && checkpoint4.size() == 0
+                        && checkpoint5.size() == 0
+                        && checkpoint6.size() == 0
+                        && checkpoint7.size() == 0
+                        && accountRepository.findByUsername(userAccount.get().getCreatedBy()).isPresent()
+                        && hrId.equals(accountRepository.findByUsername(userAccount.get().getCreatedBy()).get().getAccountId())) {
+                    accountRepository.delete(userAccount.get());
+                    return true;
+                } else {
+                    throw new ServerError("can_not_delete");
+                }
+            } else {
+                throw new NotFound("username_not_found");
+            }
+        } else {
+            throw new BadRequest("username_is_null");
         }
-        account.forEach(element -> getAllAccountResponses.add(accountMapper.convertGetAllAccount(element)));
-        return getAllAccountResponses;
-    }
-    public String getAccountId(String username) {
-        Optional<Account> userAccount = accountRepository.findByUsername(username);
-        return userAccount.get().getAccountId();
     }
 
     public RoleDto getGettingRole2(GetUserInfoRequest getUserInfoRequest) {
@@ -244,5 +318,59 @@ public class AccountManageService implements UserDetailsService {
         } else {
             throw new BadRequest("request_fail");
         }
+    }
+
+    public boolean checkManagerOfDepartment(String departmentName) {
+        Optional<Department> department = departmentRepository.findByDepartmentName(departmentName);
+        List<User> userOfDepartment = userRepository.findAllByDepartment(department.get());
+        boolean checkPoint = true;
+        for (int i = 0; i < userOfDepartment.size(); i++) {
+            Optional<Account> account = accountRepository.findByAccountId(userOfDepartment.get(i).getUserId());
+            if (Objects.equals(account.get().getRole().getRoleId(), "3")) {
+                if(Objects.equals(account.get().getStatus().getStatusId(), "1")) {
+                    checkPoint = false;
+                }else{
+                    Role role= roleRepository.findByRoleName("employee").get();
+                    account.get().setRole(role);
+                    accountRepository.save(account.get());
+                }
+            }
+        }
+        return checkPoint;
+    }
+
+    public List<GetAllAccountResponse> getGetAllAccount() {
+        List<Account> account = accountRepository.findAll();
+        List<GetAllAccountResponse> getAllAccountResponses = new ArrayList<>();
+        if (account.size() == 0) {
+            return getAllAccountResponses;
+        }
+        for (int i = 0; i < account.size(); i++) {
+            if (account.get(i).getCreatedBy() == null) {
+                account.remove(account.get(i));
+            }
+        }
+        account=account.stream()
+                .sorted((Comparator.comparing(Account::getCreatedBy).reversed()))
+                .collect(Collectors.toList());
+        account.forEach(element ->{
+                GetAllAccountResponse get=accountMapper.convertGetAllAccount(element);
+                get.setDepartmentName(element.getUser().getDepartment().getDepartmentName());
+                getAllAccountResponses.add(get);
+        });
+        return getAllAccountResponses;
+    }
+
+    public String getAccountId(String username) {
+        Optional<Account> userAccount = accountRepository.findByUsername(username);
+        return userAccount.get().getAccountId();
+    }
+
+    public AccountResponse getCreatedDate(String accountId) {
+        Account account = accountRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new BadRequest("Not_found"));
+        AccountResponse accountResponse = new AccountResponse();
+        BeanUtils.copyProperties(account, accountResponse);
+        return accountResponse;
     }
 }

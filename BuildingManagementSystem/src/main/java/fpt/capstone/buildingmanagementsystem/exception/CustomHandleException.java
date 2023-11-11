@@ -30,4 +30,9 @@ public class CustomHandleException {
     public ErrorMessage forbiddenError(Exception exception) {
         return new ErrorMessage("403", exception.getMessage());
     }
+    @ExceptionHandler(Conflict.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorMessage conflict(Exception exception) {
+        return new ErrorMessage("409", exception.getMessage());
+    }
 }

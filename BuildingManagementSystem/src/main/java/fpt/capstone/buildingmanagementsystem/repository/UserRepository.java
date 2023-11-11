@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +28,7 @@ public interface UserRepository extends JpaRepository<User, String> {
                              @Param(value = "gender") String gender, @Param(value = "date_of_birth") String date_of_birth,
                              @Param(value = "telephone_number") String telephone_number, @Param(value = "country") String country,
                              @Param(value = "city") String city, @Param(value = "email") String email, @Param(value = "image") String image
-            , @Param(value = "updated_date") String updated_date, @Param(value = "user_id") String user_id);
+            , @Param(value = "updated_date") Date updated_date, @Param(value = "user_id") String user_id);
 
     Optional<User> findByUserId(String userId);
 
@@ -40,4 +41,12 @@ public interface UserRepository extends JpaRepository<User, String> {
             "JOIN department d ON d.department_id = u.department_id\n" +
             "WHERE d.department_name LIKE :department AND role_name LIKE 'manager'", nativeQuery = true)
     List<User> getManagerByDepartment(@Param("department") String departmentName);
+
+    @Query(value = "SELECT *\n" +
+            "FROM user u\n" +
+            "JOIN department d ON d.department_id = u.department_id\n" +
+            "JOIN account a ON a.account_id = u.user_id\n" +
+            "JOIN role r ON r.role_id = a.role_id\n" +
+            "WHERE d.department_id = :departmentId AND a.role_id = 3;", nativeQuery = true)
+    List<User> getManagerByDepartmentId(@Param("departmentId") String departmentId);
 }

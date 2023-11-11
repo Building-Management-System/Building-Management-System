@@ -11,6 +11,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.AttendanceRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.AttendanceMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendAttendanceFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
@@ -27,9 +28,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
@@ -61,6 +60,9 @@ public class RequestAttendanceFromService {
     @Autowired
     RequestOtherService requestOtherService;
 
+    @Autowired
+    AutomaticNotificationService automaticNotificationService;
+
     public boolean getAttendanceUser(SendAttendanceFormRequest sendAttendanceFormRequest) {
         try {
             if (sendAttendanceFormRequest.getContent() != null &&
@@ -72,6 +74,13 @@ public class RequestAttendanceFromService {
                 if (checkValidate(sendAttendanceFormRequest)) {
                     Optional<User> send_user = userRepository.findByUserId(sendAttendanceFormRequest.getUserId());
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendAttendanceFormRequest.getDepartmentId());
+                    List<User> listUserReceiver= new ArrayList<>();
+                    if(sendAttendanceFormRequest.getReceivedId()!=null) {
+                        Optional<User> receive_user = userRepository.findByUserId(sendAttendanceFormRequest.getReceivedId());
+                        listUserReceiver.add(receive_user.get());
+                    }else{
+                        listUserReceiver= userRepository.findAllByDepartment(department.get());
+                    }
                     if (send_user.isPresent() && department.isPresent()) {
                         String id_ticket = "AT_" + Until.generateId();
                         String id_request_ticket = "AT_" + Until.generateId();
@@ -79,6 +88,16 @@ public class RequestAttendanceFromService {
                                 .updateDate(Until.generateRealTime()).build();
                         ticketRepository.save(ticket);
                         saveAttendanceRequest(sendAttendanceFormRequest, send_user, department, id_request_ticket, ticket);
+                        for(User receive_user:listUserReceiver) {
+                            automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
+                                    ticket.getTicketId(),
+                                    send_user.get(),
+                                    receive_user,
+                                    ticket.getTopic(),
+                                    true,
+                                    null
+                            ));
+                        }
                         return true;
                     } else {
                         throw new NotFound("not_found");
@@ -135,6 +154,7 @@ public class RequestAttendanceFromService {
                     sendAttendanceFormRequest.getRequestId() != null
             ) {
                 if (checkValidate(sendAttendanceFormRequest)) {
+
                     Optional<User> send_user = userRepository.findByUserId(sendAttendanceFormRequest.getUserId());
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendAttendanceFormRequest.getDepartmentId());
                     Optional<RequestTicket> request = requestTicketRepository.findByRequestId(sendAttendanceFormRequest.getRequestId());
@@ -155,7 +175,7 @@ public class RequestAttendanceFromService {
                             requestTicketRepository.save(request.get());
                         }
                         saveAttendanceMessage(sendAttendanceFormRequest, send_user, department, request.get());
-                        String time = Until.generateRealTime();
+                        Date time = Until.generateRealTime();
                         ticketRepository.updateTicketTime(time, request.get().getTicketRequest().getTicketId());
                         requestTicketRepository.updateTicketRequestTime(time, sendAttendanceFormRequest.getRequestId());
                         return true;
@@ -180,14 +200,14 @@ public class RequestAttendanceFromService {
                 validateStartTimeAndEndTime(sendAttendanceFormRequest.getManualFirstEntry(), sendAttendanceFormRequest.getManualLastExit());
     }
 
-    private void saveAttendanceRequest(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) {
+    private void saveAttendanceRequest(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) throws ParseException {
         RequestTicket requestTicket = RequestTicket.builder().requestId(id_request_ticket).createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())
                 .status(PENDING).ticketRequest(ticket).title(sendAttendanceFormRequest.getTitle()).user(send_user.get()).build();
         saveAttendanceMessage(sendAttendanceFormRequest, send_user, department, requestTicket);
     }
 
-    private void saveAttendanceMessage(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) {
+    private void saveAttendanceMessage(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) throws ParseException {
         RequestMessage requestMessage = RequestMessage.builder().createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())
                 .sender(send_user.get()).request(requestTicket).department(department.get()).build();
@@ -237,12 +257,21 @@ public class RequestAttendanceFromService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
+
+            automaticNotificationService.sendApprovalRequestNotification(
+                    new ApprovalNotificationRequest(
+                            ticket.getTicketId(),
+                            requestMessage.getReceiver(),
+                            requestMessage.getSender(),
+                            ticket.getTopic(),
+                            true,
+                            null
+                    ));
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
         }
     }
-
 
 
     @Transactional
@@ -276,6 +305,15 @@ public class RequestAttendanceFromService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
+            automaticNotificationService.sendApprovalRequestNotification(
+                    new ApprovalNotificationRequest(
+                            ticket.getTicketId(),
+                            requestMessage.getReceiver(),
+                            requestMessage.getSender(),
+                            ticket.getTopic(),
+                            false,
+                            attendanceMessageRequest.getContent()
+                    ));
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -296,7 +334,7 @@ public class RequestAttendanceFromService {
                 request.setUpdateDate(Until.generateRealTime());
             });
             ticket.setUpdateDate(Until.generateRealTime());
-            ticket.setStatus(true);
+            ticket.setStatus(false);
         } else {
             throw new BadRequest("Not_fount_request_in_ticket");
         }

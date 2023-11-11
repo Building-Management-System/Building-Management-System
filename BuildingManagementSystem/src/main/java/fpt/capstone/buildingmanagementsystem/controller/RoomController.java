@@ -35,9 +35,9 @@ public class RoomController {
         return ResponseEntity.ok(roomService.getRoomById(roomId));
     }
 
-    @GetMapping("getBookedRoom")
-    public List<RoomBookingResponse> getAllBookedRoom() {
-        return roomBookingService.getAllBookedRoom();
+    @GetMapping("getPendingAndAcceptedRoom")
+    public List<RoomBookingResponse> getPendingAndAcceptedRoom() {
+        return roomBookingService.getPendingAndAcceptedRoom();
     }
 
     @PostMapping("acceptBookRoom")

@@ -25,8 +25,8 @@ public class AttendanceController {
     RequestAttendanceFromService attendanceFromService;
 
     @GetMapping("/getAttendanceUser")
-    public List<GetAttendanceUserResponse> getAttendanceUser(@Param("user_id") String user_id) {
-        return attendanceService.getAttendanceUser(user_id);
+    public GetAttendanceUserResponse getAttendanceUser(@Param("user_id") String user_id,@Param("month") int month) {
+        return attendanceService.getAttendanceUser(user_id,month);
     }
 
     @GetMapping("/getAttendanceUserDetail")

@@ -19,8 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -58,8 +56,8 @@ public class LiveChatService {
                     from.getUserId(),
                     to.getUserId(),
                     chatMessage.getMessage(), "text",
-                    chatMessage.getCreateAt(),
-                    chatMessage.getUpdateAt()
+                    chatMessage.getCreateAt().toString(),
+                    chatMessage.getUpdateAt().toString()
             ));
         } catch (Exception e) {
             throw new BadRequest("Could not found user");
@@ -95,8 +93,8 @@ public class LiveChatService {
                         from.getUserId(),
                         to.getUserId(),
                         name, "image",
-                        chatMessage.getCreateAt(),
-                        chatMessage.getUpdateAt()
+                        chatMessage.getCreateAt().toString(),
+                        chatMessage.getUpdateAt().toString()
                 ));
             } else {
                 throw new BadRequest("request_fail");
@@ -106,7 +104,7 @@ public class LiveChatService {
         }
     }
 
-    public ResponseEntity<?> createChat3(String data, MultipartFile file){
+    public ResponseEntity<?> createChat3(String data, MultipartFile file) {
         try {
             ChatMessageRequest2 chatMessageRequest2 = new ObjectMapper().readValue(data, ChatMessageRequest2.class);
             if (chatMessageRequest2.getFrom() != null && chatMessageRequest2.getTo() != null && file != null) {
@@ -136,8 +134,8 @@ public class LiveChatService {
                             from.getUserId(),
                             to.getUserId(),
                             name, "file",
-                            chatMessage.getCreateAt(),
-                            chatMessage.getUpdateAt()
+                            chatMessage.getCreateAt().toString(),
+                            chatMessage.getUpdateAt().toString()
                     ));
                 } else {
                     throw new BadRequest("file_oversize");

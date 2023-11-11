@@ -16,8 +16,9 @@ public class RoomBookingFormRepositoryV2Implement implements RoomBookingFormRepo
 
     @PersistenceContext
     EntityManager entityManager;
+
     @Override
-    public List<RoomBookingResponse> getAllBookedRoom() {
+    public List<RoomBookingResponse> getPendingAndAcceptedRoom() {
         String query = "" +
                 "SELECT rb.room_booking_request_id AS id,\n" +
                 "       rb.end_time                AS endDate,\n" +
@@ -25,11 +26,12 @@ public class RoomBookingFormRepositoryV2Implement implements RoomBookingFormRepo
                 "       rb.title,\n" +
                 "       rb.department_sender_id    AS departmentId,\n" +
                 "       rb.booking_date            AS bookingDate,\n" +
-                "       rr.room_id                 AS roomId\n" +
+                "       rr.room_id                 AS roomId,\n" +
+                "       rb.status                  AS bookingStatus \n" +
                 "FROM room_booking_request_form rb\n" +
                 "         JOIN request_message rm ON rb.request_massage_id = rm.request_message_id\n" +
                 "         JOIN room_booking_form_room rr ON rb.room_booking_request_id = rr.room_booking_request_id\n" +
-                "WHERE rb.status = TRUE;";
+                "WHERE rb.status like 'PENDING' or rb.status like 'ACCEPTED';";
 
         return (List<RoomBookingResponse>) entityManager.createNativeQuery(query).unwrap(NativeQuery.class)
                 .setResultTransformer(Transformers.aliasToBean(RoomBookingResponse.class))
