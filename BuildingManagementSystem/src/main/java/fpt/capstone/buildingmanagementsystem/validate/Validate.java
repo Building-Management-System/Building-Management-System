@@ -2,6 +2,8 @@ package fpt.capstone.buildingmanagementsystem.validate;
 
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.stereotype.Component;
+
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,34 +13,41 @@ import java.util.regex.Pattern;
 
 @Component
 public class Validate {
-    public static final String DATE_FORMAT="^\\d{4}\\-(0[1-9]|1[0-2])\\-(0[1-9]|1\\d|2\\d|3[01])$";
-    public static final String TIME_FORMAT="^(2[0-3]|1[0-9]||0[0-9])\\:([0-5][0-9]|)\\:([0-5][0-9]|)$";
-    public static final String DATE_TIME_FORMAT="^\\d{4}\\-(0[1-9]|1[0-2])\\-(0[1-9]|1\\d|2\\d|3[01])\\s(2[0-3]|1[0-9]||0[0-9])\\:([0-5][0-9]|)\\:([0-5][0-9]|)$";
-    public static boolean validateDateFormat(String date){
-        if(Pattern.matches(DATE_FORMAT,date.toString())){
+    public static final String DATE_FORMAT = "^\\d{4}\\-(0[1-9]|1[0-2])\\-(0[1-9]|1\\d|2\\d|3[01])$";
+    public static final String TIME_FORMAT = "^(2[0-3]|1[0-9]||0[0-9])\\:([0-5][0-9]|)\\:([0-5][0-9]|)$";
+    public static final String DATE_TIME_FORMAT = "^\\d{4}\\-(0[1-9]|1[0-2])\\-(0[1-9]|1\\d|2\\d|3[01])\\s(2[0-3]|1[0-9]||0[0-9])\\:([0-5][0-9]|)\\:([0-5][0-9]|)$";
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+
+
+    public static boolean validateDateFormat(String date) {
+        if (Pattern.matches(DATE_FORMAT, date.toString())) {
             return true;
         }
         return false;
     }
-    public static boolean validateDateTime(String time){
-        if(Pattern.matches(TIME_FORMAT,time.toString())){
+
+    public static boolean validateDateTime(String time) {
+        if (Pattern.matches(TIME_FORMAT, time.toString())) {
             return true;
         }
         return false;
     }
-    public static boolean validateDateAndTime(String datetime){
-        if(Pattern.matches(DATE_TIME_FORMAT,datetime.toString())){
+
+    public static boolean validateDateAndTime(String datetime) {
+        if (Pattern.matches(DATE_TIME_FORMAT, datetime.toString())) {
             return true;
         }
         return false;
     }
-    public static boolean validateStartTimeAndEndTime(String startTime,String endTime) throws ParseException {
+
+    public static boolean validateStartTimeAndEndTime(String startTime, String endTime) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
         Date startTime1 = dateFormat.parse(startTime.toString());
         Date endTime1 = dateFormat.parse(endTime.toString());
         Timestamp timestampStartTime = new java.sql.Timestamp(startTime1.getTime());
         Timestamp timestampEndTime = new java.sql.Timestamp(endTime1.getTime());
-        if(timestampEndTime.getTime()-timestampStartTime.getTime()<=0){
+        if (timestampEndTime.getTime() - timestampStartTime.getTime() <= 0) {
             return false;
         }
         return true;
@@ -50,22 +59,24 @@ public class Validate {
         Date endDate1 = dateFormat.parse(endDate.toString());
         Timestamp timestampStartTime = new java.sql.Timestamp(startDate1.getTime());
         Timestamp timestampEndTime = new java.sql.Timestamp(endDate1.getTime());
-        if(timestampEndTime.getTime()-timestampStartTime.getTime()<0){
+        if (timestampEndTime.getTime() - timestampStartTime.getTime() < 0) {
             return false;
         }
         return true;
     }
+
     public static boolean checkDateLeave(String startDate) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date realDate = Until.generateDate();
         Date startDate1 = dateFormat.parse(startDate.toString());
         Timestamp timestampStartTime = new java.sql.Timestamp(startDate1.getTime());
         Timestamp timestampRealDate = new java.sql.Timestamp(realDate.getTime());
-        if(timestampStartTime.getTime()-timestampRealDate.getTime()<0){
+        if (timestampStartTime.getTime() - timestampRealDate.getTime() < 0) {
             return false;
         }
         return true;
     }
+
     public static boolean checkUploadDateRealTime(String startDate) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Calendar calendar = Calendar.getInstance();
@@ -75,31 +86,71 @@ public class Validate {
         Date startDate1 = dateFormat.parse(startDate.toString());
         Timestamp timestampStartTime = new java.sql.Timestamp(startDate1.getTime());
         Timestamp timestampRealDate = new java.sql.Timestamp(realDate.getTime());
-        if(timestampStartTime.getTime()-timestampRealDate.getTime()<0){
+        if (timestampStartTime.getTime() - timestampRealDate.getTime() < 0) {
             return false;
         }
         return true;
     }
-    public static boolean checkDateBookingRoom(String startDate,String startTime) throws ParseException {
+
+    public static boolean checkDateBookingRoom(String startDate, String startTime) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
         Date realDate = Until.generateDate();
         Date startDate1 = dateFormat.parse(startDate.toString());
-        Date realtime =Until.generateTime();
+        Date realtime = Until.generateTime();
         Date startTime1 = timeFormat.parse(startTime.toString());
         Timestamp timestampStartDate = new java.sql.Timestamp(startDate1.getTime());
         Timestamp timestampRealDate = new java.sql.Timestamp(realDate.getTime());
         Timestamp timestampStartTime = new java.sql.Timestamp(startTime1.getTime());
         Timestamp timestampRealTime = new java.sql.Timestamp(realtime.getTime());
-        if(timestampStartDate.getTime()-timestampRealDate.getTime()<0){
+        if (timestampStartDate.getTime() - timestampRealDate.getTime() < 0) {
             return false;
         }
-        if(timestampStartDate.getTime()-timestampRealDate.getTime()==0){
-            if(timestampStartTime.getTime()-timestampRealTime.getTime()<0){
+        if (timestampStartDate.getTime() - timestampRealDate.getTime() == 0) {
+            if (timestampStartTime.getTime() - timestampRealTime.getTime() < 0) {
                 return false;
             }
             return true;
         }
         return true;
+    }
+
+    public static double getDistanceTime(Time a, Time b) {
+        String stringA = sdf.format(a);
+        String stringB = sdf.format(b);
+
+        java.util.Date dateTimeA;
+        java.util.Date dateTimeB;
+        try {
+            dateTimeA = sdf.parse(stringA);
+            dateTimeB = sdf.parse(stringB);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        Timestamp timestampA = new Timestamp(dateTimeA.getTime());
+        Timestamp timestampB = new Timestamp(dateTimeB.getTime());
+        return timestampA.getTime() - timestampB.getTime();
+    }
+
+    public static int compareTime(Time a, Time b) {
+        String stringA = sdf.format(a);
+        String stringB = sdf.format(b);
+
+        java.util.Date dateTimeA;
+        java.util.Date dateTimeB;
+        try {
+            dateTimeA = sdf.parse(stringA);
+            dateTimeB = sdf.parse(stringB);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        Timestamp timestampA = new Timestamp(dateTimeA.getTime());
+        Timestamp timestampB = new Timestamp(dateTimeB.getTime());
+        if (timestampA.getTime() - timestampB.getTime() == 0) return 0;
+        else if (timestampA.getTime() - timestampB.getTime() > 0) {
+            return 1;
+        } else return -1;
     }
 }

@@ -4,6 +4,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 
@@ -19,7 +20,12 @@ public interface DailyLogRepository extends JpaRepository<DailyLog, Long> {
     List<DailyLog> findAllByUser(User user);
 
     Optional<DailyLog> findByUserAndDate(User user, Date date);
-//
-//    @Query()
-//    Optional<DailyLog>
+
+    @Query(value = "SELECT *\n" +
+            "FROM daily_log\n" +
+            "WHERE user_id LIKE :accountId AND date LIKE :date\n" +
+            "ORDER BY checkout DESC LIMIT 1;", nativeQuery = true)
+    Optional<DailyLog> getLastCheckoutOfDateByUserId(@Param("accountId") String accountId, @Param("date") Date date);
+
+    List<DailyLog> findByDate(Date date);
 }

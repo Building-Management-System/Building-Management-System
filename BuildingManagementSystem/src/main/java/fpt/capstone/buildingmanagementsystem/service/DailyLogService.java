@@ -18,15 +18,15 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.sql.Time;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.compareTime;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.getDistanceTime;
 
 @Service
 public class DailyLogService {
@@ -57,8 +57,6 @@ public class DailyLogService {
     private static final Time endAfternoonTime = Time.valueOf("17:30:00");
 
     private static final Logger logger = LoggerFactory.getLogger(DailyLogService.class);
-
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
 
     public DailyLog mapControlLogToDailyLog(ControlLogLcd controlLogLcd) {
@@ -109,7 +107,7 @@ public class DailyLogService {
         dailyLog.setTotalAttendance(getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour);
 
         if (dailyLog.getDateType().equals(DateType.NORMAL)) {
-            dailyLog.setPaidDay(Math.min(dailyLog.getTotalAttendance()/8, 1));
+            dailyLog.setPaidDay(Math.min(dailyLog.getTotalAttendance() / 8, 1));
         }
 
         return dailyLog;
@@ -172,44 +170,6 @@ public class DailyLogService {
         }
     }
 
-    private double getDistanceTime(Time a, Time b) {
-        String stringA = sdf.format(a);
-        String stringB = sdf.format(b);
-
-        java.util.Date dateTimeA;
-        java.util.Date dateTimeB;
-        try {
-            dateTimeA = sdf.parse(stringA);
-            dateTimeB = sdf.parse(stringB);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-
-        Timestamp timestampA = new Timestamp(dateTimeA.getTime());
-        Timestamp timestampB = new Timestamp(dateTimeB.getTime());
-        return timestampA.getTime() - timestampB.getTime();
-    }
-
-    private int compareTime(Time a, Time b) {
-        String stringA = sdf.format(a);
-        String stringB = sdf.format(b);
-
-        java.util.Date dateTimeA;
-        java.util.Date dateTimeB;
-        try {
-            dateTimeA = sdf.parse(stringA);
-            dateTimeB = sdf.parse(stringB);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-
-        Timestamp timestampA = new Timestamp(dateTimeA.getTime());
-        Timestamp timestampB = new Timestamp(dateTimeB.getTime());
-        if (timestampA.getTime() - timestampB.getTime() == 0) return 0;
-        else if (timestampA.getTime() - timestampB.getTime() > 0) {
-            return 1;
-        } else return -1;
-    }
 
 }
 
