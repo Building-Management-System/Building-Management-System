@@ -19,4 +19,7 @@ public interface DailyLogRepository extends JpaRepository<DailyLog, Long> {
     List<DailyLog> findAllByUser(User user);
 
     Optional<DailyLog> findByUserAndDate(User user, Date date);
+//
+//    @Query()
+//    Optional<DailyLog>
 }

@@ -34,7 +34,6 @@ public class DailyLog {
             name = "UUID",
             strategy = "org.hibernate.id.UUIDGenerator"
     )
-    @Column(name = "daily_log_id")
     private String dailyId;
 
     @Column(name = "date")
@@ -87,5 +86,25 @@ public class DailyLog {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
+    @Override
+    public String toString() {
+        return "DailyLog{" +
+                "dailyId='" + dailyId + '\'' +
+                ", date=" + date +
+                ", checkin=" + checkin +
+                ", checkout=" + checkout +
+                ", totalAttendance=" + totalAttendance +
+                ", morningTotal=" + morningTotal +
+                ", afternoonTotal=" + afternoonTotal +
+                ", lateCheckin=" + lateCheckin +
+                ", earlyCheckout=" + earlyCheckout +
+                ", permittedLeave=" + permittedLeave +
+                ", nonPermittedLeave=" + nonPermittedLeave +
+                ", Violate=" + Violate +
+                ", outsideWork=" + outsideWork +
+                ", paidDay=" + paidDay +
+                ", dateType=" + dateType +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }
