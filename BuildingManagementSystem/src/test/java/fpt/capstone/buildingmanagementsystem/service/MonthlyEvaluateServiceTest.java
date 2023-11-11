@@ -129,5 +129,3 @@ class MonthlyEvaluateServiceTest {
         Assertions.assertEquals(List.of(new EmployeeEvaluateRemainResponse("employeeId", new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 43).getTime(), "userName", 0, 0)), result);
     }
 }
-
-//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme
