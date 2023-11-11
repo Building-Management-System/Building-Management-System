@@ -18,7 +18,6 @@ public interface DailyLogRepository extends JpaRepository<DailyLog, Long> {
     @Query(value = "select * from daily_log where user_id = :user_id and date = :date", nativeQuery = true)
     Optional<DailyLog> getAttendanceDetailByUserIdAndDate(String user_id, String date);
     List<DailyLog> findAllByUser(User user);
-
     Optional<DailyLog> findByUserAndDate(User user, Date date);
 
     @Query(value = "SELECT *\n" +
