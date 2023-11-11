@@ -14,9 +14,11 @@ import java.util.Optional;
 
 @Repository
 public interface DailyLogRepository extends JpaRepository<DailyLog, Long> {
-    List<DailyLog> findByUser_UserIdAndMonth(String user_id,int month);
+    List<DailyLog> findByUser_UserIdAndMonth(String user_id, int month);
+
     @Query(value = "select * from daily_log where user_id = :user_id and date = :date", nativeQuery = true)
     Optional<DailyLog> getAttendanceDetailByUserIdAndDate(String user_id, String date);
+
     List<DailyLog> findAllByUser(User user);
 
     Optional<DailyLog> findByUserAndDate(User user, Date date);
@@ -28,4 +30,9 @@ public interface DailyLogRepository extends JpaRepository<DailyLog, Long> {
     Optional<DailyLog> getLastCheckoutOfDateByUserId(@Param("accountId") String accountId, @Param("date") Date date);
 
     List<DailyLog> findByDate(Date date);
+
+    @Query(value = "SELECT *\n" +
+            "FROM daily_log\n" +
+            "WHERE user_id LIKE :userId AND month = :month AND year(date) = :year;", nativeQuery = true)
+    List<DailyLog> getMonthlyDailyLog(@Param("userId") String userId, @Param("month") int month, @Param("year") int year);
 }
