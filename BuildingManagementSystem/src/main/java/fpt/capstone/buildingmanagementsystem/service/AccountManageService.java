@@ -20,6 +20,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.ChangeStatusAccountRe
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ResetPasswordRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.AccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAllAccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.RequestMessageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponseV2;
@@ -35,6 +36,7 @@ import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import fpt.capstone.buildingmanagementsystem.until.EmailSender;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -364,5 +366,13 @@ public class AccountManageService implements UserDetailsService {
     public String getAccountId(String username) {
         Optional<Account> userAccount = accountRepository.findByUsername(username);
         return userAccount.get().getAccountId();
+    }
+
+    public AccountResponse getCreatedDate(String accountId) {
+        Account account = accountRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new BadRequest("Not_found"));
+        AccountResponse accountResponse = new AccountResponse();
+        BeanUtils.copyProperties(account, accountResponse);
+        return accountResponse;
     }
 }

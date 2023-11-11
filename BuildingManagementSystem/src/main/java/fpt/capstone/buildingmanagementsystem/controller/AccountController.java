@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.controller;
 
 import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
 import fpt.capstone.buildingmanagementsystem.model.request.*;
+import fpt.capstone.buildingmanagementsystem.model.response.AccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.JwtResponse;
 import fpt.capstone.buildingmanagementsystem.security.JwtTokenUtil;
 import fpt.capstone.buildingmanagementsystem.service.AccountManageService;
@@ -79,5 +80,10 @@ public class AccountController {
         } catch (BadCredentialsException e) {
             throw new Exception("INVALID_CREDENTIALS", e);
         }
+    }
+
+    @GetMapping("getCreatedDate")
+    public AccountResponse getCreatedDate(@RequestParam("accountId") String accountId) {
+        return accountManageService.getCreatedDate(accountId);
     }
 }
