@@ -19,6 +19,7 @@ import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.sql.Date;
 import java.sql.Time;
 import java.text.ParseException;
@@ -28,6 +29,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Service
 public class OvertimeService {
@@ -48,7 +50,6 @@ public class OvertimeService {
     private static final Time endAfternoonTime = Time.valueOf("17:30:00");
 
     private static final Time startOverTime = Time.valueOf("18:00:00");
-
 
 
     public GetOvertimeListResponse getOvertime(String user_id, String month, String year) {
@@ -99,18 +100,20 @@ public class OvertimeService {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new BadRequest("Not_found_user"));
 
-        DailyLog dailyLog = dailyLogRepository.findByUserAndDate(user, date)
-                .orElseThrow(() -> new BadRequest("Not_found"));
-
-        DateType dateType = DailyLogService.getDateType(date);
-        if(dateType.equals(DateType.NORMAL)) {
-            if(Validate.compareTime(dailyLog.getCheckout(), endAfternoonTime) > 0 ) {
-                return new SystemTimeResponse(date, startOverTime, dailyLog.getCheckout());
+        Optional<DailyLog> dailyLogOptional = dailyLogRepository.findByUserAndDate(user, date);
+        if (!dailyLogOptional.isPresent()) return new SystemTimeResponse();
+        else {
+            DailyLog dailyLog = dailyLogOptional.get();
+            DateType dateType = DailyLogService.getDateType(date);
+            if (dateType.equals(DateType.NORMAL)) {
+                if (Validate.compareTime(dailyLog.getCheckout(), endAfternoonTime) > 0) {
+                    return new SystemTimeResponse(date, startOverTime, dailyLog.getCheckout());
+                } else {
+                    return new SystemTimeResponse(date, null, null);
+                }
             } else {
-                return new SystemTimeResponse(date, null, null);
+                return new SystemTimeResponse(date, dailyLog.getSystemCheckIn(), dailyLog.getSystemCheckOut());
             }
-        } else {
-            return new SystemTimeResponse(date, dailyLog.getSystemCheckIn(), dailyLog.getSystemCheckOut());
         }
     }
 }
