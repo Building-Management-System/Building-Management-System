@@ -246,10 +246,7 @@ public class NotificationServiceV2 {
 
         Map<String, NotificationFile> files = notificationFileRepository.findFirstByNotificationIn(notifications)
                 .stream().collect(Collectors.toMap(file -> file.getNotification().getNotificationId(), Function.identity()));
-
-        ExecutorService ex = Executors.newFixedThreadPool(5);
-
-        notifications.forEach(notification -> ex.submit(() -> {
+        notifications.forEach(notification -> {
             NotificationDetailResponse detailResponse = new NotificationDetailResponse();
             detailResponse.setNotificationId(notification.getNotificationId());
             detailResponse.setTitle(notification.getTitle());
@@ -263,7 +260,7 @@ public class NotificationServiceV2 {
             detailResponse.setReadStatus(true);
             detailResponse.setViewAs(viewAs);
             notificationDetailResponses.add(detailResponse);
-        }));
+        });
 
         Map<String, Notification> unreadNotification = notificationRepository.getUnreadMarkNotificationByUserId(userId)
                 .stream().collect(Collectors.toMap(Notification::getNotificationId, Function.identity()));
@@ -285,7 +282,6 @@ public class NotificationServiceV2 {
             }
         }));
         executorService.shutdown();
-        ex.shutdown();
         return notificationDetailResponses.stream()
                 .sorted(Comparator.comparing(NotificationDetailResponse::isPriority))
                 .collect(Collectors.toList());

@@ -29,12 +29,12 @@ class BuildingManagementSystemApplicationTests {
                 "\"Sendintime\":1,\n" +
                 "\"direction\":\"exit\",\n" +
                 "\"otype\":\"1\",\n" +
-                "\"persionName\":\"demo\",\n" +
+                "\"persionName\":\"thinhemp\",\n" +
                 "\"facesluiceId\":\"2032105\",\n" +
                 "\"facesluiceName\":\"Face1\",\n" +
                 "\"idCard\":\" \",\n" +
                 "\"telnum\":\" \",\n" +
-                "\"time\":\"2023-10-13 7:00:00\",\n" +
+                "\"time\":\"2023-10-12 12:30:00\",\n" +
                 "\"PushType\": \"0\",\n" +
                 "\"OpendoorWay\": \"0\",\n" +
                 "\"cardNum2\": \"1\",\n" +

@@ -310,8 +310,12 @@ public class NotificationService {
                 .notification(notification)
                 .user(user)
                 .build();
+        Optional<UnreadMark> record = unreadMarkRepository.findByNotificationAndUser(notification, user);
+
         try {
-            unreadMarkRepository.save(unreadMark);
+            if(!record.isPresent()) {
+                unreadMarkRepository.save(unreadMark);
+            }
             return true;
         } catch (Exception e) {
             throw new ServerError("fail");
