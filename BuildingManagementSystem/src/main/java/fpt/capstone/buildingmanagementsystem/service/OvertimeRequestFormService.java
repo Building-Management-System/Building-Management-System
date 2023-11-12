@@ -131,15 +131,14 @@ public class OvertimeRequestFormService {
                 (overtimeRequest.getTopicOvertime()==HOLIDAY)) {
             //totalTimeWeekEndAndHolidayDay Ot and startTimeTimeWeekEndAndHoliday Ot
             time= overtimeService.getTime(overtimeRequest.getFromTime(), overtimeRequest.getToTime());
+            //Time at 12:00
             String checkMorningTime="1999-01-01 12:00:00";
+            //Time at 13:00
             String checkAfternoonTime="1999-01-01 13:00:00";
             LocalDateTime localCheckMorningTime = LocalDateTime.parse(checkMorningTime, formatter);
             Time checkTimeStart = Time.valueOf(localCheckMorningTime.toLocalTime());
             LocalDateTime localCheckAfternoonTime = LocalDateTime.parse(checkAfternoonTime, formatter);
             Time checkTimeEnd = Time.valueOf(localCheckAfternoonTime.toLocalTime());
-            System.out.println(overtimeRequest.getFromTime().getTime());
-            System.out.println(checkTimeStart.getTime());
-
             if(overtimeRequest.getFromTime().getTime()-checkTimeStart.getTime()<0
                     &&checkTimeEnd.getTime()-overtimeRequest.getToTime().getTime()<0){
                 time=time-1.0;
