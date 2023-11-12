@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -56,7 +57,7 @@ class LiveChatServiceTest {
     }
 
     @Test
-    void testNewChatMessage2() {
+    void testNewChatMessage2() throws IOException {
         when(userRepository.findByUserId(anyString())).thenReturn(null);
         when(chatUserRepository.findAllByChat_Id(anyString())).thenReturn(List.of(new ChatUser("id", new User("userId", "firstName", "lastName", "gender", "dateOfBirth", "telephoneNumber", "address", "country", "city", "email", "AcceptedBy", new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 40).getTime(), "image", new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 40).getTime(), new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 40).getTime(), null, null), new Chat("id", "chatName", true, new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 40).getTime(), "createdBy", new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 40).getTime()))));
         when(unReadChatRepository.existsUnReadChatByChatAndUser(any(), any())).thenReturn(true);
@@ -66,7 +67,7 @@ class LiveChatServiceTest {
     }
 
     @Test
-    void testNewChatMessage3() {
+    void testNewChatMessage3() throws IOException {
         when(userRepository.findByUserId(anyString())).thenReturn(null);
         when(chatUserRepository.findAllByChat_Id(anyString())).thenReturn(List.of(new ChatUser("id", new User("userId", "firstName", "lastName", "gender", "dateOfBirth", "telephoneNumber", "address", "country", "city", "email", "AcceptedBy", new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 40).getTime(), "image", new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 40).getTime(), new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 40).getTime(), null, null), new Chat("id", "chatName", true, new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 40).getTime(), "createdBy", new GregorianCalendar(2023, Calendar.DECEMBER, 20, 0, 40).getTime()))));
         when(unReadChatRepository.existsUnReadChatByChatAndUser(any(), any())).thenReturn(true);
@@ -149,5 +150,3 @@ class LiveChatServiceTest {
         Assertions.assertEquals(new FileDataResponse("fileId", "name", "type", new byte[]{(byte) 0}), result);
     }
 }
-
-//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme
