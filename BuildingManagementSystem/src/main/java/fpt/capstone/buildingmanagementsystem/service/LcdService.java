@@ -9,6 +9,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
+import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ public class LcdService {
             String operator = rootNode.get("operator").asText();
 
             if (operator.equals(CONTROL_LOG)) {
+                String time = infoNode.path("time").asText().split("\\s+")[1];
                 ControlLogLcd controlLogLcd = ControlLogLcd.builder()
                         .operator(rootNode.path("operator").asText())
                         .personId(infoNode.path("personId").asText())
@@ -54,13 +56,13 @@ public class LcdService {
                         .similarity2(infoNode.path("similarity2").asDouble())
                         .persionName(infoNode.path("persionName").asText())
                         .telnum(infoNode.path("telnum").asText())
-                        .time(formatter.parse(infoNode.path("time").asText()))
+                        .time(Until.convertStringToTime(time))
                         .pic(convertBase64ToByteArray(infoNode.path("pic").asText()))
                         .build();
                 logger.info(controlLogLcd + "");
 
                 Account account = accountRepository.findByUsername(controlLogLcd.getPersionName())
-                                .orElseThrow(() -> new BadRequest("Not_found"));
+                        .orElseThrow(() -> new BadRequest("Not_found"));
                 controlLogLcd.setAccount(account);
                 controlLogLcdRepository.save(controlLogLcd);
                 return dailyLogService.mapControlLogToDailyLog(controlLogLcd);

@@ -70,7 +70,7 @@ public class CheckoutAnalyzeSchedule {
     private static final Logger logger = LoggerFactory.getLogger(CheckoutAnalyzeSchedule.class);
 
     //cron = "0 01 0 * * ?"
-    @Scheduled(cron = "0 30 23 * * ?")
+    @Scheduled(cron = "0 15 00 * * ?")
     @Transactional
     public void scheduledCheckoutAnalyst() {
 

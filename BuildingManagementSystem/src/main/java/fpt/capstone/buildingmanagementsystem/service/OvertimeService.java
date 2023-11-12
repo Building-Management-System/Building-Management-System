@@ -112,7 +112,7 @@ public class OvertimeService {
                     return new SystemTimeResponse(date, null, null);
                 }
             } else {
-                return new SystemTimeResponse(date, dailyLog.getSystemCheckIn(), dailyLog.getSystemCheckOut());
+                return new SystemTimeResponse(date, dailyLog.getCheckin(), dailyLog.getCheckout());
             }
         }
     }
