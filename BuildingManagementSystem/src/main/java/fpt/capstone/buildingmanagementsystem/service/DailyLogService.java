@@ -81,12 +81,14 @@ public class DailyLogService {
 
         if (compareTime(checkoutTime, endMorningTime) < 0) {
             dailyLog.setCheckout(checkoutTime);
+            dailyLog.setSystemCheckOut(checkoutTime);
 
             double morningTotal = getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour;
             dailyLog.setMorningTotal(morningTotal);
 
         } else {
             dailyLog.setCheckout(checkoutTime);
+            dailyLog.setSystemCheckOut(checkoutTime);
 
             double morningTotal = getDistanceTime(endMorningTime, dailyLog.getCheckin()) / One_hour;
             dailyLog.setMorningTotal(morningTotal);
@@ -94,12 +96,16 @@ public class DailyLogService {
 
         if (compareTime(dailyLog.getCheckin(), startAfternoonTime) < 0) {
             dailyLog.setCheckout(checkoutTime);
+            dailyLog.setSystemCheckOut(checkoutTime);
+
             if (compareTime(checkoutTime, startAfternoonTime) > 0) {
                 double afternoonTotal = getDistanceTime(checkoutTime, startAfternoonTime) / One_hour;
                 dailyLog.setAfternoonTotal(afternoonTotal);
             }
         } else {
             dailyLog.setCheckout(checkoutTime);
+            dailyLog.setSystemCheckOut(checkoutTime);
+
             double afternoonTotal = getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour;
             dailyLog.setAfternoonTotal(afternoonTotal);
         }
@@ -129,6 +135,8 @@ public class DailyLogService {
                 .paidDay(0)
                 .outsideWork(0)
                 .user(account.getUser())
+                .systemCheckIn(checkinTime)
+                .systemCheckOut(checkinTime)
                 .build();
         LocalDate localDate = dailyLog.getDate().toLocalDate();
         dailyLog.setMonth(localDate.getMonthValue());
@@ -156,7 +164,7 @@ public class DailyLogService {
         }
     }
 
-    private DateType getDateType(Date dailyDate) {
+    public static DateType getDateType(Date dailyDate) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(dailyDate);
 
