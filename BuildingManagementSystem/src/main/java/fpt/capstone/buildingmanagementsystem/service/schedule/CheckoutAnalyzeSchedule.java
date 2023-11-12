@@ -157,7 +157,6 @@ public class CheckoutAnalyzeSchedule {
         }
     }
 
-    //todo: update early checkout
     public void checkViolate(DailyLog dailyLog, Account account, Date date) {
         if (dailyLog.isViolate()) return;
         if(!dailyLog.getDateType().equals(DateType.NORMAL)) return;

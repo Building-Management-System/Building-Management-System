@@ -53,9 +53,6 @@ public class DailyLogService {
 
     private static final double One_minute = 1000 * 60;
 
-
-    private static final Time endAfternoonTime = Time.valueOf("17:30:00");
-
     private static final Logger logger = LoggerFactory.getLogger(DailyLogService.class);
 
 
@@ -179,7 +176,5 @@ public class DailyLogService {
             return DateType.NORMAL;
         }
     }
-
-
 }
 
