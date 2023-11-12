@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import java.sql.Time;
 @Data
 @AllArgsConstructor
@@ -13,6 +14,8 @@ public class DailyLogResponse {
     private String dateDaily;
     private Time checkin;
     private Time checkout;
+    private Time systemCheckIn;
+    private Time systemCheckOut;
     private double totalAttendance;
     private double morningTotal;
     private double afternoonTotal;
