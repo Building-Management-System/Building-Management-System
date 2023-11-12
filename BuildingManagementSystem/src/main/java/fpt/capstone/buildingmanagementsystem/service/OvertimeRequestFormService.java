@@ -124,8 +124,8 @@ public class OvertimeRequestFormService {
             if(overtimeRequest.getTopicOvertime()==HOLIDAY){
                 totalPaid=time*3;
             }
-            OvertimeLog overtimeLog= OvertimeLog.builder().date(sqlDate).manualEnd(overtimeRequest.getFromTime()).
-                    manualStart(overtimeRequest.getToTime()).startTime(sqlTimeStart).endTime(sqlTimeEnd).dateType(overtimeRequest.getTopicOvertime()).
+            OvertimeLog overtimeLog= OvertimeLog.builder().date(sqlDate).manualEnd(overtimeRequest.getToTime()).
+                    manualStart(overtimeRequest.getFromTime()).startTime(sqlTimeStart).endTime(sqlTimeEnd).dateType(overtimeRequest.getTopicOvertime()).
                     approvedDate(sqlDate2).totalPaid(totalPaid).user(requestMessage.getSender()).
                     build();
             overTimeRepository.save(overtimeLog);

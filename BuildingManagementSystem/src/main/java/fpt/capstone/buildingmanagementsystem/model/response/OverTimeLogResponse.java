@@ -23,5 +23,4 @@ public class OverTimeLogResponse {
     private double totalAttendance;
     private Date approveDate;
     private double totalPaid;
-    private double insideHours;
 }
