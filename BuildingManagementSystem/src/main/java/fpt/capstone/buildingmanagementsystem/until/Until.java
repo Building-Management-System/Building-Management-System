@@ -67,13 +67,17 @@ public class Until {
     }
     // cần check lại khi deploy lên host
     public static java.sql.Time convertStringToTime(String time) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-        Date date = sdf.parse(time);
-        long timeInMillis = date.getTime();
-        Time oldTime= new Time(timeInMillis);
-        LocalTime localTime = oldTime.toLocalTime();
-        return Time.valueOf(localTime);
+        if(time!=null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+            Date date = sdf.parse(time);
+            long timeInMillis = date.getTime();
+            Time oldTime = new Time(timeInMillis);
+            LocalTime localTime = oldTime.toLocalTime();
+            return Time.valueOf(localTime);
+        }else {
+            return null;
+        }
     }
 
     public static String encodePassword(String password) {
