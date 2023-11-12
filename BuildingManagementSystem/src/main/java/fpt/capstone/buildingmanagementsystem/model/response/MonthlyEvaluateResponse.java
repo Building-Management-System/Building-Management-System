@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.model.response;
 
+import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.EvaluateEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,4 +31,9 @@ public class MonthlyEvaluateResponse {
     private Date createdDate;
     private Date updateDate;
     private String createdBy;
+    private String employeeId;
+    private String firstNameEmp;
+    private String lastNameEmp;
+    private Department department;
+    private Date hireDate;
 }

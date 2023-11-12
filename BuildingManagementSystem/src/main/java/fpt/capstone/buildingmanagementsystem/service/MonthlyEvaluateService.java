@@ -47,6 +47,11 @@ public class MonthlyEvaluateService {
         MonthlyEvaluateResponse response = new MonthlyEvaluateResponse();
         BeanUtils.copyProperties(monthlyEvaluate,response);
         response.setCreatedBy(monthlyEvaluate.getCreatedBy().getUserId());
+        response.setEmployeeId(monthlyEvaluate.getEmployee().getUserId());
+        response.setFirstNameEmp(monthlyEvaluate.getEmployee().getFirstName());
+        response.setLastNameEmp(monthlyEvaluate.getEmployee().getLastName());
+        response.setDepartment(monthlyEvaluate.getEmployee().getDepartment());
+        response.setHireDate(monthlyEvaluate.getEmployee().getAccount().getCreatedDate());
         return response;
     }
 }
