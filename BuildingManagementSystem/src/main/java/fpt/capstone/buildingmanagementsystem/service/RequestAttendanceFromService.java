@@ -63,6 +63,9 @@ public class RequestAttendanceFromService {
     @Autowired
     AutomaticNotificationService automaticNotificationService;
 
+    @Autowired
+    AttendanceService attendanceService;
+
     public boolean getAttendanceUser(SendAttendanceFormRequest sendAttendanceFormRequest) {
         try {
             if (sendAttendanceFormRequest.getContent() != null &&
@@ -267,6 +270,12 @@ public class RequestAttendanceFromService {
                             true,
                             null
                     ));
+            attendanceService.updateAttendanceTime(
+                    attendanceRequestForm.getManualDate(),
+                    requestTicket.getUser(),
+                    attendanceRequestForm.getManualFirstEntry(),
+                    attendanceRequestForm.getManualLastExit()
+            );
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");

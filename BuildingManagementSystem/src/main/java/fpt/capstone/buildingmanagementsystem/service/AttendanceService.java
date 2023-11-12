@@ -7,20 +7,31 @@ import fpt.capstone.buildingmanagementsystem.mapper.DailyLogMapper;
 import fpt.capstone.buildingmanagementsystem.mapper.OvertimeLogMapper;
 import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
-import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
-import fpt.capstone.buildingmanagementsystem.model.response.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.response.AttendanceDetailResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.ControlLogResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.DailyLogResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.GetAttendanceUserResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.TotalAttendanceUser;
 import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
 import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.service.schedule.CheckoutAnalyzeSchedule;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 
 @Service
@@ -37,6 +48,12 @@ public class AttendanceService {
     OverTimeRepository overTimeRepository;
     @Autowired
     ControlLogLcdRepository controlLogLcdRepository;
+
+    @Autowired
+    CheckoutAnalyzeSchedule checkoutAnalyzeSchedule;
+
+    @Autowired
+    DailyLogService dailyLogService;
     public GetAttendanceUserResponse getAttendanceUser(String user_id, int month, String year) {
         try {
             double totalAttendance = 0.0;
@@ -124,10 +141,7 @@ public class AttendanceService {
                     double afternoonTotal = dailyLogs.getAfternoonTotal();
                     boolean lateCheckin = dailyLogs.isLateCheckin();
                     boolean earlyCheckout = dailyLogs.isEarlyCheckout();
-                    boolean nonPermittedLeave = false;
-                    if (dailyLogs.getNonPermittedLeave() > 0.0) {
-                        nonPermittedLeave = true;
-                    }
+                    boolean nonPermittedLeave = dailyLogs.getNonPermittedLeave() > 0.0;
                     double permittedLeave = dailyLogs.getPermittedLeave();
                     double outsideWork = dailyLogs.getOutsideWork();
                     List<ControlLogResponse> controlLogResponse = new ArrayList<>();
@@ -164,5 +178,22 @@ public class AttendanceService {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.DAY_OF_WEEK);
+    }
+
+    @Transactional
+    public void updateAttendanceTime(java.sql.Date date, User user, Time checkin, Time checkout) {
+        DailyLog dailyLog = dailyLogRepository.findByUserAndDate(user, date)
+                .orElseThrow(() -> new BadRequest("Not_found"));
+
+        dailyLog.setCheckin(checkin);
+        dailyLog.setCheckout(checkout);
+        dailyLogService.updateDailyLogWhenExisted(dailyLog, checkout);
+        dailyLogService.getLateCheckInDuration(dailyLog, user.getUserId(),date, checkin);
+        checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), date);
+        try {
+            dailyLogRepository.save(dailyLog);
+        }catch (Exception e) {
+            throw new ServerError("Something went wrong");
+        }
     }
 }

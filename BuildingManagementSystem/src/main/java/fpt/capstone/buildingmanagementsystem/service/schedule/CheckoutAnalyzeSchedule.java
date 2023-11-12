@@ -157,15 +157,18 @@ public class CheckoutAnalyzeSchedule {
         }
     }
 
-    private void checkViolate(DailyLog dailyLog, Account account, Date date) {
+    //todo: update early checkout
+    public void checkViolate(DailyLog dailyLog, Account account, Date date) {
         if (dailyLog.isViolate()) return;
-
+        if(!dailyLog.getDateType().equals(DateType.NORMAL)) return;
         List<LateFormResponse> lateFormResponses = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(account.accountId, date, LateType.EARLY_AFTERNOON)
                 .stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
                 .collect(Collectors.toList());
         if (compareTime(dailyLog.getCheckout(), endAfternoonTime) < 0) {
             dailyLog.setEarlyCheckout(true);
             if (lateFormResponses.isEmpty()) dailyLog.setViolate(true);
+        } else {
+            dailyLog.setEarlyCheckout(false);
         }
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
         if (getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour < 6) {

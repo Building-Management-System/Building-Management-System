@@ -77,7 +77,7 @@ public class DailyLogService {
         }
     }
 
-    private DailyLog updateDailyLogWhenExisted(DailyLog dailyLog, Time checkoutTime) {
+    public DailyLog updateDailyLogWhenExisted(DailyLog dailyLog, Time checkoutTime) {
 
         if (compareTime(checkoutTime, endMorningTime) < 0) {
             dailyLog.setCheckout(checkoutTime);
@@ -146,8 +146,8 @@ public class DailyLogService {
         return dailyLogRepository.save(dailyLog);
     }
 
-    private void getLateCheckInDuration(DailyLog dailyLog, String userId, Date date, Time checkinTime) {
-        if (dailyLog.getDateType().equals(DateType.WEEKEND) || dailyLog.getDateType().equals(DateType.HOLIDAY)) return;
+    public void getLateCheckInDuration(DailyLog dailyLog, String userId, Date date, Time checkinTime) {
+        if (!dailyLog.getDateType().equals(DateType.NORMAL) ) return;
         if (compareTime(checkinTime, startMorningTime) > 0) {
             List<LateFormResponse> findLateMorningAccepted = lateRequestFormRepositoryV2.findLateAndEarlyViolateByUserIdAndDate(userId, date, LateType.LATE_MORNING)
                     .stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
@@ -161,6 +161,8 @@ public class DailyLogService {
             } else {
                 dailyLog.setViolate(true);
             }
+        } else {
+            dailyLog.setLateCheckin(false);
         }
     }
 
