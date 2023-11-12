@@ -209,6 +209,7 @@ public class NotificationService {
             setListImage(image, notification, listImage);
         }
     }
+
     @Transactional
     public void saveFileAndReceiver(MultipartFile[] file, boolean sendAllStatus, Notification notification, List<Optional<User>> receivers, List<NotificationReceiver> notificationReceiverList, List<UnreadMark> unreadMarkList) throws IOException {
         if (receivers.size() > 0) {
@@ -244,9 +245,7 @@ public class NotificationService {
         for (int i = 0; i < image.length; i++) {
             int finalI = i;
             byte[] imageBytes = image[finalI].getBytes();
-            executorService.submit(() -> {
-                saveImageToDB(image, notification, listImage, finalI, imageBytes);
-            });
+            executorService.submit(() -> saveImageToDB(image, notification, listImage, finalI, imageBytes));
         }
         executorService.shutdown();
     }
@@ -311,9 +310,8 @@ public class NotificationService {
                 .user(user)
                 .build();
         Optional<UnreadMark> record = unreadMarkRepository.findByNotificationAndUser(notification, user);
-
         try {
-            if(!record.isPresent()) {
+            if (!record.isPresent()) {
                 unreadMarkRepository.save(unreadMark);
             }
             return true;

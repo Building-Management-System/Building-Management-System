@@ -6,19 +6,26 @@ import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.OvertimeLogMapper;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
-import fpt.capstone.buildingmanagementsystem.model.response.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
+import fpt.capstone.buildingmanagementsystem.model.response.GetOvertimeListResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.OverTimeLogResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.SystemTimeResponse;
+import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
 import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
+import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -28,6 +35,21 @@ public class OvertimeService {
     OvertimeLogMapper overtimeLogMapper;
     @Autowired
     OverTimeRepository overTimeRepository;
+
+    @Autowired
+    DailyLogRepository dailyLogRepository;
+
+    @Autowired
+    DailyLogService dailyLogService;
+
+    @Autowired
+    UserRepository userRepository;
+
+    private static final Time endAfternoonTime = Time.valueOf("17:30:00");
+
+    private static final Time startOverTime = Time.valueOf("18:00:00");
+
+
 
     public GetOvertimeListResponse getOvertime(String user_id, String month, String year) {
         try {
@@ -70,5 +92,25 @@ public class OvertimeService {
         long totalSeconds = duration.getSeconds();
         String roundedValue = String.format("%.2f", (double) totalSeconds / 3600);
         return Double.parseDouble(roundedValue);
+    }
+
+    public SystemTimeResponse getSystemTime(String userId, Date date) {
+
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequest("Not_found_user"));
+
+        DailyLog dailyLog = dailyLogRepository.findByUserAndDate(user, date)
+                .orElseThrow(() -> new BadRequest("Not_found"));
+
+        DateType dateType = DailyLogService.getDateType(date);
+        if(dateType.equals(DateType.NORMAL)) {
+            if(Validate.compareTime(dailyLog.getCheckout(), endAfternoonTime) > 0 ) {
+                return new SystemTimeResponse(date, startOverTime, dailyLog.getCheckout());
+            } else {
+                return new SystemTimeResponse(date, null, null);
+            }
+        } else {
+            return new SystemTimeResponse(date, dailyLog.getSystemCheckIn(), dailyLog.getSystemCheckOut());
+        }
     }
 }

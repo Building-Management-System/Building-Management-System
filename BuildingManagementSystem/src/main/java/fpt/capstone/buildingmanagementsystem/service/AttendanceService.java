@@ -168,11 +168,14 @@ public class AttendanceService {
     public void updateAttendanceTime(java.sql.Date date, User user, Time checkin, Time checkout) {
         DailyLog dailyLog = dailyLogRepository.findByUserAndDate(user, date)
                 .orElseThrow(() -> new BadRequest("Not_found"));
-
-        dailyLog.setCheckin(checkin);
-        dailyLog.setCheckout(checkout);
-        dailyLogService.updateDailyLogWhenExisted(dailyLog, checkout);
-        dailyLogService.getLateCheckInDuration(dailyLog, user.getUserId(),date, checkin);
+        if(checkin!= null) {
+            dailyLog.setCheckin(checkin);
+        }
+        if(checkout != null) {
+            dailyLog.setCheckout(checkout);
+        }
+        dailyLogService.updateDailyLogWhenExisted(dailyLog, dailyLog.getCheckout());
+        dailyLogService.getLateCheckInDuration(dailyLog, user.getUserId(),date, dailyLog.getCheckin());
         checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), date);
         try {
             dailyLogRepository.save(dailyLog);
