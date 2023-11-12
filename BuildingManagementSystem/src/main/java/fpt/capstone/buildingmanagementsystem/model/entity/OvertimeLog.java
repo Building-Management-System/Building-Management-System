@@ -54,10 +54,12 @@ public class OvertimeLog {
 
     @Column(name = "manual_start")
     private Time manualStart;
-
+    @Column(name = "approvedDate")
+    private Date approvedDate;
     @Column(name = "manual_end")
     private Time manualEnd;
-
+    @Column(name = "totalPaid")
+    private int totalPaid;
     @Column(name = "description")
     private String description;
 

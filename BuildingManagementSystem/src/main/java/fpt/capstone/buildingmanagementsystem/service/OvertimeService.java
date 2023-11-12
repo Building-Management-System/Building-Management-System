@@ -43,7 +43,8 @@ public class OvertimeService {
                                     .systemCheckOut(element.getEndTime()).checkin(element.getManualStart()).checkout(element.getManualEnd())
                                     .date(sdf.format(Until.convertDateToCalender(element.getDate()).getTime())).dateType(element.getDateType())
                                     .totalAttendance(getTime(element.getStartTime(), element.getManualEnd()))
-                                    .insideHours(getTime(element.getManualStart(), element.getEndTime())).build();
+                                    .insideHours(getTime(element.getManualStart(), element.getEndTime()))
+                                    .totalPaid(element.getTotalPaid()).approveDate(element.getApprovedDate()).build();
                         } catch (ParseException e) {
                             throw new ServerError("fail");
                         }

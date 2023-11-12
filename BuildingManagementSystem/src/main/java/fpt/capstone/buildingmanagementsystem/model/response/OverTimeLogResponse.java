@@ -20,5 +20,7 @@ public class OverTimeLogResponse {
     private Time systemCheckIn;
     private Time systemCheckOut;
     private double totalAttendance;
+    private Date approveDate;
+    private double totalPaid;
     private double insideHours;
 }

@@ -2,24 +2,18 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
-import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.OvertimeRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.OvertimeMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
-import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
-import fpt.capstone.buildingmanagementsystem.repository.OvertimeRequestFormRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.model.response.OverTimeLogResponse;
+import fpt.capstone.buildingmanagementsystem.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -34,10 +28,12 @@ public class OvertimeRequestFormService {
     DepartmentRepository departmentRepository;
     @Autowired
     UserRepository userRepository;
-
+    @Autowired
+    ControlLogLcdRepository controlLogLcdRepository;
+    @Autowired
+    OverTimeRepository overTimeRepository;
     @Autowired
     TicketRepository ticketRepository;
-
     @Autowired
     RequestOtherService requestOtherService;
 
@@ -78,7 +74,10 @@ public class OvertimeRequestFormService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
-
+            String username= requestMessage.getSender().getAccount().getUsername();
+            Date date=overtimeRequest.getOvertimeDate();
+            List<ControlLogLcd> list= controlLogLcdRepository.getControlLogLcdList(username,date.toString());
+//            list.forEach();
             automaticNotificationService.sendApprovalRequestNotification(
                     new ApprovalNotificationRequest(
                             ticket.getTicketId(),
