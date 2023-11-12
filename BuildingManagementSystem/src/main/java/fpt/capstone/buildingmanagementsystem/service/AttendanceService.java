@@ -4,7 +4,6 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.DailyLogMapper;
-import fpt.capstone.buildingmanagementsystem.mapper.OvertimeLogMapper;
 import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
@@ -15,8 +14,6 @@ import fpt.capstone.buildingmanagementsystem.model.response.GetAttendanceUserRes
 import fpt.capstone.buildingmanagementsystem.model.response.TotalAttendanceUser;
 import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
-import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.service.schedule.CheckoutAnalyzeSchedule;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,15 +34,9 @@ import java.util.Optional;
 @Service
 public class AttendanceService {
     @Autowired
-    UserRepository userRepository;
-    @Autowired
     DailyLogRepository dailyLogRepository;
     @Autowired
     DailyLogMapper dailyLogMapper;
-    @Autowired
-    OvertimeLogMapper overtimeLogMapper;
-    @Autowired
-    OverTimeRepository overTimeRepository;
     @Autowired
     ControlLogLcdRepository controlLogLcdRepository;
 
@@ -67,10 +58,9 @@ public class AttendanceService {
             double outsideWork = 0.0;
             double paidDay = 0.0;
             int totalDay = 0;
-            String formattedDate = null;
             List<DailyLogResponse> list = new ArrayList<>();
             if (user_id != null) {
-                List<DailyLog> dailyLogs = dailyLogRepository.getByUserIdAndMonthAndYear(user_id, month,year);
+                List<DailyLog> dailyLogs = dailyLogRepository.getByUserIdAndMonthAndYear(user_id, month, year);
                 if (dailyLogs.size() > 0) {
                     for (DailyLog dailyLog : dailyLogs) {
                         totalAttendance = totalAttendance + dailyLog.getTotalAttendance();
@@ -123,8 +113,8 @@ public class AttendanceService {
         if (user_id != null) {
             try {
                 Optional<DailyLog> dailyLogOptional = dailyLogRepository.getAttendanceDetailByUserIdAndDate(user_id, date);
-                if(dailyLogOptional.isPresent()){
-                    DailyLog dailyLogs=dailyLogOptional.get();
+                if (dailyLogOptional.isPresent()) {
+                    DailyLog dailyLogs = dailyLogOptional.get();
                     String name = dailyLogs.getUser().getFirstName() + " " + dailyLogs.getUser().getLastName();
                     String username = dailyLogs.getUser().getAccount().getUsername();
                     Date fromDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date + " 00:00:01");
@@ -168,12 +158,6 @@ public class AttendanceService {
             throw new BadRequest("request_fail");
         }
     }
-    public int getMonth(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        return calendar.get(Calendar.MONTH) + 1;
-    }
-
     public int getCheckWeekend(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
