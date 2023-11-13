@@ -20,7 +20,7 @@ public class Until {
     public static Date generateRealTime() {
         try {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            LocalDateTime localDate = LocalDateTime.now(ZoneId.of("UTC"));
+            LocalDateTime localDate = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
             String dateString = dtf.format(localDate);
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateString);
         } catch (ParseException e) {
@@ -49,7 +49,7 @@ public class Until {
     }
     public static java.sql.Date convertStringToDate(String date) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         java.util.Date dateConvert = sdf.parse(date);
         return new java.sql.Date(dateConvert.getTime());
     }
@@ -68,7 +68,7 @@ public class Until {
     public static java.sql.Time convertStringToTime(String time) throws ParseException {
         if(time!=null) {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
             Date date = sdf.parse(time);
             long timeInMillis = date.getTime();
             Time oldTime = new Time(timeInMillis);

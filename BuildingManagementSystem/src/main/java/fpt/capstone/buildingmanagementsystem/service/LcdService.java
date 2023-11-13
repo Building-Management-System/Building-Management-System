@@ -76,6 +76,7 @@ public class LcdService {
     }
 
     private static byte[] convertBase64ToByteArray(String base64Str) {
-        return Base64.decodeBase64(base64Str);
+        String image = base64Str.substring("data:image/jpeg;base64,".length());
+        return Base64.decodeBase64(image);
     }
 }
