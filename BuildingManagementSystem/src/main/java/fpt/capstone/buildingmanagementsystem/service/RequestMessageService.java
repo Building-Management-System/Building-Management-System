@@ -106,8 +106,8 @@ public class RequestMessageService {
                 .stream().map(form -> new AttendanceFormResponse(
                         form.getAttendanceRequestId(),
                         form.getManualDate().toString(),
-                        form.getManualFirstEntry().toString(),
-                        form.getManualLastExit().toString(),
+                        form.getManualFirstEntry() != null ? form.getManualFirstEntry().toString() : null,
+                        form.getManualLastExit() != null ? form.getManualLastExit().toString() : null,
                         form.getContent(),
                         form.getRequestMessage().getRequestMessageId(),
                         form.getTopic()
