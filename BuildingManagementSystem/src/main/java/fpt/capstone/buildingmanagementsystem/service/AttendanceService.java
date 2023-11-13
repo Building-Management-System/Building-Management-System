@@ -114,12 +114,9 @@ public class AttendanceService {
                     DailyLog dailyLogs = dailyLogOptional.get();
                     String name = dailyLogs.getUser().getFirstName() + " " + dailyLogs.getUser().getLastName();
                     String username = dailyLogs.getUser().getAccount().getUsername();
-                    Date fromDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date + " 00:00:01");
-                    Date toDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date + " 23:59:59");
-                    List<ControlLogLcd> controlLogLcds = controlLogLcdRepository.
-                            getControlLog(username, fromDate, toDate);
+                    List<ControlLogLcd> controlLogLcds = controlLogLcdRepository.getControlLogLcdList(username, date);
                     controlLogLcds=controlLogLcds.stream()
-                            .sorted((Comparator.comparing(ControlLogLcd::getTime).reversed()))
+                            .sorted((Comparator.comparing(ControlLogLcd::getTime)))
                             .collect(Collectors.toList());
                     String departmentName = dailyLogs.getUser().getDepartment().getDepartmentName();
                     SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
@@ -135,8 +132,8 @@ public class AttendanceService {
                     double permittedLeave = dailyLogs.getPermittedLeave();
                     double outsideWork = dailyLogs.getOutsideWork();
                     List<ControlLogResponse> controlLogResponse = new ArrayList<>();
-                    ControlLogResponse controlLogResponse1 = new ControlLogResponse();
                     controlLogLcds.forEach(element -> {
+                        ControlLogResponse controlLogResponse1 = new ControlLogResponse();
                         controlLogResponse1.setLog(element.getTime().toString());
                         controlLogResponse1.setUsername(username);
                         controlLogResponse.add(controlLogResponse1);
