@@ -2,6 +2,9 @@ package fpt.capstone.buildingmanagementsystem.until;
 
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -96,5 +99,11 @@ public class Until {
                     .charAt(index));
         }
         return sb.toString();
+    }
+
+    public static double roundDouble(double value) {
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 }

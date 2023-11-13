@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static fpt.capstone.buildingmanagementsystem.until.Until.roundDouble;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.compareTime;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.getDistanceTime;
 
@@ -79,7 +80,7 @@ public class DailyLogService {
             dailyLog.setCheckout(checkoutTime);
             dailyLog.setSystemCheckOut(checkoutTime);
 
-            double morningTotal = getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour;
+            double morningTotal = roundDouble(getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour);
             dailyLog.setMorningTotal(morningTotal);
 
             dailyLog.setAfternoonTotal(0);
@@ -88,7 +89,7 @@ public class DailyLogService {
             dailyLog.setCheckout(checkoutTime);
             dailyLog.setSystemCheckOut(checkoutTime);
 
-            double morningTotal = getDistanceTime(endMorningTime, dailyLog.getCheckin()) / One_hour;
+            double morningTotal = roundDouble(getDistanceTime(endMorningTime, dailyLog.getCheckin()) / One_hour);
             dailyLog.setMorningTotal(morningTotal);
         }
 
@@ -97,14 +98,14 @@ public class DailyLogService {
             dailyLog.setSystemCheckOut(checkoutTime);
 
             if (compareTime(checkoutTime, startAfternoonTime) > 0) {
-                double afternoonTotal = getDistanceTime(checkoutTime, startAfternoonTime) / One_hour;
+                double afternoonTotal = roundDouble(getDistanceTime(checkoutTime, startAfternoonTime) / One_hour);
                 dailyLog.setAfternoonTotal(afternoonTotal);
             }
         } else {
             dailyLog.setCheckout(checkoutTime);
             dailyLog.setSystemCheckOut(checkoutTime);
 
-            double afternoonTotal = getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour;
+            double afternoonTotal = roundDouble(getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour);
             dailyLog.setAfternoonTotal(afternoonTotal);
             dailyLog.setMorningTotal(0);
         }
@@ -112,7 +113,7 @@ public class DailyLogService {
         dailyLog.setTotalAttendance((dailyLog.getMorningTotal() + dailyLog.getAfternoonTotal()));
 
         if (dailyLog.getDateType().equals(DateType.NORMAL)) {
-            dailyLog.setPaidDay(Math.min(dailyLog.getTotalAttendance() / 8, 1));
+            dailyLog.setPaidDay(Math.min(roundDouble(dailyLog.getTotalAttendance() / 8), 1));
         }
 
         return dailyLog;
@@ -153,7 +154,7 @@ public class DailyLogService {
                     .collect(Collectors.toList());
             dailyLog.setLateCheckin(true);
             if (!findLateMorningAccepted.isEmpty()) {
-                double lateMinutes = (startMorningTime.getTime() - checkinTime.getTime()) / One_minute;
+                double lateMinutes = roundDouble((startMorningTime.getTime() - checkinTime.getTime()) / One_minute);
                 if (lateMinutes > findLateMorningAccepted.get(0).getLateDuration()) {
                     dailyLog.setViolate(true);
                 }
