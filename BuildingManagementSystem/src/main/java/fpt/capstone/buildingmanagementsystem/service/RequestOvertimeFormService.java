@@ -209,9 +209,7 @@ public class RequestOvertimeFormService {
         return validateDateFormat(sendOvertimeFormRequest.getOvertimeDate()) &&
                 validateDateTime(sendOvertimeFormRequest.getFromTime()) &&
                 validateDateTime(sendOvertimeFormRequest.getToTime()) &&
-                validateStartTimeAndEndTime(sendOvertimeFormRequest.getFromTime(), sendOvertimeFormRequest.getToTime()) &&
-                checkDateBookingRoom(sendOvertimeFormRequest.getOvertimeDate(),sendOvertimeFormRequest.getFromTime());
-    }
+                validateStartTimeAndEndTime(sendOvertimeFormRequest.getFromTime(), sendOvertimeFormRequest.getToTime());}
 
     private void saveOvertimeMessage(SendOvertimeFormRequest sendOvertimeFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) throws ParseException {
         RequestMessage requestMessage = RequestMessage.builder().createDate(Until.generateRealTime())
