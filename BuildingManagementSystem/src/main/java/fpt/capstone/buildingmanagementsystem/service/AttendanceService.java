@@ -4,6 +4,7 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.DailyLogMapper;
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
@@ -23,12 +24,8 @@ import javax.transaction.Transactional;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -61,6 +58,9 @@ public class AttendanceService {
             List<DailyLogResponse> list = new ArrayList<>();
             if (user_id != null) {
                 List<DailyLog> dailyLogs = dailyLogRepository.getByUserIdAndMonthAndYear(user_id, month, year);
+                dailyLogs=dailyLogs.stream()
+                        .sorted((Comparator.comparing(DailyLog::getDate).reversed()))
+                        .collect(Collectors.toList());
                 if (dailyLogs.size() > 0) {
                     for (DailyLog dailyLog : dailyLogs) {
                         totalAttendance = totalAttendance + dailyLog.getTotalAttendance();

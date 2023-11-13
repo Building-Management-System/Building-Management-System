@@ -26,10 +26,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class OvertimeService {
@@ -55,6 +53,9 @@ public class OvertimeService {
             List<OverTimeLogResponse> list = new ArrayList<>();
             if (user_id != null) {
                 List<OvertimeLog> overtimeLog1 = overTimeRepository.getOvertimeLog(user_id, month, year);
+                overtimeLog1=overtimeLog1.stream()
+                        .sorted((Comparator.comparing(OvertimeLog::getDate).reversed()))
+                        .collect(Collectors.toList());
                 if (overtimeLog1.size() > 0) {
                     overtimeLog1.forEach(element -> {
                         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
