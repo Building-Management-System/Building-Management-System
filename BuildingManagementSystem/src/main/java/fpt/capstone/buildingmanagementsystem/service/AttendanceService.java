@@ -4,10 +4,7 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.DailyLogMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.Account;
-import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
-import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
-import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.response.AttendanceDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ControlLogResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.DailyLogResponse;
@@ -121,6 +118,9 @@ public class AttendanceService {
                     Date toDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date + " 23:59:59");
                     List<ControlLogLcd> controlLogLcds = controlLogLcdRepository.
                             getControlLog(username, fromDate, toDate);
+                    controlLogLcds=controlLogLcds.stream()
+                            .sorted((Comparator.comparing(ControlLogLcd::getTime).reversed()))
+                            .collect(Collectors.toList());
                     String departmentName = dailyLogs.getUser().getDepartment().getDepartmentName();
                     SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
                     String dateDaily = sdf.format(Until.convertDateToCalender(dailyLogs.getDate()).getTime());
