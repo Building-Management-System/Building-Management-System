@@ -51,7 +51,6 @@ public class Until {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         java.util.Date dateConvert = sdf.parse(date);
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         return new java.sql.Date(dateConvert.getTime());
     }
     public static Date convertStringToDateTime(String date) throws ParseException {
