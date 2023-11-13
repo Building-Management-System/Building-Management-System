@@ -34,7 +34,7 @@ class BuildingManagementSystemApplicationTests {
                 "\"facesluiceName\":\"Face1\",\n" +
                 "\"idCard\":\" \",\n" +
                 "\"telnum\":\" \",\n" +
-                "\"time\":\"2023-10-12 12:30:00\",\n" +
+                "\"time\":\"2023-11-06 20:15:00\",\n" +
                 "\"PushType\": \"0\",\n" +
                 "\"OpendoorWay\": \"0\",\n" +
                 "\"cardNum2\": \"1\",\n" +

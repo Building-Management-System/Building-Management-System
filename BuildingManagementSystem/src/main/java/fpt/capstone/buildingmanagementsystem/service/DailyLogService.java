@@ -59,7 +59,6 @@ public class DailyLogService {
     public DailyLog mapControlLogToDailyLog(ControlLogLcd controlLogLcd) {
         Account account = accountRepository.findByUsername(controlLogLcd.getPersionName())
                 .orElseThrow(() -> new BadRequest("Not_found_account"));
-
         Date dailyDate = new Date(controlLogLcd.getTime().getTime());
         Time dailyTime = new Time(controlLogLcd.getTime().getTime());
 
@@ -83,6 +82,8 @@ public class DailyLogService {
             double morningTotal = getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour;
             dailyLog.setMorningTotal(morningTotal);
 
+            dailyLog.setAfternoonTotal(0);
+
         } else {
             dailyLog.setCheckout(checkoutTime);
             dailyLog.setSystemCheckOut(checkoutTime);
@@ -105,9 +106,10 @@ public class DailyLogService {
 
             double afternoonTotal = getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour;
             dailyLog.setAfternoonTotal(afternoonTotal);
+            dailyLog.setMorningTotal(0);
         }
 
-        dailyLog.setTotalAttendance(getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour);
+        dailyLog.setTotalAttendance((dailyLog.getMorningTotal() + dailyLog.getAfternoonTotal()));
 
         if (dailyLog.getDateType().equals(DateType.NORMAL)) {
             dailyLog.setPaidDay(Math.min(dailyLog.getTotalAttendance() / 8, 1));
@@ -144,7 +146,7 @@ public class DailyLogService {
     }
 
     public void getLateCheckInDuration(DailyLog dailyLog, String userId, Date date, Time checkinTime) {
-        if (!dailyLog.getDateType().equals(DateType.NORMAL) ) return;
+        if (!dailyLog.getDateType().equals(DateType.NORMAL)) return;
         if (compareTime(checkinTime, startMorningTime) > 0) {
             List<LateFormResponse> findLateMorningAccepted = lateRequestFormRepositoryV2.findLateAndEarlyViolateByUserIdAndDate(userId, date, LateType.LATE_MORNING)
                     .stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())

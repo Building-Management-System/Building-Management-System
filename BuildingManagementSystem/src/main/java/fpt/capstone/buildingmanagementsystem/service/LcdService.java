@@ -46,7 +46,7 @@ public class LcdService {
             String operator = rootNode.get("operator").asText();
 
             if (operator.equals(CONTROL_LOG)) {
-                String time = infoNode.path("time").asText().split("\\s+")[1];
+                String time = infoNode.path("time").asText();
                 ControlLogLcd controlLogLcd = ControlLogLcd.builder()
                         .operator(rootNode.path("operator").asText())
                         .personId(infoNode.path("personId").asText())
@@ -56,7 +56,7 @@ public class LcdService {
                         .similarity2(infoNode.path("similarity2").asDouble())
                         .persionName(infoNode.path("persionName").asText())
                         .telnum(infoNode.path("telnum").asText())
-                        .time(Until.convertStringToTime(time))
+                        .time(formatter.parse(time))
                         .pic(convertBase64ToByteArray(infoNode.path("pic").asText()))
                         .build();
                 logger.info(controlLogLcd + "");
