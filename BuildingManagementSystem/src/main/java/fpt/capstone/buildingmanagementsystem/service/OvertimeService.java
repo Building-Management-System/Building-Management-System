@@ -47,8 +47,6 @@ public class OvertimeService {
     @Autowired
     UserRepository userRepository;
 
-    private static final Time endAfternoonTime = Time.valueOf("17:30:00");
-
     private static final Time startOverTime = Time.valueOf("18:00:00");
 
 
@@ -106,7 +104,7 @@ public class OvertimeService {
             DailyLog dailyLog = dailyLogOptional.get();
             DateType dateType = DailyLogService.getDateType(date);
             if (dateType.equals(DateType.NORMAL)) {
-                if (Validate.compareTime(dailyLog.getCheckout(), endAfternoonTime) > 0) {
+                if (Validate.compareTime(dailyLog.getCheckout(), startOverTime) > 0) {
                     return new SystemTimeResponse(date, startOverTime, dailyLog.getCheckout());
                 } else {
                     return new SystemTimeResponse(date, null, null);

@@ -67,7 +67,6 @@ public class DailyLogService {
 
         if (dailyLogOptional.isPresent()) {
             DailyLog dailyLog = updateDailyLogWhenExisted(dailyLogOptional.get(), dailyTime);
-            logger.info(dailyLog + "");
             return dailyLogRepository.save(dailyLog);
         } else {
             return addNewDailyLog(dailyDate, dailyTime, account);

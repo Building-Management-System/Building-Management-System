@@ -197,8 +197,7 @@ public class RequestLeaveFormService {
 
     private static boolean checkValidate(SendLeaveFormRequest sendLeaveFormRequest) throws ParseException {
         return validateDateFormat(sendLeaveFormRequest.getFromDate()) &&
-                validateDateFormat(sendLeaveFormRequest.getToDate()) && validateStartDateAndEndDate(sendLeaveFormRequest.getFromDate()
-                , sendLeaveFormRequest.getToDate()) && checkDateLeave(sendLeaveFormRequest.getFromDate());
+                validateDateFormat(sendLeaveFormRequest.getToDate());
     }
 
     private void saveLeaveRequest(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) throws ParseException {
