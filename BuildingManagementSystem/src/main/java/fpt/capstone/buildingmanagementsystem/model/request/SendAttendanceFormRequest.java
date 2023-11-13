@@ -16,7 +16,7 @@ public class SendAttendanceFormRequest {
     String requestId;
     String title;
     String content;
-    String  manualDate;
+    String manualDate;
     String manualFirstEntry;
     String manualLastExit;
     String departmentId;
