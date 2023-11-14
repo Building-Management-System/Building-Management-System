@@ -93,6 +93,7 @@ public class NotificationServiceV2 {
         List<UserAccountResponse> notificationReceivers = new ArrayList<>();
         receiverRepository.findByNotification(notification)
                 .forEach(receiver -> {
+                    if(receiver.isSendAllStatus()) return;
                     UserAccountResponse userAccountResponse = new UserAccountResponse(
                             receiver.getReceiver().getUserId(),
                             receiver.getReceiver().getAccount().username,

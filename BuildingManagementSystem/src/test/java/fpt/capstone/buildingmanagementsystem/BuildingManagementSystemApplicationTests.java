@@ -34,7 +34,7 @@ class BuildingManagementSystemApplicationTests {
                 "\"facesluiceName\":\"Face1\",\n" +
                 "\"idCard\":\" \",\n" +
                 "\"telnum\":\" \",\n" +
-                "\"time\":\"2023-11-06 20:15:00\",\n" +
+                "\"time\":\"2023-11-07 9:15:00\",\n" +
                 "\"PushType\": \"0\",\n" +
                 "\"OpendoorWay\": \"0\",\n" +
                 "\"cardNum2\": \"1\",\n" +
@@ -44,7 +44,7 @@ class BuildingManagementSystemApplicationTests {
                 "\"temperatureMode\": \"0\",\n" +
                 "\"dwFileIndex\": \"0\",\n" +
                 "\"dwFilePos\": \"15269888\",\n" +
-                "\"pic\": \"\"\n" +
+                "\"pic\": \"data:image/jpeg;base64,abc\"\n" +
                 "}}\n";
         System.out.println(service.ExtractJsonLcdLog(json));
     }
