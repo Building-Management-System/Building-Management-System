@@ -2,16 +2,16 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
-import fpt.capstone.buildingmanagementsystem.model.entity.NotificationFile;
-import fpt.capstone.buildingmanagementsystem.model.entity.NotificationImage;
 import fpt.capstone.buildingmanagementsystem.model.entity.PersonalPriority;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationViewer;
+import fpt.capstone.buildingmanagementsystem.model.response.ImageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponseForCreator;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponseForDetail;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationFileResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationFileResponseV2;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationImageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationTitleResponse;
@@ -93,7 +93,7 @@ public class NotificationServiceV2 {
         List<UserAccountResponse> notificationReceivers = new ArrayList<>();
         receiverRepository.findByNotification(notification)
                 .forEach(receiver -> {
-                    if(receiver.isSendAllStatus()) return;
+                    if (receiver.isSendAllStatus()) return;
                     UserAccountResponse userAccountResponse = new UserAccountResponse(
                             receiver.getReceiver().getUserId(),
                             receiver.getReceiver().getAccount().username,
@@ -239,11 +239,20 @@ public class NotificationServiceV2 {
 
         List<NotificationDetailResponse> notificationDetailResponses = new ArrayList<>();
 
-        Map<String, NotificationImage> images = notificationImageRepository.getFirstByNotificationIn(notifications)
-                .stream().collect(Collectors.toMap(image -> image.getNotification().getNotificationId(), Function.identity()));
+        List<ImageResponse> imageResponses = notificationImageRepository.getFirstByNotificationIn(notifications)
+                .stream().map(image -> new ImageResponse(image.getImageId(), image.getImageFileName(), image.getNotification().getNotificationId()))
+                .collect(Collectors.toList());
 
-        Map<String, NotificationFile> files = notificationFileRepository.findFirstByNotificationIn(notifications)
-                .stream().collect(Collectors.toMap(file -> file.getNotification().getNotificationId(), Function.identity()));
+        List<NotificationFileResponseV2> fileResponses = notificationFileRepository.findFirstByNotificationIn(notifications)
+                .stream().map(file -> new NotificationFileResponseV2(file.getFileId(), file.getName(), file.getNotification().getNotificationId()))
+                .collect(Collectors.toList());
+
+        Map<String, Long> images = imageResponses.stream()
+                .collect(Collectors.groupingBy(ImageResponse::getNotificationId, Collectors.counting()));
+
+        Map<String, Long> files = fileResponses.stream()
+                .collect(Collectors.groupingBy(NotificationFileResponseV2::getNotificationId, Collectors.counting()));
+
         notifications.forEach(notification -> {
             NotificationDetailResponse detailResponse = new NotificationDetailResponse();
             detailResponse.setNotificationId(notification.getNotificationId());
