@@ -21,5 +21,4 @@ public class LateFormResponse {
 
     private LateType lateType;
 
-    private boolean status;
 }

@@ -89,11 +89,10 @@ public class NotificationServiceV2 {
         Notification notification = notificationRepository.findByCreatedByAndNotificationId(user, notificationId)
                 .orElseThrow(() -> new NotFound("not_found_notification"));
 
-        ExecutorService ex = Executors.newFixedThreadPool(5);
 
         List<UserAccountResponse> notificationReceivers = new ArrayList<>();
         receiverRepository.findByNotification(notification)
-                .forEach(receiver -> ex.submit(() -> {
+                .forEach(receiver -> {
                     UserAccountResponse userAccountResponse = new UserAccountResponse(
                             receiver.getReceiver().getUserId(),
                             receiver.getReceiver().getAccount().username,
@@ -101,12 +100,11 @@ public class NotificationServiceV2 {
                             receiver.getReceiver().getDepartment().getDepartmentName()
                     );
                     notificationReceivers.add(userAccountResponse);
-                }));
+                });
 
         List<NotificationFileResponse> notificationFiles = notificationFileRepository.findByNotification(notification)
                 .stream().map(file -> new NotificationFileResponse(
                         file.getFileId(),
-                        file.getData(),
                         file.getName(),
                         file.getType()
                 )).collect(Collectors.toList());
@@ -155,7 +153,6 @@ public class NotificationServiceV2 {
         notificationFileRepository.findByNotification(notification).forEach(file -> executorService.submit(() -> {
             NotificationFileResponse response = new NotificationFileResponse(
                     file.getFileId(),
-                    file.getData(),
                     file.getName(),
                     file.getType()
             );

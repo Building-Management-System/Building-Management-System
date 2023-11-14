@@ -84,8 +84,8 @@ public class OvertimeRequestFormService {
                 .userId(requestMessage.getReceiver().getUserId())
                 .ticketId(ticket.getTicketId())
                 .requestId(requestTicket.getRequestId())
-                .title("Approve attendance request")
-                .content("Approve attendance request")
+                .title("Approve overtime request")
+                .content("Approve overtime request")
                 .departmentId(requestMessage.getDepartment().getDepartmentId())
                 .receivedId(requestMessage.getSender().getUserId())
                 .build();
@@ -108,7 +108,7 @@ public class OvertimeRequestFormService {
                             true,
                             null
                     ));
-            overtimeService.updateDailyLog(overtimeRequest.getFromTime(), requestTicket.getUser(), overtimeRequest.getOvertimeDate());
+//            overtimeService.updateDailyLog(overtimeRequest.getFromTime(), requestTicket.getUser(), overtimeRequest.getOvertimeDate());
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -212,7 +212,7 @@ public class OvertimeRequestFormService {
                 .userId(requestMessage.getReceiver().getUserId())
                 .ticketId(ticket.getTicketId())
                 .requestId(requestTicket.getRequestId())
-                .title("Reject Attendance request")
+                .title("Reject overtime request")
                 .content(overtimeMessageRequest.getContent())
                 .departmentId(requestMessage.getDepartment().getDepartmentId())
                 .receivedId(requestMessage.getSender().getUserId())

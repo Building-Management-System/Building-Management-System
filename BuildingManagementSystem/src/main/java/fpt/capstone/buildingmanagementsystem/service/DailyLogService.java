@@ -115,7 +115,7 @@ public class DailyLogService {
             dailyLog.setMorningTotal(0);
         }
 
-        dailyLog.setTotalAttendance((dailyLog.getMorningTotal() + dailyLog.getAfternoonTotal()));
+        dailyLog.setTotalAttendance(roundDouble(dailyLog.getMorningTotal() + dailyLog.getAfternoonTotal()));
 
         if (dailyLog.getDateType().equals(DateType.NORMAL)) {
             dailyLog.setPaidDay(Math.min(roundDouble(dailyLog.getTotalAttendance() / 8), 1));
@@ -154,13 +154,13 @@ public class DailyLogService {
     public void getLateCheckInDuration(DailyLog dailyLog, String userId, Date date, Time checkinTime) {
         if (!dailyLog.getDateType().equals(DateType.NORMAL)) return;
         if (compareTime(checkinTime, startMorningTime) > 0) {
-            List<LateFormResponse> findLateMorningAccepted = lateRequestFormRepositoryV2.findLateAndEarlyViolateByUserIdAndDate(userId, date, LateType.LATE_MORNING)
-                    .stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
-                    .collect(Collectors.toList());
+            List<LateFormResponse> findLateMorningAccepted = lateRequestFormRepositoryV2.findLateAndEarlyViolateByUserIdAndDate(userId, date, LateType.LATE_MORNING);
             dailyLog.setLateCheckin(true);
             if (!findLateMorningAccepted.isEmpty()) {
+                List<LateFormResponse> lateAccepted = findLateMorningAccepted.stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
+                        .collect(Collectors.toList());
                 double lateMinutes = roundDouble((startMorningTime.getTime() - checkinTime.getTime()) / One_minute);
-                if (lateMinutes > findLateMorningAccepted.get(0).getLateDuration()) {
+                if (lateMinutes > lateAccepted.get(0).getLateDuration()) {
                     dailyLog.setViolate(true);
                 }
             } else {

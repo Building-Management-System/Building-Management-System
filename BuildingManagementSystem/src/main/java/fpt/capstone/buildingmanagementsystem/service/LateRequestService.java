@@ -82,8 +82,8 @@ public class LateRequestService {
                 .userId(requestMessage.getReceiver().getUserId())
                 .ticketId(ticket.getTicketId())
                 .requestId(requestTicket.getRequestId())
-                .title("Approve attendance request")
-                .content("Approve attendance request")
+                .title("Approve late request")
+                .content("Approve late request")
                 .departmentId(requestMessage.getDepartment().getDepartmentId())
                 .receivedId(requestMessage.getSender().getUserId())
                 .build();
@@ -92,7 +92,7 @@ public class LateRequestService {
         executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
             lateRequestForm.setStatus(true);
-            lateRequestFormRepository.save(lateRequestForm);
+            lateRequestFormRepository.saveAndFlush(lateRequestForm);
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
@@ -106,7 +106,7 @@ public class LateRequestService {
                             true,
                             null
                     ));
-            updateLateRequest(lateRequestForm.getRequestDate(), requestTicket.getUser());
+//            updateLateRequest(lateRequestForm.getRequestDate(), requestTicket.getUser());
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -131,7 +131,7 @@ public class LateRequestService {
                 .userId(requestMessage.getReceiver().getUserId())
                 .ticketId(ticket.getTicketId())
                 .requestId(requestTicket.getRequestId())
-                .title("Reject Attendance request")
+                .title("Reject late request")
                 .content(overtimeRequest.getContent())
                 .departmentId(requestMessage.getDepartment().getDepartmentId())
                 .receivedId(requestMessage.getSender().getUserId())

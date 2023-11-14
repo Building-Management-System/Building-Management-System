@@ -14,6 +14,7 @@ import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
 import fpt.capstone.buildingmanagementsystem.service.schedule.CheckoutAnalyzeSchedule;
 import fpt.capstone.buildingmanagementsystem.until.Until;
+import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -108,7 +109,7 @@ public class AttendanceService {
     }
 
     public AttendanceDetailResponse getAttendanceDetail(String user_id, String date) {
-        if (user_id != null) {
+        if (user_id != null && Validate.validateDateFormat(date)) {
             try {
                 Optional<DailyLog> dailyLogOptional = dailyLogRepository.getAttendanceDetailByUserIdAndDate(user_id, date);
                 if (dailyLogOptional.isPresent()) {
