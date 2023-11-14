@@ -13,6 +13,5 @@ public interface NotificationFileRepository extends JpaRepository<NotificationFi
     List<NotificationFile> findByNotification(Notification notification);
     void deleteAllByNotification_NotificationId(String id);
     void deleteByFileId(String id);
-    List<NotificationFile> findFirstByNotificationIn(List<Notification> notifications);
 
 }

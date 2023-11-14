@@ -59,8 +59,6 @@ public class LcdService {
                         .time(formatter.parse(time))
                         .pic(convertBase64ToByteArray(infoNode.path("pic").asText()))
                         .build();
-                logger.info(controlLogLcd + "");
-
                 Account account = accountRepository.findByUsername(controlLogLcd.getPersionName())
                         .orElseThrow(() -> new BadRequest("Not_found"));
                 controlLogLcd.setAccount(account);

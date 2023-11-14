@@ -24,7 +24,7 @@ public class NotificationImageAndFileResponseImp implements NotificationImageAnd
                 "i.image_file_name as imageName," +
                 "i.notification_id as notificationId\n" +
                 "FROM notification_image i\n" +
-                "WHERE i.notification_id IN :notificationIds;";
+                "WHERE i.notification_id IN :notificationIds";
 
         return (List<ImageResponse>) entityManager.createNativeQuery(query).unwrap(NativeQuery.class)
                 .setParameter("notificationIds", notificationIds)
@@ -38,8 +38,8 @@ public class NotificationImageAndFileResponseImp implements NotificationImageAnd
         String query = "SELECT n.file_id as fileId, \n" +
                 "       n.name as fileName, \n" +
                 "       n.notification_id as notificationId\n" +
-                "FROM notification_file n" +
-                "WHERE n.notification_id IN :notificationIds;";
+                "FROM notification_file n\n" +
+                "WHERE n.notification_id IN :notificationIds";
 
         return (List<NotificationFileResponseV2>) entityManager.createNativeQuery(query).unwrap(NativeQuery.class)
                 .setParameter("notificationIds", notificationIds)
