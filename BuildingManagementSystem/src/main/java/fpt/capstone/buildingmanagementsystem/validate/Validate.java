@@ -107,10 +107,7 @@ public class Validate {
             return false;
         }
         if (timestampStartDate.getTime() - timestampRealDate.getTime() == 0) {
-            if (timestampStartTime.getTime() - timestampRealTime.getTime() < 0) {
-                return false;
-            }
-            return true;
+            return timestampStartTime.getTime() - timestampRealTime.getTime() >= 0;
         }
         return true;
     }

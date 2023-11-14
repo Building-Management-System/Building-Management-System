@@ -200,8 +200,10 @@ public class RequestOvertimeFormService {
 
         LocalDateTime localCheckTime1 = LocalDateTime.parse(sendOvertimeFormRequest.getOvertimeDate()+" "+sendOvertimeFormRequest.getFromTime(), formatter);
         Time sqlTimeEnd = Time.valueOf(localCheckTime1.toLocalTime());
-        if(sqlTimeEnd.getTime()-overtimeService.getSystemTime(sendOvertimeFormRequest.getUserId(),checkDate).getSystemCheckin().getTime()<0){
-            check=false;
+        if(sqlTimeEnd.getTime()-overtimeService.getSystemTime(sendOvertimeFormRequest.getUserId(),checkDate).getSystemCheckin().getTime()<0) {
+            check = false;
+        }else if(overtimeService.getSystemTime(sendOvertimeFormRequest.getUserId(),checkDate).getSystemCheckin().toString()==null){
+            check = false;
         }
         return check;
     }

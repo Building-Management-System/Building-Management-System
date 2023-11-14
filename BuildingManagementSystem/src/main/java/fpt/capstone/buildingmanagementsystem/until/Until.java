@@ -33,7 +33,7 @@ public class Until {
     public static Date generateDate() {
         try {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDateTime localDate = LocalDateTime.now(ZoneId.of("UTC"));
+            LocalDateTime localDate = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
             String dateString = dtf.format(localDate);
             return new SimpleDateFormat("yyyy-MM-dd").parse(dateString);
         } catch (ParseException e) {
@@ -43,7 +43,7 @@ public class Until {
     public static Date generateTime() {
         try {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
-            LocalDateTime localDate = LocalDateTime.now(ZoneId.of("UTC"));
+            LocalDateTime localDate = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
             String dateString = dtf.format(localDate);
             return new SimpleDateFormat("HH:mm:ss").parse(dateString);
         } catch (ParseException e) {
@@ -58,7 +58,7 @@ public class Until {
     }
     public static Date convertStringToDateTime(String date) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         java.util.Date dateConvert = sdf.parse(date);
         return dateConvert;
     }

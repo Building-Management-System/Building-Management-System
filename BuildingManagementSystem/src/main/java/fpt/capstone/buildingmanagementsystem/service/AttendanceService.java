@@ -4,9 +4,7 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.DailyLogMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
-import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
-import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.response.AttendanceDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ControlLogResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.DailyLogResponse;
@@ -23,12 +21,8 @@ import javax.transaction.Transactional;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -62,6 +56,9 @@ public class AttendanceService {
             List<DailyLogResponse> list = new ArrayList<>();
             if (user_id != null) {
                 List<DailyLog> dailyLogs = dailyLogRepository.getByUserIdAndMonthAndYear(user_id, month, year);
+                dailyLogs=dailyLogs.stream()
+                        .sorted((Comparator.comparing(DailyLog::getDate).reversed()))
+                        .collect(Collectors.toList());
                 if (dailyLogs.size() > 0) {
                     for (DailyLog dailyLog : dailyLogs) {
                         totalAttendance = totalAttendance + dailyLog.getTotalAttendance();
@@ -118,10 +115,10 @@ public class AttendanceService {
                     DailyLog dailyLogs = dailyLogOptional.get();
                     String name = dailyLogs.getUser().getFirstName() + " " + dailyLogs.getUser().getLastName();
                     String username = dailyLogs.getUser().getAccount().getUsername();
-                    Date fromDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date + " 00:00:01");
-                    Date toDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date + " 23:59:59");
-                    List<ControlLogLcd> controlLogLcds = controlLogLcdRepository.
-                            getControlLog(username, fromDate, toDate);
+                    List<ControlLogLcd> controlLogLcds = controlLogLcdRepository.getControlLogLcdList(username, date);
+                    controlLogLcds=controlLogLcds.stream()
+                            .sorted((Comparator.comparing(ControlLogLcd::getTime)))
+                            .collect(Collectors.toList());
                     String departmentName = dailyLogs.getUser().getDepartment().getDepartmentName();
                     SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
                     String dateDaily = sdf.format(Until.convertDateToCalender(dailyLogs.getDate()).getTime());
@@ -136,8 +133,8 @@ public class AttendanceService {
                     double permittedLeave = dailyLogs.getPermittedLeave();
                     double outsideWork = dailyLogs.getOutsideWork();
                     List<ControlLogResponse> controlLogResponse = new ArrayList<>();
-                    ControlLogResponse controlLogResponse1 = new ControlLogResponse();
                     controlLogLcds.forEach(element -> {
+                        ControlLogResponse controlLogResponse1 = new ControlLogResponse();
                         controlLogResponse1.setLog(element.getTime().toString());
                         controlLogResponse1.setUsername(username);
                         controlLogResponse.add(controlLogResponse1);
