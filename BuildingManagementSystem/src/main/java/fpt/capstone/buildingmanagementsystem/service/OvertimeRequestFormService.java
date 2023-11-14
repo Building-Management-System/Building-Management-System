@@ -2,26 +2,31 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
+import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
+import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.OvertimeRequestForm;
-import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.OvertimeMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
-import fpt.capstone.buildingmanagementsystem.model.response.OverTimeLogResponse;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
+import fpt.capstone.buildingmanagementsystem.repository.OvertimeRequestFormRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.transaction.Transactional;
 import java.sql.Time;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
@@ -103,6 +108,7 @@ public class OvertimeRequestFormService {
                             true,
                             null
                     ));
+            overtimeService.updateDailyLog(overtimeRequest.getFromTime(), requestTicket.getUser(), overtimeRequest.getOvertimeDate());
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");

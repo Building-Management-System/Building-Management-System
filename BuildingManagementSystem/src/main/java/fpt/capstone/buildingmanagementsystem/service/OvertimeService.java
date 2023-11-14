@@ -19,7 +19,6 @@ import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.sql.Date;
 import java.sql.Time;
 import java.text.ParseException;
@@ -47,7 +46,8 @@ public class OvertimeService {
     @Autowired
     UserRepository userRepository;
 
-    private static final Time endAfternoonTime = Time.valueOf("17:30:00");
+    @Autowired
+    AttendanceService attendanceService;
 
     private static final Time startOverTime = Time.valueOf("18:00:00");
 
@@ -106,14 +106,38 @@ public class OvertimeService {
             DailyLog dailyLog = dailyLogOptional.get();
             DateType dateType = DailyLogService.getDateType(date);
             if (dateType.equals(DateType.NORMAL)) {
-                if (Validate.compareTime(dailyLog.getCheckout(), endAfternoonTime) > 0) {
+                if (Validate.compareTime(dailyLog.getCheckin(), startOverTime) < 0
+                        && Validate.compareTime(dailyLog.getCheckout(), startOverTime) > 0) {
                     return new SystemTimeResponse(date, startOverTime, dailyLog.getCheckout());
+
+                } else if (Validate.compareTime(dailyLog.getCheckin(), startOverTime) > 0
+                        && Validate.compareTime(dailyLog.getCheckout(), dailyLog.getCheckin()) > 0) {
+                    return new SystemTimeResponse(date, dailyLog.getCheckin(), dailyLog.getCheckout());
+
                 } else {
                     return new SystemTimeResponse(date, null, null);
                 }
             } else {
                 return new SystemTimeResponse(date, dailyLog.getCheckin(), dailyLog.getCheckout());
             }
+        }
+    }
+
+    public void updateDailyLog(Time otStart, User user, Date date) {
+        DailyLog dailyLog = dailyLogRepository.findByUserAndDate(user, date)
+                .orElseThrow(() -> new BadRequest("Not_found_log"));
+
+        if (!dailyLog.getDateType().equals(DateType.NORMAL)) return;
+
+        if(Validate.compareTime(dailyLog.getCheckin(), startOverTime) < 0
+        && Validate.compareTime(dailyLog.getCheckout(), startOverTime) > 0) {
+            dailyLog.setCheckout(otStart);
+            dailyLogService.updateDailyLog(user, date, dailyLog.getCheckin(), dailyLog.getCheckout());
+        } else if(Validate.compareTime(dailyLog.getCheckin(), startOverTime) > 0
+                && Validate.compareTime(dailyLog.getCheckout(), dailyLog.getCheckin()) > 0){
+            dailyLog.setCheckin(null);
+            dailyLog.setCheckout(null);
+            dailyLogService.updateDailyLog(user, date, dailyLog.getCheckin(), dailyLog.getCheckout());
         }
     }
 }

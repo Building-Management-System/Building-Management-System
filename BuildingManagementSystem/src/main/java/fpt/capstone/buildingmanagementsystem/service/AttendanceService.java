@@ -45,6 +45,7 @@ public class AttendanceService {
 
     @Autowired
     DailyLogService dailyLogService;
+
     public GetAttendanceUserResponse getAttendanceUser(String user_id, int month, String year) {
         try {
             double totalAttendance = 0.0;
@@ -158,6 +159,7 @@ public class AttendanceService {
             throw new BadRequest("request_fail");
         }
     }
+
     public int getCheckWeekend(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -168,18 +170,16 @@ public class AttendanceService {
     public void updateAttendanceTime(java.sql.Date date, User user, Time checkin, Time checkout) {
         DailyLog dailyLog = dailyLogRepository.findByUserAndDate(user, date)
                 .orElseThrow(() -> new BadRequest("Not_found"));
-        if(checkin!= null) {
+        if (checkin != null) {
             dailyLog.setCheckin(checkin);
         }
-        if(checkout != null) {
+        if (checkout != null) {
             dailyLog.setCheckout(checkout);
         }
-        dailyLogService.updateDailyLogWhenExisted(dailyLog, dailyLog.getCheckout());
-        dailyLogService.getLateCheckInDuration(dailyLog, user.getUserId(),date, dailyLog.getCheckin());
-        checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), date);
+        dailyLogService.updateDailyLog(user, date, checkin, checkout);
         try {
             dailyLogRepository.save(dailyLog);
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new ServerError("Something went wrong");
         }
     }

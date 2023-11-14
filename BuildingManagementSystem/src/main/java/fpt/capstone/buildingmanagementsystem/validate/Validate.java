@@ -116,6 +116,7 @@ public class Validate {
     }
 
     public static double getDistanceTime(Time a, Time b) {
+        if (a == null || b == null) return 0;
         String stringA = sdf.format(a);
         String stringB = sdf.format(b);
 
@@ -134,6 +135,10 @@ public class Validate {
     }
 
     public static int compareTime(Time a, Time b) {
+        if (a == null && b == null) return 0;
+        else if (a == null) return -1;
+        else if (b == null) return 1;
+
         String stringA = sdf.format(a);
         String stringB = sdf.format(b);
 

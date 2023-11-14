@@ -158,7 +158,6 @@ public class CheckoutAnalyzeSchedule {
     }
 
     public void checkViolate(DailyLog dailyLog, Account account, Date date) {
-        if (dailyLog.isViolate()) return;
         if(!dailyLog.getDateType().equals(DateType.NORMAL)) return;
         List<LateFormResponse> lateFormResponses = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(account.accountId, date, LateType.EARLY_AFTERNOON)
                 .stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
