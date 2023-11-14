@@ -17,6 +17,7 @@ import fpt.capstone.buildingmanagementsystem.model.response.NotificationResponse
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationTitleResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserAccountResponse;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationFileRepository;
+import fpt.capstone.buildingmanagementsystem.repository.NotificationImageAndFileResponse;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationImageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationReceiverRepository;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationRepository;
@@ -54,6 +55,9 @@ public class NotificationServiceV2 {
 
     @Autowired
     private NotificationReceiverRepository receiverRepository;
+
+    @Autowired
+    private NotificationImageAndFileResponse notificationImageAndFileResponse;
 
     public NotificationTitleResponse getAllNotificationByUser(String userId) {
 
@@ -239,13 +243,12 @@ public class NotificationServiceV2 {
 
         List<NotificationDetailResponse> notificationDetailResponses = new ArrayList<>();
 
-        List<ImageResponse> imageResponses = notificationImageRepository.getFirstByNotificationIn(notifications)
-                .stream().map(image -> new ImageResponse(image.getImageId(), image.getImageFileName(), image.getNotification().getNotificationId()))
+        List<String> notificationIds = notifications.stream().map(Notification::getNotificationId)
                 .collect(Collectors.toList());
 
-        List<NotificationFileResponseV2> fileResponses = notificationFileRepository.findFirstByNotificationIn(notifications)
-                .stream().map(file -> new NotificationFileResponseV2(file.getFileId(), file.getName(), file.getNotification().getNotificationId()))
-                .collect(Collectors.toList());
+        List<ImageResponse> imageResponses = notificationImageAndFileResponse.getImageByNotificationIn(notificationIds);
+
+        List<NotificationFileResponseV2> fileResponses = notificationImageAndFileResponse.getFileByNotificationIn(notificationIds);
 
         Map<String, Long> images = imageResponses.stream()
                 .collect(Collectors.groupingBy(ImageResponse::getNotificationId, Collectors.counting()));
