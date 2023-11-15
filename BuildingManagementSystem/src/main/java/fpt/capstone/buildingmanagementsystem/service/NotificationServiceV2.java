@@ -275,9 +275,7 @@ public class NotificationServiceV2 {
         Map<String, Notification> unreadNotification = notificationRepository.getUnreadMarkNotificationByUserId(userId)
                 .stream().collect(Collectors.toMap(Notification::getNotificationId, Function.identity()));
 
-        ExecutorService executorService = Executors.newFixedThreadPool(5);
-
-        notificationDetailResponses.forEach(response -> executorService.submit(() -> {
+        notificationDetailResponses.forEach(response -> {
             if (images.containsKey(response.getNotificationId())) {
                 response.setContainImage(true);
             }
@@ -290,8 +288,7 @@ public class NotificationServiceV2 {
             if (personalPriorities.containsKey(response.getNotificationId())) {
                 response.setPersonalPriority(true);
             }
-        }));
-        executorService.shutdown();
+        });
         return notificationDetailResponses.stream()
                 .sorted(Comparator.comparing(NotificationDetailResponse::isPriority))
                 .collect(Collectors.toList());

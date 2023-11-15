@@ -349,8 +349,12 @@ public class NotificationService {
                 .user(user)
                 .notification(notification)
                 .build();
+        List<PersonalPriority> existedPriority = personalPriorityRepository.findByNotificationAndUser(notification, user);
+
         try {
-            personalPriorityRepository.save(personalPriority);
+            if(existedPriority.isEmpty()){
+                personalPriorityRepository.save(personalPriority);
+            }
             return true;
         } catch (Exception e) {
             throw new ServerError("fail");

@@ -55,7 +55,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
     @Query(value = "SELECT *\n" +
             "FROM notification n\n" +
             "JOIN personal_priority pp ON n.notification_id = pp.notification_id\n" +
-            "JOIN user u ON pp.user_id = u.user_id\n" +
             "WHERE pp.user_id LIKE :userId", nativeQuery = true)
     List<Notification> getPersonalPriorityByUserId(@Param("userId") String userId);
     List<Notification> findAllByNotificationStatus(NotificationStatus notificationStatus);
