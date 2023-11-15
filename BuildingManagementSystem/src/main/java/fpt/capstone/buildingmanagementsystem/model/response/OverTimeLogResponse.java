@@ -17,7 +17,7 @@ public class OverTimeLogResponse {
     private String date;
     private Time checkin;
     private Time checkout;
-    private TopicOvertime dateType;
+    private DateType dateType;
     private Time systemCheckIn;
     private Time systemCheckOut;
     private double totalAttendance;

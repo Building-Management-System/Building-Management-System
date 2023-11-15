@@ -8,6 +8,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicOvertime;
 import fpt.capstone.buildingmanagementsystem.model.response.GetOvertimeListResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.OverTimeLogResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.SystemTimeResponse;
@@ -46,7 +47,6 @@ public class OvertimeService {
 
     @Autowired
     AttendanceService attendanceService;
-
     private static final Time startOverTime = Time.valueOf("18:00:00");
 
 
@@ -60,12 +60,25 @@ public class OvertimeService {
                         .collect(Collectors.toList());
                 if (overtimeLog1.size() > 0) {
                     overtimeLog1.forEach(element -> {
+                        OverTimeLogResponse overtimeLog;
+                        DateType dateType;
+                        java.sql.Date sqlDate = java.sql.Date.valueOf(element.getDate().toString());
+                        java.util.Date utilDate = new java.util.Date(sqlDate.getTime());
                         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
-                        OverTimeLogResponse overtimeLog = null;
+                        if(element.getDateType()== TopicOvertime.WEEKEND_AND_NORMAL_DAY) {
+                            if ((attendanceService.getCheckWeekend(utilDate) != Calendar.SATURDAY)
+                                    && (attendanceService.getCheckWeekend(utilDate) != Calendar.SUNDAY)) {
+                                dateType=DateType.NORMAL;
+                            }else {
+                                dateType=DateType.WEEKEND;
+                            }
+                        }else {
+                            dateType=DateType.HOLIDAY;
+                        }
                         try {
                             overtimeLog = OverTimeLogResponse.builder().systemCheckIn(element.getStartTime())
-                                    .systemCheckOut(element.getEndTime()).checkin(element.getManualStart()).checkout(element.getManualEnd())
-                                    .date(sdf.format(Until.convertDateToCalender(element.getDate()).getTime())).dateType(element.getDateType())
+                                    .systemCheckOut(element.getEndTime()).checkin(element.getManualStart()).checkout(element.getManualEnd()).dateType(dateType)
+                                    .date(sdf.format(Until.convertDateToCalender(element.getDate()).getTime()))
                                     .totalAttendance(getTime(element.getManualStart(), element.getManualEnd()))
                                     .totalPaid(element.getTotalPaid()).approveDate(element.getApprovedDate()).build();
                         } catch (ParseException e) {
@@ -131,7 +144,7 @@ public class OvertimeService {
         if (!dailyLog.getDateType().equals(DateType.NORMAL)) return;
 
         if(Validate.compareTime(dailyLog.getCheckin(), startOverTime) < 0
-        && Validate.compareTime(dailyLog.getCheckout(), startOverTime) > 0) {
+                && Validate.compareTime(dailyLog.getCheckout(), startOverTime) > 0) {
             dailyLog.setCheckout(otStart);
             dailyLogService.updateDailyLog(user, date, dailyLog.getCheckin(), dailyLog.getCheckout());
         } else if(Validate.compareTime(dailyLog.getCheckin(), startOverTime) > 0
