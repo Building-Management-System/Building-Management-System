@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.repository;
 
+import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

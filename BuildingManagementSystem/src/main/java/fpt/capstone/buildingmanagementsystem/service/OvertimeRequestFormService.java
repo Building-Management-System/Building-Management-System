@@ -2,24 +2,12 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
-import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
-import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
-import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.OvertimeRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.OvertimeMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
-import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
-import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
-import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
-import fpt.capstone.buildingmanagementsystem.repository.OvertimeRequestFormRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +26,8 @@ import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicOverti
 
 @Service
 public class OvertimeRequestFormService {
+    @Autowired
+    DailyLogRepository dailyLogRepository;
     @Autowired
     AttendanceService attendanceService;
     @Autowired
@@ -117,82 +107,83 @@ public class OvertimeRequestFormService {
 
     private void saveOverTimeLog(OvertimeRequestForm overtimeRequest, RequestMessage requestMessage) {
         String username= requestMessage.getSender().getAccount().getUsername();
+        String accountId= requestMessage.getSender().getAccount().getAccountId();
         Date date= overtimeRequest.getOvertimeDate();
-        List<ControlLogLcd> list= controlLogLcdRepository.getControlLogLcdList(username,date.toString());
+        Optional<DailyLog> dailyLog= dailyLogRepository.getAttendanceDetailByUserIdAndDate(accountId,date.toString());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        if(dailyLog.isPresent()) {
+            //endTime
+            Time sqlTimeEnd = new Time(dailyLog.get().getCheckout().getTime());
+            //date Ot
+            java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+            //approvalTime Ot
+            java.sql.Date sqlDate2 = new java.sql.Date(Until.generateDate().getTime());
 
-        //endTime
-        LocalDateTime localDateTime1 = LocalDateTime.parse(list.get(0).getTime().toString().replace(".0",""), formatter);
-        Time sqlTimeEnd = Time.valueOf(localDateTime1.toLocalTime());
-        //date Ot
-        java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-        //approvalTime Ot
-        java.sql.Date sqlDate2 = new java.sql.Date(Until.generateDate().getTime());
-
-        double totalPaid=0.0;
-        double time= 0.0;
-        String startTime = null;
-        if((attendanceService.getCheckWeekend(date) == Calendar.SATURDAY) ||
-                (attendanceService.getCheckWeekend(date) == Calendar.SUNDAY) ||
-                (overtimeRequest.getTopicOvertime()==HOLIDAY)) {
-            //totalTimeWeekEndAndHolidayDay Ot and startTimeTimeWeekEndAndHoliday Ot
-            time= overtimeService.getTime(overtimeRequest.getFromTime(), overtimeRequest.getToTime());
-            //Time at 12:00
-            String checkMorningTime="1999-01-01 12:00:00";
-            //Time at 13:00
-            String checkAfternoonTime="1999-01-01 13:00:00";
-            LocalDateTime localCheckMorningTime = LocalDateTime.parse(checkMorningTime, formatter);
-            Time checkTimeStart = Time.valueOf(localCheckMorningTime.toLocalTime());
-            LocalDateTime localCheckAfternoonTime = LocalDateTime.parse(checkAfternoonTime, formatter);
-            Time checkTimeEnd = Time.valueOf(localCheckAfternoonTime.toLocalTime());
-            if(overtimeRequest.getFromTime().getTime()-checkTimeStart.getTime()<0
-                    &&checkTimeEnd.getTime()-overtimeRequest.getToTime().getTime()<0){
-                time=time-1.0;
+            double totalPaid = 0.0;
+            double time = 0.0;
+            String startTime = null;
+            if ((attendanceService.getCheckWeekend(date) == Calendar.SATURDAY) ||
+                    (attendanceService.getCheckWeekend(date) == Calendar.SUNDAY) ||
+                    (overtimeRequest.getTopicOvertime() == HOLIDAY)) {
+                //totalTimeWeekEndAndHolidayDay Ot and startTimeTimeWeekEndAndHoliday Ot
+                time = overtimeService.getTime(overtimeRequest.getFromTime(), overtimeRequest.getToTime());
+                //Time at 12:00
+                String checkMorningTime = "1999-01-01 12:00:00";
+                //Time at 13:00
+                String checkAfternoonTime = "1999-01-01 13:00:00";
+                LocalDateTime localCheckMorningTime = LocalDateTime.parse(checkMorningTime, formatter);
+                Time checkTimeStart = Time.valueOf(localCheckMorningTime.toLocalTime());
+                LocalDateTime localCheckAfternoonTime = LocalDateTime.parse(checkAfternoonTime, formatter);
+                Time checkTimeEnd = Time.valueOf(localCheckAfternoonTime.toLocalTime());
+                if (overtimeRequest.getFromTime().getTime() - checkTimeStart.getTime() < 0
+                        && checkTimeEnd.getTime() - overtimeRequest.getToTime().getTime() < 0) {
+                    time = time - 1.0;
+                }
+                startTime = "1999-01-01 " + overtimeRequest.getFromTime();
+            } else {
+                //totalTimeNormalDay Ot and startTimeNormalDay Ot
+                time = overtimeService.getTime(overtimeRequest.getFromTime(), overtimeRequest.getToTime());
+                startTime = "1999-01-01 18:00:00";
             }
-            startTime="1999-01-01 "+ overtimeRequest.getFromTime();
-        }else {
-            //totalTimeNormalDay Ot and startTimeNormalDay Ot
-            time= overtimeService.getTime(overtimeRequest.getFromTime(), overtimeRequest.getToTime());
-            startTime="1999-01-01 18:00:00";
-        }
-        LocalDateTime localDateTime3 = LocalDateTime.parse(startTime, formatter);
-        Time sqlTimeStart = Time.valueOf(localDateTime3.toLocalTime());
+            LocalDateTime localDateTime3 = LocalDateTime.parse(startTime, formatter);
+            Time sqlTimeStart = Time.valueOf(localDateTime3.toLocalTime());
 
-        //Rounding working time
-        int convertTime = (int) time;
-        double timeToCheck2 = convertTime + 0.5;
-        double timeToCheck3 = convertTime + 1;
-        if((double) convertTime == time){
-            time= convertTime;
+            //Rounding working time
+            int convertTime = (int) time;
+            double timeToCheck2 = convertTime + 0.5;
+            double timeToCheck3 = convertTime + 1;
+            if ((double) convertTime == time) {
+                time = convertTime;
+            }
+            if ((double) convertTime < time && time <= timeToCheck2) {
+                time = timeToCheck2;
+            }
+            if (timeToCheck2 < time && time <= timeToCheck3) {
+                time = timeToCheck3;
+            }
+            //Work calculation
+            if (overtimeRequest.getTopicOvertime() == WEEKEND_AND_NORMAL_DAY) {
+                totalPaid = time * 2;
+            }
+            if (overtimeRequest.getTopicOvertime() == HOLIDAY) {
+                totalPaid = time * 3;
+            }
+            Optional<OvertimeLog> overtimeLogCheck = overTimeRepository.findByUser_Account_UsernameAndDate(username, sqlDate);
+            OvertimeLog overtimeLog;
+            //check update or save
+            if (overtimeLogCheck.isPresent()) {
+                overtimeLog = OvertimeLog.builder().otId(overtimeLogCheck.get().getOtId()).date(sqlDate).manualEnd(overtimeRequest.getToTime()).
+                        manualStart(overtimeRequest.getFromTime()).startTime(sqlTimeStart).endTime(sqlTimeEnd).dateType(overtimeRequest.getTopicOvertime()).
+                        approvedDate(sqlDate2).totalPaid(totalPaid).user(requestMessage.getSender()).
+                        build();
+            } else {
+                overtimeLog = OvertimeLog.builder().date(sqlDate).manualEnd(overtimeRequest.getToTime()).
+                        manualStart(overtimeRequest.getFromTime()).startTime(sqlTimeStart).endTime(sqlTimeEnd).dateType(overtimeRequest.getTopicOvertime()).
+                        approvedDate(sqlDate2).totalPaid(totalPaid).user(requestMessage.getSender()).
+                        build();
+            }
+            overTimeRepository.save(overtimeLog);
         }
-        if((double) convertTime < time && time <= timeToCheck2){
-            time=timeToCheck2;
-        }
-        if(timeToCheck2 < time && time <= timeToCheck3){
-            time=timeToCheck3;
-        }
-        //Work calculation
-        if(overtimeRequest.getTopicOvertime()==WEEKEND_AND_NORMAL_DAY){
-            totalPaid=time*2;
-        }
-        if(overtimeRequest.getTopicOvertime()==HOLIDAY){
-            totalPaid=time*3;
-        }
-        Optional<OvertimeLog> overtimeLogCheck=overTimeRepository.findByUser_Account_UsernameAndDate(username,sqlDate);
-        OvertimeLog overtimeLog;
-        //check update or save
-        if(overtimeLogCheck.isPresent()){
-            overtimeLog = OvertimeLog.builder().otId(overtimeLogCheck.get().getOtId()).date(sqlDate).manualEnd(overtimeRequest.getToTime()).
-                    manualStart(overtimeRequest.getFromTime()).startTime(sqlTimeStart).endTime(sqlTimeEnd).dateType(overtimeRequest.getTopicOvertime()).
-                    approvedDate(sqlDate2).totalPaid(totalPaid).user(requestMessage.getSender()).
-                    build();
-        }else {
-            overtimeLog = OvertimeLog.builder().date(sqlDate).manualEnd(overtimeRequest.getToTime()).
-                    manualStart(overtimeRequest.getFromTime()).startTime(sqlTimeStart).endTime(sqlTimeEnd).dateType(overtimeRequest.getTopicOvertime()).
-                    approvedDate(sqlDate2).totalPaid(totalPaid).user(requestMessage.getSender()).
-                    build();
-        }
-        overTimeRepository.save(overtimeLog);
     }
 
     @Transactional
