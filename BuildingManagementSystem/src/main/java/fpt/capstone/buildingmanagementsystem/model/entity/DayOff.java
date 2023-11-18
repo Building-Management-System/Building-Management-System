@@ -6,11 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,29 +22,44 @@ public class DayOff {
     )
     private String dayOffId;
 
+    @Column
     private double january;
 
+    @Column
     private double february;
 
+    @Column
     private double april;
 
+    @Column
     private double march;
 
+    @Column
     private double may;
 
+    @Column
     private double june;
 
+    @Column
     private double july;
 
+    @Column
     private double august;
 
+    @Column
     private double september;
 
+    @Column
     private double october;
 
+    @Column
     private double november;
 
+    @Column
     private double december;
+
+    @Column
+    private int year;
 
     @ManyToOne
     @JoinColumn(name = "accountId")

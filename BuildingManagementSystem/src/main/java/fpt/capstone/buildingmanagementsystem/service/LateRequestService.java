@@ -2,27 +2,14 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
-import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
-import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
-import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.LateRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.LateMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
-import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
-import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
-import fpt.capstone.buildingmanagementsystem.repository.LateRequestFormRepository;
-import fpt.capstone.buildingmanagementsystem.repository.LateRequestFormRepositoryV2;
-import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.util.List;
@@ -64,7 +51,6 @@ public class LateRequestService {
     @Autowired
     DailyLogService dailyLogService;
 
-    @Transactional
     public boolean acceptLateRequest(String acceptLateRequestId) {
         LateRequestForm lateRequestForm = lateRequestFormRepository.findById(acceptLateRequestId)
                 .orElseThrow(() -> new BadRequest("Not_found_late_request"));
@@ -106,7 +92,7 @@ public class LateRequestService {
                             true,
                             null
                     ));
-//            updateLateRequest(lateRequestForm.getRequestDate(), requestTicket.getUser());
+            updateLateRequest(lateRequestForm.getRequestDate(), requestTicket.getUser());
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -167,5 +153,6 @@ public class LateRequestService {
         DailyLog dailyLog = dailyLogRepository.findByUserAndDate(user, date)
                 .orElseThrow(() -> new BadRequest("Not_found"));
         dailyLogService.checkViolate(dailyLog, user);
+        dailyLogRepository.save(dailyLog);
     }
 }

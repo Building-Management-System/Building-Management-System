@@ -1,6 +1,5 @@
 package fpt.capstone.buildingmanagementsystem.model.response;
 
-import fpt.capstone.buildingmanagementsystem.model.enumEnitty.LateType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +18,6 @@ public class LateFormResponse {
 
     private Date requestDate;
 
-    private LateType lateType;
+    private String lateType;
 
 }

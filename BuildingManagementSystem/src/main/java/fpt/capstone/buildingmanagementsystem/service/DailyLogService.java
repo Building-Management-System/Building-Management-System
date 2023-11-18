@@ -160,9 +160,7 @@ public class DailyLogService {
                 List<LateFormResponse> lateAccepted = findLateMorningAccepted.stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
                         .collect(Collectors.toList());
                 double lateMinutes = roundDouble((startMorningTime.getTime() - checkinTime.getTime()) / One_minute);
-                if (lateMinutes > lateAccepted.get(0).getLateDuration()) {
-                    dailyLog.setViolate(true);
-                }
+                dailyLog.setViolate(lateMinutes > lateAccepted.get(0).getLateDuration());
             } else {
                 dailyLog.setViolate(true);
             }

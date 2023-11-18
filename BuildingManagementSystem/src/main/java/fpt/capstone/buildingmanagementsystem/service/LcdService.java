@@ -9,7 +9,6 @@ import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
-import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

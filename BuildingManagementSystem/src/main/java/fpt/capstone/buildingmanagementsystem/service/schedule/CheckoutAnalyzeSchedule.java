@@ -193,7 +193,8 @@ public class CheckoutAnalyzeSchedule {
     private double getPermittedLeaveLeft(Account account, int month) {
         double permittedHoursLeft = getDayOffOfMonth(month, account);
         List<DailyLog> dailyLogs = dailyLogRepository.findAllByUser(account.getUser());
-        double permittedHours = dailyLogs.stream().mapToDouble(DailyLog::getPermittedLeave)
+        double permittedHours = dailyLogs.stream()
+                .mapToDouble(DailyLog::getPermittedLeave)
                 .sum();
         return permittedHoursLeft - permittedHours;
     }
