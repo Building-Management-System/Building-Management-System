@@ -98,7 +98,7 @@ public class OvertimeRequestFormService {
                             true,
                             null
                     ));
-//            overtimeService.updateDailyLog(overtimeRequest.getFromTime(), requestTicket.getUser(), overtimeRequest.getOvertimeDate());
+            overtimeService.updateDailyLog(overtimeRequest.getFromTime(), requestTicket.getUser(), overtimeRequest.getOvertimeDate());
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
