@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LateRequestService {
@@ -150,9 +151,9 @@ public class LateRequestService {
     }
 
     public void updateLateRequest(Date date, User user) {
-        DailyLog dailyLog = dailyLogRepository.findByUserAndDate(user, date)
-                .orElseThrow(() -> new BadRequest("Not_found"));
-        dailyLogService.checkViolate(dailyLog, user);
-        dailyLogRepository.save(dailyLog);
+        Optional<DailyLog> dailyLog = dailyLogRepository.findByUserAndDate(user, date);
+        if(!dailyLog.isPresent()) return;
+        dailyLogService.checkViolate(dailyLog.get(), user);
+        dailyLogRepository.save(dailyLog.get());
     }
 }

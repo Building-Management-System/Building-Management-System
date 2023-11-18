@@ -175,20 +175,17 @@ public class CheckoutAnalyzeSchedule {
         if (getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour < 6) {
             double workingHours = getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour;
             double offHours = 8 - workingHours;
-            if (leaveRequestForms.isEmpty()) {
-                dailyLog.setNonPermittedLeave(offHours);
-                dailyLog.setViolate(true);
+            double permittedLeaveLeft = getPermittedLeaveLeft(account, dailyLog.getMonth(), year);
+
+            if (offHours <= permittedLeaveLeft) {
+                dailyLog.setPermittedLeave(offHours);
+                updateDayOffLeft(dailyLog.getMonth(), account, permittedLeaveLeft - offHours, year);
             } else {
-                double permittedLeaveLeft = getPermittedLeaveLeft(account, dailyLog.getMonth(), year);
-                if (offHours <= permittedLeaveLeft) {
-                    dailyLog.setPermittedLeave(offHours);
-                    updateDayOffLeft(dailyLog.getMonth(), account, permittedLeaveLeft - offHours, year);
-                } else {
-                    dailyLog.setPermittedLeave(permittedLeaveLeft);
-                    dailyLog.setNonPermittedLeave(offHours - permittedLeaveLeft);
-                    updateDayOffLeft(dailyLog.getMonth(), account, 0, year);
-                }
+                dailyLog.setPermittedLeave(permittedLeaveLeft);
+                dailyLog.setNonPermittedLeave(offHours - permittedLeaveLeft);
+                updateDayOffLeft(dailyLog.getMonth(), account, 0, year);
             }
+            dailyLog.setViolate(leaveRequestForms.isEmpty());
         }
 
     }
