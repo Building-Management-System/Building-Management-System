@@ -59,8 +59,7 @@ public class Until {
     public static Date convertStringToDateTime(String date) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-        java.util.Date dateConvert = sdf.parse(date);
-        return dateConvert;
+        return sdf.parse(date);
     }
     public static Calendar convertDateToCalender(Date date) throws ParseException {
         Calendar calendar = Calendar.getInstance();
@@ -105,5 +104,9 @@ public class Until {
         BigDecimal bd = new BigDecimal(Double.toString(value));
         bd = bd.setScale(2, RoundingMode.HALF_UP);
         return bd.doubleValue();
+    }
+
+    public static int getYear(java.sql.Date date) {
+        return date.toLocalDate().getYear();
     }
 }

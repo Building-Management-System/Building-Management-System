@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static fpt.capstone.buildingmanagementsystem.until.Until.getYear;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.compareTime;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.getDistanceTime;
 
@@ -140,25 +141,27 @@ public class CheckoutAnalyzeSchedule {
 
     private void checkLeaveViolate(Account account, DailyLog offWork, Date date) {
         if(!offWork.getDateType().equals(DateType.NORMAL)) return;
+        int year = getYear(offWork.getDate());
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
         if(leaveRequestForms.isEmpty()) {
             offWork.setNonPermittedLeave(8);
             offWork.setViolate(true);
         } else {
-            double permittedLeft = getPermittedLeaveLeft(account, offWork.getMonth());
+            double permittedLeft = getPermittedLeaveLeft(account, offWork.getMonth(), year);
             if(permittedLeft > 8) {
                 offWork.setPermittedLeave(8);
-                updateDayOffLeft(offWork.getMonth(), account, permittedLeft - 8);
+                updateDayOffLeft(offWork.getMonth(), account, permittedLeft - 8,year);
             } else {
                 offWork.setPermittedLeave(permittedLeft);
                 offWork.setNonPermittedLeave(8-permittedLeft);
-                updateDayOffLeft(offWork.getMonth(), account, 0);
+                updateDayOffLeft(offWork.getMonth(), account, 0, year);
             }
         }
     }
 
     public void checkViolate(DailyLog dailyLog, Account account, Date date) {
         if(!dailyLog.getDateType().equals(DateType.NORMAL)) return;
+        int year = getYear(dailyLog.getDate());
         List<LateFormResponse> lateFormResponses = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(account.accountId, date, LateType.EARLY_AFTERNOON)
                 .stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
                 .collect(Collectors.toList());
@@ -176,22 +179,22 @@ public class CheckoutAnalyzeSchedule {
                 dailyLog.setNonPermittedLeave(offHours);
                 dailyLog.setViolate(true);
             } else {
-                double permittedLeaveLeft = getPermittedLeaveLeft(account, dailyLog.getMonth());
+                double permittedLeaveLeft = getPermittedLeaveLeft(account, dailyLog.getMonth(), year);
                 if (offHours <= permittedLeaveLeft) {
                     dailyLog.setPermittedLeave(offHours);
-                    updateDayOffLeft(dailyLog.getMonth(), account, permittedLeaveLeft - offHours);
+                    updateDayOffLeft(dailyLog.getMonth(), account, permittedLeaveLeft - offHours, year);
                 } else {
                     dailyLog.setPermittedLeave(permittedLeaveLeft);
                     dailyLog.setNonPermittedLeave(offHours - permittedLeaveLeft);
-                    updateDayOffLeft(dailyLog.getMonth(), account, 0);
+                    updateDayOffLeft(dailyLog.getMonth(), account, 0, year);
                 }
             }
         }
 
     }
 
-    private double getPermittedLeaveLeft(Account account, int month) {
-        double permittedHoursLeft = getDayOffOfMonth(month, account);
+    private double getPermittedLeaveLeft(Account account, int month, int year) {
+        double permittedHoursLeft = getDayOffOfMonth(month, account, year);
         List<DailyLog> dailyLogs = dailyLogRepository.findAllByUser(account.getUser());
         double permittedHours = dailyLogs.stream()
                 .mapToDouble(DailyLog::getPermittedLeave)
@@ -199,8 +202,8 @@ public class CheckoutAnalyzeSchedule {
         return permittedHoursLeft - permittedHours;
     }
 
-    private void updateDayOffLeft(int month, Account account, double hourLeft) {
-        DayOff dayOff = dayOffRepository.findByAccount(account)
+    private void updateDayOffLeft(int month, Account account, double hourLeft, int year) {
+        DayOff dayOff = dayOffRepository.findByAccountAndYear(account, year)
                 .orElseThrow(() -> new BadRequest("Not_found"));
 
         switch (month) {
@@ -257,8 +260,8 @@ public class CheckoutAnalyzeSchedule {
         }
     }
 
-    private double getDayOffOfMonth(int month, Account account) {
-        DayOff dayOff = dayOffRepository.findByAccount(account)
+    private double getDayOffOfMonth(int month, Account account, int year) {
+        DayOff dayOff = dayOffRepository.findByAccountAndYear(account, year)
                 .orElseThrow(() -> new BadRequest("Not_found"));
 
         switch (month) {
