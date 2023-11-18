@@ -4,12 +4,14 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.DayOff;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.LateType;
 import fpt.capstone.buildingmanagementsystem.model.response.LateFormResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DayOffRepository;
 import fpt.capstone.buildingmanagementsystem.repository.LateRequestFormRepositoryV2;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.service.schedule.CheckoutAnalyzeSchedule;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
@@ -48,6 +51,9 @@ public class DailyLogService {
 
     @Autowired
     CheckoutAnalyzeSchedule checkoutAnalyzeSchedule;
+
+    @Autowired
+    DayOffRepository dayOffRepository;
 
     private static final Time startMorningTime = Time.valueOf("08:30:00");
 
@@ -230,6 +236,32 @@ public class DailyLogService {
     public void checkViolate(DailyLog dailyLog, User user) {
         getLateCheckInDuration(dailyLog, user.getUserId(), dailyLog.getDate(), dailyLog.getCheckin());
         checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), dailyLog.getDate());
+    }
+
+    public List<DayOff> initEmployeeDayOff() {
+        List<DayOff> dayOffs = new ArrayList<>();
+        accountRepository.findAll()
+                .forEach(account -> {
+                    DayOff dayOff = DayOff.builder()
+                            .account(account)
+                            .january(48)
+                            .february(48)
+                            .april(48)
+                            .march(48)
+                            .may(48)
+                            .july(48)
+                            .june(48)
+                            .august(48)
+                            .september(48)
+                            .october(48)
+                            .november(48)
+                            .december(48)
+                            .year(2023)
+                            .build();
+                    dayOffs.add(dayOff);
+                });
+        dayOffRepository.saveAll(dayOffs);
+        return dayOffs;
     }
 }
 

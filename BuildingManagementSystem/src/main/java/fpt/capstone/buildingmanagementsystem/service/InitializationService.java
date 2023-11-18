@@ -31,6 +31,10 @@ public class InitializationService {
     AccountRepository accountRepository;
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    DayOffRepository dayOffRepository;
+
     public void init() {
         int check1 = roleRepository.findAll().size();
         int check2 = statusRepository.findAll().size();
@@ -38,7 +42,8 @@ public class InitializationService {
         int check4 = departmentRepository.findAll().size();
         int check5 = roomRepository.findAll().size();
         int check6 = accountRepository.findAll().size();
-        if (check1 == 0 & check2 == 0 && check3 == 0 && check4 == 0 && check5 == 0 && check6 == 0) {
+        int check7 = dayOffRepository.findAll().size();
+        if (check1 == 0 & check2 == 0 && check3 == 0 && check4 == 0 && check5 == 0 && check6 == 0 && check7 == 0) {
             List<Role> roleList = new ArrayList<>();
             List<Status> statusList = new ArrayList<>();
             List<UserPendingStatus> userPendingStatusList = new ArrayList<>();
@@ -99,6 +104,32 @@ public class InitializationService {
             departmentRepository.saveAll(departmentList);
             roomRepository.saveAll(roomList);
             userRepository.save(user);
+            dayOffRepository.saveAll(initEmployeeDayOff());
         }
+    }
+
+    public List<DayOff> initEmployeeDayOff() {
+        List<DayOff> dayOffs = new ArrayList<>();
+        accountRepository.findAll()
+                .forEach(account -> {
+                    DayOff dayOff = DayOff.builder()
+                            .account(account)
+                            .january(48)
+                            .february(48)
+                            .april(48)
+                            .march(48)
+                            .may(48)
+                            .july(48)
+                            .june(48)
+                            .august(48)
+                            .september(48)
+                            .october(48)
+                            .november(48)
+                            .december(48)
+                            .year(2023)
+                            .build();
+                    dayOffs.add(dayOff);
+                });
+        return dayOffs;
     }
 }

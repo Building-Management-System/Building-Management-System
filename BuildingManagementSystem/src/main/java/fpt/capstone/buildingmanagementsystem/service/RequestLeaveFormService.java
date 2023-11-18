@@ -15,7 +15,9 @@ import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationR
 import fpt.capstone.buildingmanagementsystem.model.request.LeaveMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendLeaveFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
+import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.LateRequestFormRepositoryV2;
 import fpt.capstone.buildingmanagementsystem.repository.LeaveRequestFormRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
@@ -56,6 +58,15 @@ public class RequestLeaveFormService {
 
     @Autowired
     AutomaticNotificationService automaticNotificationService;
+
+    @Autowired
+    LateRequestFormRepositoryV2 lateRequestFormRepositoryV2;
+
+    @Autowired
+    DailyLogService dailyLogService;
+
+    @Autowired
+    DailyLogRepository dailyLogRepository;
 
     public boolean getLeaveFormUser(SendLeaveFormRequest sendLeaveFormRequest) {
         try {
@@ -277,6 +288,7 @@ public class RequestLeaveFormService {
                             true,
                             null
                     ));
+//            updateLateRequest();
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -334,5 +346,11 @@ public class RequestLeaveFormService {
 
     private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
         RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
+    }
+
+    public void updateLateRequest(java.sql.Date date, User user) {
+//        List<DailyLog> dailyLog = dailyLogRepository.findByUserAndDateIn(user, date);
+//
+//        dailyLogService.checkViolate(dailyLog, user);
     }
 }
