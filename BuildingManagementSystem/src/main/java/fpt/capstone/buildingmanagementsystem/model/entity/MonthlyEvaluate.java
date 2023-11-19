@@ -22,7 +22,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
-    public class MonthlyEvaluate {
+public class MonthlyEvaluate {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(
@@ -76,6 +76,16 @@ import java.util.Date;
 
     @Column
     private Date updateDate;
+
+    @Column
+    private Date approvedDate;
+
+    @Column
+    private boolean status;
+
+    @ManyToOne
+    @JoinColumn(name = "acceptedBy")
+    private User acceptedBy;
 
     @ManyToOne
     @JoinColumn(name = "createdBy")

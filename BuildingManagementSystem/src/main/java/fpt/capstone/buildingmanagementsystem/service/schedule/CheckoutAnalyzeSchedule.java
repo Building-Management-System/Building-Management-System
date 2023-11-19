@@ -143,20 +143,16 @@ public class CheckoutAnalyzeSchedule {
         if(!offWork.getDateType().equals(DateType.NORMAL)) return;
         int year = getYear(offWork.getDate());
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
-        if(leaveRequestForms.isEmpty()) {
-            offWork.setNonPermittedLeave(8);
-            offWork.setViolate(true);
+        double permittedLeft = getPermittedLeaveLeft(account, offWork.getMonth(), year);
+        if(permittedLeft > 8) {
+            offWork.setPermittedLeave(8);
+            updateDayOffLeft(offWork.getMonth(), account, permittedLeft - 8,year);
         } else {
-            double permittedLeft = getPermittedLeaveLeft(account, offWork.getMonth(), year);
-            if(permittedLeft > 8) {
-                offWork.setPermittedLeave(8);
-                updateDayOffLeft(offWork.getMonth(), account, permittedLeft - 8,year);
-            } else {
-                offWork.setPermittedLeave(permittedLeft);
-                offWork.setNonPermittedLeave(8-permittedLeft);
-                updateDayOffLeft(offWork.getMonth(), account, 0, year);
-            }
+            offWork.setPermittedLeave(permittedLeft);
+            offWork.setNonPermittedLeave(8-permittedLeft);
+            updateDayOffLeft(offWork.getMonth(), account, 0, year);
         }
+        offWork.setViolate(leaveRequestForms.isEmpty());
     }
 
     public void checkViolate(DailyLog dailyLog, Account account, Date date) {
