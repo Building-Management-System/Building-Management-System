@@ -2,21 +2,22 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
-import fpt.capstone.buildingmanagementsystem.model.entity.NotificationFile;
-import fpt.capstone.buildingmanagementsystem.model.entity.NotificationImage;
 import fpt.capstone.buildingmanagementsystem.model.entity.PersonalPriority;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationViewer;
+import fpt.capstone.buildingmanagementsystem.model.response.ImageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponseForCreator;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponseForDetail;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationFileResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationFileResponseV2;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationImageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationTitleResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserAccountResponse;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationFileRepository;
+import fpt.capstone.buildingmanagementsystem.repository.NotificationImageAndFileResponse;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationImageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationReceiverRepository;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationRepository;
@@ -55,6 +56,9 @@ public class NotificationServiceV2 {
     @Autowired
     private NotificationReceiverRepository receiverRepository;
 
+    @Autowired
+    private NotificationImageAndFileResponse notificationImageAndFileResponse;
+
     public NotificationTitleResponse getAllNotificationByUser(String userId) {
 
         Map<String, Notification> hiddenNotification = notificationRepository.getHiddenNotificationByUserId(userId)
@@ -89,11 +93,11 @@ public class NotificationServiceV2 {
         Notification notification = notificationRepository.findByCreatedByAndNotificationId(user, notificationId)
                 .orElseThrow(() -> new NotFound("not_found_notification"));
 
-        ExecutorService ex = Executors.newFixedThreadPool(5);
 
         List<UserAccountResponse> notificationReceivers = new ArrayList<>();
         receiverRepository.findByNotification(notification)
-                .forEach(receiver -> ex.submit(() -> {
+                .forEach(receiver -> {
+                    if (receiver.isSendAllStatus()) return;
                     UserAccountResponse userAccountResponse = new UserAccountResponse(
                             receiver.getReceiver().getUserId(),
                             receiver.getReceiver().getAccount().username,
@@ -101,12 +105,11 @@ public class NotificationServiceV2 {
                             receiver.getReceiver().getDepartment().getDepartmentName()
                     );
                     notificationReceivers.add(userAccountResponse);
-                }));
+                });
 
         List<NotificationFileResponse> notificationFiles = notificationFileRepository.findByNotification(notification)
                 .stream().map(file -> new NotificationFileResponse(
                         file.getFileId(),
-                        file.getData(),
                         file.getName(),
                         file.getType()
                 )).collect(Collectors.toList());
@@ -155,7 +158,6 @@ public class NotificationServiceV2 {
         notificationFileRepository.findByNotification(notification).forEach(file -> executorService.submit(() -> {
             NotificationFileResponse response = new NotificationFileResponse(
                     file.getFileId(),
-                    file.getData(),
                     file.getName(),
                     file.getType()
             );
@@ -241,15 +243,20 @@ public class NotificationServiceV2 {
 
         List<NotificationDetailResponse> notificationDetailResponses = new ArrayList<>();
 
-        Map<String, NotificationImage> images = notificationImageRepository.getFirstByNotificationIn(notifications)
-                .stream().collect(Collectors.toMap(image -> image.getNotification().getNotificationId(), Function.identity()));
+        List<String> notificationIds = notifications.stream().map(Notification::getNotificationId)
+                .collect(Collectors.toList());
 
-        Map<String, NotificationFile> files = notificationFileRepository.findFirstByNotificationIn(notifications)
-                .stream().collect(Collectors.toMap(file -> file.getNotification().getNotificationId(), Function.identity()));
+        List<ImageResponse> imageResponses = notificationImageAndFileResponse.getImageByNotificationIn(notificationIds);
 
-        ExecutorService ex = Executors.newFixedThreadPool(5);
+        List<NotificationFileResponseV2> fileResponses = notificationImageAndFileResponse.getFileByNotificationIn(notificationIds);
 
-        notifications.forEach(notification -> ex.submit(() -> {
+        Map<String, Long> images = imageResponses.stream()
+                .collect(Collectors.groupingBy(ImageResponse::getNotificationId, Collectors.counting()));
+
+        Map<String, Long> files = fileResponses.stream()
+                .collect(Collectors.groupingBy(NotificationFileResponseV2::getNotificationId, Collectors.counting()));
+
+        notifications.forEach(notification -> {
             NotificationDetailResponse detailResponse = new NotificationDetailResponse();
             detailResponse.setNotificationId(notification.getNotificationId());
             detailResponse.setTitle(notification.getTitle());
@@ -263,14 +270,12 @@ public class NotificationServiceV2 {
             detailResponse.setReadStatus(true);
             detailResponse.setViewAs(viewAs);
             notificationDetailResponses.add(detailResponse);
-        }));
+        });
 
         Map<String, Notification> unreadNotification = notificationRepository.getUnreadMarkNotificationByUserId(userId)
                 .stream().collect(Collectors.toMap(Notification::getNotificationId, Function.identity()));
 
-        ExecutorService executorService = Executors.newFixedThreadPool(5);
-
-        notificationDetailResponses.forEach(response -> executorService.submit(() -> {
+        notificationDetailResponses.forEach(response -> {
             if (images.containsKey(response.getNotificationId())) {
                 response.setContainImage(true);
             }
@@ -283,9 +288,7 @@ public class NotificationServiceV2 {
             if (personalPriorities.containsKey(response.getNotificationId())) {
                 response.setPersonalPriority(true);
             }
-        }));
-        executorService.shutdown();
-        ex.shutdown();
+        });
         return notificationDetailResponses.stream()
                 .sorted(Comparator.comparing(NotificationDetailResponse::isPriority))
                 .collect(Collectors.toList());

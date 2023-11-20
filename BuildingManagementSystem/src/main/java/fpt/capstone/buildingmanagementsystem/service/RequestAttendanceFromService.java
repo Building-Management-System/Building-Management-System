@@ -63,13 +63,15 @@ public class RequestAttendanceFromService {
     @Autowired
     AutomaticNotificationService automaticNotificationService;
 
+    @Autowired
+    AttendanceService attendanceService;
+
     public boolean getAttendanceUser(SendAttendanceFormRequest sendAttendanceFormRequest) {
         try {
             if (sendAttendanceFormRequest.getContent() != null &&
                     sendAttendanceFormRequest.getDepartmentId() != null &&
                     sendAttendanceFormRequest.getManualDate() != null &&
-                    sendAttendanceFormRequest.getTitle() != null &&
-                    sendAttendanceFormRequest.getManualLastExit() != null
+                    sendAttendanceFormRequest.getTitle() != null
             ) {
                 if (checkValidate(sendAttendanceFormRequest)) {
                     Optional<User> send_user = userRepository.findByUserId(sendAttendanceFormRequest.getUserId());
@@ -119,7 +121,6 @@ public class RequestAttendanceFromService {
                     sendAttendanceFormRequest.getDepartmentId() != null &&
                     sendAttendanceFormRequest.getManualDate() != null &&
                     sendAttendanceFormRequest.getTitle() != null &&
-                    sendAttendanceFormRequest.getManualLastExit() != null &&
                     sendAttendanceFormRequest.getTicketId() != null
             ) {
                 if (checkValidate(sendAttendanceFormRequest)) {
@@ -150,7 +151,6 @@ public class RequestAttendanceFromService {
             if (sendAttendanceFormRequest.getContent() != null &&
                     sendAttendanceFormRequest.getDepartmentId() != null &&
                     sendAttendanceFormRequest.getManualDate() != null &&
-                    sendAttendanceFormRequest.getManualLastExit() != null &&
                     sendAttendanceFormRequest.getRequestId() != null
             ) {
                 if (checkValidate(sendAttendanceFormRequest)) {
@@ -194,12 +194,19 @@ public class RequestAttendanceFromService {
     }
 
     private static boolean checkValidate(SendAttendanceFormRequest sendAttendanceFormRequest) throws ParseException {
-        return validateDateFormat(sendAttendanceFormRequest.getManualDate()) &&
-                validateDateTime(sendAttendanceFormRequest.getManualFirstEntry()) &&
-                validateDateTime(sendAttendanceFormRequest.getManualLastExit()) &&
-                validateStartTimeAndEndTime(sendAttendanceFormRequest.getManualFirstEntry(), sendAttendanceFormRequest.getManualLastExit());
+        boolean check1 = validateDateFormat(sendAttendanceFormRequest.getManualDate());
+        boolean check2=true;
+        boolean check3=true;
+        boolean check4=true;
+        if(sendAttendanceFormRequest.getManualFirstEntry() != null) {
+            check2 = validateDateTime(sendAttendanceFormRequest.getManualFirstEntry());
+        }if(sendAttendanceFormRequest.getManualLastExit() != null) {
+            check3 = validateDateTime(sendAttendanceFormRequest.getManualLastExit());
+        }if(sendAttendanceFormRequest.getManualLastExit() != null && sendAttendanceFormRequest.getManualFirstEntry() != null) {
+            check4 = validateStartTimeAndEndTime(sendAttendanceFormRequest.getManualFirstEntry(), sendAttendanceFormRequest.getManualLastExit());
+        }
+            return check1 && check2 && check3 && check4;
     }
-
     private void saveAttendanceRequest(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) throws ParseException {
         RequestTicket requestTicket = RequestTicket.builder().requestId(id_request_ticket).createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())
@@ -267,6 +274,12 @@ public class RequestAttendanceFromService {
                             true,
                             null
                     ));
+            attendanceService.updateAttendanceTime(
+                    attendanceRequestForm.getManualDate(),
+                    requestTicket.getUser(),
+                    attendanceRequestForm.getManualFirstEntry(),
+                    attendanceRequestForm.getManualLastExit()
+            );
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");

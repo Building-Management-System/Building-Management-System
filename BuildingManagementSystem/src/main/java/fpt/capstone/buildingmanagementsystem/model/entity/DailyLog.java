@@ -76,6 +76,12 @@ public class DailyLog {
     @Column
     private double paidDay;
 
+    @Column
+    private Time systemCheckIn;
+
+    @Column
+    private Time systemCheckOut;
+
     @Column(name = "date_type")
     @Enumerated(EnumType.STRING)
     private DateType dateType;

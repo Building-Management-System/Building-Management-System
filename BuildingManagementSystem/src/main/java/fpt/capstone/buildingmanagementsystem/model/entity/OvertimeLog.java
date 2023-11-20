@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.model.entity;
 
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicOvertime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -50,14 +51,16 @@ public class OvertimeLog {
 
     @Column(name = "date_type")
     @Enumerated(EnumType.STRING)
-    private DateType dateType;
+    private TopicOvertime dateType;
 
     @Column(name = "manual_start")
     private Time manualStart;
-
+    @Column(name = "approvedDate")
+    private Date approvedDate;
     @Column(name = "manual_end")
     private Time manualEnd;
-
+    @Column(name = "totalPaid")
+    private double totalPaid;
     @Column(name = "description")
     private String description;
 

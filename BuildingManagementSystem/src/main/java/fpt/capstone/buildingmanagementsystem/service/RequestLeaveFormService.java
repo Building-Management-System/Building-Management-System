@@ -4,6 +4,7 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.LeaveRequestFormMapper;
+import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
@@ -15,7 +16,9 @@ import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationR
 import fpt.capstone.buildingmanagementsystem.model.request.LeaveMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendLeaveFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
+import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.LateRequestFormRepositoryV2;
 import fpt.capstone.buildingmanagementsystem.repository.LeaveRequestFormRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
@@ -27,12 +30,16 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.LEAVE_REQUEST;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.*;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
 
 @Service
 public class RequestLeaveFormService {
@@ -57,6 +64,15 @@ public class RequestLeaveFormService {
     @Autowired
     AutomaticNotificationService automaticNotificationService;
 
+    @Autowired
+    LateRequestFormRepositoryV2 lateRequestFormRepositoryV2;
+
+    @Autowired
+    DailyLogService dailyLogService;
+
+    @Autowired
+    DailyLogRepository dailyLogRepository;
+
     public boolean getLeaveFormUser(SendLeaveFormRequest sendLeaveFormRequest) {
         try {
             if (sendLeaveFormRequest.getContent() != null &&
@@ -66,14 +82,14 @@ public class RequestLeaveFormService {
                     sendLeaveFormRequest.getToDate() != null
             ) {
                 if (checkValidate(sendLeaveFormRequest)) {
-                    List<User> listUserReceiver= new ArrayList<>();
+                    List<User> listUserReceiver = new ArrayList<>();
                     Optional<User> send_user = userRepository.findByUserId(sendLeaveFormRequest.getUserId());
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendLeaveFormRequest.getDepartmentId());
-                    if(sendLeaveFormRequest.getReceivedId()!=null) {
+                    if (sendLeaveFormRequest.getReceivedId() != null) {
                         Optional<User> receive_user = userRepository.findByUserId(sendLeaveFormRequest.getReceivedId());
                         listUserReceiver.add(receive_user.get());
-                    }else{
-                        listUserReceiver= userRepository.findAllByDepartment(department.get());
+                    } else {
+                        listUserReceiver = userRepository.findAllByDepartment(department.get());
                     }
                     if (send_user.isPresent() && department.isPresent()) {
                         String id_ticket = "LV_" + Until.generateId();
@@ -87,7 +103,7 @@ public class RequestLeaveFormService {
                                 .build();
                         ticketRepository.save(ticket);
                         saveLeaveRequest(sendLeaveFormRequest, send_user, department, id_request_ticket, ticket);
-                        for(User receive_user:listUserReceiver) {
+                        for (User receive_user : listUserReceiver) {
                             automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
                                     ticket.getTicketId(),
                                     send_user.get(),
@@ -197,8 +213,7 @@ public class RequestLeaveFormService {
 
     private static boolean checkValidate(SendLeaveFormRequest sendLeaveFormRequest) throws ParseException {
         return validateDateFormat(sendLeaveFormRequest.getFromDate()) &&
-                validateDateFormat(sendLeaveFormRequest.getToDate()) && validateStartDateAndEndDate(sendLeaveFormRequest.getFromDate()
-                , sendLeaveFormRequest.getToDate()) && checkDateLeave(sendLeaveFormRequest.getFromDate());
+                validateDateFormat(sendLeaveFormRequest.getToDate());
     }
 
     private void saveLeaveRequest(SendLeaveFormRequest sendLeaveFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) throws ParseException {
@@ -278,6 +293,7 @@ public class RequestLeaveFormService {
                             true,
                             null
                     ));
+            updateLeaveRequest(leaveRequestForm.getFromDate(), leaveRequestForm.getToDate(), requestTicket.getUser());
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -335,5 +351,19 @@ public class RequestLeaveFormService {
 
     private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
         RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
+    }
+
+    public void updateLeaveRequest(java.sql.Date fromDate, java.sql.Date toDate, User user) {
+        try {
+            List<DailyLog> dailyLogs = dailyLogRepository.getDailyLogsByUserAndFromDateAndToDate(user.getUserId(), fromDate, toDate);
+            if (dailyLogs.isEmpty()) return;
+            dailyLogs.forEach(dailyLog -> {
+                dailyLogService.checkViolate(dailyLog, user);
+                dailyLogRepository.save(dailyLog);
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

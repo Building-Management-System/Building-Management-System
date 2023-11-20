@@ -2,25 +2,18 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
-import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.LateRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.LateMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
-import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
-import fpt.capstone.buildingmanagementsystem.repository.LateRequestFormRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LateRequestService {
@@ -47,7 +40,18 @@ public class LateRequestService {
     @Autowired
     LateRequestFormRepository lateRequestFormRepository;
 
-    @Transactional
+    @Autowired
+    AttendanceService attendanceService;
+
+    @Autowired
+    DailyLogRepository dailyLogRepository;
+
+    @Autowired
+    LateRequestFormRepositoryV2 lateRequestFormRepositoryV2;
+
+    @Autowired
+    DailyLogService dailyLogService;
+
     public boolean acceptLateRequest(String acceptLateRequestId) {
         LateRequestForm lateRequestForm = lateRequestFormRepository.findById(acceptLateRequestId)
                 .orElseThrow(() -> new BadRequest("Not_found_late_request"));
@@ -65,8 +69,8 @@ public class LateRequestService {
                 .userId(requestMessage.getReceiver().getUserId())
                 .ticketId(ticket.getTicketId())
                 .requestId(requestTicket.getRequestId())
-                .title("Approve attendance request")
-                .content("Approve attendance request")
+                .title("Approve late request")
+                .content("Approve late request")
                 .departmentId(requestMessage.getDepartment().getDepartmentId())
                 .receivedId(requestMessage.getSender().getUserId())
                 .build();
@@ -75,7 +79,7 @@ public class LateRequestService {
         executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
             lateRequestForm.setStatus(true);
-            lateRequestFormRepository.save(lateRequestForm);
+            lateRequestFormRepository.saveAndFlush(lateRequestForm);
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
@@ -89,6 +93,7 @@ public class LateRequestService {
                             true,
                             null
                     ));
+            updateLateRequest(lateRequestForm.getRequestDate(), requestTicket.getUser());
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -97,10 +102,10 @@ public class LateRequestService {
 
     @javax.transaction.Transactional
     public boolean rejectLateRequest(LateMessageRequest lateMessageRequest) {
-        LateRequestForm overtimeRequest = lateRequestFormRepository.findById(lateMessageRequest.getLateMessageRequestId())
+        LateRequestForm lateRequestForm = lateRequestFormRepository.findById(lateMessageRequest.getLateMessageRequestId())
                 .orElseThrow(() -> new BadRequest("Not_found_late_request"));
 
-        RequestMessage requestMessage = requestMessageRepository.findById(overtimeRequest.getRequestMessage().getRequestMessageId())
+        RequestMessage requestMessage = requestMessageRepository.findById(lateRequestForm.getRequestMessage().getRequestMessageId())
                 .orElseThrow(() -> new BadRequest("Not_found_request_message"));
 
         RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
@@ -113,8 +118,8 @@ public class LateRequestService {
                 .userId(requestMessage.getReceiver().getUserId())
                 .ticketId(ticket.getTicketId())
                 .requestId(requestTicket.getRequestId())
-                .title("Reject Attendance request")
-                .content(overtimeRequest.getContent())
+                .title("Reject late request")
+                .content(lateRequestForm.getContent())
                 .departmentId(requestMessage.getDepartment().getDepartmentId())
                 .receivedId(requestMessage.getSender().getUserId())
                 .build();
@@ -133,7 +138,7 @@ public class LateRequestService {
                             requestMessage.getSender(),
                             ticket.getTopic(),
                             false,
-                            overtimeRequest.getContent()
+                            lateRequestForm.getContent()
                     ));
             return true;
         } catch (Exception e) {
@@ -143,5 +148,12 @@ public class LateRequestService {
 
     private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
         RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
+    }
+
+    public void updateLateRequest(Date date, User user) {
+        Optional<DailyLog> dailyLog = dailyLogRepository.findByUserAndDate(user, date);
+        if(!dailyLog.isPresent()) return;
+        dailyLogService.checkViolate(dailyLog.get(), user);
+        dailyLogRepository.save(dailyLog.get());
     }
 }

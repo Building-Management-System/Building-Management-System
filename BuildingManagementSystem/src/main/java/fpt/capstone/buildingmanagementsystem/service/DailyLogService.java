@@ -4,13 +4,17 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.DayOff;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.LateType;
 import fpt.capstone.buildingmanagementsystem.model.response.LateFormResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DayOffRepository;
 import fpt.capstone.buildingmanagementsystem.repository.LateRequestFormRepositoryV2;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.service.schedule.CheckoutAnalyzeSchedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +23,12 @@ import org.springframework.stereotype.Service;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import static fpt.capstone.buildingmanagementsystem.until.Until.roundDouble;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.compareTime;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.getDistanceTime;
 
@@ -43,6 +47,12 @@ public class DailyLogService {
     @Autowired
     LateRequestFormRepositoryV2 lateRequestFormRepositoryV2;
 
+    @Autowired
+    CheckoutAnalyzeSchedule checkoutAnalyzeSchedule;
+
+    @Autowired
+    DayOffRepository dayOffRepository;
+
     private static final Time startMorningTime = Time.valueOf("08:30:00");
 
     private static final Time endMorningTime = Time.valueOf("12:00:00");
@@ -51,25 +61,19 @@ public class DailyLogService {
 
     private static final double One_hour = 1000 * 60 * 60;
 
-    private static final double One_minute = 1000 * 60;
-
-
-    private static final Time endAfternoonTime = Time.valueOf("17:30:00");
-
     private static final Logger logger = LoggerFactory.getLogger(DailyLogService.class);
 
 
     public DailyLog mapControlLogToDailyLog(ControlLogLcd controlLogLcd) {
         Account account = accountRepository.findByUsername(controlLogLcd.getPersionName())
                 .orElseThrow(() -> new BadRequest("Not_found_account"));
-
         Date dailyDate = new Date(controlLogLcd.getTime().getTime());
         Time dailyTime = new Time(controlLogLcd.getTime().getTime());
 
         Optional<DailyLog> dailyLogOptional = dailyLogRepository.findByUserAndDate(account.getUser(), dailyDate);
 
         if (dailyLogOptional.isPresent()) {
-            DailyLog dailyLog = updateDailyLogWhenExisted(dailyLogOptional.get(), dailyTime);
+            DailyLog dailyLog = updateExistedDailyLog(dailyLogOptional.get(), dailyTime);
             logger.info(dailyLog + "");
             return dailyLogRepository.save(dailyLog);
         } else {
@@ -77,37 +81,46 @@ public class DailyLogService {
         }
     }
 
-    private DailyLog updateDailyLogWhenExisted(DailyLog dailyLog, Time checkoutTime) {
+    public DailyLog updateExistedDailyLog(DailyLog dailyLog, Time checkoutTime) {
 
         if (compareTime(checkoutTime, endMorningTime) < 0) {
             dailyLog.setCheckout(checkoutTime);
+            dailyLog.setSystemCheckOut(checkoutTime);
 
-            double morningTotal = getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour;
+            double morningTotal = roundDouble(getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour);
             dailyLog.setMorningTotal(morningTotal);
+
+            dailyLog.setAfternoonTotal(0);
 
         } else {
             dailyLog.setCheckout(checkoutTime);
+            dailyLog.setSystemCheckOut(checkoutTime);
 
-            double morningTotal = getDistanceTime(endMorningTime, dailyLog.getCheckin()) / One_hour;
+            double morningTotal = roundDouble(getDistanceTime(endMorningTime, dailyLog.getCheckin()) / One_hour);
             dailyLog.setMorningTotal(morningTotal);
         }
 
         if (compareTime(dailyLog.getCheckin(), startAfternoonTime) < 0) {
             dailyLog.setCheckout(checkoutTime);
+            dailyLog.setSystemCheckOut(checkoutTime);
+
             if (compareTime(checkoutTime, startAfternoonTime) > 0) {
-                double afternoonTotal = getDistanceTime(checkoutTime, startAfternoonTime) / One_hour;
+                double afternoonTotal = roundDouble(getDistanceTime(checkoutTime, startAfternoonTime) / One_hour);
                 dailyLog.setAfternoonTotal(afternoonTotal);
             }
         } else {
             dailyLog.setCheckout(checkoutTime);
-            double afternoonTotal = getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour;
+            dailyLog.setSystemCheckOut(checkoutTime);
+
+            double afternoonTotal = roundDouble(getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour);
             dailyLog.setAfternoonTotal(afternoonTotal);
+            dailyLog.setMorningTotal(0);
         }
 
-        dailyLog.setTotalAttendance(getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour);
+        dailyLog.setTotalAttendance(roundDouble(dailyLog.getMorningTotal() + dailyLog.getAfternoonTotal()));
 
         if (dailyLog.getDateType().equals(DateType.NORMAL)) {
-            dailyLog.setPaidDay(Math.min(dailyLog.getTotalAttendance() / 8, 1));
+            dailyLog.setPaidDay(Math.min(roundDouble(dailyLog.getTotalAttendance() / 8), 1));
         }
 
         return dailyLog;
@@ -129,6 +142,8 @@ public class DailyLogService {
                 .paidDay(0)
                 .outsideWork(0)
                 .user(account.getUser())
+                .systemCheckIn(checkinTime)
+                .systemCheckOut(checkinTime)
                 .build();
         LocalDate localDate = dailyLog.getDate().toLocalDate();
         dailyLog.setMonth(localDate.getMonthValue());
@@ -138,25 +153,26 @@ public class DailyLogService {
         return dailyLogRepository.save(dailyLog);
     }
 
-    private void getLateCheckInDuration(DailyLog dailyLog, String userId, Date date, Time checkinTime) {
-        if (dailyLog.getDateType().equals(DateType.WEEKEND) || dailyLog.getDateType().equals(DateType.HOLIDAY)) return;
+    public void getLateCheckInDuration(DailyLog dailyLog, String userId, Date date, Time checkinTime) {
+        if (!dailyLog.getDateType().equals(DateType.NORMAL)) return;
         if (compareTime(checkinTime, startMorningTime) > 0) {
-            List<LateFormResponse> findLateMorningAccepted = lateRequestFormRepositoryV2.findLateAndEarlyViolateByUserIdAndDate(userId, date, LateType.LATE_MORNING)
-                    .stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
-                    .collect(Collectors.toList());
+            List<LateFormResponse> findLateMorningAccepted = lateRequestFormRepositoryV2.findLateAndEarlyViolateByUserIdAndDate(userId, date, LateType.LATE_MORNING);
             dailyLog.setLateCheckin(true);
-            if (!findLateMorningAccepted.isEmpty()) {
-                double lateMinutes = (startMorningTime.getTime() - checkinTime.getTime()) / One_minute;
-                if (lateMinutes > findLateMorningAccepted.get(0).getLateDuration()) {
-                    dailyLog.setViolate(true);
-                }
-            } else {
-                dailyLog.setViolate(true);
-            }
+//            if (!findLateMorningAccepted.isEmpty()) {
+//                List<LateFormResponse> lateAccepted = findLateMorningAccepted.stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
+//                        .collect(Collectors.toList());
+//                double lateMinutes = roundDouble((startMorningTime.getTime() - checkinTime.getTime()) / One_minute);
+//                dailyLog.setViolate(lateMinutes > lateAccepted.get(0).getLateDuration());
+//            } else {
+//                dailyLog.setViolate(true);
+//            }
+            dailyLog.setViolate(findLateMorningAccepted.isEmpty());
+        } else {
+            dailyLog.setLateCheckin(false);
         }
     }
 
-    private DateType getDateType(Date dailyDate) {
+    public static DateType getDateType(Date dailyDate) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(dailyDate);
 
@@ -170,6 +186,77 @@ public class DailyLogService {
         }
     }
 
+    public void updateDailyLog(User user, Date date, Time checkin, Time checkoutTime) {
+        DailyLog dailyLog = dailyLogRepository.findByUserAndDate(user, date)
+                .orElseThrow(() -> new BadRequest("Not_found_log"));
+        dailyLog.setCheckin(checkin);
 
+        if (compareTime(checkoutTime, endMorningTime) < 0) {
+            dailyLog.setCheckout(checkoutTime);
+
+            double morningTotal = roundDouble(getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour);
+            dailyLog.setMorningTotal(morningTotal);
+
+            dailyLog.setAfternoonTotal(0);
+
+        } else {
+            dailyLog.setCheckout(checkoutTime);
+
+            double morningTotal = roundDouble(getDistanceTime(endMorningTime, dailyLog.getCheckin()) / One_hour);
+            dailyLog.setMorningTotal(morningTotal);
+        }
+
+        if (compareTime(dailyLog.getCheckin(), startAfternoonTime) < 0) {
+            dailyLog.setCheckout(checkoutTime);
+
+            if (compareTime(checkoutTime, startAfternoonTime) > 0) {
+                double afternoonTotal = roundDouble(getDistanceTime(checkoutTime, startAfternoonTime) / One_hour);
+                dailyLog.setAfternoonTotal(afternoonTotal);
+            }
+        } else {
+            dailyLog.setCheckout(checkoutTime);
+
+            double afternoonTotal = roundDouble(getDistanceTime(checkoutTime, dailyLog.getCheckin()) / One_hour);
+            dailyLog.setAfternoonTotal(afternoonTotal);
+            dailyLog.setMorningTotal(0);
+        }
+
+        dailyLog.setTotalAttendance((dailyLog.getMorningTotal() + dailyLog.getAfternoonTotal()));
+
+        if (dailyLog.getDateType().equals(DateType.NORMAL)) {
+            dailyLog.setPaidDay(Math.min(roundDouble(dailyLog.getTotalAttendance() / 8), 1));
+        }
+        checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), date);
+    }
+
+    public void checkViolate(DailyLog dailyLog, User user) {
+        checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), dailyLog.getDate());
+    }
+
+    public List<DayOff> initEmployeeDayOff() {
+        List<DayOff> dayOffs = new ArrayList<>();
+        accountRepository.findAll()
+                .forEach(account -> {
+                    DayOff dayOff = DayOff.builder()
+                            .account(account)
+                            .january(16)
+                            .february(16)
+                            .april(16)
+                            .march(16)
+                            .may(16)
+                            .july(16)
+                            .june(16)
+                            .august(16)
+                            .september(16)
+                            .october(16)
+                            .november(16)
+                            .december(16)
+                            .year(2023)
+                            .build();
+                    dayOffs.add(dayOff);
+                });
+        dayOffRepository.saveAll(dayOffs);
+        return dayOffs;
+    }
 }
 

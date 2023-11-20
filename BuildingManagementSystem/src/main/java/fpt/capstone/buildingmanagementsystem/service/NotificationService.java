@@ -209,6 +209,7 @@ public class NotificationService {
             setListImage(image, notification, listImage);
         }
     }
+
     @Transactional
     public void saveFileAndReceiver(MultipartFile[] file, boolean sendAllStatus, Notification notification, List<Optional<User>> receivers, List<NotificationReceiver> notificationReceiverList, List<UnreadMark> unreadMarkList) throws IOException {
         if (receivers.size() > 0) {
@@ -244,9 +245,7 @@ public class NotificationService {
         for (int i = 0; i < image.length; i++) {
             int finalI = i;
             byte[] imageBytes = image[finalI].getBytes();
-            executorService.submit(() -> {
-                saveImageToDB(image, notification, listImage, finalI, imageBytes);
-            });
+            executorService.submit(() -> saveImageToDB(image, notification, listImage, finalI, imageBytes));
         }
         executorService.shutdown();
     }
@@ -310,8 +309,11 @@ public class NotificationService {
                 .notification(notification)
                 .user(user)
                 .build();
+        Optional<UnreadMark> record = unreadMarkRepository.findByNotificationAndUser(notification, user);
         try {
-            unreadMarkRepository.save(unreadMark);
+            if (!record.isPresent()) {
+                unreadMarkRepository.save(unreadMark);
+            }
             return true;
         } catch (Exception e) {
             throw new ServerError("fail");
@@ -347,8 +349,12 @@ public class NotificationService {
                 .user(user)
                 .notification(notification)
                 .build();
+        List<PersonalPriority> existedPriority = personalPriorityRepository.findByNotificationAndUser(notification, user);
+
         try {
-            personalPriorityRepository.save(personalPriority);
+            if(existedPriority.isEmpty()){
+                personalPriorityRepository.save(personalPriority);
+            }
             return true;
         } catch (Exception e) {
             throw new ServerError("fail");

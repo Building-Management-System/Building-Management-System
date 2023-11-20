@@ -4,15 +4,27 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Date;
+import java.sql.Time;
+import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class AttendanceDetailResponse {
-    String date;
-    DailyDetailResponse dailyDetailResponse;
-    OverTimeDetailResponse overTimeDetailResponse;
+    private String name;
+    private String username;
+    private String departmentName;
+    private String dateDaily;
+    private Time checkin;
+    private Time checkout;
+    private double totalAttendance;
+    private double morningTotal;
+    private double afternoonTotal;
+    private boolean lateCheckin;
+    private boolean earlyCheckout;
+    private double permittedLeave;
+    private boolean nonPermittedLeave;
+    private double outsideWork;
+    List<ControlLogResponse> controlLogResponse;
 }

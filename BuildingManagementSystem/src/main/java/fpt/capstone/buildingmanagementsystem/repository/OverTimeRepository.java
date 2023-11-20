@@ -14,8 +14,8 @@ import java.util.Optional;
 
 @Repository
 public interface OverTimeRepository extends JpaRepository<OvertimeLog, Long> {
-    @Query(value = "select * from overtime_log where user_id = :user_id and date = :date", nativeQuery = true)
-    OvertimeLog getAttendanceDetail(String user_id, String date);
+    @Query(value = "select * from overtime_log where user_id = :user_id and month(date) = :month and year(date)  = :year", nativeQuery = true)
+    List<OvertimeLog> getOvertimeLog(String user_id,String month, String year);
     List<OvertimeLog> findAllByUser(User user);
-
+    Optional<OvertimeLog> findByUser_Account_UsernameAndDate(String username, Date date);
 }

@@ -15,7 +15,11 @@ import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Time;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
@@ -41,7 +45,8 @@ public class RequestOvertimeFormService {
     UserRepository userRepository;
     @Autowired
     AutomaticNotificationService automaticNotificationService;
-
+    @Autowired
+    OvertimeService overtimeService;
     public boolean getOvertimeFormUser(SendOvertimeFormRequest sendOvertimeFormRequest) {
         try {
             if (sendOvertimeFormRequest.getContent() != null &&
@@ -52,7 +57,7 @@ public class RequestOvertimeFormService {
                     sendOvertimeFormRequest.getToTime() != null &&
                     sendOvertimeFormRequest.getFromTime() != null
             ) {
-                if (checkValidate(sendOvertimeFormRequest)) {
+                if (checkValidate(sendOvertimeFormRequest)&&checkTime(sendOvertimeFormRequest)) {
                     List<User> listUserReceiver = new ArrayList<>();
                     Optional<User> send_user = userRepository.findByUserId(sendOvertimeFormRequest.getUserId());
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendOvertimeFormRequest.getDepartmentId());
@@ -107,7 +112,7 @@ public class RequestOvertimeFormService {
                     sendOvertimeFormRequest.getToTime() != null &&
                     sendOvertimeFormRequest.getFromTime() != null
             ) {
-                if (checkValidate(sendOvertimeFormRequest)) {
+                if (checkValidate(sendOvertimeFormRequest)&&checkTime(sendOvertimeFormRequest)) {
 
                     Optional<User> send_user = userRepository.findByUserId(sendOvertimeFormRequest.getUserId());
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendOvertimeFormRequest.getDepartmentId());
@@ -141,7 +146,7 @@ public class RequestOvertimeFormService {
                     sendOvertimeFormRequest.getToTime() != null &&
                     sendOvertimeFormRequest.getFromTime() != null
             ) {
-                if (checkValidate(sendOvertimeFormRequest)) {
+                if (checkValidate(sendOvertimeFormRequest)&&checkTime(sendOvertimeFormRequest)) {
                     Optional<User> send_user = userRepository.findByUserId(sendOvertimeFormRequest.getUserId());
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendOvertimeFormRequest.getDepartmentId());
                     Optional<RequestTicket> requestTicket = requestTicketRepository.findByRequestId(sendOvertimeFormRequest.getRequestId());
@@ -187,14 +192,26 @@ public class RequestOvertimeFormService {
                 .status(PENDING).ticketRequest(ticket).title(sendOvertimeFormRequest.getTitle()).user(send_user.get()).build();
         saveOvertimeMessage(sendOvertimeFormRequest, send_user, department, requestTicket);
     }
+    private boolean checkTime(SendOvertimeFormRequest sendOvertimeFormRequest){
+        boolean check=true;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDate localDate = LocalDate.parse(sendOvertimeFormRequest.getOvertimeDate()+" 00:00:00", formatter);
+        java.sql.Date checkDate = java.sql.Date.valueOf(localDate);
 
+        LocalDateTime localCheckTime1 = LocalDateTime.parse(sendOvertimeFormRequest.getOvertimeDate()+" "+sendOvertimeFormRequest.getFromTime(), formatter);
+        Time sqlTimeEnd = Time.valueOf(localCheckTime1.toLocalTime());
+        if(sqlTimeEnd.getTime()-overtimeService.getSystemTime(sendOvertimeFormRequest.getUserId(),checkDate).getSystemCheckin().getTime()<0) {
+            check = false;
+        }else if(overtimeService.getSystemTime(sendOvertimeFormRequest.getUserId(),checkDate).getSystemCheckin().toString()==null){
+            check = false;
+        }
+        return check;
+    }
     private static boolean checkValidate(SendOvertimeFormRequest sendOvertimeFormRequest) throws ParseException {
         return validateDateFormat(sendOvertimeFormRequest.getOvertimeDate()) &&
                 validateDateTime(sendOvertimeFormRequest.getFromTime()) &&
                 validateDateTime(sendOvertimeFormRequest.getToTime()) &&
-                validateStartTimeAndEndTime(sendOvertimeFormRequest.getFromTime(), sendOvertimeFormRequest.getToTime()) &&
-                checkDateBookingRoom(sendOvertimeFormRequest.getOvertimeDate(),sendOvertimeFormRequest.getFromTime());
-    }
+                validateStartTimeAndEndTime(sendOvertimeFormRequest.getFromTime(), sendOvertimeFormRequest.getToTime());}
 
     private void saveOvertimeMessage(SendOvertimeFormRequest sendOvertimeFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) throws ParseException {
         RequestMessage requestMessage = RequestMessage.builder().createDate(Until.generateRealTime())

@@ -8,6 +8,10 @@ public enum TopicEnum {
     OVERTIME_REQUEST,
 
     LATE_REQUEST,
+
+    OUTSIDE_REQUEST,
+
     ROOM_REQUEST,
+
     OTHER_REQUEST
 }

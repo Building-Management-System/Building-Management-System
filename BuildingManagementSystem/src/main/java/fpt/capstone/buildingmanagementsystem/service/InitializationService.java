@@ -1,15 +1,28 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.mapper.AccountMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
+import fpt.capstone.buildingmanagementsystem.model.entity.DayOff;
+import fpt.capstone.buildingmanagementsystem.model.entity.Department;
+import fpt.capstone.buildingmanagementsystem.model.entity.Role;
+import fpt.capstone.buildingmanagementsystem.model.entity.Room;
+import fpt.capstone.buildingmanagementsystem.model.entity.Status;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DayOffRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RoomRepository;
+import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserPendingStatusRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 
@@ -31,6 +44,10 @@ public class InitializationService {
     AccountRepository accountRepository;
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    DayOffRepository dayOffRepository;
+
     public void init() {
         int check1 = roleRepository.findAll().size();
         int check2 = statusRepository.findAll().size();
@@ -38,7 +55,8 @@ public class InitializationService {
         int check4 = departmentRepository.findAll().size();
         int check5 = roomRepository.findAll().size();
         int check6 = accountRepository.findAll().size();
-        if (check1 == 0 & check2 == 0 && check3 == 0 && check4 == 0 && check5 == 0 && check6 == 0) {
+        int check7 = dayOffRepository.findAll().size();
+        if (check1 == 0 & check2 == 0 && check3 == 0 && check4 == 0 && check5 == 0 && check6 == 0 && check7 == 0) {
             List<Role> roleList = new ArrayList<>();
             List<Status> statusList = new ArrayList<>();
             List<UserPendingStatus> userPendingStatusList = new ArrayList<>();
@@ -99,6 +117,32 @@ public class InitializationService {
             departmentRepository.saveAll(departmentList);
             roomRepository.saveAll(roomList);
             userRepository.save(user);
+            dayOffRepository.saveAll(initEmployeeDayOff());
         }
+    }
+
+    public List<DayOff> initEmployeeDayOff() {
+        List<DayOff> dayOffs = new ArrayList<>();
+        accountRepository.findAll()
+                .forEach(account -> {
+                    DayOff dayOff = DayOff.builder()
+                            .account(account)
+                            .january(16)
+                            .february(16)
+                            .april(16)
+                            .march(16)
+                            .may(16)
+                            .july(16)
+                            .june(16)
+                            .august(16)
+                            .september(16)
+                            .october(16)
+                            .november(16)
+                            .december(16)
+                            .year(2023)
+                            .build();
+                    dayOffs.add(dayOff);
+                });
+        return dayOffs;
     }
 }

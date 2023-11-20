@@ -11,7 +11,6 @@ import lombok.Setter;
 @Setter
 public class NotificationFileResponse {
     private String fileId;
-    private byte[] data;
     private String fileName;
     private String type;
 }

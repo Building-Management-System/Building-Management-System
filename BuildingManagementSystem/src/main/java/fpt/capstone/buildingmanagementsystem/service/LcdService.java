@@ -45,6 +45,7 @@ public class LcdService {
             String operator = rootNode.get("operator").asText();
 
             if (operator.equals(CONTROL_LOG)) {
+                String time = infoNode.path("time").asText();
                 ControlLogLcd controlLogLcd = ControlLogLcd.builder()
                         .operator(rootNode.path("operator").asText())
                         .personId(infoNode.path("personId").asText())
@@ -54,13 +55,11 @@ public class LcdService {
                         .similarity2(infoNode.path("similarity2").asDouble())
                         .persionName(infoNode.path("persionName").asText())
                         .telnum(infoNode.path("telnum").asText())
-                        .time(formatter.parse(infoNode.path("time").asText()))
+                        .time(formatter.parse(time))
                         .pic(convertBase64ToByteArray(infoNode.path("pic").asText()))
                         .build();
-                logger.info(controlLogLcd + "");
-
                 Account account = accountRepository.findByUsername(controlLogLcd.getPersionName())
-                                .orElseThrow(() -> new BadRequest("Not_found"));
+                        .orElseThrow(() -> new BadRequest("Not_found"));
                 controlLogLcd.setAccount(account);
                 controlLogLcdRepository.save(controlLogLcd);
                 return dailyLogService.mapControlLogToDailyLog(controlLogLcd);
@@ -74,6 +73,7 @@ public class LcdService {
     }
 
     private static byte[] convertBase64ToByteArray(String base64Str) {
-        return Base64.decodeBase64(base64Str);
+        String image = base64Str.substring("data:image/jpeg;base64,".length());
+        return Base64.decodeBase64(image);
     }
 }

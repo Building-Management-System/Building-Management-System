@@ -2,6 +2,9 @@ package fpt.capstone.buildingmanagementsystem.until;
 
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -51,14 +54,12 @@ public class Until {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         java.util.Date dateConvert = sdf.parse(date);
-        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         return new java.sql.Date(dateConvert.getTime());
     }
     public static Date convertStringToDateTime(String date) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-        java.util.Date dateConvert = sdf.parse(date);
-        return dateConvert;
+        return sdf.parse(date);
     }
     public static Calendar convertDateToCalender(Date date) throws ParseException {
         Calendar calendar = Calendar.getInstance();
@@ -67,13 +68,17 @@ public class Until {
     }
     // cần check lại khi deploy lên host
     public static java.sql.Time convertStringToTime(String time) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-        Date date = sdf.parse(time);
-        long timeInMillis = date.getTime();
-        Time oldTime= new Time(timeInMillis);
-        LocalTime localTime = oldTime.toLocalTime();
-        return Time.valueOf(localTime);
+        if(time!=null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+            Date date = sdf.parse(time);
+            long timeInMillis = date.getTime();
+            Time oldTime = new Time(timeInMillis);
+            LocalTime localTime = oldTime.toLocalTime();
+            return Time.valueOf(localTime);
+        }else {
+            return null;
+        }
     }
 
     public static String encodePassword(String password) {
@@ -93,5 +98,15 @@ public class Until {
                     .charAt(index));
         }
         return sb.toString();
+    }
+
+    public static double roundDouble(double value) {
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    public static int getYear(java.sql.Date date) {
+        return date.toLocalDate().getYear();
     }
 }

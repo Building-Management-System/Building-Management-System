@@ -1,9 +1,7 @@
 package fpt.capstone.buildingmanagementsystem;
 
-import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
+import fpt.capstone.buildingmanagementsystem.service.LcdService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,13 +12,41 @@ class BuildingManagementSystemApplicationTests {
     RequestMessageRepository requestMessageRepository;
 
     @Autowired
-    private RequestTicketRepository requestTicketRepository;
+    LcdService service;
 
     @Test
     void contextLoads() {
-        RequestTicket requestTicket = requestTicketRepository.findById("5636ff5d-d2e7-4861-9d15-15eaea16c460")
-                .orElseThrow(() -> new BadRequest("Not_found_request_ticket"));
-        System.out.println(requestMessageRepository.findByRequest(requestTicket).size());
+        String json = "{\n" +
+                "\"operator\": \"RecPush\",\n" +
+                "\"info\": {\n" +
+                "\"customId\":\" \",\n" +
+                "\"personId\":\"10\",\n" +
+                "\"RecordID\":\"143\",\n" +
+                "\"VerifyStatus\":\"1\",\n" +
+                "\"PersonType\":\"0\",\n" +
+                "\"similarity1\":\"90.500000\",\n" +
+                "\"similarity2\":\"0.000000\",\n" +
+                "\"Sendintime\":1,\n" +
+                "\"direction\":\"exit\",\n" +
+                "\"otype\":\"1\",\n" +
+                "\"persionName\":\"thinhemp\",\n" +
+                "\"facesluiceId\":\"2032105\",\n" +
+                "\"facesluiceName\":\"Face1\",\n" +
+                "\"idCard\":\" \",\n" +
+                "\"telnum\":\" \",\n" +
+                "\"time\":\"2023-11-07 9:15:00\",\n" +
+                "\"PushType\": \"0\",\n" +
+                "\"OpendoorWay\": \"0\",\n" +
+                "\"cardNum2\": \"1\",\n" +
+                "\"szQrCodeData\":\"\",\n" +
+                "\"temperature\": \"0.0\",\n" +
+                "\"temperatureAlarm\": \"0\",\n" +
+                "\"temperatureMode\": \"0\",\n" +
+                "\"dwFileIndex\": \"0\",\n" +
+                "\"dwFilePos\": \"15269888\",\n" +
+                "\"pic\": \"data:image/jpeg;base64,abc\"\n" +
+                "}}\n";
+        System.out.println(service.ExtractJsonLcdLog(json));
     }
 
 }

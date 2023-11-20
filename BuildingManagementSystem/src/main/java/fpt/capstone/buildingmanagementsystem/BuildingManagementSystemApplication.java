@@ -10,7 +10,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import javax.annotation.PostConstruct;
 import javax.naming.Context;
+import java.util.TimeZone;
 
 @SpringBootApplication
 @EnableScheduling
@@ -19,5 +21,10 @@ public class BuildingManagementSystemApplication {
         ConfigurableApplicationContext context = SpringApplication.run(BuildingManagementSystemApplication.class);
         InitializationService initDB = context.getBean(InitializationService.class);
         initDB.init();
+    }
+    @PostConstruct
+    public void init(){
+        // Setting Spring Boot SetTimeZone
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
     }
 }

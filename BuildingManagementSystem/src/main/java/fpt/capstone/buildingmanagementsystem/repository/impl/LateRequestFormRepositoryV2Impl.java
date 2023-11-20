@@ -21,11 +21,10 @@ public class LateRequestFormRepositoryV2Impl implements LateRequestFormRepositor
 
     @Override
     public List<LateFormResponse> findLateAndEarlyViolateByUserIdAndDate(String userId, Date date, LateType lateType) {
-        String query = "SELECT rt.user_id,\n" +
-                "        lrf.late_duration,\n" +
-                "        lrf.request_date,\n" +
-                "        lrf.late_type,\n" +
-                "        lrf.status\n" +
+        String query = "SELECT rt.user_id as userId,\n" +
+                "       lrf.late_duration as lateDuration,\n" +
+                "       lrf.request_date as requestDate,\n" +
+                "       lrf.late_type as lateType\n" +
                 "FROM request_ticket rt\n" +
                 "JOIN request_message rm ON rt.request_id = rm.request_id\n" +
                 "join late_request_form lrf ON rm.request_message_id = lrf.request_massage_id\n" +
@@ -38,7 +37,8 @@ public class LateRequestFormRepositoryV2Impl implements LateRequestFormRepositor
                 .setParameter("date", date)
                 .setParameter("lateType", lateType.toString())
                 .setResultTransformer(Transformers.aliasToBean(LateFormResponse.class))
-                .getResultList().stream()
+                .getResultList()
+                .stream()
                 .collect(Collectors.toList());
 
     }

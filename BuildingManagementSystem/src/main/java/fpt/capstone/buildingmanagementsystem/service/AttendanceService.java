@@ -4,42 +4,44 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.DailyLogMapper;
-import fpt.capstone.buildingmanagementsystem.mapper.OvertimeLogMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
-import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
-import fpt.capstone.buildingmanagementsystem.model.entity.User;
-import fpt.capstone.buildingmanagementsystem.model.response.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
+import fpt.capstone.buildingmanagementsystem.model.response.AttendanceDetailResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.ControlLogResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.DailyLogResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.GetAttendanceUserResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.TotalAttendanceUser;
+import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
-import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.service.schedule.CheckoutAnalyzeSchedule;
 import fpt.capstone.buildingmanagementsystem.until.Until;
+import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
+import javax.transaction.Transactional;
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
 public class AttendanceService {
     @Autowired
-    UserRepository userRepository;
-    @Autowired
     DailyLogRepository dailyLogRepository;
     @Autowired
     DailyLogMapper dailyLogMapper;
     @Autowired
-    OvertimeLogMapper overtimeLogMapper;
-    @Autowired
-    OverTimeRepository overTimeRepository;
+    ControlLogLcdRepository controlLogLcdRepository;
 
-    public GetAttendanceUserResponse getAttendanceUser(String user_id, int month) {
+    @Autowired
+    CheckoutAnalyzeSchedule checkoutAnalyzeSchedule;
+
+    @Autowired
+    DailyLogService dailyLogService;
+
+    public GetAttendanceUserResponse getAttendanceUser(String user_id, int month, String year) {
         try {
             double totalAttendance = 0.0;
             double morningTotal = 0.0;
@@ -52,48 +54,50 @@ public class AttendanceService {
             double outsideWork = 0.0;
             double paidDay = 0.0;
             int totalDay = 0;
-            String formattedDate = null;
             List<DailyLogResponse> list = new ArrayList<>();
             if (user_id != null) {
-                    List<DailyLog> dailyLogs = dailyLogRepository.findByUser_UserIdAndMonth(user_id, month);
-                    if (dailyLogs.size() > 0) {
-                        for (DailyLog dailyLog : dailyLogs) {
-                            totalAttendance = totalAttendance + dailyLog.getTotalAttendance();
-                            morningTotal = morningTotal + dailyLog.getMorningTotal();
-                            afternoonTotal = afternoonTotal + dailyLog.getAfternoonTotal();
-                            if (dailyLog.isEarlyCheckout()) {
-                                lateCheckinTotal = lateCheckinTotal + 1.0;
-                            }
-                            if (dailyLog.isEarlyCheckout()) {
-                                earlyCheckoutTotal = earlyCheckoutTotal + 1.0;
-                            }
-                            if (dailyLog.isViolate()) {
-                                ViolateTotal = ViolateTotal + 1.0;
-                            }
-                            if ((getCheckWeekend(dailyLog.getDate()) != Calendar.SATURDAY) && (getCheckWeekend(dailyLog.getDate()) != Calendar.SUNDAY)) {
-                                totalDay = totalDay + 1;
-                            }
-                            permittedLeave = permittedLeave + dailyLog.getPermittedLeave();
-                            nonPermittedLeave = nonPermittedLeave + dailyLog.getNonPermittedLeave();
-                            outsideWork = outsideWork + dailyLog.getOutsideWork();
-                            paidDay = paidDay + dailyLog.getPaidDay();
-                            DailyLogResponse dailyLogResponse = dailyLogMapper.convertGetAttendanceUserResponse(dailyLog);
-                            SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
-                            dailyLogResponse.setDateDaily(sdf.format(Until.convertDateToCalender(dailyLog.getDate()).getTime()));
-                            list.add(dailyLogResponse);
+                List<DailyLog> dailyLogs = dailyLogRepository.getByUserIdAndMonthAndYear(user_id, month, year);
+                dailyLogs=dailyLogs.stream()
+                        .sorted((Comparator.comparing(DailyLog::getDate).reversed()))
+                        .collect(Collectors.toList());
+                if (dailyLogs.size() > 0) {
+                    for (DailyLog dailyLog : dailyLogs) {
+                        totalAttendance = totalAttendance + dailyLog.getTotalAttendance();
+                        morningTotal = morningTotal + dailyLog.getMorningTotal();
+                        afternoonTotal = afternoonTotal + dailyLog.getAfternoonTotal();
+                        if (dailyLog.isEarlyCheckout()) {
+                            lateCheckinTotal = lateCheckinTotal + 1.0;
                         }
-                        SimpleDateFormat sdf = new SimpleDateFormat("MMMM,yyyy", Locale.US);
-                        String monthTotal = sdf.format(Until.convertDateToCalender(dailyLogs.get(0).getDate()).getTime());
-                        TotalAttendanceUser totalAttendanceUser = TotalAttendanceUser.builder().
-                                lateCheckinTotal(lateCheckinTotal).ViolateTotal(ViolateTotal).earlyCheckoutTotal(earlyCheckoutTotal).date(monthTotal)
-                                .afternoonTotal(afternoonTotal).morningTotal(morningTotal)
-                                .totalAttendance(totalAttendance).nonPermittedLeave(nonPermittedLeave).paidDay(paidDay).permittedLeave(permittedLeave)
-                                .outsideWork(outsideWork).totalDate(totalDay).build();
-                        return new GetAttendanceUserResponse(dailyLogs.get(0).getUser().getAccount().getUsername()
-                                , dailyLogs.get(0).getUser().getDepartment().getDepartmentName(), monthTotal, totalAttendanceUser, list);
-                    } else {
-                        throw new NotFound("list_null");
+                        if (dailyLog.isEarlyCheckout()) {
+                            earlyCheckoutTotal = earlyCheckoutTotal + 1.0;
+                        }
+                        if (dailyLog.isViolate()) {
+                            ViolateTotal = ViolateTotal + 1.0;
+                        }
+                        if ((getCheckWeekend(dailyLog.getDate()) != Calendar.SATURDAY) && (getCheckWeekend(dailyLog.getDate()) != Calendar.SUNDAY)) {
+                            totalDay = totalDay + 1;
+                        }
+                        permittedLeave = permittedLeave + dailyLog.getPermittedLeave();
+                        nonPermittedLeave = nonPermittedLeave + dailyLog.getNonPermittedLeave();
+                        outsideWork = outsideWork + dailyLog.getOutsideWork();
+                        paidDay = paidDay + dailyLog.getPaidDay();
+                        DailyLogResponse dailyLogResponse = dailyLogMapper.convertGetAttendanceUserResponse(dailyLog);
+                        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
+                        dailyLogResponse.setDateDaily(sdf.format(Until.convertDateToCalender(dailyLog.getDate()).getTime()));
+                        list.add(dailyLogResponse);
                     }
+                    SimpleDateFormat sdf = new SimpleDateFormat("MMMM,yyyy", Locale.US);
+                    String monthTotal = sdf.format(Until.convertDateToCalender(dailyLogs.get(0).getDate()).getTime());
+                    TotalAttendanceUser totalAttendanceUser = TotalAttendanceUser.builder().
+                            lateCheckinTotal(lateCheckinTotal).ViolateTotal(ViolateTotal).earlyCheckoutTotal(earlyCheckoutTotal).date(monthTotal)
+                            .afternoonTotal(afternoonTotal).morningTotal(morningTotal)
+                            .totalAttendance(totalAttendance).nonPermittedLeave(nonPermittedLeave).paidDay(paidDay).permittedLeave(permittedLeave)
+                            .outsideWork(outsideWork).totalDate(totalDay).build();
+                    return new GetAttendanceUserResponse(dailyLogs.get(0).getUser().getAccount().getUsername()
+                            , dailyLogs.get(0).getUser().getDepartment().getDepartmentName(), monthTotal, totalAttendanceUser, list);
+                } else {
+                    throw new NotFound("list_null");
+                }
             } else {
                 throw new BadRequest("request_fail");
             }
@@ -105,15 +109,48 @@ public class AttendanceService {
     }
 
     public AttendanceDetailResponse getAttendanceDetail(String user_id, String date) {
-        if (user_id != null) {
+        if (user_id != null && Validate.validateDateFormat(date)) {
             try {
-                DailyLog dailyLogs = dailyLogRepository.getAttendanceDetailByUserIdAndDate(user_id, date)
-                        .orElseThrow(() -> new BadRequest("not_found"));
-                OvertimeLog overtimeLog = overTimeRepository.getAttendanceDetail(user_id, date);
-                OverTimeDetailResponse overTimeDetailResponse = overtimeLogMapper.convertGetAttendanceUserDetailResponse(overtimeLog);
-                DailyDetailResponse dailyDetailResponse = dailyLogMapper.convertGetAttendanceUserDetailResponse(dailyLogs);
-                return AttendanceDetailResponse.builder().dailyDetailResponse(dailyDetailResponse).date(date).overTimeDetailResponse(overTimeDetailResponse).build();
-            } catch (Exception e) {
+                Optional<DailyLog> dailyLogOptional = dailyLogRepository.getAttendanceDetailByUserIdAndDate(user_id, date);
+                if (dailyLogOptional.isPresent()) {
+                    DailyLog dailyLogs = dailyLogOptional.get();
+                    String name = dailyLogs.getUser().getFirstName() + " " + dailyLogs.getUser().getLastName();
+                    String username = dailyLogs.getUser().getAccount().getUsername();
+                    List<ControlLogLcd> controlLogLcds = controlLogLcdRepository.getControlLogLcdList(username, date);
+                    controlLogLcds=controlLogLcds.stream()
+                            .sorted((Comparator.comparing(ControlLogLcd::getTime)))
+                            .collect(Collectors.toList());
+                    String departmentName = dailyLogs.getUser().getDepartment().getDepartmentName();
+                    SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
+                    String dateDaily = sdf.format(Until.convertDateToCalender(dailyLogs.getDate()).getTime());
+                    Time checkin = dailyLogs.getCheckin();
+                    Time checkout = dailyLogs.getCheckout();
+                    double totalAttendance = dailyLogs.getTotalAttendance();
+                    double morningTotal = dailyLogs.getMorningTotal();
+                    double afternoonTotal = dailyLogs.getAfternoonTotal();
+                    boolean lateCheckin = dailyLogs.isLateCheckin();
+                    boolean earlyCheckout = dailyLogs.isEarlyCheckout();
+                    boolean nonPermittedLeave = dailyLogs.getNonPermittedLeave() > 0.0;
+                    double permittedLeave = dailyLogs.getPermittedLeave();
+                    double outsideWork = dailyLogs.getOutsideWork();
+                    List<ControlLogResponse> controlLogResponse = new ArrayList<>();
+                    controlLogLcds.forEach(element -> {
+                        ControlLogResponse controlLogResponse1 = new ControlLogResponse();
+                        controlLogResponse1.setLog(element.getTime().toString());
+                        controlLogResponse1.setUsername(username);
+                        controlLogResponse.add(controlLogResponse1);
+                    });
+                    return AttendanceDetailResponse.builder()
+                            .name(name).username(username).departmentName(departmentName).dateDaily(dateDaily)
+                            .checkin(checkin).checkout(checkout).totalAttendance(totalAttendance)
+                            .morningTotal(morningTotal).afternoonTotal(afternoonTotal).lateCheckin(lateCheckin)
+                            .earlyCheckout(earlyCheckout).permittedLeave(permittedLeave).nonPermittedLeave(nonPermittedLeave)
+                            .outsideWork(outsideWork).controlLogResponse(controlLogResponse)
+                            .build();
+                } else {
+                    throw new NotFound("request_fail");
+                }
+            } catch (ServerError | ParseException e) {
                 throw new ServerError("fail");
             }
         } else {
@@ -121,15 +158,27 @@ public class AttendanceService {
         }
     }
 
-    public int getMonth(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        return calendar.get(Calendar.MONTH) + 1;
-    }
-
     public int getCheckWeekend(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.DAY_OF_WEEK);
+    }
+
+    @Transactional
+    public void updateAttendanceTime(java.sql.Date date, User user, Time checkin, Time checkout) {
+        DailyLog dailyLog = dailyLogRepository.findByUserAndDate(user, date)
+                .orElseThrow(() -> new BadRequest("Not_found"));
+        if (checkin != null) {
+            dailyLog.setCheckin(checkin);
+        }
+        if (checkout != null) {
+            dailyLog.setCheckout(checkout);
+        }
+        dailyLogService.updateDailyLog(user, date, checkin, checkout);
+        try {
+            dailyLogRepository.save(dailyLog);
+        } catch (Exception e) {
+            throw new ServerError("Something went wrong");
+        }
     }
 }
