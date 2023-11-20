@@ -7,7 +7,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.sql.Date;
 import java.sql.Time;
 
@@ -29,17 +37,23 @@ public class ChangeLog {
     private Date date;
     @Column
     private Time checkin;
+
     @Column
     private Time checkout;
+
     @Column
     private double outsideWork;
+
     @Column
     private boolean violate;
+
     @Column
     private String reason;
-    @Enumerated(EnumType.STRING)
+
     @Column
+    @Enumerated(EnumType.STRING)
     private ChangeLogType changeType;
+
     @Column
     private java.util.Date createdDate;
 
