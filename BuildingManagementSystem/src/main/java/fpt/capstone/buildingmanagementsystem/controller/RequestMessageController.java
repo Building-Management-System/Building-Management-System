@@ -36,6 +36,11 @@ public class RequestMessageController {
         return requestMessageService.getAllLateRequestMessageByRequestId(requestId);
     }
 
+    @GetMapping("getWorkingOutsideMessage")
+    List<Object> getAllWorkingOutsideRequestMessageByRequestId(@RequestParam("request_id") String requestId) {
+        return requestMessageService.getAllWorkingOutsideRequestMessageByRequestId(requestId);
+    }
+
     @GetMapping("getLeaveMessage")
     List<Object> getAllLeaveMessageByRequestId(@RequestParam("request_id") String requestId) {
         return requestMessageService.getAllLeaveMessageByRequestId(requestId);

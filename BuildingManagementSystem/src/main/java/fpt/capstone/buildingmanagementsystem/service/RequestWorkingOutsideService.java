@@ -2,29 +2,39 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
-import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.LateRequestForm;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
+import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
+import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.WorkingOutsideRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.LateMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.model.request.WorkingOutsideRequest;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.WorkingOutsideFormRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class LateRequestService {
+public class RequestWorkingOutsideService {
     @Autowired
     TicketRepositoryv2 ticketRepositoryv2;
+
     @Autowired
     RequestTicketRepository requestTicketRepository;
+
     @Autowired
     RequestMessageRepository requestMessageRepository;
+
     @Autowired
     DepartmentRepository departmentRepository;
+
     @Autowired
     UserRepository userRepository;
 
@@ -38,25 +48,16 @@ public class LateRequestService {
     AutomaticNotificationService automaticNotificationService;
 
     @Autowired
-    LateRequestFormRepository lateRequestFormRepository;
+    WorkingOutsideFormRepository workingOutsideRepository;
 
     @Autowired
-    AttendanceService attendanceService;
+    WorkingOutsideFormRepository workingOutsideFormRepository;
 
-    @Autowired
-    DailyLogRepository dailyLogRepository;
+    public boolean acceptWorkingOutsideRequest(String acceptWorkingOutsideRequestId) {
+        WorkingOutsideRequestForm workingOutsideForm = workingOutsideFormRepository.findById(acceptWorkingOutsideRequestId)
+                .orElseThrow(() -> new BadRequest("Not_found_working_outside_request"));
 
-    @Autowired
-    LateRequestFormRepositoryV2 lateRequestFormRepositoryV2;
-
-    @Autowired
-    DailyLogService dailyLogService;
-
-    public boolean acceptLateRequest(String acceptLateRequestId) {
-        LateRequestForm lateRequestForm = lateRequestFormRepository.findById(acceptLateRequestId)
-                .orElseThrow(() -> new BadRequest("Not_found_late_request"));
-
-        RequestMessage requestMessage = requestMessageRepository.findById(lateRequestForm.getRequestMessage().getRequestMessageId())
+        RequestMessage requestMessage = requestMessageRepository.findById(workingOutsideForm.getRequestMessage().getRequestMessageId())
                 .orElseThrow(() -> new BadRequest("Not_found_request_message"));
 
         RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
@@ -69,8 +70,8 @@ public class LateRequestService {
                 .userId(requestMessage.getReceiver().getUserId())
                 .ticketId(ticket.getTicketId())
                 .requestId(requestTicket.getRequestId())
-                .title("Approve late request")
-                .content("Approve late request")
+                .title("Approve working outside request")
+                .content("Approve working outside request")
                 .departmentId(requestMessage.getDepartment().getDepartmentId())
                 .receivedId(requestMessage.getSender().getUserId())
                 .build();
@@ -78,8 +79,8 @@ public class LateRequestService {
 
         executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
-            lateRequestForm.setStatus(true);
-            lateRequestFormRepository.saveAndFlush(lateRequestForm);
+            workingOutsideForm.setStatus(true);
+            workingOutsideFormRepository.saveAndFlush(workingOutsideForm);
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
@@ -93,7 +94,7 @@ public class LateRequestService {
                             true,
                             null
                     ));
-            updateLateRequest(lateRequestForm.getRequestDate(), requestTicket.getUser());
+//            updateLateRequest(lateRequestForm.getRequestDate(), requestTicket.getUser());
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -101,11 +102,11 @@ public class LateRequestService {
     }
 
     @javax.transaction.Transactional
-    public boolean rejectLateRequest(LateMessageRequest lateMessageRequest) {
-        LateRequestForm lateRequestForm = lateRequestFormRepository.findById(lateMessageRequest.getLateMessageRequestId())
-                .orElseThrow(() -> new BadRequest("Not_found_late_request"));
+    public boolean rejectLateRequest(WorkingOutsideRequest workingOutsideRequest) {
+        WorkingOutsideRequestForm workingOutsideForm = workingOutsideFormRepository.findById(workingOutsideRequest.getWorkOutsideRequestId())
+                .orElseThrow(() -> new BadRequest("Not_found_working_outside_request"));
 
-        RequestMessage requestMessage = requestMessageRepository.findById(lateRequestForm.getRequestMessage().getRequestMessageId())
+        RequestMessage requestMessage = requestMessageRepository.findById(workingOutsideForm.getRequestMessage().getRequestMessageId())
                 .orElseThrow(() -> new BadRequest("Not_found_request_message"));
 
         RequestTicket requestTicket = requestTicketRepository.findById(requestMessage.getRequest().getRequestId())
@@ -119,7 +120,7 @@ public class LateRequestService {
                 .ticketId(ticket.getTicketId())
                 .requestId(requestTicket.getRequestId())
                 .title("Reject late request")
-                .content(lateRequestForm.getContent())
+                .content(workingOutsideForm.getContent())
                 .departmentId(requestMessage.getDepartment().getDepartmentId())
                 .receivedId(requestMessage.getSender().getUserId())
                 .build();
@@ -138,7 +139,7 @@ public class LateRequestService {
                             requestMessage.getSender(),
                             ticket.getTopic(),
                             false,
-                            lateRequestForm.getContent()
+                            workingOutsideForm.getContent()
                     ));
             return true;
         } catch (Exception e) {
@@ -148,12 +149,5 @@ public class LateRequestService {
 
     private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
         RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
-    }
-
-    public void updateLateRequest(Date date, User user) {
-        Optional<DailyLog> dailyLog = dailyLogRepository.findByUserAndDate(user, date);
-        if(!dailyLog.isPresent()) return;
-        dailyLogService.checkViolate(dailyLog.get(), user);
-        dailyLogRepository.save(dailyLog.get());
     }
 }
