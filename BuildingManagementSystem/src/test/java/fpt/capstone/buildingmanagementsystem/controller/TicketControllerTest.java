@@ -14,6 +14,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -43,15 +44,15 @@ class TicketControllerTest {
         String senderID = "f2dbbf96-1a65-4e72-805d-ee10ca9b50a6";
 
         List<TicketRequestResponseV2> result = ticketController.getAllTicketAndRequest(senderID);
+        assertNotNull(result);
         assertEquals(3, result.size());
     }
 
     @Test
     void testGetAllTicketAndRequestByHr() {
-        when(ticketManageService.getAllTicketsByHr()).thenReturn(List.of(new TicketRequestResponseV2()));
-
         List<TicketRequestResponseV2> result = ticketController.getAllTicketAndRequestByHr();
-        Assertions.assertEquals(List.of(new TicketRequestResponseV2()), result);
+        assertNotNull(result);
+        assertEquals(2, result);
     }
 
     @Test

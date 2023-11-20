@@ -16,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-class RequestControllerTest {
+class  RequestControllerTest {
     @Autowired
     RequestOtherService requestOtherService;
     @Autowired
@@ -54,8 +54,8 @@ class RequestControllerTest {
     void testRequestAttendanceForm() {
         SendAttendanceFormRequest sendAttendanceFormRequest = new SendAttendanceFormRequest();
         sendAttendanceFormRequest.setUserId("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6");
-        sendAttendanceFormRequest.setTitle("A Nam code bi loi roi");
-        sendAttendanceFormRequest.setContent("anh 10 bi miss diem danh ngay hom nay");
+        sendAttendanceFormRequest.setTitle("attendance khong content");
+        sendAttendanceFormRequest.setContent("");
         sendAttendanceFormRequest.setDepartmentId("2");
         sendAttendanceFormRequest.setManualDate("2023-10-20");
         sendAttendanceFormRequest.setManualFirstEntry("08:00:00");
@@ -105,11 +105,11 @@ class RequestControllerTest {
     void testRequestLeaveForm() {
         SendLeaveFormRequest sendLeaveFormRequest = new SendLeaveFormRequest();
         sendLeaveFormRequest.setUserId("55fd796e-6e33-4b17-b6d9-d32aef9fce3f");
-        sendLeaveFormRequest.setTitle("hnay t nghi");
-        sendLeaveFormRequest.setContent("adasd siahf oaub ỉyhbgs íu fiub sg sguh sth g íh ");
-        sendLeaveFormRequest.setFromDate("2023-11-12");
-        sendLeaveFormRequest.setToDate("2023-11-13");
-        sendLeaveFormRequest.setHalfDay(false);
+        sendLeaveFormRequest.setTitle("leave part3");
+        sendLeaveFormRequest.setContent("leave part3");
+        sendLeaveFormRequest.setFromDate("2023-11-15");
+        sendLeaveFormRequest.setToDate("2023-11-18");
+        sendLeaveFormRequest.setHalfDay(true);
         sendLeaveFormRequest.setDurationEvaluation(1);
         sendLeaveFormRequest.setDepartmentId("2");
         sendLeaveFormRequest.setReceivedId("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6");
@@ -207,9 +207,9 @@ class RequestControllerTest {
         SendOtherFormRequest sendOtherFormRequest = new SendOtherFormRequest();
         sendOtherFormRequest.setUserId("55fd796e-6e33-4b17-b6d9-d32aef9fce3f");
         sendOtherFormRequest.setReceivedId("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6");
-        sendOtherFormRequest.setContent("auishv isudfg sdfsdfafg afg");
+        sendOtherFormRequest.setContent("other request 1");
         sendOtherFormRequest.setDepartmentId("2");
-        sendOtherFormRequest.setTitle("important thing 2");
+        sendOtherFormRequest.setTitle("other request 1");
 
         boolean result = requestController.requestOtherForm(sendOtherFormRequest);
         assertEquals(true, result);

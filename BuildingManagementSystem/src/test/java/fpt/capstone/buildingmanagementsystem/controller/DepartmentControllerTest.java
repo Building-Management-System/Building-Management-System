@@ -30,17 +30,13 @@ class DepartmentControllerTest {
 
     @Test
     public void testGetAllDepartment() {
-        // Create sample DepartmentResponse objects
         DepartmentResponse responseA = new DepartmentResponse("1", "Department A");
         DepartmentResponse responseB = new DepartmentResponse("2", "Department B");
 
-        // Mock the behavior of departmentService.getAllDepartment()
         Mockito.when(departmentService.getAllDepartment()).thenReturn(List.of(responseA, responseB));
 
-        // Call the controller method
         ResponseEntity<?> responseEntity = departmentController.getAllDepartment();
 
-        // Verify the response
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         List<DepartmentResponse> departmentResponses = (List<DepartmentResponse>) responseEntity.getBody();
         assertEquals(2, departmentResponses.size());

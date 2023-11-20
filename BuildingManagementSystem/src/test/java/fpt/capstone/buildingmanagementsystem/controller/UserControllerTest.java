@@ -10,19 +10,27 @@ import fpt.capstone.buildingmanagementsystem.service.UserManageService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
 class UserControllerTest {
-    @Mock
+    @Autowired
     UserManageService userManageService;
-    @InjectMocks
+    @Autowired
     UserController userController;
 
     @BeforeEach
@@ -32,18 +40,27 @@ class UserControllerTest {
 
     @Test
     void testGetAllUserInfoPending() throws Exception {
-        when(userManageService.getAllUserNotVerify()).thenReturn(List.of(new GetAllUserInfoPending("accountId", "firstName", "lastName", "gender", "dateOfBirth", "telephoneNumber", "country", "city", "email", "image")));
-
         ResponseEntity<?> result = userController.getAllUserInfoPending();
-        Assertions.assertEquals(null, result);
+        assertEquals(200, result.getStatusCodeValue());
+        assertTrue(result.getBody() instanceof List);
+
+        List<?> userList = (List<?>) result.getBody();
+        assertEquals(1, userList.size());
     }
 
     @Test
     void testGetInfoUser() throws Exception {
-        when(userManageService.getInfoUser(any())).thenReturn(new GetUserInfoResponse("firstName", "lastName", "gender", "dateOfBirth", "telephoneNumber", "country", "city", "email", "image", "departmentName"));
+        GetUserInfoRequest getUserInfoRequest = new GetUserInfoRequest();
+        getUserInfoRequest.setUserId("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6");
 
-        ResponseEntity<?> result = userController.getInfoUser(new GetUserInfoRequest("userId"));
-        Assertions.assertEquals(null, result);
+        ResponseEntity<?> result = userController.getInfoUser(getUserInfoRequest);
+
+        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(new GetUserInfoResponse("John", "Doe",
+                "Boyyyy", "03/04/2001",
+                "0865965402", "LA",
+                "LA", "sontung02hn@gmail.com", "unknown", "tech D1"), result.getBody());
+
     }
 
     @Test
@@ -72,10 +89,12 @@ class UserControllerTest {
 
     @Test
     void testGetAllUserInfo() {
-        when(userManageService.getAllUserInfo()).thenReturn(List.of(new UserInfoResponse("accountId", "firstName", "lastName", "image", "roleName")));
-
         ResponseEntity<?> result = userController.getAllUserInfo();
-        Assertions.assertEquals(null, result);
+        assertEquals(200, result.getStatusCodeValue());
+        assertTrue(result.getBody() instanceof List);
+
+        List<?> userList = (List<?>) result.getBody();
+        assertEquals(8, userList.size());
     }
 
     @Test
@@ -88,9 +107,9 @@ class UserControllerTest {
 
     @Test
     void testGetUserAccount() {
-        when(userManageService.getUserAccount(anyString())).thenReturn(List.of(new UserAccountResponse("accountId", "username", "departmentId", "departmentName")));
+        String userID = "11dea336-8be4-4399-bce6-c57d510b5275";
 
-        List<UserAccountResponse> result = userController.getUserAccount("userId");
-        Assertions.assertEquals(List.of(new UserAccountResponse("accountId", "username", "departmentId", "departmentName")), result);
+        List<UserAccountResponse> result = userController.getUserAccount(userID);
+        assertEquals(7, result.size());
     }
 }

@@ -55,8 +55,8 @@ class AccountControllerUnitTest {
     @Test
     void testCreateAuthenticationToken_Success() throws Exception {
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername("tungnshe");
-        loginRequest.setPassword("GsQciC2m");
+        loginRequest.setUsername("minhhaha");
+        loginRequest.setPassword("123");
 
         ResponseEntity<?> response = accountController.createAuthenticationToken(loginRequest);
 
@@ -145,8 +145,8 @@ class AccountControllerUnitTest {
     public void testChangePassword_Success() throws Exception {
         ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
         changePasswordRequest.setAccountId("f8dbabf3-34d5-4b19-97dd-d99d7b34e11f");
-        changePasswordRequest.setOldPassword("GsQciC2m");
-        changePasswordRequest.setNewPassword("123");
+        changePasswordRequest.setOldPassword("123  ");
+        changePasswordRequest.setNewPassword("123  ");
 
         boolean result = accountController.changPassword(changePasswordRequest);
 
