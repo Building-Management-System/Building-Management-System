@@ -22,6 +22,6 @@ public class RequestWorkingOutsideController {
 
     @PostMapping("rejectWorkingOutside")
     public boolean rejectWorkingOutside(@RequestBody WorkingOutsideRequest workingOutsideRequest) {
-        return workingOutsideService.rejectLateRequest(workingOutsideRequest);
+        return workingOutsideService.rejectWorkingOutsideRequest(workingOutsideRequest);
     }
 }
