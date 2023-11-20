@@ -38,6 +38,7 @@ public class RequestChangeLogService {
                     Optional<User> userEmp = userRepository.findByUserId(saveChangeLogRequest.getEmployeeId());
                     Optional<User> userManager = userRepository.findByUserId(saveChangeLogRequest.getManagerId());
                     if (userEmp.isPresent() && userManager.isPresent()) {
+                        if (saveChangeLogRequest.getWorkOutSide() == null) changeLog.setOutsideWork(-1);
                         changeLog.setEmployee(userEmp.get());
                         changeLog.setManager(userManager.get());
                         changeLogRepository.save(changeLog);
