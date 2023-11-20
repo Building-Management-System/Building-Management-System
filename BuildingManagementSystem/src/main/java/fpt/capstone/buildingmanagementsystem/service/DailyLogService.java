@@ -25,10 +25,8 @@ import java.sql.Time;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.roundDouble;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.compareTime;
@@ -62,8 +60,6 @@ public class DailyLogService {
     private static final Time startAfternoonTime = Time.valueOf("13:00:00");
 
     private static final double One_hour = 1000 * 60 * 60;
-
-    private static final double One_minute = 1000 * 60;
 
     private static final Logger logger = LoggerFactory.getLogger(DailyLogService.class);
 
@@ -162,14 +158,15 @@ public class DailyLogService {
         if (compareTime(checkinTime, startMorningTime) > 0) {
             List<LateFormResponse> findLateMorningAccepted = lateRequestFormRepositoryV2.findLateAndEarlyViolateByUserIdAndDate(userId, date, LateType.LATE_MORNING);
             dailyLog.setLateCheckin(true);
-            if (!findLateMorningAccepted.isEmpty()) {
-                List<LateFormResponse> lateAccepted = findLateMorningAccepted.stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
-                        .collect(Collectors.toList());
-                double lateMinutes = roundDouble((startMorningTime.getTime() - checkinTime.getTime()) / One_minute);
-                dailyLog.setViolate(lateMinutes > lateAccepted.get(0).getLateDuration());
-            } else {
-                dailyLog.setViolate(true);
-            }
+//            if (!findLateMorningAccepted.isEmpty()) {
+//                List<LateFormResponse> lateAccepted = findLateMorningAccepted.stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
+//                        .collect(Collectors.toList());
+//                double lateMinutes = roundDouble((startMorningTime.getTime() - checkinTime.getTime()) / One_minute);
+//                dailyLog.setViolate(lateMinutes > lateAccepted.get(0).getLateDuration());
+//            } else {
+//                dailyLog.setViolate(true);
+//            }
+            dailyLog.setViolate(findLateMorningAccepted.isEmpty());
         } else {
             dailyLog.setLateCheckin(false);
         }
@@ -229,12 +226,10 @@ public class DailyLogService {
         if (dailyLog.getDateType().equals(DateType.NORMAL)) {
             dailyLog.setPaidDay(Math.min(roundDouble(dailyLog.getTotalAttendance() / 8), 1));
         }
-        getLateCheckInDuration(dailyLog, user.getUserId(), date, dailyLog.getCheckin());
         checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), date);
     }
 
     public void checkViolate(DailyLog dailyLog, User user) {
-        getLateCheckInDuration(dailyLog, user.getUserId(), dailyLog.getDate(), dailyLog.getCheckin());
         checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), dailyLog.getDate());
     }
 

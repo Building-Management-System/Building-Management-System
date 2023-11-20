@@ -67,6 +67,9 @@ public class CheckoutAnalyzeSchedule {
 
     private static final Time endAfternoonTime = Time.valueOf("17:30:00");
 
+    private static final Time startMorningTime = Time.valueOf("08:30:00");
+
+
     private static final double One_hour = 1000 * 60 * 60;
 
     private static final Logger logger = LoggerFactory.getLogger(CheckoutAnalyzeSchedule.class);
@@ -159,15 +162,19 @@ public class CheckoutAnalyzeSchedule {
     public void checkViolate(DailyLog dailyLog, Account account, Date date) {
         if(!dailyLog.getDateType().equals(DateType.NORMAL)) return;
         int year = getYear(dailyLog.getDate());
+
+        List<LateFormResponse> findLateMorningAccepted = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(account.getAccountId(), date, LateType.LATE_MORNING);
+        if (compareTime(dailyLog.getCheckin(), startMorningTime) > 0) {
+            dailyLog.setLateCheckin(true);
+        }
+
         List<LateFormResponse> lateFormResponses = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(account.accountId, date, LateType.EARLY_AFTERNOON)
                 .stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
                 .collect(Collectors.toList());
         if (compareTime(dailyLog.getCheckout(), endAfternoonTime) < 0) {
             dailyLog.setEarlyCheckout(true);
-            if (lateFormResponses.isEmpty()) dailyLog.setViolate(true);
-        } else {
-            dailyLog.setEarlyCheckout(false);
         }
+
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
         if (getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour < 6) {
             double workingHours = roundDouble(dailyLog.getTotalAttendance()/ 8);
@@ -182,9 +189,10 @@ public class CheckoutAnalyzeSchedule {
                 dailyLog.setNonPermittedLeave(offHours - permittedLeaveLeft);
                 updateDayOffLeft(dailyLog.getMonth(), account, 0, year);
             }
-            dailyLog.setViolate(leaveRequestForms.isEmpty());
         }
-
+        dailyLog.setViolate(findLateMorningAccepted.isEmpty()
+                && lateFormResponses.isEmpty()
+                && leaveRequestForms.isEmpty());
     }
 
     private double getPermittedLeaveLeft(Account account, int month, int year) {
