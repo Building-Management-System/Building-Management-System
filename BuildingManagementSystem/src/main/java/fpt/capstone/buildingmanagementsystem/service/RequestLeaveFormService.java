@@ -354,11 +354,16 @@ public class RequestLeaveFormService {
     }
 
     public void updateLeaveRequest(java.sql.Date fromDate, java.sql.Date toDate, User user) {
-        List<DailyLog> dailyLogs = dailyLogRepository.getDailyLogsByUserAndFromDateAndToDate(user.getUserId(), fromDate, toDate);
-        if (dailyLogs.isEmpty()) return;
-        dailyLogs.forEach(dailyLog -> {
-            dailyLogService.checkViolate(dailyLog, user);
-            dailyLogRepository.save(dailyLog);
-        });
+        try {
+            List<DailyLog> dailyLogs = dailyLogRepository.getDailyLogsByUserAndFromDateAndToDate(user.getUserId(), fromDate, toDate);
+            if (dailyLogs.isEmpty()) return;
+            dailyLogs.forEach(dailyLog -> {
+                dailyLogService.checkViolate(dailyLog, user);
+                dailyLogRepository.save(dailyLog);
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

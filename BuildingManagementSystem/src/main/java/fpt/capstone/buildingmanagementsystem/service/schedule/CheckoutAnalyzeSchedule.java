@@ -37,6 +37,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.getYear;
+import static fpt.capstone.buildingmanagementsystem.until.Until.roundDouble;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.compareTime;
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.getDistanceTime;
 
@@ -144,7 +145,7 @@ public class CheckoutAnalyzeSchedule {
         int year = getYear(offWork.getDate());
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
         double permittedLeft = getPermittedLeaveLeft(account, offWork.getMonth(), year);
-        if(permittedLeft > 8) {
+        if(permittedLeft >= 8) {
             offWork.setPermittedLeave(8);
             updateDayOffLeft(offWork.getMonth(), account, permittedLeft - 8,year);
         } else {
@@ -169,7 +170,7 @@ public class CheckoutAnalyzeSchedule {
         }
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
         if (getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour < 6) {
-            double workingHours = getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour;
+            double workingHours = roundDouble(dailyLog.getTotalAttendance()/ 8);
             double offHours = 8 - workingHours;
             double permittedLeaveLeft = getPermittedLeaveLeft(account, dailyLog.getMonth(), year);
 
@@ -192,7 +193,7 @@ public class CheckoutAnalyzeSchedule {
         double permittedHours = dailyLogs.stream()
                 .mapToDouble(DailyLog::getPermittedLeave)
                 .sum();
-        return permittedHoursLeft - permittedHours;
+        return permittedHoursLeft - permittedHours < 0 ? 0 : permittedHoursLeft - permittedHours ;
     }
 
     private void updateDayOffLeft(int month, Account account, double hourLeft, int year) {
