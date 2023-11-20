@@ -30,9 +30,6 @@ public class RequestChangeLogService {
         try {
             if (saveChangeLogRequest.getManagerId() != null &&
                     saveChangeLogRequest.getEmployeeId() != null &&
-                    saveChangeLogRequest.getManualCheckIn() != null &&
-                    saveChangeLogRequest.getManualCheckOut() != null &&
-                    saveChangeLogRequest.getWorkOutSide() != null &&
                     saveChangeLogRequest.getDate() != null &&
                     saveChangeLogRequest.getChangeType() != null
             ) {
