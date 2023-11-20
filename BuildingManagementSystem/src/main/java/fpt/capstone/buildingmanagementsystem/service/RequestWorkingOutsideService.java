@@ -102,7 +102,7 @@ public class RequestWorkingOutsideService {
     }
 
     @javax.transaction.Transactional
-    public boolean rejectLateRequest(WorkingOutsideRequest workingOutsideRequest) {
+    public boolean rejectWorkingOutside(WorkingOutsideRequest workingOutsideRequest) {
         WorkingOutsideRequestForm workingOutsideForm = workingOutsideFormRepository.findById(workingOutsideRequest.getWorkOutsideRequestId())
                 .orElseThrow(() -> new BadRequest("Not_found_working_outside_request"));
 
@@ -119,8 +119,8 @@ public class RequestWorkingOutsideService {
                 .userId(requestMessage.getReceiver().getUserId())
                 .ticketId(ticket.getTicketId())
                 .requestId(requestTicket.getRequestId())
-                .title("Reject late request")
-                .content(workingOutsideForm.getContent())
+                .title("Reject working outside request")
+                .content(workingOutsideRequest.getContent())
                 .departmentId(requestMessage.getDepartment().getDepartmentId())
                 .receivedId(requestMessage.getSender().getUserId())
                 .build();
