@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin
 public class RequestController {
     @Autowired
+    RequestOutSideWorkFromService requestOutSideWorkFromService;
+    @Autowired
     RequestOtherService requestOtherService;
     @Autowired
     RequestAttendanceFromService requestAttendanceFromService;
@@ -102,5 +104,17 @@ public class RequestController {
     @PostMapping("/lateFormExistRequest")
     public boolean requestLateFormExistRequest(@RequestBody SendLateFormRequest sendLateFormRequest) {
         return requestLateFormService.getLateFormUserExistRequest(sendLateFormRequest);
+    }
+    @PostMapping("/workingOutForm")
+    public boolean requestWorkingOutForm(@RequestBody SendWorkingOutSideRequest sendWorkingOutSideRequest) {
+        return requestOutSideWorkFromService.getOutSideFormUser(sendWorkingOutSideRequest);
+    }
+    @PostMapping("/workingOutFormExistTicket")
+    public boolean requestWorkingOutFormExistTicket(@RequestBody SendWorkingOutSideRequest sendWorkingOutSideRequest) {
+        return requestOutSideWorkFromService.getOutSideFormUserExistTicket(sendWorkingOutSideRequest);
+    }
+    @PostMapping("/workingOutFormExistRequest")
+    public boolean requestWorkingOutFormExistRequest(@RequestBody SendWorkingOutSideRequest sendWorkingOutSideRequest) {
+        return requestOutSideWorkFromService.getOutSideFormUserExistRequest(sendWorkingOutSideRequest);
     }
 }
