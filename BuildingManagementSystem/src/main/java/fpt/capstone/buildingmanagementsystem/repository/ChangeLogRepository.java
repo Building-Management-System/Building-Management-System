@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ChangeLogRepository extends JpaRepository<ChangeLog, String> {
@@ -15,4 +16,6 @@ public interface ChangeLogRepository extends JpaRepository<ChangeLog, String> {
             "FROM change_log\n" +
             "WHERE employee_id LIKE :userId AND MONTH(date) = :month",nativeQuery = true)
     List<ChangeLog> getChangeLogByUserIdAndMonth(@Param("userId") String userId, @Param("month")int month);
+    @Query(value = "select * from change_log where employee_id = :employee_id and date = :date", nativeQuery = true)
+    Optional<ChangeLog> getChangeLogDetailByUserIdAndDate(String employee_id, String date);
 }

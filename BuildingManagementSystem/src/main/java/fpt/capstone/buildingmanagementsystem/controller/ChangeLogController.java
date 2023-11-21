@@ -2,10 +2,13 @@ package fpt.capstone.buildingmanagementsystem.controller;
 
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeLogRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SaveChangeLogRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.ChangeLogDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ChangeLogResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.MessageResponse;
 import fpt.capstone.buildingmanagementsystem.service.ChangeLogService;
 import fpt.capstone.buildingmanagementsystem.service.RequestChangeLogService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,5 +34,9 @@ public class ChangeLogController {
     @GetMapping("getChangeLogByEmployeeAndMonth")
     public List<ChangeLogResponse> getChangeLogByEmployeeAndMonth(@RequestBody ChangeLogRequest changeLogRequest) {
         return changeLogService.getAllChangeLogByEmployeeIdAndMonth(changeLogRequest);
+    }
+    @GetMapping("/getChangeLogDetail")
+    public ChangeLogDetailResponse getChangeLogDetail(@Param("employee_id") String employee_id, @Param("date") String date) {
+        return requestChangeLogService.getChangeLogDetail(employee_id, date);
     }
 }
