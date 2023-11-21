@@ -103,6 +103,7 @@ public class RequestChangeLogService {
                     String changeFrom = null;
                     boolean violate = false;
                     double outSideWork = 0;
+                    String reason=null;
                     if(changeLog.isPresent()) {
                          checkinChange = changeLog.get().getCheckin();
                          checkoutChange = changeLog.get().getCheckout();
@@ -110,6 +111,7 @@ public class RequestChangeLogService {
                          changeFrom = changeLog.get().getManager().getAccount().getUsername();
                          violate = changeLog.get().isViolate();
                          outSideWork = changeLog.get().getOutsideWork();
+                         reason=changeLog.get().getReason();
                     }
                     List<ControlLogResponse> controlLogResponse = new ArrayList<>();
                     controlLogLcds.forEach(element -> {
@@ -121,7 +123,7 @@ public class RequestChangeLogService {
                     return ChangeLogDetailResponse.builder()
                             .name(name).username(username).departmentName(departmentName).dateDaily(dateDaily)
                             .checkin(checkin).checkout(checkout).checkinChange(checkinChange).checkoutChange(checkoutChange).dateDailyChange(dateDailyChange)
-                            .violate(violate).changeFrom(changeFrom).outSideWork(outSideWork)
+                            .violate(violate).changeFrom(changeFrom).outSideWork(outSideWork).reason(reason)
                             .controlLogResponse(controlLogResponse)
                             .build();
                 } else {

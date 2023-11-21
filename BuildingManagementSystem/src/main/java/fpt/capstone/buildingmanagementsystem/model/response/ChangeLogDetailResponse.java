@@ -22,6 +22,7 @@ public class ChangeLogDetailResponse {
     private Time checkoutChange;
     private String dateDailyChange;
     private String changeFrom;
+    private String reason;
     private boolean violate;
     private double outSideWork;
     List<ControlLogResponse> controlLogResponse;
