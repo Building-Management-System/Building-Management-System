@@ -2,9 +2,11 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
+import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
 import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.WorkingOutsideRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
@@ -17,10 +19,13 @@ import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
 import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.repository.WorkingOutsideFormRepository;
+import fpt.capstone.buildingmanagementsystem.service.schedule.CheckoutAnalyzeSchedule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RequestWorkingOutsideService {
@@ -54,10 +59,11 @@ public class RequestWorkingOutsideService {
     WorkingOutsideFormRepository workingOutsideRepository;
 
     @Autowired
-    WorkingOutsideFormRepository workingOutsideFormRepository;
+    CheckoutAnalyzeSchedule checkoutAnalyzeSchedule;
+
 
     public boolean acceptWorkingOutsideRequest(String acceptWorkingOutsideRequestId) {
-        WorkingOutsideRequestForm workingOutsideForm = workingOutsideFormRepository.findById(acceptWorkingOutsideRequestId)
+        WorkingOutsideRequestForm workingOutsideForm = workingOutsideRepository.findById(acceptWorkingOutsideRequestId)
                 .orElseThrow(() -> new BadRequest("Not_found_working_outside_request"));
 
         RequestMessage requestMessage = requestMessageRepository.findById(workingOutsideForm.getRequestMessage().getRequestMessageId())
@@ -83,7 +89,7 @@ public class RequestWorkingOutsideService {
         executeRequestDecision(requestTickets, ticket, sendOtherFormRequest);
         try {
             workingOutsideForm.setStatus(true);
-            workingOutsideFormRepository.saveAndFlush(workingOutsideForm);
+            workingOutsideRepository.saveAndFlush(workingOutsideForm);
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
@@ -96,7 +102,7 @@ public class RequestWorkingOutsideService {
                             true,
                             null
                     ));
-//          updateLateRequest(lateRequestForm.getRequestDate(), requestTicket.getUser());
+          updateWorkingOutside(requestTicket.getUser(), workingOutsideForm.getDate());
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -105,7 +111,7 @@ public class RequestWorkingOutsideService {
 
     @javax.transaction.Transactional
     public boolean rejectWorkingOutside(WorkingOutsideRequest workingOutsideRequest) {
-        WorkingOutsideRequestForm workingOutsideForm = workingOutsideFormRepository.findById(workingOutsideRequest.getWorkOutsideRequestId())
+        WorkingOutsideRequestForm workingOutsideForm = workingOutsideRepository.findById(workingOutsideRequest.getWorkOutsideRequestId())
                 .orElseThrow(() -> new BadRequest("Not_found_working_outside_request"));
 
         RequestMessage requestMessage = requestMessageRepository.findById(workingOutsideForm.getRequestMessage().getRequestMessageId())
@@ -151,5 +157,18 @@ public class RequestWorkingOutsideService {
 
     private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
         RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
+    }
+
+    private void updateWorkingOutside(User user, Date date) {
+        Optional<DailyLog> dailyLogOptional = dailyLogRepository.findByUserAndDate(user, date);
+        if(!dailyLogOptional.isPresent()) return;
+        DailyLog dailyLog = dailyLogOptional.get();
+        checkoutAnalyzeSchedule.checkWorkingOutside(dailyLog, user.getAccount(), date);
+        checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), date);
+        try{
+            dailyLogRepository.save(dailyLog);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

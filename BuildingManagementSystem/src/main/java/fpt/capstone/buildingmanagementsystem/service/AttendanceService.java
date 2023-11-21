@@ -4,7 +4,10 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.DailyLogMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
+import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
+import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.response.AttendanceDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ControlLogResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.DailyLogResponse;
@@ -22,7 +25,13 @@ import javax.transaction.Transactional;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -57,7 +66,7 @@ public class AttendanceService {
             List<DailyLogResponse> list = new ArrayList<>();
             if (user_id != null) {
                 List<DailyLog> dailyLogs = dailyLogRepository.getByUserIdAndMonthAndYear(user_id, month, year);
-                dailyLogs=dailyLogs.stream()
+                dailyLogs = dailyLogs.stream()
                         .sorted((Comparator.comparing(DailyLog::getDate).reversed()))
                         .collect(Collectors.toList());
                 if (dailyLogs.size() > 0) {
@@ -117,7 +126,7 @@ public class AttendanceService {
                     String name = dailyLogs.getUser().getFirstName() + " " + dailyLogs.getUser().getLastName();
                     String username = dailyLogs.getUser().getAccount().getUsername();
                     List<ControlLogLcd> controlLogLcds = controlLogLcdRepository.getControlLogLcdList(username, date);
-                    controlLogLcds=controlLogLcds.stream()
+                    controlLogLcds = controlLogLcds.stream()
                             .sorted((Comparator.comparing(ControlLogLcd::getTime)))
                             .collect(Collectors.toList());
                     String departmentName = dailyLogs.getUser().getDepartment().getDepartmentName();
@@ -166,19 +175,56 @@ public class AttendanceService {
 
     @Transactional
     public void updateAttendanceTime(java.sql.Date date, User user, Time checkin, Time checkout) {
-        DailyLog dailyLog = dailyLogRepository.findByUserAndDate(user, date)
-                .orElseThrow(() -> new BadRequest("Not_found"));
-        if (checkin != null) {
-            dailyLog.setCheckin(checkin);
+        Optional<DailyLog> dailyLogOptional = dailyLogRepository.findByUserAndDate(user, date);
+        if (!dailyLogOptional.isPresent()) {
+            DailyLog dailyLog;
+            if (checkin != null && checkout == null) {
+                dailyLog = getNewDailyLog(date, checkin, checkin, user.getAccount());
+            } else if (checkin != null) {
+                dailyLog = getNewDailyLog(date, checkin, checkout, user.getAccount());
+            } else {
+                throw new ServerError("wrong");
+            }
+            try {
+                dailyLogRepository.save(dailyLog);
+            } catch (Exception e) {
+                throw new ServerError("Something went wrong");
+            }
+        } else {
+            DailyLog dailyLog = dailyLogOptional.get();
+            if (checkin != null) {
+                dailyLog.setCheckin(checkin);
+            }
+            if (checkout != null) {
+                dailyLog.setCheckout(checkout);
+            }
+            dailyLogService.updateDailyLog(user, date, checkin, checkout);
+            try {
+                dailyLogRepository.save(dailyLog);
+            } catch (Exception e) {
+                throw new ServerError("Something went wrong");
+            }
         }
-        if (checkout != null) {
-            dailyLog.setCheckout(checkout);
-        }
-        dailyLogService.updateDailyLog(user, date, checkin, checkout);
-        try {
-            dailyLogRepository.save(dailyLog);
-        } catch (Exception e) {
-            throw new ServerError("Something went wrong");
-        }
+    }
+
+    private DailyLog getNewDailyLog(java.sql.Date dailyDate, Time checkinTime, Time checkoutTime, Account account) {
+        DailyLog dailyLog = DailyLog.builder()
+                .date(dailyDate)
+                .checkin(checkinTime)
+                .checkout(checkoutTime)
+                .totalAttendance(0)
+                .morningTotal(0)
+                .afternoonTotal(0)
+                .earlyCheckout(false)
+                .lateCheckin(false)
+                .permittedLeave(0)
+                .nonPermittedLeave(0)
+                .Violate(false)
+                .paidDay(0)
+                .outsideWork(0)
+                .user(account.getUser())
+                .build();
+        checkoutAnalyzeSchedule.updateTotalField(dailyLog);
+        return dailyLog;
     }
 }
