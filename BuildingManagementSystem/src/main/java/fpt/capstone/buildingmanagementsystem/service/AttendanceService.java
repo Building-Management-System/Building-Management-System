@@ -25,6 +25,7 @@ import javax.transaction.Transactional;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -186,6 +187,7 @@ public class AttendanceService {
                 throw new ServerError("wrong");
             }
             try {
+                checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), date);
                 dailyLogRepository.save(dailyLog);
             } catch (Exception e) {
                 throw new ServerError("Something went wrong");
@@ -224,6 +226,9 @@ public class AttendanceService {
                 .outsideWork(0)
                 .user(account.getUser())
                 .build();
+        LocalDate localDate = dailyDate.toLocalDate();
+        dailyLog.setMonth(localDate.getMonthValue());
+        dailyLog.setDateType(DailyLogService.getDateType(dailyDate));
         checkoutAnalyzeSchedule.updateTotalField(dailyLog);
         return dailyLog;
     }
