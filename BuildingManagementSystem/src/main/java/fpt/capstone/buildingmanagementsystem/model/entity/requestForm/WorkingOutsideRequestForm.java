@@ -37,6 +37,7 @@ public class WorkingOutsideRequestForm {
     private Date date;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private WorkingOutsideType type;
 
     @Column

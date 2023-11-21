@@ -17,5 +17,6 @@ public class GetUserInfoResponse {
     String city;
     String email;
     String image;
+    String departmentId;
     String departmentName;
 }

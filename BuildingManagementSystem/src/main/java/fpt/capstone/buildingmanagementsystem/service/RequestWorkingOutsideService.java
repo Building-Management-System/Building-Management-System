@@ -9,6 +9,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.WorkingOut
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.WorkingOutsideRequest;
+import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
@@ -23,6 +24,8 @@ import java.util.List;
 
 @Service
 public class RequestWorkingOutsideService {
+    @Autowired
+    DailyLogRepository dailyLogRepository;
     @Autowired
     TicketRepositoryv2 ticketRepositoryv2;
 
@@ -84,7 +87,6 @@ public class RequestWorkingOutsideService {
             requestMessageRepository.saveAndFlush(requestMessage);
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
-
             automaticNotificationService.sendApprovalRequestNotification(
                     new ApprovalNotificationRequest(
                             ticket.getTicketId(),
@@ -94,7 +96,7 @@ public class RequestWorkingOutsideService {
                             true,
                             null
                     ));
-//            updateLateRequest(lateRequestForm.getRequestDate(), requestTicket.getUser());
+//          updateLateRequest(lateRequestForm.getRequestDate(), requestTicket.getUser());
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -102,7 +104,7 @@ public class RequestWorkingOutsideService {
     }
 
     @javax.transaction.Transactional
-    public boolean rejectLateRequest(WorkingOutsideRequest workingOutsideRequest) {
+    public boolean rejectWorkingOutside(WorkingOutsideRequest workingOutsideRequest) {
         WorkingOutsideRequestForm workingOutsideForm = workingOutsideFormRepository.findById(workingOutsideRequest.getWorkOutsideRequestId())
                 .orElseThrow(() -> new BadRequest("Not_found_working_outside_request"));
 
@@ -119,7 +121,7 @@ public class RequestWorkingOutsideService {
                 .userId(requestMessage.getReceiver().getUserId())
                 .ticketId(ticket.getTicketId())
                 .requestId(requestTicket.getRequestId())
-                .title("Reject late request")
+                .title("Reject working outside request")
                 .content(workingOutsideForm.getContent())
                 .departmentId(requestMessage.getDepartment().getDepartmentId())
                 .receivedId(requestMessage.getSender().getUserId())

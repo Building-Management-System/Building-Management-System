@@ -17,6 +17,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.AcceptChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.EmployeeResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAllUserInfoPending;
 import fpt.capstone.buildingmanagementsystem.model.response.GetUserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.HrDepartmentResponse;
@@ -192,6 +193,7 @@ public class UserManageService {
                 throw new NotFound("user_not_found");
             }
             getUserInfoResponse = userMapper.convertGetUserInfo(user.get());
+            getUserInfoResponse.setDepartmentId(user.get().getDepartment().getDepartmentId());
             getUserInfoResponse.setDepartmentName(user.get().getDepartment().getDepartmentName());
         } else {
             throw new BadRequest("request_fail");
@@ -233,6 +235,21 @@ public class UserManageService {
         } else {
             throw new BadRequest("request_fail");
         }
+    }
+
+    public List<EmployeeResponse> getAllDepartmentEmployee(String departmentId) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new BadRequest("Not_found_department"));
+        List<User> users = userRepository.findAllByDepartment(department);
+
+        return users.stream()
+                .filter(user -> user.getAccount().getRole().roleName.equals("employee"))
+                .map(user -> new EmployeeResponse(
+                        user.getUserId(),
+                        user.getAccount().getUsername(),
+                        user.getFirstName(),
+                        user.getLastName()
+                )).collect(Collectors.toList());
     }
 
     public List<UserInfoResponse> getManagerByDepartmentId(String departmentId) {

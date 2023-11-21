@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DailyLogRepository extends JpaRepository<DailyLog, Long> {
+public interface DailyLogRepository extends JpaRepository<DailyLog, String> {
     @Query(value = "select * from daily_log where user_id = :user_id and month = :month and year(date)  = :year", nativeQuery = true)
     List<DailyLog> getByUserIdAndMonthAndYear(String user_id, int month, String year);
 
