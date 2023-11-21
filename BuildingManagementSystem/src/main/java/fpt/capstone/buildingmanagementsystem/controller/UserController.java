@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.controller;
 
 import fpt.capstone.buildingmanagementsystem.model.request.AcceptChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.EmployeeResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserAccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.service.UserManageService;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -63,5 +63,10 @@ public class UserController {
     @RequestMapping(value = "/getUserAccount", method = RequestMethod.GET)
     public List<UserAccountResponse> getUserAccount(@RequestParam("userId") String userId) {
         return userManageService.getUserAccount(userId);
+    }
+
+    @RequestMapping(value = "/getAllDepartmentEmployee", method = RequestMethod.GET)
+    public List<EmployeeResponse> getAllEmployeeByDepartment(@RequestParam("department_id") String id) {
+        return userManageService.getAllDepartmentEmployee(id);
     }
 }
