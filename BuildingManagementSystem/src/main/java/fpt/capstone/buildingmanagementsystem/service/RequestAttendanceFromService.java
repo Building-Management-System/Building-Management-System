@@ -28,7 +28,11 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
@@ -76,12 +80,12 @@ public class RequestAttendanceFromService {
                 if (checkValidate(sendAttendanceFormRequest)) {
                     Optional<User> send_user = userRepository.findByUserId(sendAttendanceFormRequest.getUserId());
                     Optional<Department> department = departmentRepository.findByDepartmentId(sendAttendanceFormRequest.getDepartmentId());
-                    List<User> listUserReceiver= new ArrayList<>();
-                    if(sendAttendanceFormRequest.getReceivedId()!=null) {
+                    List<User> listUserReceiver = new ArrayList<>();
+                    if (sendAttendanceFormRequest.getReceivedId() != null) {
                         Optional<User> receive_user = userRepository.findByUserId(sendAttendanceFormRequest.getReceivedId());
                         listUserReceiver.add(receive_user.get());
-                    }else{
-                        listUserReceiver= userRepository.findAllByDepartment(department.get());
+                    } else {
+                        listUserReceiver = userRepository.findAllByDepartment(department.get());
                     }
                     if (send_user.isPresent() && department.isPresent()) {
                         String id_ticket = "AT_" + Until.generateId();
@@ -90,7 +94,7 @@ public class RequestAttendanceFromService {
                                 .updateDate(Until.generateRealTime()).build();
                         ticketRepository.save(ticket);
                         saveAttendanceRequest(sendAttendanceFormRequest, send_user, department, id_request_ticket, ticket);
-                        for(User receive_user:listUserReceiver) {
+                        for (User receive_user : listUserReceiver) {
                             automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
                                     ticket.getTicketId(),
                                     send_user.get(),
@@ -195,18 +199,21 @@ public class RequestAttendanceFromService {
 
     private static boolean checkValidate(SendAttendanceFormRequest sendAttendanceFormRequest) throws ParseException {
         boolean check1 = validateDateFormat(sendAttendanceFormRequest.getManualDate());
-        boolean check2=true;
-        boolean check3=true;
-        boolean check4=true;
-        if(sendAttendanceFormRequest.getManualFirstEntry() != null) {
+        boolean check2 = true;
+        boolean check3 = true;
+        boolean check4 = true;
+        if (sendAttendanceFormRequest.getManualFirstEntry() != null) {
             check2 = validateDateTime(sendAttendanceFormRequest.getManualFirstEntry());
-        }if(sendAttendanceFormRequest.getManualLastExit() != null) {
+        }
+        if (sendAttendanceFormRequest.getManualLastExit() != null) {
             check3 = validateDateTime(sendAttendanceFormRequest.getManualLastExit());
-        }if(sendAttendanceFormRequest.getManualLastExit() != null && sendAttendanceFormRequest.getManualFirstEntry() != null) {
+        }
+        if (sendAttendanceFormRequest.getManualLastExit() != null && sendAttendanceFormRequest.getManualFirstEntry() != null) {
             check4 = validateStartTimeAndEndTime(sendAttendanceFormRequest.getManualFirstEntry(), sendAttendanceFormRequest.getManualLastExit());
         }
-            return check1 && check2 && check3 && check4;
+        return check1 && check2 && check3 && check4;
     }
+
     private void saveAttendanceRequest(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) throws ParseException {
         RequestTicket requestTicket = RequestTicket.builder().requestId(id_request_ticket).createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())

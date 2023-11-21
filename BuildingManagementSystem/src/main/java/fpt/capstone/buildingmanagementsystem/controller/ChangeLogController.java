@@ -31,7 +31,7 @@ public class ChangeLogController {
         return requestChangeLogService.saveChangeLog(saveChangeLogRequest);
     }
 
-    @GetMapping("getChangeLogByEmployeeAndMonth")
+    @PostMapping("getChangeLogByEmployeeAndMonth")
     public List<ChangeLogResponse> getChangeLogByEmployeeAndMonth(@RequestBody ChangeLogRequest changeLogRequest) {
         return changeLogService.getAllChangeLogByEmployeeIdAndMonth(changeLogRequest);
     }

@@ -83,7 +83,7 @@ public class DailyLogService {
 
     public DailyLog updateExistedDailyLog(DailyLog dailyLog, Time checkoutTime) {
 
-        if (compareTime(checkoutTime, endMorningTime) < 0) {
+        if (compareTime(checkoutTime, endMorningTime) <= 0) {
             dailyLog.setCheckout(checkoutTime);
             dailyLog.setSystemCheckOut(checkoutTime);
 
@@ -100,11 +100,11 @@ public class DailyLogService {
             dailyLog.setMorningTotal(morningTotal);
         }
 
-        if (compareTime(dailyLog.getCheckin(), startAfternoonTime) < 0) {
+        if (compareTime(dailyLog.getCheckin(), startAfternoonTime) <= 0) {
             dailyLog.setCheckout(checkoutTime);
             dailyLog.setSystemCheckOut(checkoutTime);
 
-            if (compareTime(checkoutTime, startAfternoonTime) > 0) {
+            if (compareTime(checkoutTime, startAfternoonTime) >= 0) {
                 double afternoonTotal = roundDouble(getDistanceTime(checkoutTime, startAfternoonTime) / One_hour);
                 dailyLog.setAfternoonTotal(afternoonTotal);
             }
