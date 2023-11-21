@@ -381,16 +381,16 @@ class AccountControllerUnitTest {
     @Test
     public void testsaveUser_Success() throws Exception {
         RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setUsername("tungnshe");
+        registerRequest.setUsername("manager_secu");
         registerRequest.setPassword("123");
-        registerRequest.setRole("employee");
-        registerRequest.setDepartmentName("tech D1");
+        registerRequest.setRole("manager");
+        registerRequest.setDepartmentName("security");
         registerRequest.setHrId("0dff5d5c-095d-4386-91f2-82bdb7eba342");
 
         boolean result = accountManageService.saveNewAccount(registerRequest);
 
         assertTrue(result);
-        assertTrue(accountRepository.existsByUsername("tungnshe"));
+        assertTrue(accountRepository.existsByUsername("secu1"));
 
     }
 

@@ -10,17 +10,16 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.sql.Time;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -39,26 +38,143 @@ class AttendanceControllerTest {
 
     @Test
     void testGetAttendanceUser() {
-        String user_id = "";
-        int month = 10;
+        String userId = "3a5cccac-9490-4b9b-9e1e-16ce220b35cb";
+        int month = 11;
+        String year = "2023";
 
+        GetAttendanceUserResponse response = attendanceController.getAttendanceUser(userId, month, year);
 
-        GetAttendanceUserResponse result = attendanceController.getAttendanceUser("user_id", 0);
-        Assertions.assertEquals(new GetAttendanceUserResponse("username", "department", "date", new TotalAttendanceUser("date", 0, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d, 0d), List.of(new DailyLogResponse("dailyId", "dateDaily", null, null, 0d, 0d, 0d, true, true, 0d, 0d, true, 0d, 0d))), result);
+        TotalAttendanceUser expectedTotalAttendanceUser = new TotalAttendanceUser(
+                "November,2023", 2, 15.0, 1.75, 13.25, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 1.63
+        );
+
+        List<DailyLogResponse> expectedDailyLogList = Arrays.asList(
+                new DailyLogResponse(
+                        "d2f2e1b8-253d-498b-a6ca-6e596a7ad7c2",
+                        "Wednesday, November 22, 2023",
+                        new Time(10, 15, 00),
+                        new Time(22, 15, 00),
+                        null,
+                        null,
+                        10.0,
+                        1.75,
+                        8.25,
+                        true,
+                        false,
+                        0.0,
+                        0.0,
+                        true,
+                        0.0,
+                        1.0
+                ),
+                new DailyLogResponse(
+                        "54ae58ad-8cb1-461b-84b5-fd42a3f1c527",
+                        "Monday, November 20, 2023",
+                        new Time(14,15,00),
+                        new Time(20, 15, 00),
+                        null,
+                        null,
+                        5.0,
+                        0.0,
+                        5.0,
+                        true,
+                        false,
+                        0.0,
+                        0.0,
+                        true,
+                        0.0,
+                        0.63
+                )
+        );
+
+        assertEquals(expectedTotalAttendanceUser, response.getTotalAttendanceUser());
+        assertEquals(expectedDailyLogList, response.getDailyLogList());
+
+    }
+
+    @Test
+    void testGetAttendanceUser_BadRequest() {
+        String userId = null;
+        int month = 11;
+        String year = "2023";
+
+        BadRequest exception = org.junit.jupiter.api.Assertions.assertThrows(BadRequest.class,
+                () -> attendanceController.getAttendanceUser(userId, month, year));
+
+        assertEquals("request_fail", exception.getMessage());
+
+    }
+
+    @Test
+    void testGetAttendanceUser_NotFound() {
+        String userId = "3a5cccac-9490-4b9b-9e1e-16ce220b35cb";
+        int month = 1;
+        String year = "2022";
+
+        NotFound exception = org.junit.jupiter.api.Assertions.assertThrows(NotFound.class,
+                () -> attendanceController.getAttendanceUser(userId, month, year));
+
+        assertEquals("list_null", exception.getMessage());
+
     }
 
     @Test
     void testGetAttendanceUserDetail() {
-        when(attendanceService.getAttendanceDetail(anyString(), anyString())).thenReturn(new AttendanceDetailResponse("date", new DailyDetailResponse("firstEntry", "lastExit", 0f, 0f, 0f, 0f, "dateType", 0f, 0f, 0f, "description"), new OverTimeDetailResponse("startTime", "endTime", "dateType", "manualStart", "manualEnd", "description")));
+        String user_id = "3a5cccac-9490-4b9b-9e1e-16ce220b35cb";
+        String date = "2023-11-22";
 
-        AttendanceDetailResponse result = attendanceController.getAttendanceUserDetail("user_id", "date");
-        Assertions.assertEquals(new AttendanceDetailResponse("date", new DailyDetailResponse("firstEntry", "lastExit", 0f, 0f, 0f, 0f, "dateType", 0f, 0f, 0f, "description"), new OverTimeDetailResponse("startTime", "endTime", "dateType", "manualStart", "manualEnd", "description")), result);
+        AttendanceDetailResponse result = attendanceController.getAttendanceUserDetail(user_id, date);
+
+        AttendanceDetailResponse expectedResponse = new AttendanceDetailResponse(
+                "unknown unknown",
+                "managersecurity",
+                "security",
+                "Wednesday, November 22, 2023",
+                new Time(10, 15, 00),
+                new Time(22, 15, 00),
+                10.0,
+                1.75,
+                8.25,
+                true,
+                false,
+                0.0,
+                false,
+                0.0,
+                Arrays.asList(
+                        new ControlLogResponse("managersecurity", "2023-11-22 09:15:00.0"),
+                        new ControlLogResponse("managersecurity", "2023-11-22 21:15:00.0")
+                )
+        );
+
+        assertEquals(expectedResponse, result);
+    }
+
+    @Test
+    void testGetAttendanceUserDetail_BadRequest() {
+        String user_id = "not exist";
+        String date = "2023-11-70";
+
+        BadRequest exception = org.junit.jupiter.api.Assertions.assertThrows(BadRequest.class,
+                () -> attendanceController.getAttendanceUserDetail(user_id, date));
+
+        assertEquals("request_fail", exception.getMessage());
+    }
+
+    @Test
+    void testGetAttendanceUserDetail_NotFound() {
+        String user_id = "3a5cccac-9490-4b9b-9e1e-16ce220b35cb";
+        String date = "2023-11-25";
+
+        NotFound exception = org.junit.jupiter.api.Assertions.assertThrows(NotFound.class,
+                () -> attendanceController.getAttendanceUserDetail(user_id, date));
+
+        assertEquals("request_fail", exception.getMessage());
     }
 
     @Test
     void testAcceptAttendanceRequest() {
         AttendanceMessageRequest attendanceMessageRequest = new AttendanceMessageRequest();
-        attendanceMessageRequest.setAttendanceRequestId("a0ac94f3-4a67-4ce6-a9a7-5ba193ad47ca");
+        attendanceMessageRequest.setAttendanceRequestId("96486e20-0421-432a-aa43-b74f5275bb5c");
 
         boolean result = attendanceController.acceptAttendanceRequest(attendanceMessageRequest);
         Assertions.assertEquals(true, result);

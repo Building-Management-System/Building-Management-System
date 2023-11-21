@@ -54,10 +54,10 @@ class  RequestControllerTest {
     void testRequestAttendanceForm() {
         SendAttendanceFormRequest sendAttendanceFormRequest = new SendAttendanceFormRequest();
         sendAttendanceFormRequest.setUserId("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6");
-        sendAttendanceFormRequest.setTitle("attendance khong content");
-        sendAttendanceFormRequest.setContent("");
+        sendAttendanceFormRequest.setTitle("attendance 1");
+        sendAttendanceFormRequest.setContent("attendance 1");
         sendAttendanceFormRequest.setDepartmentId("2");
-        sendAttendanceFormRequest.setManualDate("2023-10-20");
+        sendAttendanceFormRequest.setManualDate("2023-11-21");
         sendAttendanceFormRequest.setManualFirstEntry("08:00:00");
         sendAttendanceFormRequest.setManualLastExit("19:00:00");
         sendAttendanceFormRequest.setReceivedId("94b38a94-bb4a-4adb-acc9-34bde9babd4e");
@@ -206,10 +206,10 @@ class  RequestControllerTest {
     void testRequestOtherForm() {
         SendOtherFormRequest sendOtherFormRequest = new SendOtherFormRequest();
         sendOtherFormRequest.setUserId("55fd796e-6e33-4b17-b6d9-d32aef9fce3f");
-        sendOtherFormRequest.setReceivedId("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6");
-        sendOtherFormRequest.setContent("other request 1");
-        sendOtherFormRequest.setDepartmentId("2");
-        sendOtherFormRequest.setTitle("other request 1");
+        sendOtherFormRequest.setReceivedId("3a5cccac-9490-4b9b-9e1e-16ce220b35cb");
+        sendOtherFormRequest.setContent("other request to admin depart");
+        sendOtherFormRequest.setDepartmentId("9");
+        sendOtherFormRequest.setTitle("other request to admin depart");
 
         boolean result = requestController.requestOtherForm(sendOtherFormRequest);
         assertEquals(true, result);
@@ -241,6 +241,98 @@ class  RequestControllerTest {
         boolean result = requestController.requestOtherFormExistRequest(sendOtherFormRequest);
         Assertions.assertEquals(true, result);
     }
-}
 
-//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme
+    @Test
+    void testRequestLateFormForm() {
+        SendLateFormRequest sendLateFormRequest = new SendLateFormRequest();
+        sendLateFormRequest.setUserId("07644394-789a-46f4-91d1-69d3e8e09fec");
+        sendLateFormRequest.setContent("Lateform to secu depart 2");
+        sendLateFormRequest.setDepartmentId("10");
+        sendLateFormRequest.setTitle("Lateform to secu depart 2");
+        sendLateFormRequest.setRequestDate("2023-11-13");
+        sendLateFormRequest.setLateType("LATE_MORNING");
+        sendLateFormRequest.setLateDuration("30");
+        sendLateFormRequest.setReceivedId("3f103761-d5bf-4686-a435-9c32d648ceca");
+
+        boolean result = requestController.requestLateFormForm(sendLateFormRequest);
+        assertEquals(true, result);
+    }
+
+    @Test
+    void testRequestLateFormExistTicket() {
+        SendLateFormRequest sendLateFormRequest = new SendLateFormRequest();
+        sendLateFormRequest.setUserId("07644394-789a-46f4-91d1-69d3e8e09fec");
+        sendLateFormRequest.setTicketId("LT_2e3773e7-ca68-47bd-adb3-9f9aa01e97bb");
+        sendLateFormRequest.setContent("Lateform to secu depart 2v2");
+        sendLateFormRequest.setDepartmentId("10");
+        sendLateFormRequest.setTitle("Lateform to secu depart 2v2");
+        sendLateFormRequest.setRequestDate("2023-11-13");
+        sendLateFormRequest.setLateType("EARLY_AFTERNOON");
+        sendLateFormRequest.setLateDuration("30");
+        sendLateFormRequest.setReceivedId("3f103761-d5bf-4686-a435-9c32d648ceca");
+
+        boolean result = requestController.requestLateFormExistTicket(sendLateFormRequest);
+        assertEquals(true, result);
+    }
+
+    @Test
+    void testrequestLateFormExistRequest() {
+        SendLateFormRequest sendLateFormRequest = new SendLateFormRequest();
+        sendLateFormRequest.setUserId("07644394-789a-46f4-91d1-69d3e8e09fec");
+        sendLateFormRequest.setRequestId("LT_617cae63-9441-4a3b-8f6d-313e77eef447");
+        sendLateFormRequest.setContent("Lateform to secu depart 2v3");
+        sendLateFormRequest.setDepartmentId("10");
+        sendLateFormRequest.setRequestDate("2023-11-13");
+        sendLateFormRequest.setLateType("EARLY_AFTERNOON");
+        sendLateFormRequest.setLateDuration("60");
+        sendLateFormRequest.setReceivedId("3f103761-d5bf-4686-a435-9c32d648ceca");
+
+        boolean result = requestController.requestLateFormExistRequest(sendLateFormRequest);
+        assertEquals(true, result);
+    }
+
+    @Test
+    void testRequestOverTimeForm() {
+        SendOvertimeFormRequest sendOvertimeFormRequest = new SendOvertimeFormRequest();
+        sendOvertimeFormRequest.setUserId("3a5cccac-9490-4b9b-9e1e-16ce220b35cb");
+        sendOvertimeFormRequest.setTitle("OT 35cb to 50a6 Tech1 1");
+        sendOvertimeFormRequest.setContent("OT 35cb to 50a6 Tech1 1");
+        sendOvertimeFormRequest.setTopicOvertime("WEEKEND_AND_NORMAL_DAY");
+        sendOvertimeFormRequest.setOvertimeDate("2023-11-22");
+        sendOvertimeFormRequest.setFromTime("18:15:00");
+        sendOvertimeFormRequest.setToTime("21:15:00");
+        sendOvertimeFormRequest.setDepartmentId("2");
+        sendOvertimeFormRequest.setReceivedId("55fd796e-6e33-4b17-b6d9-d32aef9fce3f");
+
+        boolean result = requestController.requestOverTimeForm(sendOvertimeFormRequest);
+        assertEquals(true, result);
+    }
+
+    @Test
+    void testRequestOverTimeExistTicket() {
+//        "userId":"382d2ed3-4e20-4e1f-8020-73ed1789bbf9",
+//                "ticketId":"OT_e7f433bf-3b8a-431a-aa4d-ee5804f4a49d",
+//                "title":"ars",
+//                "content":"arsenal",
+//                "topicOvertime":"WEEKEND_AND_NORMAL_DAY",
+//                "overtimeDate":"2023-11-10",
+//                "fromTime":"00:00:00",
+//                "toTime":"19:00:00",
+//                "departmentId":"2",
+//                "receivedId":"556ad22a-ca9b-44fc-89b1-8b7fff878d76"
+        SendOvertimeFormRequest sendOvertimeFormRequest = new SendOvertimeFormRequest();
+        sendOvertimeFormRequest.setUserId("3a5cccac-9490-4b9b-9e1e-16ce220b35cb");
+        sendOvertimeFormRequest.setTicketId("");
+        sendOvertimeFormRequest.setTitle("OT 35cb to 50a6 Tech1 1");
+        sendOvertimeFormRequest.setContent("OT 35cb to 50a6 Tech1 1");
+        sendOvertimeFormRequest.setTopicOvertime("WEEKEND_AND_NORMAL_DAY");
+        sendOvertimeFormRequest.setOvertimeDate("2023-11-22");
+        sendOvertimeFormRequest.setFromTime("18:15:00");
+        sendOvertimeFormRequest.setToTime("21:15:00");
+        sendOvertimeFormRequest.setDepartmentId("2");
+        sendOvertimeFormRequest.setReceivedId("55fd796e-6e33-4b17-b6d9-d32aef9fce3f");
+
+        boolean result = requestController.requestOverTimeExistTicket(sendOvertimeFormRequest);
+        assertEquals(true, result);
+    }
+}

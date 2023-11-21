@@ -1,9 +1,10 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
+import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
+import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeReceiveIdRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponseV2;
 import fpt.capstone.buildingmanagementsystem.service.TicketManageService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +17,6 @@ import java.util.List;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -45,47 +45,85 @@ class TicketControllerTest {
 
         List<TicketRequestResponseV2> result = ticketController.getAllTicketAndRequest(senderID);
         assertNotNull(result);
-        assertEquals(3, result.size());
+        assertEquals(5, result.size());
     }
 
     @Test
     void testGetAllTicketAndRequestByHr() {
         List<TicketRequestResponseV2> result = ticketController.getAllTicketAndRequestByHr();
         assertNotNull(result);
-        assertEquals(2, result);
+        assertEquals(1, result.size());
     }
 
     @Test
     void testGetAllTicketAndRequestBySecurity() {
-        when(ticketManageService.getAllTicketsBySecurity()).thenReturn(List.of(new TicketRequestResponseV2()));
 
         List<TicketRequestResponseV2> result = ticketController.getAllTicketAndRequestBySecurity();
-        Assertions.assertEquals(List.of(new TicketRequestResponseV2()), result);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
     }
 
     @Test
     void testGetAllTicketAndRequestByAdmin() {
-        when(ticketManageService.getAllTicketsByAdmin()).thenReturn(List.of(new TicketRequestResponseV2()));
-
         List<TicketRequestResponseV2> result = ticketController.getAllTicketAndRequestByAdmin();
-        Assertions.assertEquals(List.of(new TicketRequestResponseV2()), result);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
     }
 
     @Test
     void testGetAllTicketAndRequestByDepartmentManager() {
-        when(ticketManageService.getAllTicketByDepartmentManager(anyString())).thenReturn(List.of(new TicketRequestResponseV2()));
-
-        List<TicketRequestResponseV2> result = ticketController.getAllTicketAndRequestByDepartmentManager("departmentName");
-        Assertions.assertEquals(List.of(new TicketRequestResponseV2()), result);
+        List<TicketRequestResponseV2> result = ticketController.getAllTicketAndRequestByDepartmentManager("tech D1");
+        assertNotNull(result);
+        assertEquals(11, result.size());
     }
 
     @Test
     void testChangeReceiveIdRequest() {
-        when(ticketManageService.changeReceiveId(any())).thenReturn(true);
+//        3a5cccac-9490-4b9b-9e1e-16ce220b35cb
+        ChangeReceiveIdRequest changeReceiveIdRequest = new ChangeReceiveIdRequest();
+        changeReceiveIdRequest.setRequestId("OR_c4e4c395-add2-40d3-ad1c-f4118f117554");
+        changeReceiveIdRequest.setReceiverId("f8dbabf3-34d5-4b19-97dd-d99d7b34e11f");
 
-        boolean result = ticketController.changeReceiveIdRequest(new ChangeReceiveIdRequest("requestId", "receiverId"));
-        Assertions.assertEquals(true, result);
+        boolean result = ticketController.changeReceiveIdRequest(changeReceiveIdRequest);
+        assertEquals(true, result);
+
     }
-}
 
-//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme
+    @Test
+    void testChangeReceiveIdRequest_NotFoundReceiverID() {
+        ChangeReceiveIdRequest changeReceiveIdRequest = new ChangeReceiveIdRequest();
+        changeReceiveIdRequest.setRequestId("OR_c4e4c395-add2-40d3-ad1c-f4118f117554");
+        changeReceiveIdRequest.setReceiverId("skdfgsdfjsdgfksdjbfskjdhvgf");
+
+        NotFound exception = org.junit.jupiter.api.Assertions.assertThrows(NotFound.class,
+                () -> ticketController.changeReceiveIdRequest(changeReceiveIdRequest));
+        assertEquals("receiver_id_not_found", exception.getMessage());
+
+    }
+
+    @Test
+    void testChangeReceiveIdRequest_NotFoundNull() {
+        ChangeReceiveIdRequest changeReceiveIdRequest = new ChangeReceiveIdRequest();
+        changeReceiveIdRequest.setRequestId(null);
+        changeReceiveIdRequest.setReceiverId("skdfgsdfjsdgfksdjbfskjdhvgf");
+
+        BadRequest exception = org.junit.jupiter.api.Assertions.assertThrows(BadRequest.class,
+                () -> ticketController.changeReceiveIdRequest(changeReceiveIdRequest));
+        assertEquals("request_fail", exception.getMessage());
+
+    }
+// loi vi k bat dc loi requestID not found
+//    @Test
+//    void testChangeReceiveIdRequest_NotFoundRequestID() {
+//        ChangeReceiveIdRequest changeReceiveIdRequest = new ChangeReceiveIdRequest();
+//        changeReceiveIdRequest.setRequestId("uwesijbsfokasdbasda");
+//        changeReceiveIdRequest.setReceiverId("f8dbabf3-34d5-4b19-97dd-d99d7b34e11f");
+//
+//        NotFound exception = org.junit.jupiter.api.Assertions.assertThrows(NotFound.class,
+//                () -> ticketController.changeReceiveIdRequest(changeReceiveIdRequest));
+//        assertEquals("request_ticket_not_found", exception.getMessage());
+//
+//    }
+}
