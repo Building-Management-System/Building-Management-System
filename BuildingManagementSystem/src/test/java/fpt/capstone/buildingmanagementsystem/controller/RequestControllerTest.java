@@ -294,15 +294,15 @@ class  RequestControllerTest {
     @Test
     void testRequestOverTimeForm() {
         SendOvertimeFormRequest sendOvertimeFormRequest = new SendOvertimeFormRequest();
-        sendOvertimeFormRequest.setUserId("3a5cccac-9490-4b9b-9e1e-16ce220b35cb");
-        sendOvertimeFormRequest.setTitle("OT 35cb to 50a6 Tech1 1");
-        sendOvertimeFormRequest.setContent("OT 35cb to 50a6 Tech1 1");
+        sendOvertimeFormRequest.setUserId("55fd796e-6e33-4b17-b6d9-d32aef9fce3f");
+        sendOvertimeFormRequest.setTitle("OT ce3f to 50a6 Tech1 2");
+        sendOvertimeFormRequest.setContent("OT ce3f to 50a6 Tech1 2");
         sendOvertimeFormRequest.setTopicOvertime("WEEKEND_AND_NORMAL_DAY");
-        sendOvertimeFormRequest.setOvertimeDate("2023-11-22");
-        sendOvertimeFormRequest.setFromTime("18:15:00");
-        sendOvertimeFormRequest.setToTime("21:15:00");
+        sendOvertimeFormRequest.setOvertimeDate("2023-11-21");
+        sendOvertimeFormRequest.setFromTime("18:00:00");
+        sendOvertimeFormRequest.setToTime("19:15:00");
         sendOvertimeFormRequest.setDepartmentId("2");
-        sendOvertimeFormRequest.setReceivedId("55fd796e-6e33-4b17-b6d9-d32aef9fce3f");
+        sendOvertimeFormRequest.setReceivedId("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6");
 
         boolean result = requestController.requestOverTimeForm(sendOvertimeFormRequest);
         assertEquals(true, result);
@@ -310,29 +310,83 @@ class  RequestControllerTest {
 
     @Test
     void testRequestOverTimeExistTicket() {
-//        "userId":"382d2ed3-4e20-4e1f-8020-73ed1789bbf9",
-//                "ticketId":"OT_e7f433bf-3b8a-431a-aa4d-ee5804f4a49d",
-//                "title":"ars",
-//                "content":"arsenal",
-//                "topicOvertime":"WEEKEND_AND_NORMAL_DAY",
-//                "overtimeDate":"2023-11-10",
-//                "fromTime":"00:00:00",
-//                "toTime":"19:00:00",
-//                "departmentId":"2",
-//                "receivedId":"556ad22a-ca9b-44fc-89b1-8b7fff878d76"
         SendOvertimeFormRequest sendOvertimeFormRequest = new SendOvertimeFormRequest();
-        sendOvertimeFormRequest.setUserId("3a5cccac-9490-4b9b-9e1e-16ce220b35cb");
-        sendOvertimeFormRequest.setTicketId("");
-        sendOvertimeFormRequest.setTitle("OT 35cb to 50a6 Tech1 1");
-        sendOvertimeFormRequest.setContent("OT 35cb to 50a6 Tech1 1");
+        sendOvertimeFormRequest.setUserId("55fd796e-6e33-4b17-b6d9-d32aef9fce3f");
+        sendOvertimeFormRequest.setTicketId("OT_33dda742-1582-43e6-94e2-c8eb989a0bc4");
+        sendOvertimeFormRequest.setTitle("OT 35cb to 50a6 Tech1 2");
+        sendOvertimeFormRequest.setContent("OT 35cb to 50a6 Tech1 2");
         sendOvertimeFormRequest.setTopicOvertime("WEEKEND_AND_NORMAL_DAY");
-        sendOvertimeFormRequest.setOvertimeDate("2023-11-22");
+        sendOvertimeFormRequest.setOvertimeDate("2023-11-21");
         sendOvertimeFormRequest.setFromTime("18:15:00");
         sendOvertimeFormRequest.setToTime("21:15:00");
         sendOvertimeFormRequest.setDepartmentId("2");
         sendOvertimeFormRequest.setReceivedId("55fd796e-6e33-4b17-b6d9-d32aef9fce3f");
 
         boolean result = requestController.requestOverTimeExistTicket(sendOvertimeFormRequest);
+        assertEquals(true, result);
+    }
+
+    @Test
+    void testRequestOverTimeExist() {
+        SendOvertimeFormRequest sendOvertimeFormRequest = new SendOvertimeFormRequest();
+        sendOvertimeFormRequest.setUserId("55fd796e-6e33-4b17-b6d9-d32aef9fce3f");
+        sendOvertimeFormRequest.setRequestId("OT_0e3b15a4-552c-4271-ba89-adc18d82a63a");
+        sendOvertimeFormRequest.setTitle("OT 35cb to 50a6 Tech1 2");
+        sendOvertimeFormRequest.setContent("OT 35cb to 50a6 Tech1 2");
+        sendOvertimeFormRequest.setTopicOvertime("WEEKEND_AND_NORMAL_DAY");
+        sendOvertimeFormRequest.setOvertimeDate("2023-11-21");
+        sendOvertimeFormRequest.setFromTime("19:45:00");
+        sendOvertimeFormRequest.setToTime("23:15:00");
+        sendOvertimeFormRequest.setDepartmentId("2");
+        sendOvertimeFormRequest.setReceivedId("55fd796e-6e33-4b17-b6d9-d32aef9fce3f");
+
+        boolean result = requestController.requestOverTimeExistRequest(sendOvertimeFormRequest);
+        assertEquals(true, result);
+    }
+
+    @Test
+     void testRequestWorkingOutForm(){
+        SendWorkingOutSideRequest sendWorkingOutSideRequest = new SendWorkingOutSideRequest();
+        sendWorkingOutSideRequest.setUserId("3f103761-d5bf-4686-a435-9c32d648ceca");
+        sendWorkingOutSideRequest.setTitle("workout 2");
+        sendWorkingOutSideRequest.setContent("workout 2");
+        sendWorkingOutSideRequest.setType("ALL_DAY");
+        sendWorkingOutSideRequest.setDate("2023-11-24");
+        sendWorkingOutSideRequest.setDepartmentId("10");
+        sendWorkingOutSideRequest.setReceivedId("3a5cccac-9490-4b9b-9e1e-16ce220b35cb");
+
+        boolean result = requestController.requestWorkingOutForm(sendWorkingOutSideRequest);
+        assertEquals(true, result);
+    }
+
+    @Test
+    void testRequestWorkingOutFormExistTicket(){
+        SendWorkingOutSideRequest sendWorkingOutSideRequest = new SendWorkingOutSideRequest();
+        sendWorkingOutSideRequest.setUserId("3f103761-d5bf-4686-a435-9c32d648ceca");
+        sendWorkingOutSideRequest.setTicketId("OW_d7603197-1672-4894-80bb-6658c0b26cf4");
+        sendWorkingOutSideRequest.setTitle("workout 2 exist ticket");
+        sendWorkingOutSideRequest.setContent("workout 2 exist ticket");
+        sendWorkingOutSideRequest.setType("ALL_DAY");
+        sendWorkingOutSideRequest.setDate("2023-11-24");
+        sendWorkingOutSideRequest.setDepartmentId("10");
+        sendWorkingOutSideRequest.setReceivedId("3a5cccac-9490-4b9b-9e1e-16ce220b35cb");
+
+        boolean result = requestController.requestWorkingOutFormExistTicket(sendWorkingOutSideRequest);
+        assertEquals(true, result);
+    }
+
+    @Test
+    void testRequestWorkingOutFormExistRequest(){
+        SendWorkingOutSideRequest sendWorkingOutSideRequest = new SendWorkingOutSideRequest();
+        sendWorkingOutSideRequest.setUserId("3f103761-d5bf-4686-a435-9c32d648ceca");
+        sendWorkingOutSideRequest.setRequestId("OW_556345ad-3ba1-49d3-bf9e-1201a74c2187");
+        sendWorkingOutSideRequest.setContent("workout 1 exist request");
+        sendWorkingOutSideRequest.setType("ALL_DAY");
+        sendWorkingOutSideRequest.setDate("2023-11-22");
+        sendWorkingOutSideRequest.setDepartmentId("10");
+        sendWorkingOutSideRequest.setReceivedId("3a5cccac-9490-4b9b-9e1e-16ce220b35cb");
+
+        boolean result = requestController.requestWorkingOutFormExistRequest(sendWorkingOutSideRequest);
         assertEquals(true, result);
     }
 }

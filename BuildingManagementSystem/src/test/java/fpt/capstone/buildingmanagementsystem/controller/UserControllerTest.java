@@ -2,7 +2,6 @@ package fpt.capstone.buildingmanagementsystem.controller;
 
 import fpt.capstone.buildingmanagementsystem.model.request.AcceptChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
-import fpt.capstone.buildingmanagementsystem.model.response.GetAllUserInfoPending;
 import fpt.capstone.buildingmanagementsystem.model.response.GetUserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserAccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
@@ -11,8 +10,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,12 +51,12 @@ class UserControllerTest {
         getUserInfoRequest.setUserId("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6");
 
         ResponseEntity<?> result = userController.getInfoUser(getUserInfoRequest);
-
-        assertEquals(200, result.getStatusCodeValue());
-        assertEquals(new GetUserInfoResponse("John", "Doe",
+        GetUserInfoResponse expected = new GetUserInfoResponse("John", "Doe",
                 "Boyyyy", "03/04/2001",
                 "0865965402", "LA",
-                "LA", "sontung02hn@gmail.com", "unknown", "tech D1"), result.getBody());
+                "LA", "sontung02hn@gmail.com", "unknown","2", "tech D1");
+        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(expected, result.getBody());
 
     }
 

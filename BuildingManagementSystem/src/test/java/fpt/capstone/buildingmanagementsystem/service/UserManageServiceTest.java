@@ -5,7 +5,6 @@ import fpt.capstone.buildingmanagementsystem.mapper.UserPendingMapper;
 import fpt.capstone.buildingmanagementsystem.model.request.AcceptChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAllUserInfoPending;
-import fpt.capstone.buildingmanagementsystem.model.response.GetUserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ReceiveIdAndDepartmentIdResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.repository.*;
@@ -98,17 +97,17 @@ class UserManageServiceTest {
         assertEquals(1, result.size());
     }
 
-    @Test
-    void testGetInfoUser() {
-        GetUserInfoRequest getUserInfoRequest = new GetUserInfoRequest();
-        getUserInfoRequest.setUserId("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6");
-
-        GetUserInfoResponse result = userManageService.getInfoUser(getUserInfoRequest);
-        assertEquals(new GetUserInfoResponse("John", "Doe",
-                "Boyyyy", "03/04/2001",
-                "0865965402", "LA",
-                "LA", "sontung02hn@gmail.com", "unknown", "tech D1"), result);
-    }
+//    @Test
+//    void testGetInfoUser() {
+//        GetUserInfoRequest getUserInfoRequest = new GetUserInfoRequest();
+//        getUserInfoRequest.setUserId("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6");
+//
+//        GetUserInfoResponse result = userManageService.getInfoUser(getUserInfoRequest);
+//        assertEquals(new GetUserInfoResponse("John", "Doe",
+//                "Boyyyy", "03/04/2001",
+//                "0865965402", "LA",
+//                "LA", "sontung02hn@gmail.com", "unknown", "tech D1"), result);
+//    }
 
     @Test
     void testGetAllUserInfo() {

@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.mockito.Mockito.*;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 class LateRequestControllerTest {
@@ -28,17 +26,20 @@ class LateRequestControllerTest {
 
     @Test
     void testAcceptLateRequest() {
-        when(lateRequestService.acceptLateRequest(anyString())).thenReturn(true);
+        LateMessageRequest lateMessageRequest = new LateMessageRequest();
+        lateMessageRequest.setLateMessageRequestId("34c48221-3718-4fa7-8fff-186382512978");
 
-        boolean result = lateRequestController.acceptLateRequest(new LateMessageRequest("lateMessageRequestId", "content"));
+        boolean result = lateRequestController.acceptLateRequest(lateMessageRequest);
         Assertions.assertEquals(true, result);
     }
 
     @Test
     void testRejectLateRequest() {
-        when(lateRequestService.rejectLateRequest(any())).thenReturn(true);
+        LateMessageRequest lateMessageRequest = new LateMessageRequest();
+        lateMessageRequest.setLateMessageRequestId("d7a24608-edc8-428d-b57f-a0a0db560c3f");
+        lateMessageRequest.setContent("reject Lateform to secu depart 2v3");
 
-        boolean result = lateRequestController.rejectLateRequest(new LateMessageRequest("lateMessageRequestId", "content"));
+        boolean result = lateRequestController.rejectLateRequest(lateMessageRequest);
         Assertions.assertEquals(true, result);
     }
 }
