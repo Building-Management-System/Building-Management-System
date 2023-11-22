@@ -2,13 +2,20 @@ package fpt.capstone.buildingmanagementsystem.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatMessageRequest {
+@Data
+@Getter
+@Setter
+public class CreateChatRequest {
     private String from;
-    private String chatId;
+    private String chatName;
+    private List<String> to;
     private String message;
 }

@@ -30,28 +30,28 @@ public class ChatMessage {
             name = "UUID",
             strategy = "org.hibernate.id.UUIDGenerator"
     )
-    @Column(name = "messageId",updatable = false, nullable = false)
+    @Column(name = "messageId")
     private String id;
-
+    @Column(name = "message")
+    private String message;
+    @Column
+    private String fileName;
+    @Column
+    private String imageName;
+    @Column
+    private byte[] file;
+    @Column
+    private String fileType;
+    @Column(name = "createAt")
+    private Date createAt;
+    @Column(name = "updateAt")
+    private Date updateAt;
+    @Column(name = "type")
+    private String type;
     @ManyToOne
     @JoinColumn(name = "senderId")
     private User sender;
-
     @ManyToOne
-    @JoinColumn(name = "receiverId")
-    private User receiver;
-
-    @Column(name = "message")
-    private String message;
-
-    @Column(name = "createAt")
-    private Date createAt;
-
-    @Column(name = "updateAt")
-    private Date updateAt;
-
-    @Column(name = "status")
-    private String status;
-    @Column(name = "type")
-    private String type;
+    @JoinColumn(name = "chatId")
+    private Chat chat;
 }
