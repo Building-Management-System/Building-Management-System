@@ -12,7 +12,14 @@ import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.LateType;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.WorkingOutsideType;
 import fpt.capstone.buildingmanagementsystem.model.response.LateFormResponse;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
+import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DayOffRepository;
+import fpt.capstone.buildingmanagementsystem.repository.LateRequestFormRepositoryV2;
+import fpt.capstone.buildingmanagementsystem.repository.LeaveRequestFormRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.WorkingOutsideFormRepository;
 import fpt.capstone.buildingmanagementsystem.service.DailyLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +31,11 @@ import javax.transaction.Transactional;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -233,22 +243,33 @@ public class CheckoutAnalyzeSchedule {
     }
 
     public void checkViolate(DailyLog dailyLog, Account account, Date date) {
+        boolean isLateCheckinViolate = false;
+        boolean isEarlyCheckoutViolate = false;
+        boolean isLeaveWithoutNoticeViolate = false;
         if (!dailyLog.getDateType().equals(DateType.NORMAL)) return;
         int year = getYear(dailyLog.getDate());
 
         List<LateFormResponse> findLateMorningAccepted = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(account.getAccountId(), date, LateType.LATE_MORNING);
-        dailyLog.setLateCheckin(compareTime(dailyLog.getCheckin(), startMorningTime) > 0);
+        if (compareTime(dailyLog.getCheckin(), startMorningTime) > 0) {
+            dailyLog.setLateCheckin(true);
+            isLateCheckinViolate = findLateMorningAccepted.isEmpty();
+        }
 
         List<LateFormResponse> lateFormResponses = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(account.accountId, date, LateType.EARLY_AFTERNOON)
                 .stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
                 .collect(Collectors.toList());
-        dailyLog.setEarlyCheckout(compareTime(dailyLog.getCheckout(), endAfternoonTime) < 0);
 
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
         if (getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour < 6) {
+            if (compareTime(dailyLog.getCheckout(), endAfternoonTime) < 0) {
+                dailyLog.setEarlyCheckout(true);
+                isEarlyCheckoutViolate = lateFormResponses.isEmpty();
+            }
             double workingHours = roundDouble(dailyLog.getTotalAttendance() / 8);
             double offHours = 8 - workingHours;
             double permittedLeaveLeft = roundDouble(getPermittedLeaveLeft(account, dailyLog.getMonth(), year, dailyLog));
+
+            isLeaveWithoutNoticeViolate = leaveRequestForms.isEmpty();
 
             if (offHours <= permittedLeaveLeft) {
                 dailyLog.setPermittedLeave(offHours);
@@ -262,9 +283,9 @@ public class CheckoutAnalyzeSchedule {
             dailyLog.setPermittedLeave(0);
             dailyLog.setNonPermittedLeave(0);
         }
-        dailyLog.setViolate(findLateMorningAccepted.isEmpty()
-                && lateFormResponses.isEmpty()
-                && leaveRequestForms.isEmpty());
+        dailyLog.setViolate(isLateCheckinViolate &&
+                isEarlyCheckoutViolate &&
+                isLeaveWithoutNoticeViolate);
     }
 
     public double getPermittedLeaveLeft(Account account, int month, int year, DailyLog newLog) {
