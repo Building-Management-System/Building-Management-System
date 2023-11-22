@@ -314,8 +314,15 @@ public class LiveChatService {
             if (chatMessage.getSender().getUserId().equals(userId)) {
                 myself = true;
             }
-            MessageResponse messageResponse = new MessageResponse(myself, chatMessage.getMessage()
-                    , chatMessage.getSender().getUserId(), chatMessage.getFileName(), chatMessage.getImageName(),
+            String message;
+            if(chatMessage.getType().equals("image")){
+                message=chatMessage.getImageName();
+            }else if(chatMessage.getType().equals("file")){
+                message=chatMessage.getFileName();
+            }else {
+                message=chatMessage.getMessage();
+            }
+            MessageResponse messageResponse = new MessageResponse(myself, message, chatMessage.getSender().getUserId(),
                     chatMessage.getCreateAt().toString(), chatMessage.getType());
             messageResponses.add(messageResponse);
         });
