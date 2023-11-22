@@ -25,6 +25,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -266,18 +267,23 @@ public class CheckoutAnalyzeSchedule {
                 && leaveRequestForms.isEmpty());
     }
 
-    public double getPermittedLeaveLeft(Account account, int month, int year, DailyLog withoutDay) {
+    public double getPermittedLeaveLeft(Account account, int month, int year, DailyLog newLog) {
         double permittedHoursLeft = getDayOffOfMonth(month, account, year);
-        List<DailyLog> dailyLogs = dailyLogRepository.findAllByUserAndMonth(account.getUser(), month)
-                .stream()
-                .filter(dailyLog -> dailyLog.getDate() != withoutDay.getDate())
-                .collect(Collectors.toList());
+        List<DailyLog> dailyLogs = dailyLogRepository.findAllByUserAndMonth(account.getUser(), month);
 
-        double permittedHours = dailyLogs.stream()
+        double permittedHours = dailyLogs
+                .stream()
+                .filter(dailyLog -> dailyLog.getDate() != newLog.getDate())
                 .mapToDouble(DailyLog::getPermittedLeave)
                 .sum();
 
-        return permittedHoursLeft - permittedHours < 0 ? 0 : permittedHoursLeft - permittedHours;
+        for (DailyLog dailyLog : dailyLogs) {
+            if (dailyLog.getDailyId().equals(newLog.getDailyId())) {
+                permittedHoursLeft += dailyLog.getPermittedLeave();
+            }
+        }
+
+        return roundDouble(permittedHoursLeft - permittedHours < 0 ? 0 : permittedHoursLeft - permittedHours);
     }
 
     public void updateDayOffLeft(int month, Account account, double hourLeft, int year) {
