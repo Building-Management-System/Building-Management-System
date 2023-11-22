@@ -1,19 +1,11 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
-import fpt.capstone.buildingmanagementsystem.model.entity.Account;
-import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
-import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
-import fpt.capstone.buildingmanagementsystem.model.entity.DayOff;
-import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.LateType;
 import fpt.capstone.buildingmanagementsystem.model.response.LateFormResponse;
-import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
-import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
-import fpt.capstone.buildingmanagementsystem.repository.DayOffRepository;
-import fpt.capstone.buildingmanagementsystem.repository.LateRequestFormRepositoryV2;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.service.schedule.CheckoutAnalyzeSchedule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
