@@ -12,10 +12,6 @@ import java.util.Optional;
 
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
-    @Query(value = "select * from chat_message where (sender_id = :from and receiver_id = :to) or (sender_id = :to and receiver_id = :from) order by create_at ASC", nativeQuery = true)
-    List<ChatMessage> findBySenderIdAndReceiverId(String from, String to);
-    List<ChatMessage> findAllByReceiver(User user);
-
+    List<ChatMessage> findAllByChat_Id(String chatId);
     List<ChatMessage> findAllBySender(User user);
-
 }

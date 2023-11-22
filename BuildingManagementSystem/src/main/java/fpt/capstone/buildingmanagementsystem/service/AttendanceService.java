@@ -35,6 +35,8 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static fpt.capstone.buildingmanagementsystem.until.Until.getYear;
+
 
 @Service
 public class AttendanceService {
@@ -202,7 +204,9 @@ public class AttendanceService {
             }
             dailyLogService.updateDailyLog(user, date, checkin, checkout);
             try {
-                dailyLogRepository.save(dailyLog);
+                dailyLogRepository.saveAndFlush(dailyLog);
+//                double dayOffLeft = checkoutAnalyzeSchedule.getPermittedLeaveLeft(user.getAccount(), dailyLog.getMonth(), getYear(dailyLog.getDate()), dailyLog);
+//                checkoutAnalyzeSchedule.updateDayOffLeft(dailyLog.getMonth(), user.getAccount(), dayOffLeft, getYear(dailyLog.getDate()));
             } catch (Exception e) {
                 throw new ServerError("Something went wrong");
             }

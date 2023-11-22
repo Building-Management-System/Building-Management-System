@@ -160,7 +160,7 @@ public class CheckoutAnalyzeSchedule {
         if (!offWork.getDateType().equals(DateType.NORMAL)) return;
         int year = getYear(offWork.getDate());
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
-        double permittedLeft = getPermittedLeaveLeft(account, offWork.getMonth(), year);
+        double permittedLeft = getPermittedLeaveLeft(account, offWork.getMonth(), year, offWork);
         if (permittedLeft >= 8) {
             offWork.setPermittedLeave(8);
             updateDayOffLeft(offWork.getMonth(), account, permittedLeft - 8, year);
@@ -212,6 +212,7 @@ public class CheckoutAnalyzeSchedule {
         //set total time
         updateTotalField(dailyLog);
     }
+
     public void updateTotalField(DailyLog dailyLog) {
         if (compareTime(dailyLog.getCheckout(), endMorningTime) <= 0) {
 
@@ -242,22 +243,33 @@ public class CheckoutAnalyzeSchedule {
     }
 
     public void checkViolate(DailyLog dailyLog, Account account, Date date) {
+        boolean isLateCheckinViolate = false;
+        boolean isEarlyCheckoutViolate = false;
+        boolean isLeaveWithoutNoticeViolate = false;
         if (!dailyLog.getDateType().equals(DateType.NORMAL)) return;
         int year = getYear(dailyLog.getDate());
 
         List<LateFormResponse> findLateMorningAccepted = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(account.getAccountId(), date, LateType.LATE_MORNING);
-        dailyLog.setLateCheckin(compareTime(dailyLog.getCheckin(), startMorningTime) > 0);
+        if (compareTime(dailyLog.getCheckin(), startMorningTime) > 0) {
+            dailyLog.setLateCheckin(true);
+            isLateCheckinViolate = findLateMorningAccepted.isEmpty();
+        }
 
         List<LateFormResponse> lateFormResponses = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(account.accountId, date, LateType.EARLY_AFTERNOON)
                 .stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
                 .collect(Collectors.toList());
-        dailyLog.setEarlyCheckout(compareTime(dailyLog.getCheckout(), endAfternoonTime) < 0);
 
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
         if (getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour < 6) {
+            if (compareTime(dailyLog.getCheckout(), endAfternoonTime) < 0) {
+                dailyLog.setEarlyCheckout(true);
+                isEarlyCheckoutViolate = lateFormResponses.isEmpty();
+            }
             double workingHours = roundDouble(dailyLog.getTotalAttendance() / 8);
             double offHours = 8 - workingHours;
-            double permittedLeaveLeft = getPermittedLeaveLeft(account, dailyLog.getMonth(), year);
+            double permittedLeaveLeft = roundDouble(getPermittedLeaveLeft(account, dailyLog.getMonth(), year, dailyLog));
+
+            isLeaveWithoutNoticeViolate = leaveRequestForms.isEmpty();
 
             if (offHours <= permittedLeaveLeft) {
                 dailyLog.setPermittedLeave(offHours);
@@ -267,22 +279,35 @@ public class CheckoutAnalyzeSchedule {
                 dailyLog.setNonPermittedLeave(roundDouble(offHours - permittedLeaveLeft));
                 updateDayOffLeft(dailyLog.getMonth(), account, 0, year);
             }
+        } else {
+            dailyLog.setPermittedLeave(0);
+            dailyLog.setNonPermittedLeave(0);
         }
-        dailyLog.setViolate(findLateMorningAccepted.isEmpty()
-                && lateFormResponses.isEmpty()
-                && leaveRequestForms.isEmpty());
+        dailyLog.setViolate(isLateCheckinViolate &&
+                isEarlyCheckoutViolate &&
+                isLeaveWithoutNoticeViolate);
     }
 
-    private double getPermittedLeaveLeft(Account account, int month, int year) {
+    public double getPermittedLeaveLeft(Account account, int month, int year, DailyLog newLog) {
         double permittedHoursLeft = getDayOffOfMonth(month, account, year);
-        List<DailyLog> dailyLogs = dailyLogRepository.findAllByUser(account.getUser());
-        double permittedHours = dailyLogs.stream()
+        List<DailyLog> dailyLogs = dailyLogRepository.findAllByUserAndMonth(account.getUser(), month);
+
+        double permittedHours = dailyLogs
+                .stream()
+                .filter(dailyLog -> dailyLog.getDate() != newLog.getDate())
                 .mapToDouble(DailyLog::getPermittedLeave)
                 .sum();
-        return permittedHoursLeft - permittedHours < 0 ? 0 : permittedHoursLeft - permittedHours;
+
+        for (DailyLog dailyLog : dailyLogs) {
+            if (dailyLog.getDailyId().equals(newLog.getDailyId())) {
+                permittedHoursLeft += dailyLog.getPermittedLeave();
+            }
+        }
+
+        return roundDouble(permittedHoursLeft - permittedHours < 0 ? 0 : permittedHoursLeft - permittedHours);
     }
 
-    private void updateDayOffLeft(int month, Account account, double hourLeft, int year) {
+    public void updateDayOffLeft(int month, Account account, double hourLeft, int year) {
         DayOff dayOff = dayOffRepository.findByAccountAndYear(account, year)
                 .orElseThrow(() -> new BadRequest("Not_found"));
 

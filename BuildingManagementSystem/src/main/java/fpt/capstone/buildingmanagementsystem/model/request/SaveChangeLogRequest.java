@@ -17,6 +17,6 @@ public class SaveChangeLogRequest {
     String manualCheckOut;
     String workOutSide;
     String changeType;
-    int violet;
+    boolean violate;
     String reason;
 }
