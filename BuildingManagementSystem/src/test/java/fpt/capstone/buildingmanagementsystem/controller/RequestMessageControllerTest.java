@@ -57,5 +57,3 @@ class RequestMessageControllerTest {
         assertEquals(2, result.size());
     }
 }
-
-//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme
