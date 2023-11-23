@@ -16,8 +16,6 @@ public class MessageResponse {
     private boolean myself;
     private String message;
     private String senderId;
-    private String fileName;
-    private String imageName;
     private String createdAt;
     private String type;
 }
