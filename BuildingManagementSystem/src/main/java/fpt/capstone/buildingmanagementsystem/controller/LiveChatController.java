@@ -6,6 +6,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.CreateChatRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.ChatResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.ListChatResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.MessageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.service.LiveChatService;
@@ -58,5 +59,9 @@ public class LiveChatController {
     @PostMapping("/getAllChatUserSingle")
     public List<UserInfoResponse> getAllChatUserSingle(@RequestBody GetUserInfoRequest getUserInfoRequest) {
         return liveChatService.getAllChatUserSingle(getUserInfoRequest.getUserId());
+    }
+    @PostMapping("/getAllChat")
+    public List<ListChatResponse> getAllChat(@RequestBody GetUserInfoRequest getUserInfoRequest) {
+        return liveChatService.getAllChat(getUserInfoRequest.getUserId());
     }
 }

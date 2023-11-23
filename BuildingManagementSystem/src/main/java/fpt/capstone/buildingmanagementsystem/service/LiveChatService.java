@@ -11,10 +11,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest2;
 import fpt.capstone.buildingmanagementsystem.model.request.CreateChatRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.CreateChatRequest2;
-import fpt.capstone.buildingmanagementsystem.model.response.ChatResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.MessageResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.UserChatResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.*;
 import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,7 +49,7 @@ public class LiveChatService {
                     Chat chat;
                     List<ChatUser> chatUsers = new ArrayList<>();
                     if (to.size() == 1) {
-                        chat = Chat.builder().chatName(null).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
+                        chat = Chat.builder().chatName(to.get(0).getAccount().getUsername()).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
                         chatUsers.add(ChatUser.builder().user(to.get(0)).chat(chat).build());
                     } else {
                         chat = Chat.builder().chatName(createChatRequest.getChatName()).isGroupChat(true)
@@ -134,7 +130,7 @@ public class LiveChatService {
                     Chat chat;
                     List<ChatUser> chatUsers = new ArrayList<>();
                     if (to.size() == 1) {
-                        chat = Chat.builder().chatName(null).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
+                        chat = Chat.builder().chatName(to.get(0).getAccount().getUsername()).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
                         chatUsers.add(ChatUser.builder().user(to.get(0)).chat(chat).build());
                     } else {
                         chat = Chat.builder().chatName(createChatRequest2.getChatName()).isGroupChat(true)
@@ -227,7 +223,7 @@ public class LiveChatService {
                     Chat chat;
                     List<ChatUser> chatUsers = new ArrayList<>();
                     if (to.size() == 1) {
-                        chat = Chat.builder().chatName(null).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
+                        chat = Chat.builder().chatName(to.get(0).getAccount().getUsername()).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
                         chatUsers.add(ChatUser.builder().user(to.get(0)).chat(chat).build());
                     } else {
                         chat = Chat.builder().chatName(createChatRequest2.getChatName()).isGroupChat(true)
@@ -352,5 +348,39 @@ public class LiveChatService {
             userInfoResponses.add(userInfoResponse);
         });
         return userInfoResponses;
+    }
+
+    public List<ListChatResponse> getAllChat(String userId) {
+        List<ListChatResponse> listChatResponses = new ArrayList<>();
+        List<ChatUser> chatUser = chatUserRepository.findAllByUser_UserId(userId);
+        for (ChatUser userChat : chatUser) {
+            ListChatResponse listChatResponse = new ListChatResponse();
+            List<String> userLists = new ArrayList<>();
+            List<String> avatarLists = new ArrayList<>();
+            List<ChatUser> chatUsers2 = chatUserRepository.findAllByChat_Id(userChat.getChat().getId());
+            listChatResponse.setChatName(userChat.getChat().getChatName());
+            listChatResponse.setChatId(userChat.getChat().getId());
+            listChatResponse.setUpdateAt(userChat.getChat().getUpdateAt());
+            for (ChatUser userChat2 : chatUsers2) {
+                if (!Objects.equals(userChat2.getUser().getUserId(), userId)) {
+                    avatarLists.add(userChat2.getUser().getImage());
+                }
+                if(!Objects.equals(userChat2.getUser().getUserId(), userId)) {
+                    userLists.add(userChat2.getUser().getUserId());
+                }
+            }
+            String isGroup = "false";
+            if (userChat.getChat().isGroupChat()) {
+                isGroup = "true";
+            }
+            listChatResponse.setIsGroupChat(isGroup);
+            listChatResponse.setAvatar(avatarLists);
+            listChatResponse.setUser(userLists);
+            listChatResponses.add(listChatResponse);
+        }
+        listChatResponses = listChatResponses.stream()
+                .sorted((Comparator.comparing(ListChatResponse::getUpdateAt).reversed()))
+                .collect(Collectors.toList());
+        return listChatResponses;
     }
 }
