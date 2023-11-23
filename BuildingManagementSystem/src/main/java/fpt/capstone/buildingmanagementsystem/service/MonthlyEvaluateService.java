@@ -14,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -39,13 +40,13 @@ public class MonthlyEvaluateService {
         return true;
     }
 
-    public MonthlyEvaluateResponse getMonthlyEvaluate(MonthlyEvaluateRequest request) {
+    public MonthlyEvaluateResponse getMonthlyEvaluateOfEmployee(MonthlyEvaluateRequest request) {
         User user = userRepository.findByUserId(request.getUserId())
                 .orElseThrow(() -> new BadRequest("Not_found_user"));
         MonthlyEvaluate monthlyEvaluate = monthlyEvaluateRepository.findByEmployeeAndMonthAndYear(user, request.getMonth(), request.getYear())
                 .orElseThrow(() -> new BadRequest("Not_fount_report"));
         MonthlyEvaluateResponse response = new MonthlyEvaluateResponse();
-        BeanUtils.copyProperties(monthlyEvaluate,response);
+        BeanUtils.copyProperties(monthlyEvaluate, response);
         response.setCreatedBy(monthlyEvaluate.getCreatedBy().getUserId());
         response.setEmployeeId(monthlyEvaluate.getEmployee().getUserId());
         response.setFirstNameEmp(monthlyEvaluate.getEmployee().getFirstName());
@@ -54,4 +55,25 @@ public class MonthlyEvaluateService {
         response.setHireDate(monthlyEvaluate.getEmployee().getAccount().getCreatedDate());
         return response;
     }
+
+    public List<MonthlyEvaluateResponse> getEvaluateOfDepartment(String departmentId, int month, int year) {
+        List<MonthlyEvaluate> monthlyEvaluates = monthlyEvaluateRepository.findByDepartmentAndMonthAndYear(departmentId, month, year);
+        List<MonthlyEvaluateResponse> responses = new ArrayList<>();
+        monthlyEvaluates.forEach(monthlyEvaluate -> {
+            MonthlyEvaluateResponse response = new MonthlyEvaluateResponse();
+            BeanUtils.copyProperties(monthlyEvaluate, response);
+            response.setCreatedBy(monthlyEvaluate.getCreatedBy().getUserId());
+            response.setEmployeeId(monthlyEvaluate.getEmployee().getUserId());
+            response.setFirstNameEmp(monthlyEvaluate.getEmployee().getFirstName());
+            response.setLastNameEmp(monthlyEvaluate.getEmployee().getLastName());
+            response.setDepartment(monthlyEvaluate.getEmployee().getDepartment());
+            response.setHireDate(monthlyEvaluate.getEmployee().getAccount().getCreatedDate());
+            response.setEmployeeUserName(monthlyEvaluate.getEmployee().getAccount().getUsername());
+            response.setAcceptedHrId(monthlyEvaluate.getAcceptedBy() == null ? null : monthlyEvaluate.getAcceptedBy().getUserId());
+            response.setAcceptedHrUserName(monthlyEvaluate.getAcceptedBy() == null ? null :monthlyEvaluate.getAcceptedBy().getAccount().username);
+            responses.add(response);
+        });
+        return responses;
+    }
+
 }

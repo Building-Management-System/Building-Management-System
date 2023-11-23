@@ -265,8 +265,7 @@ public class CheckoutAnalyzeSchedule {
                 dailyLog.setEarlyCheckout(true);
                 isEarlyCheckoutViolate = lateFormResponses.isEmpty();
             }
-            double workingHours = roundDouble(dailyLog.getTotalAttendance() / 8);
-            double offHours = 8 - workingHours;
+            double offHours = 8 - dailyLog.getTotalAttendance();
             double permittedLeaveLeft = roundDouble(getPermittedLeaveLeft(account, dailyLog.getMonth(), year, dailyLog));
 
             isLeaveWithoutNoticeViolate = leaveRequestForms.isEmpty();
@@ -283,8 +282,8 @@ public class CheckoutAnalyzeSchedule {
             dailyLog.setPermittedLeave(0);
             dailyLog.setNonPermittedLeave(0);
         }
-        dailyLog.setViolate(isLateCheckinViolate &&
-                isEarlyCheckoutViolate &&
+        dailyLog.setViolate(isLateCheckinViolate ||
+                isEarlyCheckoutViolate ||
                 isLeaveWithoutNoticeViolate);
     }
 

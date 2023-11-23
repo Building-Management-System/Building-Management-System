@@ -5,9 +5,13 @@ import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateRespo
 import fpt.capstone.buildingmanagementsystem.service.MonthlyEvaluateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -16,9 +20,16 @@ public class MonthlyEvaluateController {
     @Autowired
     MonthlyEvaluateService monthlyEvaluateService;
 
-    @PostMapping("/getEvaluate")
+    @PostMapping("/getIndividualEvaluate")
     public MonthlyEvaluateResponse getEvaluate(@RequestBody MonthlyEvaluateRequest monthlyEvaluateRequest) {
-        return monthlyEvaluateService.getMonthlyEvaluate(monthlyEvaluateRequest);
+        return monthlyEvaluateService.getMonthlyEvaluateOfEmployee(monthlyEvaluateRequest);
+    }
+
+    @GetMapping("/getDepartmentEvaluate")
+    public List<MonthlyEvaluateResponse> getDepartmentEvaluate(@RequestParam("department_id") String departmentId,
+                                                               @RequestParam("month")int month,
+                                                               @RequestParam("year") int year) {
+        return monthlyEvaluateService.getEvaluateOfDepartment(departmentId, month, year);
     }
 
 }
