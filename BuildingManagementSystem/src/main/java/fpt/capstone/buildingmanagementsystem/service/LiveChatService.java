@@ -14,6 +14,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.CreateChatRequest2;
 import fpt.capstone.buildingmanagementsystem.model.response.ChatResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.MessageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserChatResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -315,12 +317,12 @@ public class LiveChatService {
                 myself = true;
             }
             String message;
-            if(chatMessage.getType().equals("image")){
-                message=chatMessage.getImageName();
-            }else if(chatMessage.getType().equals("file")){
-                message=chatMessage.getFileName();
-            }else {
-                message=chatMessage.getMessage();
+            if (chatMessage.getType().equals("image")) {
+                message = chatMessage.getImageName();
+            } else if (chatMessage.getType().equals("file")) {
+                message = chatMessage.getFileName();
+            } else {
+                message = chatMessage.getMessage();
             }
             MessageResponse messageResponse = new MessageResponse(myself, message, chatMessage.getSender().getUserId(),
                     chatMessage.getCreateAt().toString(), chatMessage.getType());
@@ -331,5 +333,24 @@ public class LiveChatService {
             user.add(userChatResponse);
         });
         return new ChatResponse(messageResponses, user);
+    }
+
+    public List<UserInfoResponse> getAllChatUserSingle(String userId) {
+        List<UserInfoResponse> userInfoResponses = new ArrayList<>();
+        List<User> userList = userRepository.findAll();
+        Optional<User> user = userRepository.findByUserId(userId);
+        List<ChatUser> chatUser = chatUserRepository.findAllByUser_UserIdIsNot(userId);
+        for (ChatUser userChat : chatUser) {
+            if (!userChat.getChat().isGroupChat()) {
+                userList.remove(userChat.getUser());
+            }
+        }
+        userList.remove(user.get());
+        userList.forEach(element -> {
+            UserInfoResponse userInfoResponse = UserInfoResponse.builder().accountId(element.getUserId())
+                    .username(element.getAccount().getUsername()).firstName(element.getFirstName()).lastName(element.getLastName()).build();
+            userInfoResponses.add(userInfoResponse);
+        });
+        return userInfoResponses;
     }
 }

@@ -4,8 +4,10 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.CreateChatRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.ChatResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.MessageResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.service.LiveChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
@@ -53,5 +55,8 @@ public class LiveChatController {
     public ChatResponse getMessagesByChatId(@Param("chatId") String chatId, @Param("userId") String userId) {
         return liveChatService.getMessageBySenderAndReceiver(chatId,userId);
     }
-
+    @PostMapping("/getAllChatUserSingle")
+    public List<UserInfoResponse> getAllChatUserSingle(@RequestBody GetUserInfoRequest getUserInfoRequest) {
+        return liveChatService.getAllChatUserSingle(getUserInfoRequest.getUserId());
+    }
 }

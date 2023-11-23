@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 public interface ChatUserRepository extends JpaRepository<ChatUser, String> {
     List<ChatUser> findAllByChat_Id(String chatId);
-    Optional<ChatUser> findByUserIn(List<User> list);
+    List<ChatUser> findAllByUser_UserIdIsNot(String userId);
 }

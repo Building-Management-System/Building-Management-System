@@ -265,6 +265,7 @@ public class UserManageService {
             BeanUtils.copyProperties(u, response);
             response.setAccountId(u.getUserId());
             response.setRoleName(u.getAccount().getRole().getRoleName());
+            response.setUsername(u.getAccount().getUsername());
             userInfoResponses.add(response);
         });
         return userInfoResponses;
