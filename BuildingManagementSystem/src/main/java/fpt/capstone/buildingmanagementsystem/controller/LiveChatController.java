@@ -5,10 +5,7 @@ import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.CreateChatRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
-import fpt.capstone.buildingmanagementsystem.model.response.ChatResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.ListChatResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.MessageResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.*;
 import fpt.capstone.buildingmanagementsystem.service.LiveChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
@@ -36,20 +33,12 @@ public class LiveChatController {
     public boolean createNewMessage(@RequestBody ChatMessageRequest chatMessageRequest) {
         return liveChatService.newChatMessage(chatMessageRequest);
     }
-    @RequestMapping(path = "/createNewChat2", method = RequestMethod.POST, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public boolean createNewChat2(@RequestParam("data") String data,@RequestParam("image") MultipartFile image) {
-        return liveChatService.createChat2(data,image);
-    }
     @RequestMapping(path ="/createNewMessage2", method = RequestMethod.POST, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public boolean createNewMessage2(@RequestParam("data") String data,@RequestParam("image") MultipartFile image) throws IOException {
+    public MessageImageAndFileResponse createNewMessage2(@RequestParam("data") String data,@RequestParam("image") MultipartFile image) throws IOException {
         return liveChatService.newChatMessage2(data,image);
     }
-    @RequestMapping(path = "/createNewChat3", method = RequestMethod.POST, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public boolean createNewChat3(@RequestParam("data") String data,@RequestParam("file") MultipartFile file) {
-        return liveChatService.createChat3(data,file);
-    }
     @RequestMapping(path ="/createNewMessage3", method = RequestMethod.POST, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public boolean createNewMessage3(@RequestParam("data") String data,@RequestParam("file") MultipartFile file) throws IOException {
+    public MessageImageAndFileResponse createNewMessage3(@RequestParam("data") String data, @RequestParam("file") MultipartFile file) throws IOException {
         return liveChatService.newChatMessage3(data,file);
     }
     @GetMapping("/message")

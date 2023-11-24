@@ -119,63 +119,7 @@ public class LiveChatService {
         return true;
     }
 
-    public boolean createChat2(String data, MultipartFile file) {
-        try {
-            CreateChatRequest2 createChatRequest2 = new ObjectMapper().readValue(data, CreateChatRequest2.class);
-            if (createChatRequest2.getFrom() != null
-                    && createChatRequest2.getTo() != null) {
-                List<User> to = userRepository.findAllByUserIdIn(createChatRequest2.getTo());
-                Optional<User> from = userRepository.findByUserId(createChatRequest2.getFrom());
-                if (to.size() > 0 && from.isPresent()) {
-                    Chat chat;
-                    List<ChatUser> chatUsers = new ArrayList<>();
-                    if (to.size() == 1) {
-                        chat = Chat.builder().chatName(null).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
-                        chatUsers.add(ChatUser.builder().user(to.get(0)).chat(chat).build());
-                    } else {
-                        chat = Chat.builder().chatName(createChatRequest2.getChatName()).isGroupChat(true)
-                                .createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
-                        for (User elementTo : to) {
-                            chatUsers.add(ChatUser.builder().user(elementTo).chat(chat).build());
-                        }
-                    }
-                    chatUsers.add(ChatUser.builder().user(from.get()).chat(chat).build());
-                    chatRepository.saveAndFlush(chat);
-                    chatUserRepository.saveAll(chatUsers);
-                    chatUserRepository.flush();
-                    String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
-                    List<String> stringList = new ArrayList<>(Arrays.asList(subFileName));
-                    String name = "livechat_" + UUID.randomUUID() + "." + stringList.get(1);
-                    Bucket bucket = StorageClient.getInstance().bucket();
-                    bucket.create(name, file.getBytes(), file.getContentType());
-
-                    ChatMessage chatMessage = ChatMessage.builder()
-                            .sender(from.get())
-                            .imageName(name).chat(chat)
-                            .createAt(Until.generateRealTime())
-                            .updateAt(Until.generateRealTime())
-                            .type("image")
-                            .build();
-                    chatMessageRepository.save(chatMessage);
-                    List<UnReadChat> list = new ArrayList<>();
-                    for (User elementTo : to) {
-                        UnReadChat unReadChat = UnReadChat.builder().chat(chat).user(elementTo).build();
-                        list.add(unReadChat);
-                    }
-                    unReadChatRepository.saveAll(list);
-                    return true;
-                } else {
-                    throw new NotFound("requests_fails");
-                }
-            } else {
-                throw new BadRequest("requests_fails");
-            }
-        } catch (ServerError | IOException e) {
-            throw new ServerError("fail");
-        }
-    }
-
-    public boolean newChatMessage2(String data, MultipartFile file) throws IOException {
+    public MessageImageAndFileResponse newChatMessage2(String data, MultipartFile file) throws IOException {
         ChatMessageRequest2 chatMessageRequest2 = new ObjectMapper().readValue(data, ChatMessageRequest2.class);
         List<User> to = new ArrayList<>();
         Chat chat = chatRepository.findById(chatMessageRequest2.getChatId()).get();
@@ -209,63 +153,10 @@ public class LiveChatService {
             }
         }
         unReadChatRepository.saveAll(list);
-        return true;
+        return MessageImageAndFileResponse.builder().message(name).build();
     }
 
-    public boolean createChat3(String data, MultipartFile file) {
-        try {
-            CreateChatRequest2 createChatRequest2 = new ObjectMapper().readValue(data, CreateChatRequest2.class);
-            if (createChatRequest2.getFrom() != null
-                    && createChatRequest2.getTo() != null) {
-                List<User> to = userRepository.findAllByUserIdIn(createChatRequest2.getTo());
-                Optional<User> from = userRepository.findByUserId(createChatRequest2.getFrom());
-                if (to.size() > 0 && from.isPresent()) {
-                    Chat chat;
-                    List<ChatUser> chatUsers = new ArrayList<>();
-                    if (to.size() == 1) {
-                        chat = Chat.builder().chatName(null).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
-                        chatUsers.add(ChatUser.builder().user(to.get(0)).chat(chat).build());
-                    } else {
-                        chat = Chat.builder().chatName(createChatRequest2.getChatName()).isGroupChat(true)
-                                .createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
-                        for (User elementTo : to) {
-                            chatUsers.add(ChatUser.builder().user(elementTo).chat(chat).build());
-                        }
-                    }
-                    chatUsers.add(ChatUser.builder().user(from.get()).chat(chat).build());
-                    chatRepository.saveAndFlush(chat);
-                    chatUserRepository.saveAll(chatUsers);
-                    chatUserRepository.flush();
-                    ChatMessage chatMessage = ChatMessage.builder()
-                            .sender(from.get())
-                            .chat(chat)
-                            .createAt(Until.generateRealTime())
-                            .updateAt(Until.generateRealTime())
-                            .fileName(StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())))
-                            .fileType(file.getContentType())
-                            .file(file.getBytes())
-                            .type("file")
-                            .build();
-                    chatMessageRepository.saveAndFlush(chatMessage);
-                    List<UnReadChat> list = new ArrayList<>();
-                    for (User elementTo : to) {
-                        UnReadChat unReadChat = UnReadChat.builder().chat(chat).user(elementTo).build();
-                        list.add(unReadChat);
-                    }
-                    unReadChatRepository.saveAll(list);
-                    return true;
-                } else {
-                    throw new NotFound("requests_fails");
-                }
-            } else {
-                throw new BadRequest("requests_fails");
-            }
-        } catch (ServerError | IOException e) {
-            throw new ServerError("fail");
-        }
-    }
-
-    public boolean newChatMessage3(String data, MultipartFile file) throws IOException {
+    public MessageImageAndFileResponse newChatMessage3(String data, MultipartFile file) throws IOException {
         ChatMessageRequest2 chatMessageRequest2 = new ObjectMapper().readValue(data, ChatMessageRequest2.class);
         List<User> to = new ArrayList<>();
         Chat chat = chatRepository.findById(chatMessageRequest2.getChatId()).get();
@@ -296,7 +187,7 @@ public class LiveChatService {
             }
         }
         unReadChatRepository.saveAll(list);
-        return true;
+        return MessageImageAndFileResponse.builder().message(StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()))).build();
     }
 
     public ChatResponse getMessageBySenderAndReceiver(String chatId, String userId) {
