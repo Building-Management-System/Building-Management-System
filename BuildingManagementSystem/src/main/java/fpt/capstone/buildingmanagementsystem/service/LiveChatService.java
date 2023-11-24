@@ -304,7 +304,7 @@ public class LiveChatService {
         List<UserChatResponse> user = new ArrayList<>();
         List<ChatMessage> chatMessages = chatMessageRepository.findAllByChat_Id(chatId);
         chatMessages = chatMessages.stream()
-                .sorted((Comparator.comparing(ChatMessage::getCreateAt).reversed()))
+                .sorted((Comparator.comparing(ChatMessage::getCreateAt)))
                 .collect(Collectors.toList());
         List<ChatUser> chatUsers = chatUserRepository.findAllByChat_Id(chatId);
         chatMessages.forEach(chatMessage -> {
@@ -344,7 +344,7 @@ public class LiveChatService {
         userList.remove(user.get());
         userList.forEach(element -> {
             UserInfoResponse userInfoResponse = UserInfoResponse.builder().accountId(element.getUserId())
-                    .username(element.getAccount().getUsername()).firstName(element.getFirstName()).lastName(element.getLastName()).build();
+                    .username(element.getAccount().getUsername()).firstName(element.getFirstName()).lastName(element.getLastName()).roleName(element.getAccount().getRole().getRoleName()).build();
             userInfoResponses.add(userInfoResponse);
         });
         return userInfoResponses;
