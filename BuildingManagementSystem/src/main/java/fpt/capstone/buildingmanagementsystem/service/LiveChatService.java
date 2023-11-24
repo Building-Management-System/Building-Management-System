@@ -49,7 +49,7 @@ public class LiveChatService {
                     Chat chat;
                     List<ChatUser> chatUsers = new ArrayList<>();
                     if (to.size() == 1) {
-                        chat = Chat.builder().chatName(to.get(0).getAccount().getUsername()).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
+                        chat = Chat.builder().chatName(null).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
                         chatUsers.add(ChatUser.builder().user(to.get(0)).chat(chat).build());
                     } else {
                         chat = Chat.builder().chatName(createChatRequest.getChatName()).isGroupChat(true)
@@ -130,7 +130,7 @@ public class LiveChatService {
                     Chat chat;
                     List<ChatUser> chatUsers = new ArrayList<>();
                     if (to.size() == 1) {
-                        chat = Chat.builder().chatName(to.get(0).getAccount().getUsername()).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
+                        chat = Chat.builder().chatName(null).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
                         chatUsers.add(ChatUser.builder().user(to.get(0)).chat(chat).build());
                     } else {
                         chat = Chat.builder().chatName(createChatRequest2.getChatName()).isGroupChat(true)
@@ -223,7 +223,7 @@ public class LiveChatService {
                     Chat chat;
                     List<ChatUser> chatUsers = new ArrayList<>();
                     if (to.size() == 1) {
-                        chat = Chat.builder().chatName(to.get(0).getAccount().getUsername()).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
+                        chat = Chat.builder().chatName(null).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
                         chatUsers.add(ChatUser.builder().user(to.get(0)).chat(chat).build());
                     } else {
                         chat = Chat.builder().chatName(createChatRequest2.getChatName()).isGroupChat(true)
@@ -358,15 +358,16 @@ public class LiveChatService {
             List<String> userLists = new ArrayList<>();
             List<String> avatarLists = new ArrayList<>();
             List<ChatUser> chatUsers2 = chatUserRepository.findAllByChat_Id(userChat.getChat().getId());
-            listChatResponse.setChatName(userChat.getChat().getChatName());
             listChatResponse.setChatId(userChat.getChat().getId());
             listChatResponse.setUpdateAt(userChat.getChat().getUpdateAt());
+            String chatName=userChat.getChat().getChatName();
             for (ChatUser userChat2 : chatUsers2) {
                 if (!Objects.equals(userChat2.getUser().getUserId(), userId)) {
                     avatarLists.add(userChat2.getUser().getImage());
-                }
-                if(!Objects.equals(userChat2.getUser().getUserId(), userId)) {
                     userLists.add(userChat2.getUser().getUserId());
+                }
+                if (!userChat2.getChat().isGroupChat()&& !Objects.equals(userChat2.getUser().getUserId(), userId)) {
+                    chatName=userChat2.getUser().getAccount().getUsername();
                 }
             }
             String isGroup = "false";
@@ -376,6 +377,7 @@ public class LiveChatService {
             listChatResponse.setIsGroupChat(isGroup);
             listChatResponse.setAvatar(avatarLists);
             listChatResponse.setUser(userLists);
+            listChatResponse.setChatName(chatName);
             listChatResponses.add(listChatResponse);
         }
         listChatResponses = listChatResponses.stream()
