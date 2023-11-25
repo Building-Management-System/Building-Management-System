@@ -5,15 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
+import java.util.Date;
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 @Builder
-public class UserInfoResponse {
-    String accountId;
-    String username;
-    String firstName;
-    String lastName;
-    String image;
-    String roleName;
+public class ListChatResponse {
+    String chatId;
+    String chatName;
+    String isGroupChat;
+    List<String> avatar;
+    List<String> user;
+    Date updateAt;
 }
