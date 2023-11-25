@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MonthlyEvaluateService {
@@ -57,7 +58,14 @@ public class MonthlyEvaluateService {
     }
 
     public List<MonthlyEvaluateResponse> getEvaluateOfDepartment(String departmentId, int month, int year) {
-        List<MonthlyEvaluate> monthlyEvaluates = monthlyEvaluateRepository.findByDepartmentAndMonthAndYear(departmentId, month, year);
+        List<MonthlyEvaluate> monthlyEvaluates = monthlyEvaluateRepository.findByDepartmentAndMonthAndYear(departmentId, month, year)
+                .stream()
+                .filter(monthlyEvaluate -> monthlyEvaluate.getEmployee()
+                        .getAccount()
+                        .getRole()
+                        .getRoleName().equals("employee"))
+                .collect(Collectors.toList());
+
         List<MonthlyEvaluateResponse> responses = new ArrayList<>();
         monthlyEvaluates.forEach(monthlyEvaluate -> {
             MonthlyEvaluateResponse response = new MonthlyEvaluateResponse();
