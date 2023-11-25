@@ -31,7 +31,9 @@ public class ChangeLogService {
                         changeLog.getDate(),
                         changeLog.getCreatedDate(),
                         changeLog.getManager().getUserId(),
-                        changeLog.getEmployee().getUserId()
+                        changeLog.getEmployee().getUserId(),
+                        changeLog.getEmployee().getFirstName(),
+                        changeLog.getEmployee().getLastName()
                 ))
                 .collect(Collectors.toList());
     }
