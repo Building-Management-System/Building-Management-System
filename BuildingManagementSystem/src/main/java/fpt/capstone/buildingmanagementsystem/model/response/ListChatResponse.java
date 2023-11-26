@@ -17,7 +17,7 @@ public class ListChatResponse {
     String chatName;
     String isGroupChat;
     List<String> avatar;
-    List<UserListChatResponse> user;
+    List<UserInfoResponse> user;
     Date updateAt;
     String read;
 }

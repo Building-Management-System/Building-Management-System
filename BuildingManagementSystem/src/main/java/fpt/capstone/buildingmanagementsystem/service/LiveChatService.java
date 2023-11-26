@@ -81,10 +81,13 @@ public class LiveChatService {
                     }
                     unReadChatRepository.saveAll(list);
                     List<String> avatarLists = new ArrayList<>();
-                    List<UserListChatResponse> userLists = new ArrayList<>();
+                    List<UserInfoResponse> userLists = new ArrayList<>();
                     to.forEach(element -> {
                         avatarLists.add(element.getImage());
-                        UserListChatResponse userListChatResponse = new UserListChatResponse(element.getUserId(), element.getAccount().getRole().getRoleName());
+                        UserInfoResponse userListChatResponse = new UserInfoResponse
+                                (element.getUserId(), element.getAccount().getUsername(),
+                                        element.getFirstName(),element.getLastName(),element.getImage()
+                                        ,element.getAccount().getRole().getRoleName());
                         userLists.add(userListChatResponse);
                     });
                     return ListChatResponse.builder().chatId(chatResponse.getId()).chatName(chatName)
@@ -267,7 +270,7 @@ public class LiveChatService {
         List<ChatUser> chatUser = chatUserRepository.findAllByUser_UserId(userId);
         for (ChatUser userChat : chatUser) {
             ListChatResponse listChatResponse = new ListChatResponse();
-            List<UserListChatResponse> userLists = new ArrayList<>();
+            List<UserInfoResponse> userLists = new ArrayList<>();
             List<String> avatarLists = new ArrayList<>();
             List<ChatUser> chatUsers2 = chatUserRepository.findAllByChat_Id(userChat.getChat().getId());
             listChatResponse.setChatId(userChat.getChat().getId());
@@ -276,7 +279,10 @@ public class LiveChatService {
             for (ChatUser userChat2 : chatUsers2) {
                 if (!Objects.equals(userChat2.getUser().getUserId(), userId)) {
                     avatarLists.add(userChat2.getUser().getImage());
-                    UserListChatResponse userListChatResponse = new UserListChatResponse(userChat2.getUser().getUserId(), userChat2.getUser().getAccount().getRole().getRoleName());
+                    UserInfoResponse userListChatResponse = new UserInfoResponse
+                            (userChat2.getUser().getUserId(), userChat2.getUser().getAccount().getUsername(),
+                                    userChat2.getUser().getFirstName(),userChat2.getUser().getLastName(),userChat2.getUser().getImage()
+                                    ,userChat2.getUser().getAccount().getRole().getRoleName());
                     userLists.add(userListChatResponse);
                 }
                 if (!userChat2.getChat().isGroupChat() && !Objects.equals(userChat2.getUser().getUserId(), userId)) {
