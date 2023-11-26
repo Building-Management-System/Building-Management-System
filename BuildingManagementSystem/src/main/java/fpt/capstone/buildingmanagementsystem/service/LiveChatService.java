@@ -4,13 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.storage.Bucket;
 import com.google.firebase.cloud.StorageClient;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
+import fpt.capstone.buildingmanagementsystem.exception.Conflict;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.model.entity.*;
-import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest2;
-import fpt.capstone.buildingmanagementsystem.model.request.CreateChatRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.UpdateGroupChatRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.*;
 import fpt.capstone.buildingmanagementsystem.model.response.*;
 import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.until.Until;
@@ -63,6 +61,7 @@ public class LiveChatService {
                             chatUsers.add(ChatUser.builder().user(elementTo).chat(chat).build());
                         }
                     }
+                    chat.setCreatedBy(from.get().getUserId());
                     chatUsers.add(ChatUser.builder().user(from.get()).chat(chat).build());
                     Chat chatResponse = chatRepository.saveAndFlush(chat);
                     chatUserRepository.saveAll(chatUsers);
@@ -224,7 +223,7 @@ public class LiveChatService {
             } else {
                 message = chatMessage.getMessage();
             }
-            MessageResponse messageResponse = new MessageResponse(myself, message, chatMessage.getSender().getUserId(),
+            MessageResponse messageResponse = new MessageResponse(chatMessage.getId(),myself, message, chatMessage.getSender().getUserId(),
                     chatMessage.getCreateAt().toString(), chatMessage.getType());
             messageResponses.add(messageResponse);
         });
@@ -232,7 +231,7 @@ public class LiveChatService {
             UserChatResponse userChatResponse = new UserChatResponse(element.getUser().getUserId(), element.getUser().getAccount().getUsername(), element.getUser().getImage());
             user.add(userChatResponse);
         });
-        return new ChatResponse(messageResponses, user);
+        return new ChatResponse(messageResponses, user, chatMessages.get(0).getChat().getCreatedBy());
     }
 
     public List<UserInfoResponse> getAllChatUserSingle(String userId) {
@@ -298,20 +297,90 @@ public class LiveChatService {
 
     public boolean updateChat(UpdateGroupChatRequest updateGroupChatRequest) {
         if (updateGroupChatRequest.getIsGroup() != null && updateGroupChatRequest.getChatId() != null &&
-                updateGroupChatRequest.getUserId().size() > 0 && updateGroupChatRequest.getIsGroup().equals("true")
-        ) {
-            Chat chat = chatRepository.findById(updateGroupChatRequest.getChatId()).get();
-            chat.setChatName(updateGroupChatRequest.getChatName());
-            chat.setUpdateAt(Until.generateRealTime());
-            chatRepository.save(chat);
-            chatUserRepository.deleteAllByChat_Id(updateGroupChatRequest.getChatId());
-            List<User> to = userRepository.findAllByUserIdIn(updateGroupChatRequest.getUserId());
-            List<ChatUser> chatUsers = new ArrayList<>();
-            for (User elementTo : to) {
-                chatUsers.add(ChatUser.builder().user(elementTo).chat(chat).build());
+                updateGroupChatRequest.getUserId().size() > 0 && updateGroupChatRequest.getIsGroup().equals("true")) {
+            Optional<Chat> chatOptional = chatRepository.findById(updateGroupChatRequest.getChatId());
+            if(chatOptional.isPresent()) {
+                Chat chat = chatOptional.get();
+                boolean check=false;
+                for(String userId:updateGroupChatRequest.getUserId()){
+                    if (userId.equals(chat.getCreatedBy())) {
+                        check = true;
+                        break;
+                    }
+                }if(check) {
+                    chat.setChatName(updateGroupChatRequest.getChatName());
+                    chat.setUpdateAt(Until.generateRealTime());
+                    chatRepository.save(chat);
+                    chatUserRepository.deleteAllByChat_Id(updateGroupChatRequest.getChatId());
+                    unReadChatRepository.deleteAllByChat_Id(updateGroupChatRequest.getChatId());
+                    List<User> to = userRepository.findAllByUserIdIn(updateGroupChatRequest.getUserId());
+                    List<ChatUser> chatUsers = new ArrayList<>();
+                    for (User elementTo : to) {
+                        chatUsers.add(ChatUser.builder().user(elementTo).chat(chat).build());
+                    }
+                    chatUserRepository.saveAll(chatUsers);
+                    return true;
+                }else {
+                    throw new Conflict("admin_not_found_in_list");
+                }
+            } else {
+                throw new NotFound("not_found");
             }
-            chatUserRepository.saveAll(chatUsers);
-            return true;
+        } else {
+            throw new BadRequest("requests_fails");
+        }
+    }
+    public boolean removeFromChat(RemoveUserAndChangeAdminRequest request) {
+        if (request.getUserId()!=null&&request.getChatId()!=null) {
+            Optional<Chat> chat = chatRepository.findById(request.getChatId());
+            Optional<User> user= userRepository.findByUserId(request.getUserId());
+            if(chat.isPresent()&&user.isPresent()&& !Objects.equals(chat.get().getCreatedBy(), request.getUserId())) {
+                chatUserRepository.deleteByUserAndChat(user.get(),chat.get());
+                unReadChatRepository.deleteByUserAndChat(user.get(),chat.get());
+                return true;
+            }else {
+                throw new BadRequest("requests_fails");
+            }
+        } else {
+            throw new BadRequest("requests_fails");
+        }
+    }
+    public boolean readChat(RemoveUserAndChangeAdminRequest request) {
+        if (request.getUserId()!=null&&request.getChatId()!=null) {
+            Optional<Chat> chat = chatRepository.findById(request.getChatId());
+            Optional<User> user= userRepository.findByUserId(request.getUserId());
+            if(chat.isPresent()&&user.isPresent()) {
+                unReadChatRepository.deleteByUserAndChat(user.get(),chat.get());
+                return true;
+            }else {
+                throw new BadRequest("requests_fails");
+            }
+        } else {
+            throw new BadRequest("requests_fails");
+        }
+    }
+    public boolean updateChange(RemoveUserAndChangeAdminRequest request) {
+        if (request.getUserId()!=null&&request.getChatId()!=null) {
+            Optional<Chat> chat = chatRepository.findById(request.getChatId());
+            if(chat.isPresent()) {
+                chat.get().setCreatedBy(request.getUserId());
+                chatRepository.save(chat.get());
+                return true;
+            }else {
+                throw new BadRequest("requests_fails");
+            }
+        } else {
+            throw new BadRequest("requests_fails");
+        }
+    }
+    public FileDataResponse getFileChatDownload(FileRequest fileRequest){
+        if (fileRequest.getMessageId()!=null&&fileRequest.getFileName()!=null) {
+            Optional<ChatMessage> chatMessage = chatMessageRepository.findByIdAndFileName(fileRequest.getMessageId(), fileRequest.getFileName());
+            if(chatMessage.isPresent()) {
+                return new FileDataResponse(fileRequest.getMessageId(),chatMessage.get().getFileName(), chatMessage.get().getFileType(),chatMessage.get().getFile());
+            }else {
+                throw new NotFound("file_not_found");
+            }
         } else {
             throw new BadRequest("requests_fails");
         }
