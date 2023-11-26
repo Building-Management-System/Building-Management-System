@@ -38,28 +38,33 @@ public class LiveChatService {
     UnReadChatRepository unReadChatRepository;
 
     @Transactional
-    public boolean createChat(CreateChatRequest createChatRequest) {
+    public ListChatResponse createChat(CreateChatRequest createChatRequest) {
         try {
             if (createChatRequest.getFrom() != null
                     && createChatRequest.getMessage() != null
                     && createChatRequest.getTo() != null) {
                 List<User> to = userRepository.findAllByUserIdIn(createChatRequest.getTo());
                 Optional<User> from = userRepository.findByUserId(createChatRequest.getFrom());
+                String isGroupChat="true";
+                String chatName=null;
                 if (to.size() > 0 && from.isPresent()) {
                     Chat chat;
                     List<ChatUser> chatUsers = new ArrayList<>();
                     if (to.size() == 1) {
                         chat = Chat.builder().chatName(null).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
                         chatUsers.add(ChatUser.builder().user(to.get(0)).chat(chat).build());
+                        isGroupChat="false";
+                        chatName=to.get(0).getAccount().getUsername();
                     } else {
                         chat = Chat.builder().chatName(createChatRequest.getChatName()).isGroupChat(true)
                                 .createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
+                        chatName=createChatRequest.getChatName();
                         for (User elementTo : to) {
                             chatUsers.add(ChatUser.builder().user(elementTo).chat(chat).build());
                         }
                     }
                     chatUsers.add(ChatUser.builder().user(from.get()).chat(chat).build());
-                    chatRepository.saveAndFlush(chat);
+                    Chat chatResponse = chatRepository.saveAndFlush(chat);
                     chatUserRepository.saveAll(chatUsers);
                     ChatMessage chatMessage = ChatMessage.builder()
                             .sender(from.get())
@@ -76,7 +81,15 @@ public class LiveChatService {
                         list.add(unReadChat);
                     }
                     unReadChatRepository.saveAll(list);
-                    return true;
+                    List<String> avatarLists = new ArrayList<>();
+                    List<UserListChatResponse> userLists = new ArrayList<>();
+                    to.forEach(element -> {
+                        avatarLists.add(element.getImage());
+                        UserListChatResponse userListChatResponse= new UserListChatResponse(element.getUserId(),element.getAccount().getRole().getRoleName());
+                        userLists.add(userListChatResponse);
+                    });
+                    return ListChatResponse.builder().chatId(chatResponse.getId()).chatName(chatName)
+                            .avatar(avatarLists).user(userLists).updateAt(chatResponse.getUpdateAt()).isGroupChat(isGroupChat).read("true").build();
                 } else {
                     throw new NotFound("requests_fails");
                 }
@@ -246,29 +259,35 @@ public class LiveChatService {
         List<ChatUser> chatUser = chatUserRepository.findAllByUser_UserId(userId);
         for (ChatUser userChat : chatUser) {
             ListChatResponse listChatResponse = new ListChatResponse();
-            List<String> userLists = new ArrayList<>();
+            List<UserListChatResponse> userLists = new ArrayList<>();
             List<String> avatarLists = new ArrayList<>();
             List<ChatUser> chatUsers2 = chatUserRepository.findAllByChat_Id(userChat.getChat().getId());
             listChatResponse.setChatId(userChat.getChat().getId());
             listChatResponse.setUpdateAt(userChat.getChat().getUpdateAt());
-            String chatName=userChat.getChat().getChatName();
+            String chatName = userChat.getChat().getChatName();
             for (ChatUser userChat2 : chatUsers2) {
                 if (!Objects.equals(userChat2.getUser().getUserId(), userId)) {
                     avatarLists.add(userChat2.getUser().getImage());
-                    userLists.add(userChat2.getUser().getUserId());
+                    UserListChatResponse userListChatResponse = new UserListChatResponse(userChat2.getUser().getUserId(), userChat2.getUser().getAccount().getRole().getRoleName());
+                    userLists.add(userListChatResponse);
                 }
-                if (!userChat2.getChat().isGroupChat()&& !Objects.equals(userChat2.getUser().getUserId(), userId)) {
-                    chatName=userChat2.getUser().getAccount().getUsername();
+                if (!userChat2.getChat().isGroupChat() && !Objects.equals(userChat2.getUser().getUserId(), userId)) {
+                    chatName = userChat2.getUser().getAccount().getUsername();
                 }
             }
             String isGroup = "false";
             if (userChat.getChat().isGroupChat()) {
                 isGroup = "true";
             }
+            String isRead = "true";
+            if (unReadChatRepository.existsUnReadChatByChatAndUser(userChat.getChat(), userChat.getUser())) {
+                isRead = "false";
+            }
             listChatResponse.setIsGroupChat(isGroup);
             listChatResponse.setAvatar(avatarLists);
             listChatResponse.setUser(userLists);
             listChatResponse.setChatName(chatName);
+            listChatResponse.setRead(isRead);
             listChatResponses.add(listChatResponse);
         }
         listChatResponses = listChatResponses.stream()

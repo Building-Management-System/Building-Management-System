@@ -26,7 +26,7 @@ public class LiveChatController {
     LiveChatService liveChatService;
 
     @PostMapping("/createNewChat")
-    public boolean createNewChat(@RequestBody CreateChatRequest createChatRequest) {
+    public ListChatResponse createNewChat(@RequestBody CreateChatRequest createChatRequest) {
         return liveChatService.createChat(createChatRequest);
     }
     @PostMapping("/createNewMessage")
