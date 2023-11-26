@@ -8,6 +8,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.MonthlyEvaluate;
 import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.request.EditEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.EmployeeEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.MonthlyEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.EmployeeResponse;
@@ -148,6 +149,25 @@ public class MonthlyEvaluateService {
         } catch (ServerError e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new EmployeeResponse());
+        }
+    }
+
+    public ResponseEntity<?> updateEvaluate(EditEvaluateRequest evaluateRequest) {
+        MonthlyEvaluate monthlyEvaluate = monthlyEvaluateRepository.findById(evaluateRequest.getEvaluateId())
+                .orElseThrow(() -> new BadRequest("Not_found_evaluate_record"));
+
+        if (evaluateRequest.getNote() != null) monthlyEvaluate.setNote(evaluateRequest.getNote());
+        if (evaluateRequest.getRate() != null) monthlyEvaluate.setEvaluateEnum(evaluateRequest.getRate());
+        if (monthlyEvaluate.getAcceptedBy() != null) monthlyEvaluate.setAcceptedBy(null);
+        if (monthlyEvaluate.getApprovedDate() != null) monthlyEvaluate.setApprovedDate(null);
+        if (monthlyEvaluate.getHrNote() != null) monthlyEvaluate.setHrNote(null);
+        monthlyEvaluate.setUpdateDate(Until.generateDate());
+        monthlyEvaluate.setStatus(false);
+        try {
+            return ResponseEntity.ok(monthlyEvaluateRepository.save(monthlyEvaluate));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getCause());
         }
     }
 
