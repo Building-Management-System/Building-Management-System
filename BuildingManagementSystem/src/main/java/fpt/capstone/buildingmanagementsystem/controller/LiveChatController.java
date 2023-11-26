@@ -5,6 +5,7 @@ import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.CreateChatRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.UpdateGroupChatRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.*;
 import fpt.capstone.buildingmanagementsystem.service.LiveChatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,5 +53,9 @@ public class LiveChatController {
     @PostMapping("/getAllChat")
     public List<ListChatResponse> getAllChat(@RequestBody GetUserInfoRequest getUserInfoRequest) {
         return liveChatService.getAllChat(getUserInfoRequest.getUserId());
+    }
+    @PostMapping("/updateChat")
+    public boolean updateChat(@RequestBody UpdateGroupChatRequest updateGroupChatRequest) {
+        return liveChatService.updateChat(updateGroupChatRequest);
     }
 }

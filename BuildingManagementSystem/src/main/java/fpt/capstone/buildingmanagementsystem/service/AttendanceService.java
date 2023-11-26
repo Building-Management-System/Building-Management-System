@@ -111,8 +111,11 @@ public class AttendanceService {
                             .outsideWork(outsideWork)
                             .totalDate(totalDay)
                             .build();
+                    SimpleDateFormat sdf2 = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
                     return new GetAttendanceUserResponse(dailyLogs.get(0).getUser().getAccount().getUsername()
-                            , dailyLogs.get(0).getUser().getDepartment().getDepartmentName(), monthTotal, totalAttendanceUser, list);
+                            , dailyLogs.get(0).getUser().getDepartment().getDepartmentName(), monthTotal,
+                            sdf2.format(Until.convertDateToCalender(dailyLogs.get(0).getUser().getAccount().getCreatedDate()).getTime())
+                            , totalAttendanceUser, list);
                 } else {
                     throw new NotFound("list_null");
                 }

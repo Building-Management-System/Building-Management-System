@@ -15,6 +15,7 @@ public class GetAttendanceUserResponse{
     String username;
     String department;
     String date;
+    String hireDate;
     TotalAttendanceUser totalAttendanceUser;
     List<DailyLogResponse> dailyLogList;
 }
