@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static fpt.capstone.buildingmanagementsystem.until.Until.roundDouble;
+
 @Service
 public class MonthlyEvaluateService {
 
@@ -120,7 +122,7 @@ public class MonthlyEvaluateService {
 
             MonthlyEvaluate monthlyEvaluate = MonthlyEvaluate.builder()
                     .workingDay(totalDay)
-                    .totalAttendance(totalAttendance)
+                    .totalAttendance(roundDouble(totalAttendance))
                     .lateCheckin(lateCheckinTotal)
                     .earlyCheckout(earlyCheckoutTotal)
                     .permittedLeave(permittedLeave)
@@ -161,7 +163,7 @@ public class MonthlyEvaluateService {
         if (monthlyEvaluate.getAcceptedBy() != null) monthlyEvaluate.setAcceptedBy(null);
         if (monthlyEvaluate.getApprovedDate() != null) monthlyEvaluate.setApprovedDate(null);
         if (monthlyEvaluate.getHrNote() != null) monthlyEvaluate.setHrNote(null);
-        monthlyEvaluate.setUpdateDate(Until.generateDate());
+        monthlyEvaluate.setUpdateDate(Until.generateRealTime());
         monthlyEvaluate.setStatus(false);
         try {
             return ResponseEntity.ok(monthlyEvaluateRepository.save(monthlyEvaluate));
@@ -183,6 +185,7 @@ public class MonthlyEvaluateService {
         response.setFirstNameEmp(monthlyEvaluate.getEmployee().getFirstName());
         response.setLastNameEmp(monthlyEvaluate.getEmployee().getLastName());
         response.setDepartment(monthlyEvaluate.getEmployee().getDepartment());
+        response.setEmployeeUserName(monthlyEvaluate.getEmployee().getAccount().getUsername());
         response.setHireDate(monthlyEvaluate.getEmployee().getAccount().getCreatedDate());
         return response;
     }

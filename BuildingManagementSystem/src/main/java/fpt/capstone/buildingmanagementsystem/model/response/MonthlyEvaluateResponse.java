@@ -42,4 +42,5 @@ public class MonthlyEvaluateResponse {
     private boolean status;
     private String acceptedHrId;
     private String acceptedHrUserName;
+    private String hrNote;
 }
