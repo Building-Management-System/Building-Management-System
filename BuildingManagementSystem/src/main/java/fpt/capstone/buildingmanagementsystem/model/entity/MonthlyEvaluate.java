@@ -90,7 +90,7 @@ public class MonthlyEvaluate {
     private boolean status;
 
     @Column
-    private boolean HrNote;
+    private String HrNote;
 
     @ManyToOne
     @JsonIgnore
