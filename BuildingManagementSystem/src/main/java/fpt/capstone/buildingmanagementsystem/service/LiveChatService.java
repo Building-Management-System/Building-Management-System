@@ -10,7 +10,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChatMessageRequest2;
 import fpt.capstone.buildingmanagementsystem.model.request.CreateChatRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.CreateChatRequest2;
+import fpt.capstone.buildingmanagementsystem.model.request.UpdateGroupChatRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.*;
 import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.until.Until;
@@ -45,20 +45,20 @@ public class LiveChatService {
                     && createChatRequest.getTo() != null) {
                 List<User> to = userRepository.findAllByUserIdIn(createChatRequest.getTo());
                 Optional<User> from = userRepository.findByUserId(createChatRequest.getFrom());
-                String isGroupChat="true";
-                String chatName=null;
+                String isGroupChat = "true";
+                String chatName = null;
                 if (to.size() > 0 && from.isPresent()) {
                     Chat chat;
                     List<ChatUser> chatUsers = new ArrayList<>();
                     if (to.size() == 1) {
                         chat = Chat.builder().chatName(null).isGroupChat(false).createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
                         chatUsers.add(ChatUser.builder().user(to.get(0)).chat(chat).build());
-                        isGroupChat="false";
-                        chatName=to.get(0).getAccount().getUsername();
+                        isGroupChat = "false";
+                        chatName = to.get(0).getAccount().getUsername();
                     } else {
                         chat = Chat.builder().chatName(createChatRequest.getChatName()).isGroupChat(true)
                                 .createAt(Until.generateRealTime()).updateAt(Until.generateRealTime()).build();
-                        chatName=createChatRequest.getChatName();
+                        chatName = createChatRequest.getChatName();
                         for (User elementTo : to) {
                             chatUsers.add(ChatUser.builder().user(elementTo).chat(chat).build());
                         }
@@ -85,7 +85,7 @@ public class LiveChatService {
                     List<UserListChatResponse> userLists = new ArrayList<>();
                     to.forEach(element -> {
                         avatarLists.add(element.getImage());
-                        UserListChatResponse userListChatResponse= new UserListChatResponse(element.getUserId(),element.getAccount().getRole().getRoleName());
+                        UserListChatResponse userListChatResponse = new UserListChatResponse(element.getUserId(), element.getAccount().getRole().getRoleName());
                         userLists.add(userListChatResponse);
                     });
                     return ListChatResponse.builder().chatId(chatResponse.getId()).chatName(chatName)
@@ -294,5 +294,26 @@ public class LiveChatService {
                 .sorted((Comparator.comparing(ListChatResponse::getUpdateAt).reversed()))
                 .collect(Collectors.toList());
         return listChatResponses;
+    }
+
+    public boolean updateChat(UpdateGroupChatRequest updateGroupChatRequest) {
+        if (updateGroupChatRequest.getIsGroup() != null && updateGroupChatRequest.getChatId() != null &&
+                updateGroupChatRequest.getUserId().size() > 0 && updateGroupChatRequest.getIsGroup().equals("true")
+        ) {
+            Chat chat = chatRepository.findById(updateGroupChatRequest.getChatId()).get();
+            chat.setChatName(updateGroupChatRequest.getChatName());
+            chat.setUpdateAt(Until.generateRealTime());
+            chatRepository.save(chat);
+            chatUserRepository.deleteAllByChat_Id(updateGroupChatRequest.getChatId());
+            List<User> to = userRepository.findAllByUserIdIn(updateGroupChatRequest.getUserId());
+            List<ChatUser> chatUsers = new ArrayList<>();
+            for (User elementTo : to) {
+                chatUsers.add(ChatUser.builder().user(elementTo).chat(chat).build());
+            }
+            chatUserRepository.saveAll(chatUsers);
+            return true;
+        } else {
+            throw new BadRequest("requests_fails");
+        }
     }
 }
