@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Repository
 public interface UnReadChatRepository extends JpaRepository<UnReadChat, String> {
@@ -15,5 +16,7 @@ public interface UnReadChatRepository extends JpaRepository<UnReadChat, String> 
     @Transactional
     void deleteByUserAndChat(User user, Chat chat);
     @Transactional
-    void deleteAllByChat_Id(String chatId);
+    void deleteAllByChat(Chat chat);
+    @Transactional
+    List<UnReadChat> findAllByChat_Id(String chatId);
 }

@@ -205,6 +205,7 @@ public class LiveChatService {
     public ChatResponse getMessageBySenderAndReceiver(String chatId, String userId) {
         List<MessageResponse> messageResponses = new ArrayList<>();
         List<UserChatResponse> user = new ArrayList<>();
+        List<String> sender_Id= new ArrayList<>();
         List<ChatMessage> chatMessages = chatMessageRepository.findAllByChat_Id(chatId);
         chatMessages = chatMessages.stream()
                 .sorted((Comparator.comparing(ChatMessage::getCreateAt)))
@@ -223,13 +224,21 @@ public class LiveChatService {
             } else {
                 message = chatMessage.getMessage();
             }
-            MessageResponse messageResponse = new MessageResponse(chatMessage.getId(),myself, message, chatMessage.getSender().getUserId(),
+            MessageResponse messageResponse = new MessageResponse(chatMessage.getId(), myself, message, chatMessage.getSender().getUserId(),
                     chatMessage.getCreateAt().toString(), chatMessage.getType());
             messageResponses.add(messageResponse);
+            sender_Id.add(chatMessage.getSender().getUserId());
         });
         chatUsers.forEach(element -> {
             UserChatResponse userChatResponse = new UserChatResponse(element.getUser().getUserId(), element.getUser().getAccount().getUsername(), element.getUser().getImage());
             user.add(userChatResponse);
+        });
+        List<User> users=userRepository.findAllByUserIdIn(sender_Id);
+        users.forEach(element->{
+            if(!chatUserRepository.existsByUserAndChat(element,chatUsers.get(0).getChat())){
+                UserChatResponse userChatResponse = new UserChatResponse(element.getUserId(), element.getAccount().getUsername(), element.getImage());
+                user.add(userChatResponse);
+            }
         });
         return new ChatResponse(messageResponses, user, chatMessages.get(0).getChat().getCreatedBy());
     }
@@ -299,28 +308,32 @@ public class LiveChatService {
         if (updateGroupChatRequest.getIsGroup() != null && updateGroupChatRequest.getChatId() != null &&
                 updateGroupChatRequest.getUserId().size() > 0 && updateGroupChatRequest.getIsGroup().equals("true")) {
             Optional<Chat> chatOptional = chatRepository.findById(updateGroupChatRequest.getChatId());
-            if(chatOptional.isPresent()) {
+            if (chatOptional.isPresent()) {
                 Chat chat = chatOptional.get();
-                boolean check=false;
-                for(String userId:updateGroupChatRequest.getUserId()){
+                boolean check = false;
+                List<UnReadChat> list = unReadChatRepository.findAllByChat_Id(updateGroupChatRequest.getChatId());
+                for (String userId : updateGroupChatRequest.getUserId()) {
                     if (userId.equals(chat.getCreatedBy())) {
                         check = true;
                         break;
                     }
-                }if(check) {
+                }
+                if (check) {
                     chat.setChatName(updateGroupChatRequest.getChatName());
                     chat.setUpdateAt(Until.generateRealTime());
                     chatRepository.save(chat);
+                    unReadChatRepository.deleteAllByChat(chat);
                     chatUserRepository.deleteAllByChat_Id(updateGroupChatRequest.getChatId());
-                    unReadChatRepository.deleteAllByChat_Id(updateGroupChatRequest.getChatId());
                     List<User> to = userRepository.findAllByUserIdIn(updateGroupChatRequest.getUserId());
                     List<ChatUser> chatUsers = new ArrayList<>();
                     for (User elementTo : to) {
                         chatUsers.add(ChatUser.builder().user(elementTo).chat(chat).build());
                     }
                     chatUserRepository.saveAll(chatUsers);
+                    ChatMessageRequest chatMessageRequest= new ChatMessageRequest(chat.getCreatedBy(),chat.getId(),"[AUTO] I have updated the chat group !");
+                    newChatMessage(chatMessageRequest);
                     return true;
-                }else {
+                } else {
                     throw new Conflict("admin_not_found_in_list");
                 }
             } else {
@@ -330,55 +343,59 @@ public class LiveChatService {
             throw new BadRequest("requests_fails");
         }
     }
+
     public boolean removeFromChat(RemoveUserAndChangeAdminRequest request) {
-        if (request.getUserId()!=null&&request.getChatId()!=null) {
+        if (request.getUserId() != null && request.getChatId() != null) {
             Optional<Chat> chat = chatRepository.findById(request.getChatId());
-            Optional<User> user= userRepository.findByUserId(request.getUserId());
-            if(chat.isPresent()&&user.isPresent()&& !Objects.equals(chat.get().getCreatedBy(), request.getUserId())) {
-                chatUserRepository.deleteByUserAndChat(user.get(),chat.get());
-                unReadChatRepository.deleteByUserAndChat(user.get(),chat.get());
+            Optional<User> user = userRepository.findByUserId(request.getUserId());
+            if (chat.isPresent() && user.isPresent() && !Objects.equals(chat.get().getCreatedBy(), request.getUserId())) {
+                chatUserRepository.deleteByUserAndChat(user.get(), chat.get());
+                unReadChatRepository.deleteByUserAndChat(user.get(), chat.get());
                 return true;
-            }else {
+            } else {
                 throw new BadRequest("requests_fails");
             }
         } else {
             throw new BadRequest("requests_fails");
         }
     }
+
     public boolean readChat(RemoveUserAndChangeAdminRequest request) {
-        if (request.getUserId()!=null&&request.getChatId()!=null) {
+        if (request.getUserId() != null && request.getChatId() != null) {
             Optional<Chat> chat = chatRepository.findById(request.getChatId());
-            Optional<User> user= userRepository.findByUserId(request.getUserId());
-            if(chat.isPresent()&&user.isPresent()) {
-                unReadChatRepository.deleteByUserAndChat(user.get(),chat.get());
+            Optional<User> user = userRepository.findByUserId(request.getUserId());
+            if (chat.isPresent() && user.isPresent()) {
+                unReadChatRepository.deleteByUserAndChat(user.get(), chat.get());
                 return true;
-            }else {
+            } else {
                 throw new BadRequest("requests_fails");
             }
         } else {
             throw new BadRequest("requests_fails");
         }
     }
+
     public boolean updateChange(RemoveUserAndChangeAdminRequest request) {
-        if (request.getUserId()!=null&&request.getChatId()!=null) {
+        if (request.getUserId() != null && request.getChatId() != null) {
             Optional<Chat> chat = chatRepository.findById(request.getChatId());
-            if(chat.isPresent()) {
+            if (chat.isPresent()) {
                 chat.get().setCreatedBy(request.getUserId());
                 chatRepository.save(chat.get());
                 return true;
-            }else {
+            } else {
                 throw new BadRequest("requests_fails");
             }
         } else {
             throw new BadRequest("requests_fails");
         }
     }
-    public FileDataResponse getFileChatDownload(FileRequest fileRequest){
-        if (fileRequest.getMessageId()!=null&&fileRequest.getFileName()!=null) {
+
+    public FileDataResponse getFileChatDownload(FileRequest fileRequest) {
+        if (fileRequest.getMessageId() != null && fileRequest.getFileName() != null) {
             Optional<ChatMessage> chatMessage = chatMessageRepository.findByIdAndFileName(fileRequest.getMessageId(), fileRequest.getFileName());
-            if(chatMessage.isPresent()) {
-                return new FileDataResponse(fileRequest.getMessageId(),chatMessage.get().getFileName(), chatMessage.get().getFileType(),chatMessage.get().getFile());
-            }else {
+            if (chatMessage.isPresent()) {
+                return new FileDataResponse(fileRequest.getMessageId(), chatMessage.get().getFileName(), chatMessage.get().getFileType(), chatMessage.get().getFile());
+            } else {
                 throw new NotFound("file_not_found");
             }
         } else {
