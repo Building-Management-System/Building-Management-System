@@ -35,8 +35,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static fpt.capstone.buildingmanagementsystem.until.Until.getYear;
-
 
 @Service
 public class AttendanceService {
@@ -101,10 +99,18 @@ public class AttendanceService {
                     SimpleDateFormat sdf = new SimpleDateFormat("MMMM,yyyy", Locale.US);
                     String monthTotal = sdf.format(Until.convertDateToCalender(dailyLogs.get(0).getDate()).getTime());
                     TotalAttendanceUser totalAttendanceUser = TotalAttendanceUser.builder().
-                            lateCheckinTotal(lateCheckinTotal).ViolateTotal(ViolateTotal).earlyCheckoutTotal(earlyCheckoutTotal).date(monthTotal)
-                            .afternoonTotal(afternoonTotal).morningTotal(morningTotal)
-                            .totalAttendance(totalAttendance).nonPermittedLeave(nonPermittedLeave).paidDay(paidDay).permittedLeave(permittedLeave)
-                            .outsideWork(outsideWork).totalDate(totalDay).build();
+                            lateCheckinTotal(lateCheckinTotal).ViolateTotal(ViolateTotal)
+                            .earlyCheckoutTotal(earlyCheckoutTotal)
+                            .date(monthTotal)
+                            .afternoonTotal(afternoonTotal)
+                            .morningTotal(morningTotal)
+                            .totalAttendance(totalAttendance)
+                            .nonPermittedLeave(nonPermittedLeave)
+                            .paidDay(paidDay)
+                            .permittedLeave(permittedLeave)
+                            .outsideWork(outsideWork)
+                            .totalDate(totalDay)
+                            .build();
                     return new GetAttendanceUserResponse(dailyLogs.get(0).getUser().getAccount().getUsername()
                             , dailyLogs.get(0).getUser().getDepartment().getDepartmentName(), monthTotal, totalAttendanceUser, list);
                 } else {

@@ -15,13 +15,13 @@ import java.util.Date;
 @Setter
 public class MonthlyEvaluateResponse {
     private String evaluateId;
-    private double workingDay;
-    private double totalAttendance;
-    private int lateCheckin;
-    private int earlyCheckout;
-    private double permittedLeave;
-    private double nonPermittedLeave;
-    private int violate;
+    private double workingDay;//
+    private double totalAttendance;//
+    private int lateCheckin;//
+    private int earlyCheckout;//
+    private double permittedLeave;//
+    private double nonPermittedLeave;//
+    private int violate;//
     private double overTime;
     private double paidDay;
     private int month;
