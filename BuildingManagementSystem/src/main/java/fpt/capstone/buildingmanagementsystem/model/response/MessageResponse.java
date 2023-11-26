@@ -13,6 +13,7 @@ import javax.persistence.Column;
 @Getter
 @Setter
 public class MessageResponse {
+    private String messageId;
     private boolean myself;
     private String message;
     private String senderId;

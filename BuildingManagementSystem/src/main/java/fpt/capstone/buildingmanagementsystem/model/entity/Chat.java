@@ -28,6 +28,8 @@ public class Chat {
     private boolean isGroupChat;
     @Column(name = "createAt")
     private Date createAt;
+    @Column(name="createdBy")
+    private String createdBy;
     @Column(name = "updateAt")
     private Date updateAt;
 }
