@@ -181,6 +181,7 @@ public class MonthlyEvaluateService {
             MonthlyEvaluateResponse response = new MonthlyEvaluateResponse();
             BeanUtils.copyProperties(monthlyEvaluate, response);
             response.setCreatedBy(monthlyEvaluate.getCreatedBy().getUserId());
+            response.setUsernameCreatedBy(monthlyEvaluate.getCreatedBy().getAccount().getUsername());
             response.setEmployeeId(monthlyEvaluate.getEmployee().getUserId());
             response.setFirstNameEmp(monthlyEvaluate.getEmployee().getFirstName());
             response.setLastNameEmp(monthlyEvaluate.getEmployee().getLastName());
