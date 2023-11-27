@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class MessageImageAndFileResponse {
+    String messageId;
     String message;
 }

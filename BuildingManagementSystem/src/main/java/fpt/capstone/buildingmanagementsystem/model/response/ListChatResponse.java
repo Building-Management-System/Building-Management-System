@@ -20,4 +20,5 @@ public class ListChatResponse {
     List<UserInfoResponse> user;
     Date updateAt;
     String read;
+    String admin;
 }

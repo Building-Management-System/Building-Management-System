@@ -90,7 +90,7 @@ public class LiveChatService {
                                         ,element.getAccount().getRole().getRoleName());
                         userLists.add(userListChatResponse);
                     });
-                    return ListChatResponse.builder().chatId(chatResponse.getId()).chatName(chatName)
+                    return ListChatResponse.builder().chatId(chatResponse.getId()).chatName(chatName).admin(createChatRequest.getFrom())
                             .avatar(avatarLists).user(userLists).updateAt(chatResponse.getUpdateAt()).isGroupChat(isGroupChat).read("true").build();
                 } else {
                     throw new NotFound("requests_fails");
@@ -191,7 +191,7 @@ public class LiveChatService {
                 .file(file.getBytes())
                 .type("file")
                 .build();
-        chatMessageRepository.saveAndFlush(chatMessage);
+        ChatMessage chatMessage1=chatMessageRepository.saveAndFlush(chatMessage);
         chat.setUpdateAt(Until.generateRealTime());
         chatRepository.saveAndFlush(chat);
         List<UnReadChat> list = new ArrayList<>();
@@ -202,7 +202,7 @@ public class LiveChatService {
             }
         }
         unReadChatRepository.saveAll(list);
-        return MessageImageAndFileResponse.builder().message(StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()))).build();
+        return MessageImageAndFileResponse.builder().messageId(chatMessage1.getId()).message(StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()))).build();
     }
 
     public ChatResponse getMessageBySenderAndReceiver(String chatId, String userId) {
@@ -302,6 +302,7 @@ public class LiveChatService {
             listChatResponse.setUser(userLists);
             listChatResponse.setChatName(chatName);
             listChatResponse.setRead(isRead);
+            listChatResponse.setAdmin(userChat.getChat().getCreatedBy());
             listChatResponses.add(listChatResponse);
         }
         listChatResponses = listChatResponses.stream()
