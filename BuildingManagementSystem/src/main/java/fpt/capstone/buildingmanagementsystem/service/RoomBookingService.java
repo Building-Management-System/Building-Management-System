@@ -42,7 +42,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.*;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.checkDateBookingRoom;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateTime;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartTimeAndEndTime;
 
 @Service
 public class RoomBookingService {
@@ -90,7 +93,7 @@ public class RoomBookingService {
                     && sendRoomBookingRequest.getEndTime() != null
                     && sendRoomBookingRequest.getDepartmentReceiverId() != null) {
                 if (checkValidate(sendRoomBookingRequest)) {
-                    List<User> listUserReceiver= new ArrayList<>();
+                    List<User> listUserReceiver = new ArrayList<>();
                     Room room = roomRepository.findById(sendRoomBookingRequest.getRoomId())
                             .orElseThrow(() -> new BadRequest("not_found_room"));
                     User user = userRepository.findByUserId(sendRoomBookingRequest.getUserId())
@@ -102,11 +105,11 @@ public class RoomBookingService {
 
                     String ticketId = "RB_" + Until.generateId();
                     String requestTicketId = "RB_" + Until.generateId();
-                    if(sendRoomBookingRequest.getReceiverId()!=null) {
+                    if (sendRoomBookingRequest.getReceiverId() != null) {
                         Optional<User> receive_user = userRepository.findByUserId(sendRoomBookingRequest.getReceiverId());
                         listUserReceiver.add(receive_user.get());
-                    }else{
-                        listUserReceiver= userRepository.findAllByDepartment(receiverDepartment);
+                    } else {
+                        listUserReceiver = userRepository.findAllByDepartment(receiverDepartment);
                     }
                     Ticket ticket = Ticket.builder()
                             .ticketId(ticketId)
@@ -117,7 +120,7 @@ public class RoomBookingService {
                             .build();
                     ticketRepository.save(ticket);
                     saveRoomBookingRequest(sendRoomBookingRequest, room, user, receiverDepartment, senderDepartment, requestTicketId, ticket);
-                    for(User receive_user:listUserReceiver) {
+                    for (User receive_user : listUserReceiver) {
                         automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
                                 ticket.getTicketId(),
                                 user,
@@ -241,8 +244,8 @@ public class RoomBookingService {
         return validateDateFormat(sendRoomBookingRequest.getBookingDate()) &&
                 validateDateTime(sendRoomBookingRequest.getStartTime()) &&
                 validateDateTime(sendRoomBookingRequest.getEndTime()) &&
-                validateStartTimeAndEndTime(sendRoomBookingRequest.getStartTime(), sendRoomBookingRequest.getEndTime())&&
-        checkDateBookingRoom(sendRoomBookingRequest.getBookingDate(),sendRoomBookingRequest.getStartTime());
+                validateStartTimeAndEndTime(sendRoomBookingRequest.getStartTime(), sendRoomBookingRequest.getEndTime()) &&
+                checkDateBookingRoom(sendRoomBookingRequest.getBookingDate(), sendRoomBookingRequest.getStartTime());
     }
 
     private void saveRoomBookingRequest(SendRoomBookingRequest sendRoomBookingRequest, Room room, User user, Department receiverDepartment, Department senderDepartment, String requestTicketId, Ticket ticket) throws ParseException {
@@ -442,6 +445,6 @@ public class RoomBookingService {
     }
 
     private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
-        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
+        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService);
     }
 }

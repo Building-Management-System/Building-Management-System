@@ -38,4 +38,26 @@ public class ChangeLogService {
                 ))
                 .collect(Collectors.toList());
     }
+
+    public List<ChangeLogResponse> getAllLogsInDay(ChangeLogRequest changeLogRequest) {
+        List<ChangeLog> changeLogs = changeLogRepository.getChangeLogByUserIdAndDate(changeLogRequest.getEmployeeId(), changeLogRequest.getDate());
+        return changeLogs.stream()
+                .map(changeLog -> new ChangeLogResponse(
+                        changeLog.getChangeLogId(),
+                        changeLog.getCheckin(),
+                        changeLog.getCheckout(),
+                        changeLog.getOutsideWork(),
+                        changeLog.isViolate(),
+                        changeLog.getReason(),
+                        changeLog.getChangeType(),
+                        changeLog.getDate(),
+                        changeLog.getCreatedDate(),
+                        changeLog.getManager().getUserId(),
+                        changeLog.getEmployee().getUserId(),
+                        changeLog.getEmployee().getAccount().getUsername(),
+                        changeLog.getEmployee().getFirstName(),
+                        changeLog.getEmployee().getLastName()
+                ))
+                .collect(Collectors.toList());
+    }
 }
