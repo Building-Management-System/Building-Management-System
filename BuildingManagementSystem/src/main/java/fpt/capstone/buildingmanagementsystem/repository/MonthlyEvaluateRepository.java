@@ -13,6 +13,7 @@ import java.util.Optional;
 @Repository
 public interface MonthlyEvaluateRepository extends JpaRepository<MonthlyEvaluate, String> {
     Optional<MonthlyEvaluate> findByEmployeeAndMonthAndYear(User user, int month, int year);
+    Optional<MonthlyEvaluate> findByEvaluateId(String id);
 
     @Query(value = "SELECT me.*\n" +
             "FROM monthly_evaluate me\n" +

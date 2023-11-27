@@ -10,6 +10,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.request.EditEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.EmployeeEvaluateRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.EvaluateByHrRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.MonthlyEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.EmployeeResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateResponse;
@@ -170,6 +171,31 @@ public class MonthlyEvaluateService {
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getCause());
+        }
+    }
+
+    public boolean updateAcceptOrRejectEvaluateByHr(EvaluateByHrRequest evaluateByHrRequest) {
+        try {
+            if (evaluateByHrRequest.getEvaluateId() != null && evaluateByHrRequest.getHrId() != null && evaluateByHrRequest.getHrStatus() != null) {
+                Optional<MonthlyEvaluate> monthlyEvaluateOptional = monthlyEvaluateRepository.findByEvaluateId(evaluateByHrRequest.getEvaluateId());
+                Optional<User> user=userRepository.findByUserId(evaluateByHrRequest.getHrId());
+                if (monthlyEvaluateOptional.isPresent()&&user.isPresent()) {
+                    MonthlyEvaluate monthlyEvaluate=monthlyEvaluateOptional.get();
+                    monthlyEvaluate.setApprovedDate(Until.generateRealTime());
+                    monthlyEvaluate.setAcceptedBy(user.get());
+                    monthlyEvaluate.setHrNote(evaluateByHrRequest.getHrNote());
+                    boolean booleanValue = Boolean.parseBoolean(evaluateByHrRequest.getHrStatus());
+                    monthlyEvaluate.setStatus(booleanValue);
+                    monthlyEvaluateRepository.save(monthlyEvaluate);
+                    return true;
+                } else {
+                    throw new NotFound("monthly_evaluate");
+                }
+            } else {
+                throw new BadRequest("request_fails");
+            }
+        } catch (ServerError e) {
+            throw new ServerError("fails");
         }
     }
 

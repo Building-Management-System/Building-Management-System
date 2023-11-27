@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.controller;
 
 import fpt.capstone.buildingmanagementsystem.model.request.EditEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.EmployeeEvaluateRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.EvaluateByHrRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.MonthlyEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateResponse;
 import fpt.capstone.buildingmanagementsystem.service.MonthlyEvaluateService;
@@ -37,7 +38,10 @@ public class MonthlyEvaluateController {
     public ResponseEntity<?> updateEvaluate(@RequestBody EditEvaluateRequest request) {
         return monthlyEvaluateService.updateEvaluate(request);
     }
-
+    @PostMapping("/updateAcceptOrRejectEvaluateByHr")
+    public boolean updateAcceptOrRejectEvaluateByHr(@RequestBody EvaluateByHrRequest request) {
+        return monthlyEvaluateService.updateAcceptOrRejectEvaluateByHr(request);
+    }
     @GetMapping("/getDepartmentEvaluate")
     public List<MonthlyEvaluateResponse> getDepartmentEvaluate(@RequestParam("department_id") String departmentId,
                                                                @RequestParam("month") int month,
