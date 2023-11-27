@@ -189,7 +189,7 @@ public class MonthlyEvaluateService {
                     monthlyEvaluateRepository.save(monthlyEvaluate);
                     return true;
                 } else {
-                    throw new NotFound("monthly_evaluate");
+                    throw new NotFound("not_found_monthly_evaluate_or_hr");
                 }
             } else {
                 throw new BadRequest("request_fails");
