@@ -59,7 +59,7 @@ public class LiveChatController {
     }
 
     @PostMapping("/updateChat")
-    public boolean updateChat(@RequestBody UpdateGroupChatRequest updateGroupChatRequest) {
+    public ListChatResponse updateChat(@RequestBody UpdateGroupChatRequest updateGroupChatRequest) {
         return liveChatService.updateChat(updateGroupChatRequest);
     }
 

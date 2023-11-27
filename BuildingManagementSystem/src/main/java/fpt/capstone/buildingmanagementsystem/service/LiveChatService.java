@@ -311,7 +311,7 @@ public class LiveChatService {
         return listChatResponses;
     }
 
-    public boolean updateChat(UpdateGroupChatRequest updateGroupChatRequest) {
+    public ListChatResponse updateChat(UpdateGroupChatRequest updateGroupChatRequest) {
         if (updateGroupChatRequest.getIsGroup() != null && updateGroupChatRequest.getChatId() != null &&
                 updateGroupChatRequest.getUserId().size() > 0 && updateGroupChatRequest.getIsGroup().equals("true")) {
             Optional<Chat> chatOptional = chatRepository.findById(updateGroupChatRequest.getChatId());
@@ -339,7 +339,18 @@ public class LiveChatService {
                     chatUserRepository.saveAll(chatUsers);
                     ChatMessageRequest chatMessageRequest= new ChatMessageRequest(chat.getCreatedBy(),chat.getId(),"[AUTO] I have updated the chat group !");
                     newChatMessage(chatMessageRequest);
-                    return true;
+                    List<String> avatarLists = new ArrayList<>();
+                    List<UserInfoResponse> userLists = new ArrayList<>();
+                    to.forEach(element -> {
+                        avatarLists.add(element.getImage());
+                        UserInfoResponse userListChatResponse = new UserInfoResponse
+                                (element.getUserId(), element.getAccount().getUsername(),
+                                        element.getFirstName(),element.getLastName(),element.getImage()
+                                        ,element.getAccount().getRole().getRoleName());
+                        userLists.add(userListChatResponse);
+                    });
+                    return new ListChatResponse(chat.getId(),chat.getChatName(),Boolean.toString(chat.isGroupChat()),avatarLists,
+                            userLists,Until.generateRealTime(),"true",chat.getCreatedBy());
                 } else {
                     throw new Conflict("admin_not_found_in_list");
                 }
