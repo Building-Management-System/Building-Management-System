@@ -66,15 +66,8 @@ public class RequestChangeLogService {
                         }
                         changeLog.setEmployee(userEmp.get());
                         changeLog.setManager(userManager.get());
-                        Optional<ChangeLog> optionalChangeLog = changeLogRepository.getChangeLogDetailByUserIdAndDate(saveChangeLogRequest.getEmployeeId(), saveChangeLogRequest.getDate());
-                        if (optionalChangeLog.isPresent()) {
-                            changeLog.setChangeLogId(optionalChangeLog.get().getChangeLogId());
-                            changeLogRepository.save(changeLog);
-                            return true;
-                        } else {
-                            changeLogRepository.save(changeLog);
-                            return true;
-                        }
+                        changeLogRepository.save(changeLog);
+                        return true;
                     } else {
                         throw new BadRequest("request_fail");
                     }
@@ -88,7 +81,6 @@ public class RequestChangeLogService {
             throw new ServerError("fail");
         }
     }
-
     public ChangeLogDetailResponse getChangeLogDetail(String employee_id, String date) {
         if (employee_id != null && Validate.validateDateFormat(date)) {
             try {
