@@ -285,7 +285,8 @@ public class RequestAttendanceFromService {
                     attendanceRequestForm.getManualDate(),
                     requestTicket.getUser(),
                     attendanceRequestForm.getManualFirstEntry(),
-                    attendanceRequestForm.getManualLastExit()
+                    attendanceRequestForm.getManualLastExit(),
+                    attendanceRequestForm.getContent()
             );
             return true;
         } catch (Exception e) {
@@ -341,10 +342,10 @@ public class RequestAttendanceFromService {
     }
 
     private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
-        executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
+        executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService);
     }
 
-    static void executeDuplicate(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest, RequestOtherService requestOtherService, RequestTicketRepository requestTicketRepository) {
+    static void executeDuplicate(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest, RequestOtherService requestOtherService) {
         requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
 
         if (!requestTickets.isEmpty()) {

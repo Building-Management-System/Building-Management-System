@@ -93,7 +93,7 @@ public class LateRequestService {
                             true,
                             null
                     ));
-            updateLateRequest(lateRequestForm.getRequestDate(), requestTicket.getUser());
+            updateLateRequest(lateRequestForm.getRequestDate(), requestTicket.getUser(), lateRequestForm.getContent());
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -147,13 +147,13 @@ public class LateRequestService {
     }
 
     private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
-        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
+        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService);
     }
 
-    public void updateLateRequest(Date date, User user) {
+    public void updateLateRequest(Date date, User user, String reasons) {
         Optional<DailyLog> dailyLog = dailyLogRepository.findByUserAndDate(user, date);
         if(!dailyLog.isPresent()) return;
-        dailyLogService.checkViolate(dailyLog.get(), user);
+        dailyLogService.checkViolate(dailyLog.get(), user,reasons);
         dailyLogRepository.save(dailyLog.get());
     }
 }

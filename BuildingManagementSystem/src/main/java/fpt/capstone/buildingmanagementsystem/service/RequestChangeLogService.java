@@ -10,7 +10,6 @@ import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.request.SaveChangeLogRequest;
-import fpt.capstone.buildingmanagementsystem.model.response.AttendanceDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ChangeLogDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ControlLogResponse;
 import fpt.capstone.buildingmanagementsystem.repository.ChangeLogRepository;
@@ -25,7 +24,11 @@ import org.springframework.stereotype.Service;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartTimeAndEndTime;
@@ -81,6 +84,7 @@ public class RequestChangeLogService {
             throw new ServerError("fail");
         }
     }
+
     public ChangeLogDetailResponse getChangeLogDetail(String employee_id, String date) {
         if (employee_id != null && Validate.validateDateFormat(date)) {
             try {

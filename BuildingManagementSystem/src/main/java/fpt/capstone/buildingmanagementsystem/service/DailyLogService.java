@@ -1,12 +1,21 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
+import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
+import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.DayOff;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.LateType;
 import fpt.capstone.buildingmanagementsystem.model.response.LateFormResponse;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DayOffRepository;
+import fpt.capstone.buildingmanagementsystem.repository.LateRequestFormRepositoryV2;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.service.schedule.CheckoutAnalyzeSchedule;
+import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,10 +187,10 @@ public class DailyLogService {
         }
     }
 
-    public void updateDailyLog(User user, Date date, Time checkin, Time checkoutTime) {
+    public boolean updateDailyLog(User user, Date date, Time checkin, Time checkoutTime) {
         DailyLog dailyLog = dailyLogRepository.findByUserAndDate(user, date)
                 .orElseThrow(() -> new BadRequest("Not_found_log"));
-        dailyLog.setCheckin(checkin);
+        if (checkin != null) dailyLog.setCheckin(checkin);
 
         if (compareTime(checkoutTime, endMorningTime) < 0) {
             dailyLog.setCheckout(checkoutTime);
@@ -218,11 +227,17 @@ public class DailyLogService {
         if (dailyLog.getDateType().equals(DateType.NORMAL)) {
             dailyLog.setPaidDay(Math.min(roundDouble(dailyLog.getTotalAttendance() / 8), 1));
         }
-        checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), date);
+        return checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), date);
     }
 
-    public void checkViolate(DailyLog dailyLog, User user) {
-        checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), dailyLog.getDate());
+    public void checkViolate(DailyLog dailyLog, User user, String reasons) {
+        boolean isViolate = checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), dailyLog.getDate());
+        if (!isViolate) return;
+        //change log check
+        Date instanceDate = new Date(Until.generateDate().getTime());
+        if (instanceDate.compareTo(dailyLog.getDate()) > 0) {
+            checkoutAnalyzeSchedule.saveToChangeLog(user.getAccount(), dailyLog.getDate(), -1, isViolate, reasons);
+        }
     }
 
     public List<DayOff> initEmployeeDayOff() {

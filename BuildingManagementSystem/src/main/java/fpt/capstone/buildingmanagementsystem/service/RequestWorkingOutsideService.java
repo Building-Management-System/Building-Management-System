@@ -20,6 +20,7 @@ import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.repository.WorkingOutsideFormRepository;
 import fpt.capstone.buildingmanagementsystem.service.schedule.CheckoutAnalyzeSchedule;
+import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -102,7 +103,7 @@ public class RequestWorkingOutsideService {
                             true,
                             null
                     ));
-          updateWorkingOutside(requestTicket.getUser(), workingOutsideForm.getDate());
+            updateWorkingOutside(requestTicket.getUser(), workingOutsideForm.getDate(), workingOutsideForm.getContent());
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -156,16 +157,21 @@ public class RequestWorkingOutsideService {
     }
 
     private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
-        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
+        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService);
     }
 
-    private void updateWorkingOutside(User user, Date date) {
+    private void updateWorkingOutside(User user, Date date, String reasons) {
         Optional<DailyLog> dailyLogOptional = dailyLogRepository.findByUserAndDate(user, date);
-        if(!dailyLogOptional.isPresent()) return;
+        if (!dailyLogOptional.isPresent()) return;
         DailyLog dailyLog = dailyLogOptional.get();
-        checkoutAnalyzeSchedule.checkWorkingOutside(dailyLog, user.getAccount(), date);
-        checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), date);
-        try{
+        double workingOutsideChange = checkoutAnalyzeSchedule.checkWorkingOutside(dailyLog, user.getAccount(), date);
+        boolean isViolate = checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), date);
+        //change log check
+        Date instanceDate = new Date(Until.generateDate().getTime());
+        if (instanceDate.compareTo(dailyLog.getDate()) > 0) {
+            checkoutAnalyzeSchedule.saveToChangeLog(user.getAccount(), date, workingOutsideChange, isViolate, reasons);
+        }
+        try {
             dailyLogRepository.save(dailyLog);
         } catch (Exception e) {
             e.printStackTrace();
