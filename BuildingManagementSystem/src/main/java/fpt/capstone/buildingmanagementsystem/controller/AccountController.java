@@ -29,46 +29,53 @@ public class AccountController {
     public ResponseEntity<?> saveUser(@RequestBody RegisterRequest registerRequest) throws Exception {
         return ResponseEntity.ok(accountManageService.saveNewAccount(registerRequest));
     }
+
     @RequestMapping(value = "/getAllAccount", method = RequestMethod.GET)
     public ResponseEntity<?> getAllAccount() throws Exception {
         return ResponseEntity.ok(accountManageService.getGetAllAccount());
     }
+
     @RequestMapping(value = "/getRoleByUserId", method = RequestMethod.POST)
     public RoleDto getRoleByUserId(@RequestBody GetUserInfoRequest getUserInfoRequest) throws Exception {
         return accountManageService.getGettingRole2(getUserInfoRequest);
     }
+
     @RequestMapping(value = "/changeStatusAccount", method = RequestMethod.POST)
     public boolean changeStatusAccount(@RequestBody ChangeStatusAccountRequest changeStatusAccountRequest) throws Exception {
         return accountManageService.changeStatusAccount(changeStatusAccountRequest);
     }
+
     @RequestMapping(value = "/changeRoleAccount", method = RequestMethod.POST)
     public boolean changeRoleAccount(@RequestBody ChangeRoleRequest changeRoleRequest) throws Exception {
         return accountManageService.changeRoleAccount(changeRoleRequest);
     }
+
     @RequestMapping(value = "/changePassword", method = RequestMethod.POST)
     public boolean changPassword(@RequestBody ChangePasswordRequest changePasswordRequest) throws Exception {
         return accountManageService.changePassword(changePasswordRequest);
     }
+
     @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
     public boolean resetPassword(@RequestBody ResetPasswordRequest resetPassword) throws Exception {
         return accountManageService.resetPassword(resetPassword);
     }
+
     @RequestMapping(value = "/deleteAccount", method = RequestMethod.POST)
     public boolean deleteAccount(@RequestBody DeleteAccount deleteAccount) throws Exception {
-        return accountManageService.deleteAccount(deleteAccount.getUsername(),deleteAccount.getHrId());
+        return accountManageService.deleteAccount(deleteAccount.getUsername(), deleteAccount.getHrId());
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest authenticationRequest) throws Exception {
-        JwtResponse jwtResponse=new JwtResponse();
-        if (accountManageService.checkUsernameAndPassword(authenticationRequest.getUsername(), authenticationRequest.getPassword())){
+        JwtResponse jwtResponse = new JwtResponse();
+        if (accountManageService.checkUsernameAndPassword(authenticationRequest.getUsername(), authenticationRequest.getPassword())) {
             authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
             final UserDetails userDetails = accountManageService.loadUserByUsername(authenticationRequest.getUsername());
             final String token = jwtTokenUtil.generateToken(userDetails);
             RoleDto role = accountManageService.getGettingRole(authenticationRequest.getUsername());
             String userId = accountManageService.getAccountId(authenticationRequest.getUsername());
-            jwtResponse=new JwtResponse(token,role.getRoleName(),userId);
-    }
+            jwtResponse = new JwtResponse(token, role.getRoleName(), userId);
+        }
         return ResponseEntity.ok(jwtResponse);
     }
 
