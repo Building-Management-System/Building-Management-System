@@ -39,6 +39,7 @@ public class ChangeLogController {
     public List<ChangeLogResponse> getChangeLogsInDay(@RequestBody ChangeLogRequest changeLogRequest) {
         return changeLogService.getAllLogsInDay(changeLogRequest);
     }
+
     @GetMapping("/getChangeLogDetail")
     public ChangeLogDetailResponse getChangeLogDetail(@Param("employee_id") String employee_id, @Param("date") String date) {
         return requestChangeLogService.getChangeLogDetail(employee_id, date);
