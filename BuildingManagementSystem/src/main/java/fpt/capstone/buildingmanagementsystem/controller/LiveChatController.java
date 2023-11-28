@@ -29,7 +29,7 @@ public class LiveChatController {
     }
 
     @PostMapping("/createNewMessage")
-    public boolean createNewMessage(@RequestBody ChatMessageRequest chatMessageRequest) {
+    public MessageImageAndFileResponse createNewMessage(@RequestBody ChatMessageRequest chatMessageRequest) {
         return liveChatService.newChatMessage(chatMessageRequest);
     }
 

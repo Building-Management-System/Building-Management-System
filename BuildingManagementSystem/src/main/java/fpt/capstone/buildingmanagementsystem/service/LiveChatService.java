@@ -103,7 +103,7 @@ public class LiveChatService {
         }
     }
 
-    public boolean newChatMessage(ChatMessageRequest chatMessageRequest) {
+    public MessageImageAndFileResponse newChatMessage(ChatMessageRequest chatMessageRequest) {
         List<User> to = new ArrayList<>();
         Chat chat = chatRepository.findById(chatMessageRequest.getChatId()).get();
         chatUserRepository.findAllByChat_Id(chatMessageRequest.getChatId()).forEach(element -> {
@@ -131,7 +131,7 @@ public class LiveChatService {
             }
         }
         unReadChatRepository.saveAll(list);
-        return true;
+        return MessageImageAndFileResponse.builder().messageId(chatMessage.getId()).senderId(chatMessage.getSender().getUserId()).message(chatMessageRequest.getMessage()).build();
     }
 
     public MessageImageAndFileResponse newChatMessage2(String data, MultipartFile file) throws IOException {
@@ -168,7 +168,7 @@ public class LiveChatService {
             }
         }
         unReadChatRepository.saveAll(list);
-        return MessageImageAndFileResponse.builder().message(name).build();
+        return MessageImageAndFileResponse.builder().messageId(chatMessage.getId()).senderId(chatMessage.getSender().getUserId()).message(name).build();
     }
 
     public MessageImageAndFileResponse newChatMessage3(String data, MultipartFile file) throws IOException {
@@ -202,7 +202,8 @@ public class LiveChatService {
             }
         }
         unReadChatRepository.saveAll(list);
-        return MessageImageAndFileResponse.builder().messageId(chatMessage1.getId()).message(StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()))).build();
+        return MessageImageAndFileResponse.builder().senderId(chatMessage1.getSender().getUserId())
+                .messageId(chatMessage1.getId()).message(StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()))).build();
     }
 
     public ChatResponse getMessageBySenderAndReceiver(String chatId, String userId) {

@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class MessageImageAndFileResponse {
     String messageId;
     String message;
+    String senderId;
 }
