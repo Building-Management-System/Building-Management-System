@@ -13,4 +13,5 @@ import java.util.List;
 public class ChatResponse {
     List<MessageResponse> messageResponseList;
     List<UserChatResponse> users;
+    String admin;
 }

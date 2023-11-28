@@ -10,7 +10,6 @@ import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.request.SaveChangeLogRequest;
-import fpt.capstone.buildingmanagementsystem.model.response.AttendanceDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ChangeLogDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ControlLogResponse;
 import fpt.capstone.buildingmanagementsystem.repository.ChangeLogRepository;
@@ -25,7 +24,11 @@ import org.springframework.stereotype.Service;
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartTimeAndEndTime;
@@ -42,6 +45,7 @@ public class RequestChangeLogService {
     ChangeLogRepository changeLogRepository;
     @Autowired
     ChangeLogMapper changeLogMapper;
+
     public boolean saveChangeLog(SaveChangeLogRequest saveChangeLogRequest) {
         try {
             if (saveChangeLogRequest.getManagerId() != null &&
@@ -50,22 +54,23 @@ public class RequestChangeLogService {
                     saveChangeLogRequest.getChangeType() != null
             ) {
                 ChangeLog changeLog = changeLogMapper.convert(saveChangeLogRequest);
-                if (validateStartTimeAndEndTime(saveChangeLogRequest.getManualCheckIn(), saveChangeLogRequest.getManualCheckOut())) {
+                if (saveChangeLogRequest.getManualCheckIn() != null && saveChangeLogRequest.getManualCheckOut() != null && validateStartTimeAndEndTime(saveChangeLogRequest.getManualCheckIn(), saveChangeLogRequest.getManualCheckOut())
+                        || saveChangeLogRequest.getManualCheckIn() == null && saveChangeLogRequest.getManualCheckOut() == null
+                        || saveChangeLogRequest.getManualCheckIn() != null && saveChangeLogRequest.getManualCheckOut() == null
+                        || saveChangeLogRequest.getManualCheckIn() == null
+                ) {
                     Optional<User> userEmp = userRepository.findByUserId(saveChangeLogRequest.getEmployeeId());
                     Optional<User> userManager = userRepository.findByUserId(saveChangeLogRequest.getManagerId());
                     if (userEmp.isPresent() && userManager.isPresent()) {
-                        if (saveChangeLogRequest.getWorkOutSide() == null) changeLog.setOutsideWork(-1);
+                        if (saveChangeLogRequest.getWorkOutSide() == null) {
+                            changeLog.setOutsideWork(-1);
+                        } else {
+                            changeLog.setOutsideWork(Double.parseDouble(saveChangeLogRequest.getWorkOutSide()));
+                        }
                         changeLog.setEmployee(userEmp.get());
                         changeLog.setManager(userManager.get());
-                        Optional<ChangeLog> optionalChangeLog=changeLogRepository.getChangeLogDetailByUserIdAndDate(saveChangeLogRequest.getEmployeeId(),saveChangeLogRequest.getDate());
-                        if(optionalChangeLog.isPresent()) {
-                            changeLog.setChangeLogId(optionalChangeLog.get().getChangeLogId());
-                            changeLogRepository.save(changeLog);
-                            return true;
-                        }else {
-                            changeLogRepository.save(changeLog);
-                            return true;
-                        }
+                        changeLogRepository.save(changeLog);
+                        return true;
                     } else {
                         throw new BadRequest("request_fail");
                     }
@@ -79,6 +84,7 @@ public class RequestChangeLogService {
             throw new ServerError("fail");
         }
     }
+
     public ChangeLogDetailResponse getChangeLogDetail(String employee_id, String date) {
         if (employee_id != null && Validate.validateDateFormat(date)) {
             try {
@@ -88,7 +94,7 @@ public class RequestChangeLogService {
                     String name = dailyLogs.getUser().getFirstName() + " " + dailyLogs.getUser().getLastName();
                     String username = dailyLogs.getUser().getAccount().getUsername();
                     List<ControlLogLcd> controlLogLcds = controlLogLcdRepository.getControlLogLcdList(username, date);
-                    controlLogLcds=controlLogLcds.stream()
+                    controlLogLcds = controlLogLcds.stream()
                             .sorted((Comparator.comparing(ControlLogLcd::getTime)))
                             .collect(Collectors.toList());
                     String departmentName = dailyLogs.getUser().getDepartment().getDepartmentName();
@@ -96,22 +102,22 @@ public class RequestChangeLogService {
                     String dateDaily = sdf.format(Until.convertDateToCalender(dailyLogs.getDate()).getTime());
                     Time checkin = dailyLogs.getCheckin();
                     Time checkout = dailyLogs.getCheckout();
-                    Optional<ChangeLog> changeLog=changeLogRepository.getChangeLogDetailByUserIdAndDate(employee_id,date);
+                    Optional<ChangeLog> changeLog = changeLogRepository.getChangeLogDetailByUserIdAndDate(employee_id, date);
                     Time checkinChange = null;
                     Time checkoutChange = null;
                     String dateDailyChange = null;
                     String changeFrom = null;
                     boolean violate = false;
                     double outSideWork = 0;
-                    String reason=null;
-                    if(changeLog.isPresent()) {
-                         checkinChange = changeLog.get().getCheckin();
-                         checkoutChange = changeLog.get().getCheckout();
-                         dateDailyChange = sdf.format(Until.convertDateToCalender(changeLog.get().getCreatedDate()).getTime());
-                         changeFrom = changeLog.get().getManager().getAccount().getUsername();
-                         violate = changeLog.get().isViolate();
-                         outSideWork = changeLog.get().getOutsideWork();
-                         reason=changeLog.get().getReason();
+                    String reason = null;
+                    if (changeLog.isPresent()) {
+                        checkinChange = changeLog.get().getCheckin();
+                        checkoutChange = changeLog.get().getCheckout();
+                        dateDailyChange = sdf.format(Until.convertDateToCalender(changeLog.get().getCreatedDate()).getTime());
+                        changeFrom = changeLog.get().getManager().getAccount().getUsername();
+                        violate = changeLog.get().isViolate();
+                        outSideWork = changeLog.get().getOutsideWork();
+                        reason = changeLog.get().getReason();
                     }
                     List<ControlLogResponse> controlLogResponse = new ArrayList<>();
                     controlLogLcds.forEach(element -> {

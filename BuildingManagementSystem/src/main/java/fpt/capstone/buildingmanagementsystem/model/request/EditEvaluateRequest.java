@@ -1,18 +1,17 @@
 package fpt.capstone.buildingmanagementsystem.model.request;
 
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.EvaluateEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Date;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class ChangeLogRequest {
-    private String employeeId;
-    private int month;
-    private Date date;
+public class EditEvaluateRequest {
+    private String evaluateId;
+    private String note;
+    private EvaluateEnum rate;
 }

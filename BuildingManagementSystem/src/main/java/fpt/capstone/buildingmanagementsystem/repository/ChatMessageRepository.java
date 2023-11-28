@@ -14,4 +14,5 @@ import java.util.Optional;
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
     List<ChatMessage> findAllByChat_Id(String chatId);
     List<ChatMessage> findAllBySender(User user);
+    Optional<ChatMessage> findByIdAndFileName(String id,String fileName);
 }

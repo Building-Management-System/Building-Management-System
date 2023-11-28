@@ -4,7 +4,6 @@ import fpt.capstone.buildingmanagementsystem.model.request.ChangeLogRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SaveChangeLogRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.ChangeLogDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ChangeLogResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.MessageResponse;
 import fpt.capstone.buildingmanagementsystem.service.ChangeLogService;
 import fpt.capstone.buildingmanagementsystem.service.RequestChangeLogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +33,11 @@ public class ChangeLogController {
     @PostMapping("getChangeLogByEmployeeAndMonth")
     public List<ChangeLogResponse> getChangeLogByEmployeeAndMonth(@RequestBody ChangeLogRequest changeLogRequest) {
         return changeLogService.getAllChangeLogByEmployeeIdAndMonth(changeLogRequest);
+    }
+
+    @PostMapping("getChangeLogsInDay")
+    public List<ChangeLogResponse> getChangeLogsInDay(@RequestBody ChangeLogRequest changeLogRequest) {
+        return changeLogService.getAllLogsInDay(changeLogRequest);
     }
     @GetMapping("/getChangeLogDetail")
     public ChangeLogDetailResponse getChangeLogDetail(@Param("employee_id") String employee_id, @Param("date") String date) {

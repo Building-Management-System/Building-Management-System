@@ -1,11 +1,14 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
+import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
+import fpt.capstone.buildingmanagementsystem.model.entity.NotificationFile;
 import fpt.capstone.buildingmanagementsystem.model.entity.PersonalPriority;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationViewer;
+import fpt.capstone.buildingmanagementsystem.model.response.FileDataResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ImageResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationDetailResponseForCreator;
@@ -23,6 +26,7 @@ import fpt.capstone.buildingmanagementsystem.repository.NotificationReceiverRepo
 import fpt.capstone.buildingmanagementsystem.repository.NotificationRepository;
 import fpt.capstone.buildingmanagementsystem.repository.PersonalPriorityRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -292,6 +296,14 @@ public class NotificationServiceV2 {
         return notificationDetailResponses.stream()
                 .sorted(Comparator.comparing(NotificationDetailResponse::isPriority))
                 .collect(Collectors.toList());
+    }
+
+    public FileDataResponse getFileDataToDownload(String fileId) {
+        NotificationFile notificationFile = notificationFileRepository.findById(fileId)
+                .orElseThrow(() -> new BadRequest("not_found_file"));
+        FileDataResponse fileDataResponse = new FileDataResponse();
+        BeanUtils.copyProperties(notificationFile, fileDataResponse);
+        return fileDataResponse;
     }
 
     public List<NotificationDetailResponse> getListScheduledNotificationByDepartmentOfCreator(String userId) {

@@ -293,7 +293,11 @@ public class RequestLeaveFormService {
                             true,
                             null
                     ));
-            updateLeaveRequest(leaveRequestForm.getFromDate(), leaveRequestForm.getToDate(), requestTicket.getUser());
+            updateLeaveRequest(leaveRequestForm.getFromDate(),
+                    leaveRequestForm.getToDate(),
+                    requestTicket.getUser(),
+                    leaveRequestForm.getContent()
+            );
             return true;
         } catch (Exception e) {
             throw new ServerError("Fail");
@@ -350,15 +354,15 @@ public class RequestLeaveFormService {
     }
 
     private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
-        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
+        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService);
     }
 
-    public void updateLeaveRequest(java.sql.Date fromDate, java.sql.Date toDate, User user) {
+    public void updateLeaveRequest(java.sql.Date fromDate, java.sql.Date toDate, User user, String reason) {
         try {
             List<DailyLog> dailyLogs = dailyLogRepository.getDailyLogsByUserAndFromDateAndToDate(user.getUserId(), fromDate, toDate);
             if (dailyLogs.isEmpty()) return;
             dailyLogs.forEach(dailyLog -> {
-                dailyLogService.checkViolate(dailyLog, user);
+                dailyLogService.checkViolate(dailyLog, user, reason);
                 dailyLogRepository.save(dailyLog);
             });
         } catch (Exception e) {

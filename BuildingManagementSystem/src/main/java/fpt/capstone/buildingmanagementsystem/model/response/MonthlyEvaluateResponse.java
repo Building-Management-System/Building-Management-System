@@ -31,9 +31,16 @@ public class MonthlyEvaluateResponse {
     private Date createdDate;
     private Date updateDate;
     private String createdBy;
+    private String UsernameCreatedBy;
     private String employeeId;
+    private String employeeUserName;
     private String firstNameEmp;
     private String lastNameEmp;
     private Department department;
     private Date hireDate;
+    private Date approvedDate;
+    private boolean status;
+    private String acceptedHrId;
+    private String acceptedHrUserName;
+    private String hrNote;
 }

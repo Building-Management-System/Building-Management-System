@@ -9,11 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserInfoResponse {
-    String accountId;
-    String username;
-    String firstName;
-    String lastName;
-    String image;
-    String roleName;
+public class MessageImageAndFileResponse {
+    String messageId;
+    String message;
+    String senderId;
 }

@@ -1,7 +1,9 @@
 package fpt.capstone.buildingmanagementsystem.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.EvaluateEnum;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +24,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
+@Builder
 public class MonthlyEvaluate {
     @Id
     @GeneratedValue(generator = "UUID")
@@ -65,6 +68,9 @@ public class MonthlyEvaluate {
     private int year;
 
     @Column
+    private double workingOutside;
+
+    @Column
     @Enumerated(EnumType.STRING)
     private EvaluateEnum evaluateEnum;
 
@@ -83,16 +89,22 @@ public class MonthlyEvaluate {
     @Column
     private boolean status;
 
+    @Column
+    private String HrNote;
+
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "acceptedBy")
     private User acceptedBy;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "createdBy")
-    private User createdBy;
+    private User createdBy;//
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "employee")
-    private User employee;
+    private User employee;//
 
 }

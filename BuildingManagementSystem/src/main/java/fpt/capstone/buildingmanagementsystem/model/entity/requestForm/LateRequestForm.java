@@ -37,7 +37,7 @@ public class LateRequestForm {
     @Enumerated(EnumType.STRING)
     private LateType lateType;
 
-    @Column
+    @Column(columnDefinition = "integer")
     private int lateDuration;
 
     @Column

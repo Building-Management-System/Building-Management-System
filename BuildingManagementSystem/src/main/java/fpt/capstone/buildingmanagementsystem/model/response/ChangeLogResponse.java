@@ -36,4 +36,10 @@ public class ChangeLogResponse {
     private String managerId;
 
     private String employeeId;
+
+    private String userName;
+
+    private String firstName;
+
+    private String lastName;
 }

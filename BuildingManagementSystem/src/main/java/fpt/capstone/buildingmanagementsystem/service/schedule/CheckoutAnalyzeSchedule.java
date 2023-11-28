@@ -2,15 +2,18 @@ package fpt.capstone.buildingmanagementsystem.service.schedule;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
+import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.DayOff;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.LeaveRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.WorkingOutsideRequestForm;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ChangeLogType;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.LateType;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.WorkingOutsideType;
+import fpt.capstone.buildingmanagementsystem.model.request.SaveChangeLogRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.LateFormResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
@@ -21,6 +24,7 @@ import fpt.capstone.buildingmanagementsystem.repository.LeaveRequestFormReposito
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.repository.WorkingOutsideFormRepository;
 import fpt.capstone.buildingmanagementsystem.service.DailyLogService;
+import fpt.capstone.buildingmanagementsystem.service.RequestChangeLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +74,9 @@ public class CheckoutAnalyzeSchedule {
 
     @Autowired
     WorkingOutsideFormRepository workingOutsideFormRepository;
+
+    @Autowired
+    RequestChangeLogService requestChangeLogService;
 
     private static final Time startMorningTime = Time.valueOf("08:30:00");
 
@@ -122,9 +129,10 @@ public class CheckoutAnalyzeSchedule {
         DailyLog dailyLog = dailyLogRepository.getLastCheckoutOfDateByUserId(account.getAccountId(), yesterday)
                 .orElseThrow(() -> new BadRequest("Not_found"));
 
-        checkWorkingOutside(dailyLog, account, yesterday);
+        double workingOutsideChange = checkWorkingOutside(dailyLog, account, yesterday);
+        boolean isViolateChange = checkViolate(dailyLog, account, yesterday);
+        saveToChangeLog(account, yesterday, workingOutsideChange, isViolateChange, "REQUEST");
 
-        checkViolate(dailyLog, account, yesterday);
         logger.info(dailyLog + "");
         dailyLogRepository.save(dailyLog);
     }
@@ -151,7 +159,8 @@ public class CheckoutAnalyzeSchedule {
         LocalDate localDate = yesterday.toLocalDate();
         offWork.setMonth(localDate.getMonthValue());
         offWork.setDateType(DailyLogService.getDateType(yesterday));
-        checkWorkingOutside(offWork, account, yesterday);
+        double workingOutsideChange = checkWorkingOutside(offWork, account, yesterday);
+        saveToChangeLog(account, yesterday, workingOutsideChange, false, "REQUEST");
         checkLeaveViolate(account, offWork, yesterday);
         return offWork;
     }
@@ -172,11 +181,14 @@ public class CheckoutAnalyzeSchedule {
         offWork.setViolate(leaveRequestForms.isEmpty());
     }
 
-    public void checkWorkingOutside(DailyLog dailyLog, Account account, Date yesterday) {
+    public double checkWorkingOutside(DailyLog dailyLog, Account account, Date yesterday) {
         Map<WorkingOutsideType, List<WorkingOutsideRequestForm>> workingOutsideRequests = workingOutsideFormRepository.findByUserIdAndDate(account.getAccountId(), yesterday)
                 .stream()
                 .collect(Collectors.groupingBy(WorkingOutsideRequestForm::getType, Collectors.toList()));
-        if (workingOutsideRequests.isEmpty()) return;
+        if (workingOutsideRequests.isEmpty()) return -1;
+
+        double workingOutsideType = -1;
+
         Time checkin = null;
         Time checkout = null;
         if (workingOutsideRequests.containsKey(WorkingOutsideType.HALF_MORNING)) {
@@ -184,6 +196,7 @@ public class CheckoutAnalyzeSchedule {
             if (compareTime(dailyLog.getCheckout(), endMorningTime) < 0 || dailyLog.getCheckout() == null) {
                 checkout = endMorningTime;
             }
+            workingOutsideType = 0.5;
         }
 
         if (workingOutsideRequests.containsKey(WorkingOutsideType.HALF_AFTERNOON)) {
@@ -191,11 +204,13 @@ public class CheckoutAnalyzeSchedule {
             if (compareTime(dailyLog.getCheckin(), startAfternoonTime) > 0 || dailyLog.getCheckin() == null) {
                 checkin = startAfternoonTime;
             }
+            workingOutsideType = 0.5;
         }
 
         if (workingOutsideRequests.containsKey(WorkingOutsideType.ALL_DAY)) {
             checkin = startMorningTime;
             checkout = endAfternoonTime;
+            workingOutsideType = 1;
         }
 
         if (checkin != null) {
@@ -211,6 +226,7 @@ public class CheckoutAnalyzeSchedule {
         }
         //set total time
         updateTotalField(dailyLog);
+        return workingOutsideType;
     }
 
     public void updateTotalField(DailyLog dailyLog) {
@@ -242,31 +258,35 @@ public class CheckoutAnalyzeSchedule {
         }
     }
 
-    public void checkViolate(DailyLog dailyLog, Account account, Date date) {
+    public boolean checkViolate(DailyLog dailyLog, Account account, Date date) {
         boolean isLateCheckinViolate = false;
         boolean isEarlyCheckoutViolate = false;
         boolean isLeaveWithoutNoticeViolate = false;
-        if (!dailyLog.getDateType().equals(DateType.NORMAL)) return;
+        if (!dailyLog.getDateType().equals(DateType.NORMAL)) return false;
         int year = getYear(dailyLog.getDate());
 
         List<LateFormResponse> findLateMorningAccepted = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(account.getAccountId(), date, LateType.LATE_MORNING);
         if (compareTime(dailyLog.getCheckin(), startMorningTime) > 0) {
             dailyLog.setLateCheckin(true);
             isLateCheckinViolate = findLateMorningAccepted.isEmpty();
+        } else {
+            dailyLog.setLateCheckin(false);
         }
 
-        List<LateFormResponse> lateFormResponses = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(account.accountId, date, LateType.EARLY_AFTERNOON)
+        List<LateFormResponse> earlyCheckout = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(account.accountId, date, LateType.EARLY_AFTERNOON)
                 .stream().sorted(Comparator.comparing(LateFormResponse::getLateDuration).reversed())
                 .collect(Collectors.toList());
 
+        if (compareTime(dailyLog.getCheckout(), endAfternoonTime) < 0) {
+            dailyLog.setEarlyCheckout(true);
+            isEarlyCheckoutViolate = earlyCheckout.isEmpty();
+        } else {
+            dailyLog.setEarlyCheckout(false);
+        }
+
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
         if (getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour < 6) {
-            if (compareTime(dailyLog.getCheckout(), endAfternoonTime) < 0) {
-                dailyLog.setEarlyCheckout(true);
-                isEarlyCheckoutViolate = lateFormResponses.isEmpty();
-            }
-            double workingHours = roundDouble(dailyLog.getTotalAttendance() / 8);
-            double offHours = 8 - workingHours;
+            double offHours = 8 - dailyLog.getTotalAttendance();
             double permittedLeaveLeft = roundDouble(getPermittedLeaveLeft(account, dailyLog.getMonth(), year, dailyLog));
 
             isLeaveWithoutNoticeViolate = leaveRequestForms.isEmpty();
@@ -283,9 +303,38 @@ public class CheckoutAnalyzeSchedule {
             dailyLog.setPermittedLeave(0);
             dailyLog.setNonPermittedLeave(0);
         }
-        dailyLog.setViolate(isLateCheckinViolate &&
-                isEarlyCheckoutViolate &&
-                isLeaveWithoutNoticeViolate);
+        boolean checkViolate = isLateCheckinViolate ||
+                isEarlyCheckoutViolate ||
+                isLeaveWithoutNoticeViolate;
+        if (checkViolate != dailyLog.isViolate()) {
+            dailyLog.setViolate(checkViolate);
+            return true;
+        }
+        return false;
+    }
+
+    public void saveToChangeLog(Account employee,
+                                Date date,
+                                double workingOutside,
+                                boolean isViolateChange,
+                                String reasons) {
+        User manager = userRepository.getManagerByDepartment(employee.getUser().getDepartment().getDepartmentName())
+                .get(0);
+        SaveChangeLogRequest saveChangeLogRequest = SaveChangeLogRequest.builder()
+                .employeeId(employee.getAccountId())
+                .managerId(manager.getUserId())
+                .date(date.toString())
+                .workOutSide(workingOutside + "")
+                .changeType(ChangeLogType.FROM_REQUEST.toString())
+                .violate(isViolateChange)
+                .reason(reasons)
+                .build();
+        try {
+            requestChangeLogService.saveChangeLog(saveChangeLogRequest);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ServerError("fail");
+        }
     }
 
     public double getPermittedLeaveLeft(Account account, int month, int year, DailyLog newLog) {

@@ -2,12 +2,25 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
-import fpt.capstone.buildingmanagementsystem.model.entity.*;
+import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
+import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.OvertimeRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.OvertimeMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
-import fpt.capstone.buildingmanagementsystem.repository.*;
+import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
+import fpt.capstone.buildingmanagementsystem.repository.OvertimeRequestFormRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
+import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -106,12 +119,12 @@ public class OvertimeRequestFormService {
     }
 
     private void saveOverTimeLog(OvertimeRequestForm overtimeRequest, RequestMessage requestMessage) {
-        String username= requestMessage.getSender().getAccount().getUsername();
-        String accountId= requestMessage.getSender().getAccount().getAccountId();
-        Date date= overtimeRequest.getOvertimeDate();
-        Optional<DailyLog> dailyLog= dailyLogRepository.getAttendanceDetailByUserIdAndDate(accountId,date.toString());
+        String username = requestMessage.getSender().getAccount().getUsername();
+        String accountId = requestMessage.getSender().getAccount().getAccountId();
+        Date date = overtimeRequest.getOvertimeDate();
+        Optional<DailyLog> dailyLog = dailyLogRepository.getAttendanceDetailByUserIdAndDate(accountId, date.toString());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        if(dailyLog.isPresent()) {
+        if (dailyLog.isPresent()) {
             //endTime
             Time sqlTimeEnd = new Time(dailyLog.get().getCheckout().getTime());
             //date Ot
@@ -231,7 +244,7 @@ public class OvertimeRequestFormService {
     }
 
     private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
-        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService, requestTicketRepository);
+        RequestAttendanceFromService.executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService);
     }
 
 }
