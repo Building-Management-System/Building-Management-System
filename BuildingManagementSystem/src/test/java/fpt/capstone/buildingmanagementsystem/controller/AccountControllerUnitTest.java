@@ -375,7 +375,8 @@ class AccountControllerUnitTest {
         ResponseEntity<?> response = accountController.getAllAccount();
         List<Account> accounts = (List<Account>) response.getBody();
 
-        assertEquals(1, accounts.size());
+        assertEquals(10, accounts.size());
+        assertTrue(response.getStatusCode().is2xxSuccessful());
     }
 
     @Test

@@ -70,9 +70,9 @@ class  RequestControllerTest {
     void testRequestAttendanceFormExistTicket() {
         SendAttendanceFormRequest sendAttendanceFormRequest = new SendAttendanceFormRequest();
         sendAttendanceFormRequest.setUserId("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6");
-        sendAttendanceFormRequest.setTitle("attendance reesut 2 v3");
+        sendAttendanceFormRequest.setTitle("Helo this is my title 2");
         sendAttendanceFormRequest.setTicketId("AT_37aacd33-d892-489e-ac37-478ee9ff5512");
-        sendAttendanceFormRequest.setContent("sua nhanhn len");
+        sendAttendanceFormRequest.setContent("Helo this is my title 2");
         sendAttendanceFormRequest.setManualDate("2023-10-18");
         sendAttendanceFormRequest.setManualFirstEntry("08:00:00");
         sendAttendanceFormRequest.setManualLastExit("19:00:00");
