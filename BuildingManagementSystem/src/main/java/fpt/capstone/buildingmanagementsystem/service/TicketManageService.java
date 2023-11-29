@@ -5,6 +5,8 @@ import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.model.dto.RequestTicketDto;
 import fpt.capstone.buildingmanagementsystem.model.dto.TicketDto;
 import fpt.capstone.buildingmanagementsystem.model.dto.TicketRequestDto;
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
+import fpt.capstone.buildingmanagementsystem.model.entity.InactiveManagerTemp;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeReceiveIdRequest;
@@ -125,9 +127,9 @@ public class TicketManageService {
 
     public List<TicketRequestResponseV2> getAllTicketByDepartmentManager(String departmentName) {
         List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
-        List<User> manager = userRepository.getManagerByDepartment(departmentName);
-        if (manager.isEmpty()) return new ArrayList<>();
-        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepositoryv2.getTicketRequestByDepartmentManager(manager.get(0).getUserId())
+//        List<User> manager = userRepository.getManagerByDepartment(departmentName);
+//        if (manager.isEmpty()) return new ArrayList<>();
+        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepositoryv2.getTicketRequestByDepartment(departmentName)
                 .stream()
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
         return getTicketRequestResponse(responseV2s, ticketDtos);
@@ -167,5 +169,10 @@ public class TicketManageService {
         } else {
             throw new BadRequest("request_fail");
         }
+    }
+
+    public void updateTicketOfNewManager(Account account, InactiveManagerTemp inactiveManager) {
+        List<TicketRequestDto> ticketReceive = ticketRepositoryv2.getTicketRequestByDepartment(inactiveManager.getManager().accountId);
+
     }
 }

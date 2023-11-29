@@ -44,7 +44,7 @@ public class TicketRepositoryImplement implements TicketRepositoryv2 {
     @Override
     public List<TicketRequestDto> getTicketRequestBySenderId(String senderId) {
         String query = commonQuery()
-        + "WHERE rm.receiver_id LIKE :senderId";
+        + "WHERE rm.sender_id LIKE :senderId";
 
         return (List<TicketRequestDto>) entityManager.createNativeQuery(query).unwrap(NativeQuery.class)
                 .setParameter("senderId", senderId)
@@ -90,12 +90,12 @@ public class TicketRepositoryImplement implements TicketRepositoryv2 {
     }
 
     @Override
-    public List<TicketRequestDto> getTicketRequestByDepartmentManager(String managerId) {
+    public List<TicketRequestDto> getTicketRequestByDepartment(String departmentName) {
         String query = commonQuery() +
-                "WHERE rm.receiver_id LIKE :managerId";
+                "WHERE d.department_name LIKE :departmentName";
 
         return (List<TicketRequestDto>) entityManager.createNativeQuery(query).unwrap(NativeQuery.class)
-                .setParameter("managerId", managerId)
+                .setParameter("departmentName", departmentName)
                 .setResultTransformer(Transformers.aliasToBean(TicketRequestDto.class))
                 .getResultList().stream()
                 .collect(Collectors.toList());
