@@ -91,7 +91,7 @@ public class CheckoutAnalyzeSchedule {
     private static final Logger logger = LoggerFactory.getLogger(CheckoutAnalyzeSchedule.class);
 
     //cron = "0 01 0 * * ?"
-    @Scheduled(cron = "0 18 23 * * ?")
+    @Scheduled(cron = "0 38 08 * * ?")
     @Transactional
     public void scheduledCheckoutAnalyst() {
 
@@ -231,10 +231,8 @@ public class CheckoutAnalyzeSchedule {
 
     public void updateTotalField(DailyLog dailyLog) {
         if (compareTime(dailyLog.getCheckout(), endMorningTime) <= 0) {
-
             double morningTotal = roundDouble(getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour);
             dailyLog.setMorningTotal(morningTotal);
-
             dailyLog.setAfternoonTotal(0);
 
         } else {
@@ -313,13 +311,15 @@ public class CheckoutAnalyzeSchedule {
         return false;
     }
 
+    @Transactional
     public void saveToChangeLog(Account employee,
                                 Date date,
                                 double workingOutside,
                                 boolean isViolateChange,
                                 String reasons) {
-        User manager = userRepository.getManagerByDepartment(employee.getUser().getDepartment().getDepartmentName())
-                .get(0);
+        List<User> managers = userRepository.getManagerByDepartment(employee.getUser().getDepartment().getDepartmentName());
+        if (managers.isEmpty()) return;
+        User manager = managers.get(0);
         SaveChangeLogRequest saveChangeLogRequest = SaveChangeLogRequest.builder()
                 .employeeId(employee.getAccountId())
                 .managerId(manager.getUserId())
