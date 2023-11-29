@@ -75,7 +75,7 @@ public class AutomaticNotificationService {
         NotificationAcceptResponse response = NotificationAcceptResponse.builder()
                 .userId(request.getSensor().getUserId())
                 .receiverId(request.getReceiver().getUserId())
-                .receiverName(request.getReceiver().getAccount().getUsername())
+                .senderName(request.getReceiver().getAccount().getUsername())
                 .readStatus(false)
                 .title(notificationTitle)
                 .uploadDate(Until.generateRealTime())

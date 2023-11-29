@@ -12,6 +12,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.ChatMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
+import fpt.capstone.buildingmanagementsystem.model.entity.InactiveManagerTemp;
 import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
@@ -86,6 +87,9 @@ public class AccountManageService implements UserDetailsService {
     StatusRepository statusRepository;
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    InactiveManagerTempRepository tempRepository;
     @Autowired
     RoleMapper roleMapper;
 
@@ -112,7 +116,7 @@ public class AccountManageService implements UserDetailsService {
                     && registerRequest.getHrId() != null) {
                 if (!accountRepository.existsByUsername(registerRequest.getUsername())) {
                     Optional<Role> role = roleRepository.findByRoleName(registerRequest.getRole());
-                    Optional<Department> department= departmentRepository.findByDepartmentName(registerRequest.getDepartmentName());
+                    Optional<Department> department = departmentRepository.findByDepartmentName(registerRequest.getDepartmentName());
                     if (role.isPresent() && department.isPresent()) {
                         Optional<Status> status = statusRepository.findByStatusId("1");
                         Account newAccount = accountMapper.convertRegisterAccount(registerRequest, status.get(), role.get());
@@ -193,9 +197,10 @@ public class AccountManageService implements UserDetailsService {
         }
         throw new BadRequest("password_wrong");
     }
+
     public boolean changeStatusAccount(ChangeStatusAccountRequest changeStatusAccountRequest) {
         try {
-            String accountId=changeStatusAccountRequest.getAccountId();
+            String accountId = changeStatusAccountRequest.getAccountId();
             if (accountId != null && changeStatusAccountRequest.getStatusName() != null) {
                 if (!accountRepository.existsById(changeStatusAccountRequest.getAccountId())) {
                     throw new NotFound("user_not_found");
@@ -206,10 +211,9 @@ public class AccountManageService implements UserDetailsService {
                     if (!status.isPresent()) {
                         throw new NotFound("status_not_found");
                     }
-                    accountRepository.updateStatusAccount(status.get().statusId,accountId);
+                    accountRepository.updateStatusAccount(status.get().statusId, accountId);
                     return true;
-                }
-                else{
+                } else {
                     throw new BadRequest("new_status_existed");
                 }
             } else {
@@ -219,20 +223,23 @@ public class AccountManageService implements UserDetailsService {
             throw new ServerError("fail");
         }
     }
+
     public boolean changeRoleAccount(ChangeRoleRequest changeRoleRequest) {
         try {
-            String accountId=changeRoleRequest.getAccountId();
+            String accountId = changeRoleRequest.getAccountId();
             if (accountId != null && changeRoleRequest.getRoleName() != null) {
+                Account account = accountRepository.findByAccountId(accountId)
+                        .orElseThrow(() -> new BadRequest("Not_found_user"));
 
                 Role role = roleRepository.findByRoleName(changeRoleRequest.getRoleName())
                         .orElseThrow(() -> new BadRequest("Not_found_role"));
 
+                Department department = departmentRepository.findByDepartmentId(changeRoleRequest.departmentId)
+                        .orElseThrow(() -> new BadRequest("Not_found_department"));
+
                 String newRoleId = role.getRoleId();
 
-                if (Objects.equals(changeRoleRequest.getRoleName(), "manager") ||
-                        Objects.equals(changeRoleRequest.getRoleName(), "employee")) {
-                    Department department = departmentRepository.findByDepartmentId(changeRoleRequest.departmentId)
-                            .orElseThrow(() -> new BadRequest("Not_found_department"));
+                if (Objects.equals(changeRoleRequest.getRoleName(), "manager")) {
 
                     if (checkManagerOfDepartment(department.getDepartmentName())) {
                         accountRepository.updateRoleAccount(newRoleId, accountId);
@@ -241,6 +248,14 @@ public class AccountManageService implements UserDetailsService {
                     } else {
                         throw new Conflict("department_exist_manager");
                     }
+                }
+                if (Objects.equals(account.getRole().getRoleName(), "manager") &&
+                        !Objects.equals(changeRoleRequest.getRoleName(), "manager")) {
+                    InactiveManagerTemp temp = InactiveManagerTemp.builder()
+                            .manager(account)
+                            .department(department)
+                            .build();
+                    tempRepository.save(temp);
                 }
                 accountRepository.updateRoleAccount(newRoleId, accountId);
                 return true;
@@ -251,6 +266,7 @@ public class AccountManageService implements UserDetailsService {
             throw new ServerError("fail");
         }
     }
+
     public boolean resetPassword(ResetPasswordRequest resetPassword) {
         try {
             String username = resetPassword.getUsername();
@@ -259,10 +275,10 @@ public class AccountManageService implements UserDetailsService {
                     throw new NotFound("user_not_found");
                 }
                 String newPassword = getRandomString(8);
-                String toEmail=accountRepository.findByUsername(username).get().getUser().getEmail();
+                String toEmail = accountRepository.findByUsername(username).get().getUser().getEmail();
                 String newPasswordEncode = passwordEncode.passwordEncoder().encode(newPassword);
                 accountRepository.updatePassword(newPasswordEncode, generateRealTime(), username);
-                emailSender.setMailSender(toEmail,"[Notification] - Password has been successfully reset!","Your newly reset password is: "+newPassword);
+                emailSender.setMailSender(toEmail, "[Notification] - Password has been successfully reset!", "Your newly reset password is: " + newPassword);
                 return true;
             } else {
                 throw new BadRequest("request_fail");
@@ -271,6 +287,7 @@ public class AccountManageService implements UserDetailsService {
             throw new ServerError("fail");
         }
     }
+
     public RoleDto getGettingRole(String username) {
         Optional<Account> userAccount = accountRepository.findByUsername(username);
         Optional<Role> role = roleRepository.findByRoleId(userAccount.get().getRole().getRoleId());
@@ -333,10 +350,10 @@ public class AccountManageService implements UserDetailsService {
         for (int i = 0; i < userOfDepartment.size(); i++) {
             Optional<Account> account = accountRepository.findByAccountId(userOfDepartment.get(i).getUserId());
             if (Objects.equals(account.get().getRole().getRoleId(), "3")) {
-                if(Objects.equals(account.get().getStatus().getStatusId(), "1")) {
+                if (Objects.equals(account.get().getStatus().getStatusId(), "1")) {
                     checkPoint = false;
-                }else{
-                    Role role= roleRepository.findByRoleName("employee").get();
+                } else {
+                    Role role = roleRepository.findByRoleName("employee").get();
                     account.get().setRole(role);
                     accountRepository.save(account.get());
                 }
@@ -356,13 +373,13 @@ public class AccountManageService implements UserDetailsService {
                 account.remove(account.get(i));
             }
         }
-        account=account.stream()
+        account = account.stream()
                 .sorted((Comparator.comparing(Account::getCreatedDate).reversed()))
                 .collect(Collectors.toList());
-        account.forEach(element ->{
-                GetAllAccountResponse get=accountMapper.convertGetAllAccount(element);
-                get.setDepartmentName(element.getUser().getDepartment().getDepartmentName());
-                getAllAccountResponses.add(get);
+        account.forEach(element -> {
+            GetAllAccountResponse get = accountMapper.convertGetAllAccount(element);
+            get.setDepartmentName(element.getUser().getDepartment().getDepartmentName());
+            getAllAccountResponses.add(get);
         });
         return getAllAccountResponses;
     }
