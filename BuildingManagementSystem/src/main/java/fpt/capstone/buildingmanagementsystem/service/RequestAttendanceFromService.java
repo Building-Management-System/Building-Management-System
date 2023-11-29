@@ -15,6 +15,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationR
 import fpt.capstone.buildingmanagementsystem.model.request.AttendanceMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendAttendanceFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationAcceptResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AttendanceRequestFormRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
@@ -239,7 +240,7 @@ public class RequestAttendanceFromService {
     }
 
     @Transactional
-    public boolean acceptAttendanceRequest(String attendanceRequestId) {
+    public NotificationAcceptResponse acceptAttendanceRequest(String attendanceRequestId) {
         AttendanceRequestForm attendanceRequestForm = attendanceRequestFormRepository.findById(attendanceRequestId)
                 .orElseThrow(() -> new BadRequest("Not_found_attendance_id"));
 
@@ -272,7 +273,7 @@ public class RequestAttendanceFromService {
             requestTicketRepository.saveAll(requestTickets);
             ticketRepository.save(ticket);
 
-            automaticNotificationService.sendApprovalRequestNotification(
+            NotificationAcceptResponse response = automaticNotificationService.sendApprovalRequestNotification(
                     new ApprovalNotificationRequest(
                             ticket.getTicketId(),
                             requestMessage.getReceiver(),
@@ -288,7 +289,7 @@ public class RequestAttendanceFromService {
                     attendanceRequestForm.getManualLastExit(),
                     attendanceRequestForm.getContent()
             );
-            return true;
+            return response;
         } catch (Exception e) {
             throw new ServerError("Fail");
         }

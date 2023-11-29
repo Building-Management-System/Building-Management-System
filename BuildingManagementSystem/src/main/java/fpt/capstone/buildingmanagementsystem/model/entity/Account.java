@@ -50,4 +50,47 @@ public class Account {
     @JoinColumn(name = "role_id")
     public Role role;
 
+
+//    public Account(String accountId, String username, String password, Date createdDate, Date updatedDate, User user, Status status, Role role) {
+//        this.accountId = accountId;
+//        this.username = username;
+//        this.password = password;
+//        this.createdDate = createdDate;
+//        this.updatedDate = updatedDate;
+//        this.user = user;
+//        this.status = status;
+//        this.role = role;
+//    }
+//
+//    public String getAccountId() {
+//        return accountId;
+//    }
+//
+//    public String getUsername() {
+//        return username;
+//    }
+//
+//    public String getPassword() {
+//        return password;
+//    }
+//
+//    public Date getCreatedDate() {
+//        return createdDate;
+//    }
+//
+//    public Date getUpdatedDate() {
+//        return updatedDate;
+//    }
+//
+//    public User getUser() {
+//        return user;
+//    }
+//
+//    public Status getStatus() {
+//        return status;
+//    }
+//
+//    public Role getRole() {
+//        return role;
+//    }
 }

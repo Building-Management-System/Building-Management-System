@@ -7,13 +7,12 @@ import fpt.capstone.buildingmanagementsystem.service.AttendanceService;
 import fpt.capstone.buildingmanagementsystem.service.RequestAttendanceFromService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -25,8 +24,8 @@ public class AttendanceController {
     RequestAttendanceFromService attendanceFromService;
 
     @GetMapping("/getAttendanceUser")
-    public GetAttendanceUserResponse getAttendanceUser(@Param("user_id") String user_id,@Param("month") int month,@Param("month") String year) {
-        return attendanceService.getAttendanceUser(user_id,month,year);
+    public GetAttendanceUserResponse getAttendanceUser(@Param("user_id") String user_id, @Param("month") int month, @Param("month") String year) {
+        return attendanceService.getAttendanceUser(user_id, month, year);
     }
 
     @GetMapping("/getAttendanceUserDetail")
@@ -35,8 +34,8 @@ public class AttendanceController {
     }
 
     @PostMapping("/acceptAttendanceRequest")
-    public boolean acceptAttendanceRequest(@RequestBody AttendanceMessageRequest attendanceMessageRequest) {
-        return attendanceFromService.acceptAttendanceRequest(attendanceMessageRequest.getAttendanceRequestId());
+    public ResponseEntity<?> acceptAttendanceRequest(@RequestBody AttendanceMessageRequest attendanceMessageRequest) {
+        return ResponseEntity.ok(attendanceFromService.acceptAttendanceRequest(attendanceMessageRequest.getAttendanceRequestId()));
     }
 
     @PostMapping("/rejectAttendanceRequest")

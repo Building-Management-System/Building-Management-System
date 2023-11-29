@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ChangeLogType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -58,10 +59,12 @@ public class ChangeLog {
     private java.util.Date createdDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "manager_id")
     private User manager;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "employee_id")
     private User employee;
 }

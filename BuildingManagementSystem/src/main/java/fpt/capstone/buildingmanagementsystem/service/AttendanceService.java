@@ -241,8 +241,9 @@ public class AttendanceService {
                                 Time checkout,
                                 boolean isViolateChange,
                                 String reasons) {
-        User manager = userRepository.getManagerByDepartment(employee.getUser().getDepartment().getDepartmentName())
-                .get(0);
+        List<User> managers = userRepository.getManagerByDepartment(employee.getUser().getDepartment().getDepartmentName());
+        if (managers.isEmpty()) return;
+        User manager = managers.get(0);
         SaveChangeLogRequest saveChangeLogRequest = SaveChangeLogRequest.builder()
                 .employeeId(employee.getAccountId())
                 .managerId(manager.getUserId())
