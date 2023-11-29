@@ -18,6 +18,7 @@ public class NotificationAcceptResponse {
     private String notificationId;
     private String userId;
     private String receiverId;
+    private String senderName;
     private boolean readStatus;
     private String title;
     private Date uploadDate;
