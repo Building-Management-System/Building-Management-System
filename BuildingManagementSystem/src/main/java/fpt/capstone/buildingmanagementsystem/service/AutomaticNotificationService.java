@@ -1,11 +1,15 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
+import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
+import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
 import fpt.capstone.buildingmanagementsystem.model.entity.NotificationReceiver;
 import fpt.capstone.buildingmanagementsystem.model.entity.UnreadMark;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationAcceptResponse;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationReceiverRepository;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UnreadMarkRepository;
@@ -29,7 +33,10 @@ public class AutomaticNotificationService {
     @Autowired
     NotificationReceiverRepository notificationReceiverRepository;
 
-    public void sendApprovalRequestNotification(ApprovalNotificationRequest request) {
+    @Autowired
+    DepartmentRepository departmentRepository;
+
+    public NotificationAcceptResponse sendApprovalRequestNotification(ApprovalNotificationRequest request) {
 
         String notificationTitle = "[SYSTEM] New update about "+request.getTopic()+" request";
 
@@ -65,10 +72,23 @@ public class AutomaticNotificationService {
                 .receiver(request.getReceiver())
                 .build();
 
+        NotificationAcceptResponse response = NotificationAcceptResponse.builder()
+                .userId(request.getSensor().getUserId())
+                .receiverId(request.getReceiver().getUserId())
+                .readStatus(false)
+                .title(notificationTitle)
+                .uploadDate(Until.generateRealTime())
+                .build();
+
+        Department department = departmentRepository.findByUserId(response.getUserId())
+                .orElseThrow(() -> new BadRequest("Not_found_department"));
+        response.setDepartment(department);
         try {
-            notificationRepository.saveAndFlush(notification);
+            Notification notificationResponse = notificationRepository.saveAndFlush(notification);
             unreadMarkRepository.save(unreadMark);
             notificationReceiverRepository.save(notificationReceiver);
+            response.setNotificationId(notificationResponse.getNotificationId());
+            return response;
         }catch (Exception e) {
             throw new ServerError("Fail");
         }
