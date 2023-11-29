@@ -8,7 +8,7 @@ import java.util.List;
 public interface TicketRepositoryv2 {
      List<TicketDto> getAllTicketRequest();
 
-     List<TicketRequestDto> getTicketRequestv2();
+     List<TicketRequestDto> getTicketRequestBySenderId(String senderId);
 
      List<TicketRequestDto> getTicketRequestByHr();
 

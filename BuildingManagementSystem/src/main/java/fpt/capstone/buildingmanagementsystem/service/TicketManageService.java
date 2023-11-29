@@ -72,9 +72,8 @@ public class TicketManageService {
 
     public List<TicketRequestResponseV2> getAllTicketsBySenderId(String senderId) {
         List<TicketRequestResponseV2> responseV2s = new ArrayList<>();
-        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepositoryv2.getTicketRequestv2()
+        Map<String, List<TicketRequestDto>> ticketDtos = ticketRepositoryv2.getTicketRequestBySenderId(senderId)
                 .stream()
-                .filter(ticketRequestDto -> ticketRequestDto.getSenderId().equals(senderId))
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
 
         executeListTicketResponse(responseV2s, ticketDtos);
@@ -143,6 +142,7 @@ public class TicketManageService {
                 .collect(Collectors.toList());
 
     }
+
     @Transactional
     public boolean changeReceiveId(ChangeReceiveIdRequest changeReceiveIdRequest) {
         if (changeReceiveIdRequest.getReceiverId() != null &&
