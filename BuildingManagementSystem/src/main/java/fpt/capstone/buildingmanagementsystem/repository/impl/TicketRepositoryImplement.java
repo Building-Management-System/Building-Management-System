@@ -116,6 +116,7 @@ public class TicketRepositoryImplement implements TicketRepositoryv2 {
                 "       rm.sender_id      AS senderId,\n" +
                 "       rm.receiver_id    AS receiverId,\n" +
                 "       rm.create_date    AS messageCreateDate,\n" +
+                "       rm.request_message_id    AS messageId,\n" +
                 "       rm.department_id  AS departmentId,\n" +
                 "       d.department_name AS departmentName,\n" +
                 "       u1.first_name     AS senderFirstName,\n" +

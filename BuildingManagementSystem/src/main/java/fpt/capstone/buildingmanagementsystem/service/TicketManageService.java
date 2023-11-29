@@ -7,8 +7,8 @@ import fpt.capstone.buildingmanagementsystem.model.dto.TicketDto;
 import fpt.capstone.buildingmanagementsystem.model.dto.TicketRequestDto;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.InactiveManagerTemp;
+import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
-import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeReceiveIdRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.RequestTicketResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponse;
@@ -172,7 +172,14 @@ public class TicketManageService {
     }
 
     public void updateTicketOfNewManager(Account account, InactiveManagerTemp inactiveManager) {
-        List<TicketRequestDto> ticketReceive = ticketRepositoryv2.getTicketRequestByDepartment(inactiveManager.getManager().accountId);
-
+        Map<String, List<TicketRequestDto>> ticketReceives = ticketRepositoryv2.getTicketRequestByDepartment(inactiveManager.getManager().accountId)
+                .stream()
+                .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
+        ticketReceives.forEach((key, messages) -> {
+            RequestMessage firstMessage = requestMessageRepository.findById(messages.get(0).getMessageId())
+                    .orElseThrow(() -> new BadRequest("Not_found_message"));
+            firstMessage.setReceiver(account.getUser());
+            requestMessageRepository.save(firstMessage);
+        });
     }
 }

@@ -31,13 +31,13 @@ import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.ChatMessageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.InactiveManagerTempRepository;
 import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
 import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
-import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import fpt.capstone.buildingmanagementsystem.until.EmailSender;
 import org.springframework.beans.BeanUtils;
@@ -92,6 +92,9 @@ public class AccountManageService implements UserDetailsService {
     InactiveManagerTempRepository tempRepository;
     @Autowired
     RoleMapper roleMapper;
+
+    @Autowired
+    TicketManageService ticketManageService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -240,15 +243,23 @@ public class AccountManageService implements UserDetailsService {
                 String newRoleId = role.getRoleId();
 
                 if (Objects.equals(changeRoleRequest.getRoleName(), "manager")) {
-
                     if (checkManagerOfDepartment(department.getDepartmentName())) {
                         accountRepository.updateRoleAccount(newRoleId, accountId);
                         accountRepository.updateDepartmentUser(department.getDepartmentId(), accountId);
+                        Optional<InactiveManagerTemp> inactiveManagerTempOptional = tempRepository.findByDepartment(department);
+                        if (inactiveManagerTempOptional.isPresent()) {
+                            InactiveManagerTemp inactiveManager = inactiveManagerTempOptional.get();
+                            //update
+                            ticketManageService.updateTicketOfNewManager(account, inactiveManager);
+                            //delete from temp
+                            tempRepository.delete(inactiveManager);
+                        }
                         return true;
                     } else {
                         throw new Conflict("department_exist_manager");
                     }
                 }
+
                 if (Objects.equals(account.getRole().getRoleName(), "manager") &&
                         !Objects.equals(changeRoleRequest.getRoleName(), "manager")) {
                     InactiveManagerTemp temp = InactiveManagerTemp.builder()

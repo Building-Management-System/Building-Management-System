@@ -21,6 +21,7 @@ public class TicketRequestDto {
     private String senderId;
     private String receiverId;
     private Date messageCreateDate;
+    private String messageId;
     private String departmentId;
     private String departmentName;
     private String senderFirstName;
