@@ -107,4 +107,7 @@ public class MonthlyEvaluate {
     @JoinColumn(name = "employee")
     private User employee;//
 
+    @ManyToOne
+    @JoinColumn(name = "department")
+    private Department department;
 }

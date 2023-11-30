@@ -5,6 +5,7 @@ import fpt.capstone.buildingmanagementsystem.exception.Conflict;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.entity.MonthlyEvaluate;
 import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
@@ -12,10 +13,12 @@ import fpt.capstone.buildingmanagementsystem.model.request.EditEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.EmployeeEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.EvaluateByHrRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.MonthlyEvaluateRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.EmployeeEvaluateRemainResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.EmployeeResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.MonthlyEvaluateRepository;
 import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
@@ -32,7 +35,9 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.roundDouble;
@@ -57,6 +62,9 @@ public class MonthlyEvaluateService {
 
     @Autowired
     OverTimeRepository overTimeRepository;
+
+    @Autowired
+    DepartmentRepository departmentRepository;
 
     @Transactional(rollbackOn = Exception.class)
     public ResponseEntity<?> createEvaluate(EmployeeEvaluateRequest request) {
@@ -141,6 +149,7 @@ public class MonthlyEvaluateService {
                     .status(false)
                     .createdBy(manager)
                     .employee(employee)
+                    .department(employee.getDepartment())
                     .build();
             try {
                 return ResponseEntity.status(HttpStatus.OK)
@@ -234,7 +243,6 @@ public class MonthlyEvaluateService {
             response.setEmployeeId(monthlyEvaluate.getEmployee().getUserId());
             response.setFirstNameEmp(monthlyEvaluate.getEmployee().getFirstName());
             response.setLastNameEmp(monthlyEvaluate.getEmployee().getLastName());
-            response.setDepartment(monthlyEvaluate.getEmployee().getDepartment());
             response.setHireDate(monthlyEvaluate.getEmployee().getAccount().getCreatedDate());
             response.setEmployeeUserName(monthlyEvaluate.getEmployee().getAccount().getUsername());
             response.setAcceptedHrId(monthlyEvaluate.getAcceptedBy() == null ? null : monthlyEvaluate.getAcceptedBy().getUserId());
@@ -250,4 +258,32 @@ public class MonthlyEvaluateService {
         return calendar.get(Calendar.DAY_OF_WEEK);
     }
 
+    public boolean checkEvaluateExisted(String employeeId, int month, int year) {
+        User user = userRepository.findById(employeeId)
+                .orElseThrow(() -> new BadRequest("Not_found_user"));
+        Optional<MonthlyEvaluate> monthlyEvaluateOptional = monthlyEvaluateRepository.findByEmployeeAndMonthAndYear(user, month, year);
+        return monthlyEvaluateOptional.isPresent();
+    }
+
+    public List<EmployeeEvaluateRemainResponse> evaluateRemain(String departmentId, int month, int year) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new BadRequest("Not_found_department"));
+
+        Map<String, MonthlyEvaluate> monthlyEvaluates = monthlyEvaluateRepository.findByDepartmentAndMonthAndYear(departmentId, month, year)
+                .stream()
+                .collect(Collectors.toMap(monthlyEvaluate -> monthlyEvaluate.getEmployee().getUserId(), Function.identity()));
+
+        List<User> employees = userRepository.findAllByDepartment(department)
+                .stream().filter(employee -> !monthlyEvaluates.containsKey(employee.getUserId()))
+                .collect(Collectors.toList());
+
+        return employees.stream()
+                .map(employee -> new EmployeeEvaluateRemainResponse(
+                        employee.getUserId(),
+                        month,
+                        year
+                ))
+                .collect(Collectors.toList());
+
+    }
 }

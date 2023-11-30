@@ -4,6 +4,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.EditEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.EmployeeEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.EvaluateByHrRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.MonthlyEvaluateRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.EmployeeEvaluateRemainResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateResponse;
 import fpt.capstone.buildingmanagementsystem.service.MonthlyEvaluateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,4 +50,17 @@ public class MonthlyEvaluateController {
         return monthlyEvaluateService.getEvaluateOfDepartment(departmentId, month, year);
     }
 
+    @GetMapping("/checkEvaluateExisted")
+    public boolean checkEvaluateExisted(@RequestParam("employee_id") String employeeId,
+                                        @RequestParam("month") int month,
+                                        @RequestParam("year") int year) {
+        return monthlyEvaluateService.checkEvaluateExisted(employeeId, month, year);
+    }
+
+    @GetMapping("/getEmployeeEvaluateRemain")
+    public List<EmployeeEvaluateRemainResponse> getEmployeeEvaluateRemain(@RequestParam("department_id") String departmentId,
+                                                                    @RequestParam("month") int month,
+                                                                    @RequestParam("year") int year) {
+        return monthlyEvaluateService.evaluateRemain(departmentId, month, year);
+    }
 }
