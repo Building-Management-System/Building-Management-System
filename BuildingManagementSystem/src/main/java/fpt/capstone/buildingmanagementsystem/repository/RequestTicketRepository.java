@@ -26,4 +26,6 @@ public interface RequestTicketRepository extends JpaRepository<RequestTicket, St
 
     List<RequestTicket> findByTicketRequest(Ticket tickets);
     List<RequestTicket> findAllByUser(User user);
+
+    List<RequestTicket> findByRequestIdIn(List<String> requestId);
 }

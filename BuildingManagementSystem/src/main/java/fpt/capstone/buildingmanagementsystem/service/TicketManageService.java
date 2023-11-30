@@ -9,6 +9,8 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.InactiveManagerTemp;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
+import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeReceiveIdRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.RequestTicketResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponse;
@@ -172,14 +174,39 @@ public class TicketManageService {
     }
 
     public void updateTicketOfNewManager(Account account, InactiveManagerTemp inactiveManager) {
-        Map<String, List<TicketRequestDto>> ticketReceives = ticketRepositoryv2.getTicketRequestByDepartment(inactiveManager.getManager().accountId)
+        Map<String, List<TicketRequestDto>> ticketReceives = ticketRepositoryv2.getTicketRequestByDepartment(inactiveManager.getDepartment().getDepartmentName())
                 .stream()
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
+
         ticketReceives.forEach((key, messages) -> {
-            RequestMessage firstMessage = requestMessageRepository.findById(messages.get(0).getMessageId())
-                    .orElseThrow(() -> new BadRequest("Not_found_message"));
-            firstMessage.setReceiver(account.getUser());
-            requestMessageRepository.save(firstMessage);
+            Ticket ticket = ticketRepository.findById(key)
+                    .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+            if (ticket.isStatus()) {
+                RequestMessage firstMessage = requestMessageRepository.findById(messages.get(0).getMessageId())
+                        .orElseThrow(() -> new BadRequest("Not_found_message"));
+                firstMessage.setReceiver(account.getUser());
+                requestMessageRepository.save(firstMessage);
+            }
         });
+
+        //close all tickets are send of old manager
+        Map<String, List<TicketRequestDto>> ticketSends = ticketRepositoryv2.getTicketRequestBySenderId(inactiveManager.getManager().getAccountId())
+                .stream()
+                .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
+
+        ticketSends.forEach((key, messages) -> {
+            Ticket ticket = ticketRepository.findById(key)
+                    .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+
+            List<RequestTicket> requestTickets = requestTicketRepository.findByRequestIdIn(
+                    messages.stream()
+                            .map(TicketRequestDto::getRequestId)
+                            .collect(Collectors.toList())
+            );
+
+            ticket.setStatus(false);
+            requestTickets.forEach(requestTicket -> requestTicket.setStatus(RequestStatus.CLOSED));
+        });
+
     }
 }
