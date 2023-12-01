@@ -17,6 +17,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.MonthlyEvaluateReques
 import fpt.capstone.buildingmanagementsystem.model.response.EmployeeEvaluateRemainResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.EmployeeResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateSummaryResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationAcceptResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
@@ -271,6 +272,32 @@ public class MonthlyEvaluateService {
             responses.add(response);
         });
         return responses;
+    }
+
+    public List<MonthlyEvaluateSummaryResponse> getAllEvaluateOfEmployee(String employeeId) {
+        User employee = userRepository.findById(employeeId)
+                .orElseThrow(() -> new BadRequest("Not_found_user"));
+        if(!employee.getAccount().getRole().getRoleName().equals("employee")) return new ArrayList<>();
+
+        List<MonthlyEvaluate> monthlyEvaluates = monthlyEvaluateRepository.findByEmployee(employee)
+                .stream()
+                .filter(MonthlyEvaluate::isStatus)
+                .collect(Collectors.toList());
+
+        return monthlyEvaluates.stream()
+                .map(monthlyEvaluate -> new MonthlyEvaluateSummaryResponse(
+                        monthlyEvaluate.getEvaluateId(),
+                        monthlyEvaluate.getEmployee().getUserId(),
+                        monthlyEvaluate.getEmployee().getAccount().getUsername(),
+                        monthlyEvaluate.getEmployee().getFirstName(),
+                        monthlyEvaluate.getEmployee().getLastName(),
+                        monthlyEvaluate.getDepartment(),
+                        monthlyEvaluate.getPaidDay(),
+                        monthlyEvaluate.getMonth(),
+                        monthlyEvaluate.getYear(),
+                        monthlyEvaluate.getEvaluateEnum(),
+                        monthlyEvaluate.getApprovedDate()
+                )).collect(Collectors.toList());
     }
 
     public int getCheckWeekend(Date date) {

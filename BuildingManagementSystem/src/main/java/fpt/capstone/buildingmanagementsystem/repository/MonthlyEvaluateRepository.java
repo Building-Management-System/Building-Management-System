@@ -23,4 +23,6 @@ public interface MonthlyEvaluateRepository extends JpaRepository<MonthlyEvaluate
             "AND month = :month\n" +
             "AND year = :year", nativeQuery = true)
     List<MonthlyEvaluate> findByDepartmentAndMonthAndYear(@Param("departmentId") String departmentId, @Param("month") int month, @Param("year") int year);
+
+    List<MonthlyEvaluate> findByEmployee(User employee);
 }
