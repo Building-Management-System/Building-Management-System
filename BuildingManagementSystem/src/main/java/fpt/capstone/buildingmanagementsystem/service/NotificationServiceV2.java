@@ -5,6 +5,7 @@ import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
 import fpt.capstone.buildingmanagementsystem.model.entity.NotificationFile;
 import fpt.capstone.buildingmanagementsystem.model.entity.PersonalPriority;
+import fpt.capstone.buildingmanagementsystem.model.entity.UnreadMark;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationViewer;
@@ -25,9 +26,11 @@ import fpt.capstone.buildingmanagementsystem.repository.NotificationImageReposit
 import fpt.capstone.buildingmanagementsystem.repository.NotificationReceiverRepository;
 import fpt.capstone.buildingmanagementsystem.repository.NotificationRepository;
 import fpt.capstone.buildingmanagementsystem.repository.PersonalPriorityRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UnreadMarkRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -62,6 +65,9 @@ public class NotificationServiceV2 {
 
     @Autowired
     private NotificationImageAndFileResponse notificationImageAndFileResponse;
+
+    @Autowired
+    private UnreadMarkRepository unreadMarkRepository;
 
     public NotificationTitleResponse getAllNotificationByUser(String userId) {
 
@@ -316,6 +322,19 @@ public class NotificationServiceV2 {
                 .stream().filter(response -> response.getNotificationStatus().equals(NotificationStatus.SCHEDULED))
                 .collect(Collectors.toList());
 
+    }
+
+    public ResponseEntity<?> readAllNotification(String userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFound("not_found_user"));
+        List<UnreadMark> unreadMarks = unreadMarkRepository.findByUser(user);
+        try {
+            unreadMarkRepository.deleteAll(unreadMarks);
+            return ResponseEntity.ok(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(e.getCause());
+        }
     }
 
 }

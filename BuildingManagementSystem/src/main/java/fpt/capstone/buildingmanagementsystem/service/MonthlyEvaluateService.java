@@ -9,6 +9,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.entity.MonthlyEvaluate;
 import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationEvaluate;
 import fpt.capstone.buildingmanagementsystem.model.request.EditEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.EmployeeEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.EvaluateByHrRequest;
@@ -16,6 +17,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.MonthlyEvaluateReques
 import fpt.capstone.buildingmanagementsystem.model.response.EmployeeEvaluateRemainResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.EmployeeResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationAcceptResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
@@ -68,6 +70,9 @@ public class MonthlyEvaluateService {
 
     @Autowired
     TicketManageService ticketManageService;
+
+    @Autowired
+    AutomaticNotificationService automaticNotificationService;
 
     @Transactional(rollbackOn = Exception.class)
     public ResponseEntity<?> createEvaluate(EmployeeEvaluateRequest request) {
@@ -186,7 +191,7 @@ public class MonthlyEvaluateService {
         }
     }
 
-    public boolean updateAcceptOrRejectEvaluateByHr(EvaluateByHrRequest evaluateByHrRequest) {
+    public NotificationAcceptResponse updateAcceptOrRejectEvaluateByHr(EvaluateByHrRequest evaluateByHrRequest) {
         try {
             if (evaluateByHrRequest.getEvaluateId() != null && evaluateByHrRequest.getHrId() != null && evaluateByHrRequest.getHrStatus() != null) {
                 Optional<MonthlyEvaluate> monthlyEvaluateOptional = monthlyEvaluateRepository.findByEvaluateId(evaluateByHrRequest.getEvaluateId());
@@ -204,7 +209,15 @@ public class MonthlyEvaluateService {
                                 monthlyEvaluate.getMonth(),
                                 monthlyEvaluate.getYear());
                     }
-                    return true;
+
+                    return automaticNotificationService.sendApprovalEvaluateRequest(
+                            new ApprovalNotificationEvaluate(
+                                    monthlyEvaluate.getAcceptedBy(),
+                                    monthlyEvaluate.getCreatedBy(),
+                                    monthlyEvaluate.getEmployee(),
+                                    booleanValue,
+                                    evaluateByHrRequest.getHrNote()
+                            ));
                 } else {
                     throw new NotFound("not_found_monthly_evaluate_or_hr");
                 }

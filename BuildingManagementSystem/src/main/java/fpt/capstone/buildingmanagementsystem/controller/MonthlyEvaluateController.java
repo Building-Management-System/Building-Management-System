@@ -6,6 +6,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.EvaluateByHrRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.MonthlyEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.EmployeeEvaluateRemainResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.NotificationAcceptResponse;
 import fpt.capstone.buildingmanagementsystem.service.MonthlyEvaluateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class MonthlyEvaluateController {
         return monthlyEvaluateService.updateEvaluate(request);
     }
     @PostMapping("/updateAcceptOrRejectEvaluateByHr")
-    public boolean updateAcceptOrRejectEvaluateByHr(@RequestBody EvaluateByHrRequest request) {
+    public NotificationAcceptResponse updateAcceptOrRejectEvaluateByHr(@RequestBody EvaluateByHrRequest request) {
         return monthlyEvaluateService.updateAcceptOrRejectEvaluateByHr(request);
     }
     @GetMapping("/getDepartmentEvaluate")

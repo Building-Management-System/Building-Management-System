@@ -7,6 +7,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
 import fpt.capstone.buildingmanagementsystem.model.entity.NotificationReceiver;
 import fpt.capstone.buildingmanagementsystem.model.entity.UnreadMark;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationEvaluate;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationAcceptResponse;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
@@ -17,6 +18,8 @@ import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class AutomaticNotificationService {
@@ -38,12 +41,12 @@ public class AutomaticNotificationService {
 
     public NotificationAcceptResponse sendApprovalRequestNotification(ApprovalNotificationRequest request) {
 
-        String notificationTitle = "[SYSTEM] New update about "+request.getTopic()+" request";
+        String notificationTitle = "[SYSTEM] New update about " + request.getTopic() + " request";
 
         String notificationContent = "" +
                 "Ticket Id: " + request.getTicketId() + "<br>" +
                 "Topic: " + request.getTopic() + "<br>";
-        if(request.isDecision()) {
+        if (request.isDecision()) {
             notificationContent += "Status: Accepted";
         } else {
             notificationContent += "" +
@@ -90,10 +93,11 @@ public class AutomaticNotificationService {
             notificationReceiverRepository.save(notificationReceiver);
             response.setNotificationId(notificationResponse.getNotificationId());
             return response;
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new ServerError("Fail");
         }
     }
+
     public void sendApprovalTicketNotification(ApprovalNotificationRequest request) {
 
         String notificationTitle = "[SYSTEM] You have a new ticket request.";
@@ -127,7 +131,66 @@ public class AutomaticNotificationService {
             notificationRepository.saveAndFlush(notification);
             unreadMarkRepository.save(unreadMark);
             notificationReceiverRepository.save(notificationReceiver);
-        }catch (Exception e) {
+        } catch (Exception e) {
+            throw new ServerError("Fail");
+        }
+    }
+
+    public NotificationAcceptResponse sendApprovalEvaluateRequest(ApprovalNotificationEvaluate request) {
+
+        String notificationTitle = "Evaluate Status Approval.";
+        String decision = request.isDecision() ? "Accepted" : "Rejected";
+        String notificationContent = "Evaluate of employee " + request.getEmployee().getAccount().getUsername()
+                + " are " + decision + " by Hr\n";
+        if(!request.getHrNote().isEmpty()) {
+            notificationContent += "HR note: " + request.getHrNote();
+        }
+
+        Notification notification = Notification.builder()
+                .title(notificationTitle)
+                .content(notificationContent)
+                .notificationStatus(NotificationStatus.UPLOADED)
+                .priority(false)
+                .createDate(Until.generateRealTime())
+                .updateDate(Until.generateRealTime())
+                .uploadDate(Until.generateRealTime())
+                .createdBy(request.getSender())
+                .build();
+
+        UnreadMark unreadMark = UnreadMark.builder()
+                .notification(notification)
+                .user(request.getManager())
+                .build();
+
+        NotificationReceiver notificationManagerReceiver = NotificationReceiver.builder()
+                .notification(notification)
+                .receiver(request.getManager())
+                .build();
+
+        NotificationReceiver notificationEmployeeReceiver = NotificationReceiver.builder()
+                .notification(notification)
+                .receiver(request.getEmployee())
+                .build();
+
+        NotificationAcceptResponse response = NotificationAcceptResponse.builder()
+                .userId(request.getSender().getUserId())
+                .receiverId(request.getManager().getUserId())
+                .senderName(request.getManager().getAccount().getUsername())
+                .readStatus(false)
+                .title(notificationTitle)
+                .uploadDate(Until.generateRealTime())
+                .build();
+
+        Department department = departmentRepository.findByUserId(response.getUserId())
+                .orElseThrow(() -> new BadRequest("Not_found_department"));
+        response.setDepartment(department);
+        try {
+            Notification notificationResponse = notificationRepository.saveAndFlush(notification);
+            unreadMarkRepository.save(unreadMark);
+            notificationReceiverRepository.saveAll(List.of(notificationManagerReceiver, notificationEmployeeReceiver));
+            response.setNotificationId(notificationResponse.getNotificationId());
+            return response;
+        } catch (Exception e) {
             throw new ServerError("Fail");
         }
     }
