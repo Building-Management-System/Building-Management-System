@@ -21,13 +21,16 @@ public interface UserRepository extends JpaRepository<User, String> {
             ",last_name = :last_name" + ",gender = :gender" +
             ",date_of_birth = :date_of_birth" + ",telephone_number = :telephone_number" +
             ",country = :country" + ",city = :city" +
+            ",address = :address" + ",accepted_by = :accepted_by" +",approved_date = :approved_date" +
             ",email = :email" + ",updated_date = :updated_date" +
             ",image = :image" +
             " where user_id = :user_id", nativeQuery = true)
     int updateAcceptUserInfo(@Param(value = "first_name") String first_name, @Param(value = "last_name") String last_name,
                              @Param(value = "gender") String gender, @Param(value = "date_of_birth") String date_of_birth,
                              @Param(value = "telephone_number") String telephone_number, @Param(value = "country") String country,
-                             @Param(value = "city") String city, @Param(value = "email") String email, @Param(value = "image") String image
+                             @Param(value = "city") String city,@Param(value = "address") String address,@Param(value = "accepted_by") String accepted_by,
+                             @Param(value = "approved_date") Date approved_date
+            , @Param(value = "email") String email, @Param(value = "image") String image
             , @Param(value = "updated_date") Date updated_date, @Param(value = "user_id") String user_id);
 
     Optional<User> findByUserId(String userId);

@@ -37,6 +37,13 @@ public class UserPending {
     @NotNull
     @Column(name = "telephone_number")
     String telephoneNumber;
+    @Column(name = "accepted_by")
+    String AcceptedBy;
+    @Column(name = "approved_date")
+    Date ApprovedDate;
+    @NotNull
+    @Column(name = "address")
+    String address;
     @NotNull
     @Column(name = "country")
     String country;
@@ -52,6 +59,12 @@ public class UserPending {
     @NotNull
     @Column(name = "created_date")
     Date createdDate;
+    @Column(name = "roleName")
+    String roleName;
+    @Column(name = "username")
+    String username;
+    @Column(name = "departmentName")
+    String departmentName;
     @NotNull
     @ManyToOne
     @JoinColumn(name = "user_pending_status_id")

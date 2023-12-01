@@ -131,7 +131,7 @@ public class AccountManageService implements UserDetailsService {
                             hr.ifPresent(account -> newAccount.setCreatedBy(account.getUsername()));
                             User user = User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
                                     .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
-                                            generateRealTime()).image("unknown").updatedDate(generateRealTime()).account(newAccount).department(department.get())
+                                            generateRealTime()).address("unknown").image("unknown").updatedDate(generateRealTime()).account(newAccount).department(department.get())
                                     .build();
                             Account saveAccount;
                             if (Objects.equals(registerRequest.getRole(), "manager")) {

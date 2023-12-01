@@ -1,7 +1,9 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
-import fpt.capstone.buildingmanagementsystem.model.request.AcceptChangeUserInfo;
+
+import fpt.capstone.buildingmanagementsystem.model.request.AcceptOrRejectChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.ChangeInfoAcceptDetailsResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.EmployeeResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserAccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
@@ -41,13 +43,16 @@ public class UserController {
     }
 
     @RequestMapping(value = "/acceptChangeUserInfo", method = RequestMethod.POST)
-    public boolean acceptChangeUserInfo(@RequestBody AcceptChangeUserInfo acceptChangeUserInfo) throws Exception {
-        return userManageService.AcceptChangeUserInfo(acceptChangeUserInfo);
+    public boolean acceptChangeUserInfo(@RequestBody AcceptOrRejectChangeUserInfo acceptOrRejectChangeUserInfo) throws Exception {
+        return userManageService.AcceptChangeUserInfo(acceptOrRejectChangeUserInfo);
     }
-
+    @RequestMapping(value = "/getChangeInfoDetail", method = RequestMethod.POST)
+    public ChangeInfoAcceptDetailsResponse getChangeInfoDetail(@RequestBody GetUserInfoRequest getUserInfoRequest) throws Exception {
+        return userManageService.getChangeInfoDetail(getUserInfoRequest);
+    }
     @RequestMapping(value = "/rejectChangeUserInfo", method = RequestMethod.POST)
-    public boolean rejectChangeUserInfo(@RequestBody GetUserInfoRequest getUserInfoRequest) throws Exception {
-        return userManageService.RejectChangeUserInfo(getUserInfoRequest);
+    public boolean rejectChangeUserInfo(@RequestBody AcceptOrRejectChangeUserInfo acceptOrRejectChangeUserInfo) throws Exception {
+        return userManageService.RejectChangeUserInfo(acceptOrRejectChangeUserInfo);
     }
 
     @RequestMapping(value = "/getAllUserInfo", method = RequestMethod.GET)

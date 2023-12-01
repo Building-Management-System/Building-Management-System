@@ -1,6 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
-import fpt.capstone.buildingmanagementsystem.model.request.AcceptChangeUserInfo;
+import fpt.capstone.buildingmanagementsystem.model.request.AcceptOrRejectChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.GetUserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserAccountResponse;
@@ -72,7 +72,7 @@ class UserControllerTest {
     void testAcceptChangeUserInfo() throws Exception {
         when(userManageService.AcceptChangeUserInfo(any())).thenReturn(true);
 
-        boolean result = userController.acceptChangeUserInfo(new AcceptChangeUserInfo("userId"));
+        boolean result = userController.acceptChangeUserInfo(new AcceptOrRejectChangeUserInfo("userId","hrId"));
         Assertions.assertEquals(true, result);
     }
 
@@ -80,7 +80,7 @@ class UserControllerTest {
     void testRejectChangeUserInfo() throws Exception {
         when(userManageService.RejectChangeUserInfo(any())).thenReturn(true);
 
-        boolean result = userController.rejectChangeUserInfo(new GetUserInfoRequest("userId"));
+        boolean result = userController.rejectChangeUserInfo(new AcceptOrRejectChangeUserInfo("userId","hrId"));
         Assertions.assertEquals(true, result);
     }
 

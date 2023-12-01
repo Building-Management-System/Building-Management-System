@@ -14,17 +14,10 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.UserPending;
 import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
-import fpt.capstone.buildingmanagementsystem.model.request.AcceptChangeUserInfo;
+import fpt.capstone.buildingmanagementsystem.model.request.AcceptOrRejectChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
-import fpt.capstone.buildingmanagementsystem.model.response.EmployeeResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.GetAllUserInfoPending;
-import fpt.capstone.buildingmanagementsystem.model.response.GetUserInfoResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.HrDepartmentResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.ManagerInfoResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.ReceiveIdAndDepartmentIdResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.UserAccountResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.*;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
@@ -53,6 +46,8 @@ import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime
 
 @Service
 public class UserManageService {
+    @Autowired
+    AutomaticNotificationService automaticNotificationService;
     @Autowired
     AccountRepository accountRepository;
     @Autowired
@@ -87,8 +82,10 @@ public class UserManageService {
                     changeUserInfoRequest.getGender() != null &&
                     changeUserInfoRequest.getCity() != null &&
                     changeUserInfoRequest.getTelephoneNumber() != null &&
-                    changeUserInfoRequest.getDateOfBirth() != null
+                    changeUserInfoRequest.getDateOfBirth() != null &&
+                    changeUserInfoRequest.getAddress() != null
             ) {
+                User user = userRepository.findByUserId(changeUserInfoRequest.getUserId()).get();
                 String name = "avatar_" + UUID.randomUUID();
                 if (file != null) {
                     String[] subFileName = Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
@@ -97,20 +94,18 @@ public class UserManageService {
                     Bucket bucket = StorageClient.getInstance().bucket();
                     bucket.create(name, file.getBytes(), file.getContentType());
                 } else {
-                    name = userRepository.findByUserId(changeUserInfoRequest.getUserId()).get().getImage();
+                    name = user.getImage();
                 }
-                if (!userPendingRepository.existsById(userId)) {
-                    Optional<UserPendingStatus> userPendingStatus = userPendingStatusRepository.findByUserPendingStatusId("1");
-                    UserPending userPending = userPendingMapper.convertRegisterAccount(changeUserInfoRequest);
-                    userPending.setImage(name);
-                    userPending.setUserPendingStatus(userPendingStatus.get());
-                    userPendingRepository.save(userPending);
-                } else {
-                    userPendingRepository.updateUserInfo(changeUserInfoRequest.getFirstName(),
-                            changeUserInfoRequest.getLastName(), changeUserInfoRequest.getGender(), changeUserInfoRequest.getDateOfBirth()
-                            , changeUserInfoRequest.getTelephoneNumber(), changeUserInfoRequest.getCountry()
-                            , changeUserInfoRequest.getCity(), changeUserInfoRequest.getEmail(), name, Until.generateRealTime(), "1", changeUserInfoRequest.getUserId());
-                }
+                Optional<UserPendingStatus> userPendingStatus = userPendingStatusRepository.findByUserPendingStatusId("1");
+                UserPending userPending = userPendingMapper.convertRegisterAccount(changeUserInfoRequest);
+                userPending.setImage(name);
+                userPending.setUsername(user.getAccount().getUsername());
+                userPending.setUserPendingStatus(userPendingStatus.get());
+                userPending.setApprovedDate(user.getApprovedDate());
+                userPending.setDepartmentName(user.getDepartment().getDepartmentName());
+                userPending.setAcceptedBy(user.getAcceptedBy());
+                userPending.setRoleName(user.getAccount().getRole().getRoleName());
+                userPendingRepository.save(userPending);
                 return true;
             } else {
                 throw new BadRequest("request_fail");
@@ -121,14 +116,16 @@ public class UserManageService {
     }
 
 
-    public boolean AcceptChangeUserInfo(AcceptChangeUserInfo acceptChangeUserInfo) {
+    public boolean AcceptChangeUserInfo(AcceptOrRejectChangeUserInfo acceptOrRejectChangeUserInfo) {
         try {
-            String userId = acceptChangeUserInfo.getUserId();
+            String userId = acceptOrRejectChangeUserInfo.getUserId();
+            String hrId = acceptOrRejectChangeUserInfo.getHrId();
             if (userId != null) {
                 if (!userRepository.existsById(userId)) {
                     throw new NotFound("user_not_found");
                 }
                 Optional<User> user = userRepository.findByUserId(userId);
+                Optional<User> hr = userRepository.findByUserId(hrId);
                 Optional<UserPending> userPending = userPendingRepository.findById(userId);
                 if (!userPending.isPresent() || !user.isPresent()) {
                     throw new NotFound("not_found");
@@ -144,10 +141,12 @@ public class UserManageService {
                 }
                 userRepository.updateAcceptUserInfo(userPending.get().getFirstName(), userPending.get().getLastName(), userPending.get().getGender()
                         , userPending.get().getDateOfBirth(), userPending.get().getTelephoneNumber()
-                        , userPending.get().getCity(), userPending.get().getCity(), userPending.get().getEmail()
+                        , userPending.get().getCountry(), userPending.get().getCity(), userPending.get().getAddress(), hr.get().getAccount().getUsername()
+                        , Until.generateRealTime(), userPending.get().getEmail()
                         , userPending.get().getImage(), generateRealTime()
                         , userId);
                 userPendingRepository.updateStatus("2", userId);
+                automaticNotificationService.sendChangeNotification(acceptOrRejectChangeUserInfo, "accepted");
                 return true;
             } else {
                 throw new BadRequest("request_fail");
@@ -157,11 +156,12 @@ public class UserManageService {
         }
     }
 
-    public boolean RejectChangeUserInfo(GetUserInfoRequest getUserInfoRequest) {
+    public boolean RejectChangeUserInfo(AcceptOrRejectChangeUserInfo acceptOrRejectChangeUserInfo) {
         try {
-            if (getUserInfoRequest.getUserId() != null) {
-                if (userPendingRepository.existsById(getUserInfoRequest.getUserId())) {
-                    userPendingRepository.updateStatus("3", getUserInfoRequest.getUserId());
+            if (acceptOrRejectChangeUserInfo.getUserId() != null) {
+                if (userPendingRepository.existsById(acceptOrRejectChangeUserInfo.getUserId())) {
+                    userPendingRepository.updateStatus("3", acceptOrRejectChangeUserInfo.getUserId());
+                    automaticNotificationService.sendChangeNotification(acceptOrRejectChangeUserInfo, "rejected");
                     return true;
                 } else {
                     throw new NotFound("user_not_found");
@@ -206,6 +206,27 @@ public class UserManageService {
         List<User> users = userRepository.findAll();
         if (users.isEmpty()) return userInfoResponses;
         return getUserInfoResponses(userInfoResponses, users);
+    }
+
+    public ChangeInfoAcceptDetailsResponse getChangeInfoDetail(GetUserInfoRequest getUserInfoRequest) {
+        Optional<User> userOptional = userRepository.findByUserId(getUserInfoRequest.getUserId());
+        Optional<UserPending> userPendingOptional = userPendingRepository.findById(getUserInfoRequest.getUserId());
+        if (userOptional.isPresent() && userPendingOptional.isPresent()) {
+            User user= userOptional.get();
+            UserPending userPending=userPendingOptional.get();
+            return ChangeInfoAcceptDetailsResponse
+                    .builder()
+                    .username(user.getAccount().getUsername()).role(user.getAccount().getRole().getRoleName())
+                    .department(user.getDepartment().getDepartmentName()).hireDate(user.getCreatedDate().toString())
+                    .firstNameBefore(user.getFirstName()).imageBefore(user.getImage()).lastNameBefore(user.getLastName()).emailBefore(user.getEmail())
+                    .dateOfBirthBefore(user.getDateOfBirth()).phoneBefore(user.getTelephoneNumber()).addressBefore(user.getAddress()).cityBefore(user.getCity())
+                    .countryBefore(user.getCountry()).firstNameAfter(userPending.getFirstName()).imageAfter(userPending.getImage()).lastNameAfter(userPending.getLastName())
+                    .emailAfter(userPending.getEmail()).dateOfBirthAfter(userPending.getDateOfBirth()).phoneAfter(userPending.getTelephoneNumber()).addressAfter(userPending.getAddress())
+                    .cityAfter(userPending.getCity()).countryAfter(userPending.getCountry())
+                    .build();
+        } else {
+            throw new BadRequest("request_fail");
+        }
     }
 
     public ReceiveIdAndDepartmentIdResponse getReceiveIdAndDepartmentId(String userId) {

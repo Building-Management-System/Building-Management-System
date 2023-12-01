@@ -2,11 +2,9 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
-import fpt.capstone.buildingmanagementsystem.model.entity.Department;
-import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
-import fpt.capstone.buildingmanagementsystem.model.entity.NotificationReceiver;
-import fpt.capstone.buildingmanagementsystem.model.entity.UnreadMark;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.AcceptOrRejectChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationEvaluate;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationAcceptResponse;
@@ -20,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class AutomaticNotificationService {
@@ -125,6 +124,42 @@ public class AutomaticNotificationService {
         NotificationReceiver notificationReceiver = NotificationReceiver.builder()
                 .notification(notification)
                 .receiver(request.getReceiver())
+                .build();
+
+        try {
+            notificationRepository.saveAndFlush(notification);
+            unreadMarkRepository.save(unreadMark);
+            notificationReceiverRepository.save(notificationReceiver);
+        } catch (Exception e) {
+            throw new ServerError("Fail");
+        }
+    }
+    public void sendChangeNotification(AcceptOrRejectChangeUserInfo request, String status) {
+        String userId = request.getUserId();
+        String hrId = request.getHrId();
+        Optional<User> user = userRepository.findByUserId(userId);
+        Optional<User> hr = userRepository.findByUserId(hrId);
+        String notificationTitle = "[SYSTEM] You have a new notification.";
+        String notificationContent = "The new personal information you want to update has been"+" "+status+" "+"by"+" "+hr.get().getAccount().getUsername();
+        Notification notification = Notification.builder()
+                .title(notificationTitle)
+                .content(notificationContent)
+                .notificationStatus(NotificationStatus.UPLOADED)
+                .priority(false)
+                .createDate(Until.generateRealTime())
+                .updateDate(Until.generateRealTime())
+                .uploadDate(Until.generateRealTime())
+                .createdBy(hr.get())
+                .build();
+
+        UnreadMark unreadMark = UnreadMark.builder()
+                .notification(notification)
+                .user(user.get())
+                .build();
+
+        NotificationReceiver notificationReceiver = NotificationReceiver.builder()
+                .notification(notification)
+                .receiver(user.get())
                 .build();
 
         try {
