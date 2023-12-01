@@ -66,6 +66,9 @@ public class MonthlyEvaluateService {
     @Autowired
     DepartmentRepository departmentRepository;
 
+    @Autowired
+    TicketManageService ticketManageService;
+
     @Transactional(rollbackOn = Exception.class)
     public ResponseEntity<?> createEvaluate(EmployeeEvaluateRequest request) {
         User employee = userRepository.findByUserId(request.getEmployeeId())
@@ -187,15 +190,20 @@ public class MonthlyEvaluateService {
         try {
             if (evaluateByHrRequest.getEvaluateId() != null && evaluateByHrRequest.getHrId() != null && evaluateByHrRequest.getHrStatus() != null) {
                 Optional<MonthlyEvaluate> monthlyEvaluateOptional = monthlyEvaluateRepository.findByEvaluateId(evaluateByHrRequest.getEvaluateId());
-                Optional<User> user=userRepository.findByUserId(evaluateByHrRequest.getHrId());
-                if (monthlyEvaluateOptional.isPresent()&&user.isPresent()) {
-                    MonthlyEvaluate monthlyEvaluate=monthlyEvaluateOptional.get();
+                Optional<User> user = userRepository.findByUserId(evaluateByHrRequest.getHrId());
+                if (monthlyEvaluateOptional.isPresent() && user.isPresent()) {
+                    MonthlyEvaluate monthlyEvaluate = monthlyEvaluateOptional.get();
                     monthlyEvaluate.setApprovedDate(Until.generateRealTime());
                     monthlyEvaluate.setAcceptedBy(user.get());
                     monthlyEvaluate.setHrNote(evaluateByHrRequest.getHrNote());
                     boolean booleanValue = Boolean.parseBoolean(evaluateByHrRequest.getHrStatus());
                     monthlyEvaluate.setStatus(booleanValue);
                     monthlyEvaluateRepository.save(monthlyEvaluate);
+                    if (booleanValue) {
+                        ticketManageService.closeAllTicketWhenAcceptEvaluate(monthlyEvaluate.getEmployee().getUserId(),
+                                monthlyEvaluate.getMonth(),
+                                monthlyEvaluate.getYear());
+                    }
                     return true;
                 } else {
                     throw new NotFound("not_found_monthly_evaluate_or_hr");

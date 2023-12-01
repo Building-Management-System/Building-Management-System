@@ -123,31 +123,38 @@ public class RequestChangeLogService {
             if (changeLogRequest.getWorkOutSide() != null) {
                 Time checkin = null;
                 Time checkout = null;
-                if (changeLogRequest.getType().equals(WorkingOutsideType.HALF_MORNING.toString())) {
-                    checkin = startMorningTime;
-                    if (compareTime(dailyLog.getCheckout(), endMorningTime) < 0 || dailyLog.getCheckout() == null) {
-                        checkout = endMorningTime;
+                double workingOutside = Double.parseDouble(changeLogRequest.getWorkOutSide());
+                if (workingOutside == 0) {
+                    //update khong co working outside
+                    dailyLog.setCheckin(dailyLog.getSystemCheckIn());
+                    dailyLog.setCheckout(dailyLog.getSystemCheckOut());
+                } else if(workingOutside == 1 || workingOutside == 0.5) {
+                    if (changeLogRequest.getType().equals(WorkingOutsideType.HALF_MORNING.toString())) {
+                        checkin = startMorningTime;
+                        if (compareTime(dailyLog.getCheckout(), endMorningTime) < 0 || dailyLog.getCheckout() == null) {
+                            checkout = endMorningTime;
+                        }
                     }
-                }
-                if (changeLogRequest.getType().equals(WorkingOutsideType.HALF_AFTERNOON.toString())) {
-                    checkout = endAfternoonTime;
-                    if (compareTime(dailyLog.getCheckin(), startAfternoonTime) > 0 || dailyLog.getCheckin() == null) {
-                        checkin = startAfternoonTime;
+                    if (changeLogRequest.getType().equals(WorkingOutsideType.HALF_AFTERNOON.toString())) {
+                        checkout = endAfternoonTime;
+                        if (compareTime(dailyLog.getCheckin(), startAfternoonTime) > 0 || dailyLog.getCheckin() == null) {
+                            checkin = startAfternoonTime;
+                        }
                     }
-                }
-                if (changeLogRequest.getType().equals(WorkingOutsideType.ALL_DAY.toString())) {
-                    checkin = startMorningTime;
-                    checkout = endAfternoonTime;
-                }
-                if (checkin != null) {
-                    if (compareTime(dailyLog.getCheckin(), checkin) > 0 || dailyLog.getCheckin() == null) {
-                        dailyLog.setCheckin(checkin);
+                    if (changeLogRequest.getType().equals(WorkingOutsideType.ALL_DAY.toString())) {
+                        checkin = startMorningTime;
+                        checkout = endAfternoonTime;
                     }
-                }
+                    if (checkin != null) {
+                        if (compareTime(dailyLog.getCheckin(), checkin) > 0 || dailyLog.getCheckin() == null) {
+                            dailyLog.setCheckin(checkin);
+                        }
+                    }
 
-                if (checkout != null) {
-                    if (compareTime(dailyLog.getCheckout(), checkout) < 0 || dailyLog.getCheckout() == null) {
-                        dailyLog.setCheckout(checkout);
+                    if (checkout != null) {
+                        if (compareTime(dailyLog.getCheckout(), checkout) < 0 || dailyLog.getCheckout() == null) {
+                            dailyLog.setCheckout(checkout);
+                        }
                     }
                 }
             }

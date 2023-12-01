@@ -11,6 +11,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
 import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeReceiveIdRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.RequestTicketResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.TicketRequestResponse;
@@ -210,5 +211,24 @@ public class TicketManageService {
             requestTicketRepository.saveAll(requestTickets);
         });
 
+    }
+
+    public void closeAllTicketWhenAcceptEvaluate(String employeeId, int month, int year) {
+        List<Ticket> tickets = ticketRepository.findByUserIdAndMonthAndYear(employeeId, month, year)
+                .stream()
+                .filter(ticket -> !ticket.getTopic().equals(TopicEnum.OTHER_REQUEST) ||
+                        !ticket.getTopic().equals(TopicEnum.ROOM_REQUEST))
+                .collect(Collectors.toList());
+
+        if (tickets.isEmpty()) return;
+        List<RequestTicket> requestTickets = requestTicketRepository.findByTicketRequestIn(tickets);
+        tickets.forEach(ticket -> ticket.setStatus(false));
+        requestTickets.forEach(requestTicket -> requestTicket.setStatus(RequestStatus.CLOSED));
+        try {
+            ticketRepository.saveAll(tickets);
+            requestTicketRepository.saveAll(requestTickets);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

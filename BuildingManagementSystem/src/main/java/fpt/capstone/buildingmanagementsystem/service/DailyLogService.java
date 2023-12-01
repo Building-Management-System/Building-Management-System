@@ -265,5 +265,30 @@ public class DailyLogService {
         dayOffRepository.saveAll(dayOffs);
         return dayOffs;
     }
+    public void initDayOff(String accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new BadRequest("not_found_account"));
+        DayOff dayOff = DayOff.builder()
+                .account(account)
+                .january(16)
+                .february(16)
+                .april(16)
+                .march(16)
+                .may(16)
+                .july(16)
+                .june(16)
+                .august(16)
+                .september(16)
+                .october(16)
+                .november(16)
+                .december(16)
+                .year(2023)
+                .build();
+        try {
+            dayOffRepository.save(dayOff);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 

@@ -96,6 +96,9 @@ public class AccountManageService implements UserDetailsService {
     @Autowired
     TicketManageService ticketManageService;
 
+    @Autowired
+    DailyLogService dailyLogService;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Account> userAccount = accountRepository.findByUsername(username);
@@ -130,17 +133,19 @@ public class AccountManageService implements UserDetailsService {
                                     .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
                                             generateRealTime()).image("unknown").updatedDate(generateRealTime()).account(newAccount).department(department.get())
                                     .build();
+                            Account saveAccount;
                             if (Objects.equals(registerRequest.getRole(), "manager")) {
                                 if (checkManagerOfDepartment(registerRequest.getDepartmentName())) {
                                     newAccount.setUser(user);
-                                    accountRepository.saveAndFlush(newAccount);
+                                    saveAccount = accountRepository.saveAndFlush(newAccount);
                                 } else {
                                     throw new Conflict("department_exist_manager");
                                 }
                             } else {
                                 newAccount.setUser(user);
-                                accountRepository.saveAndFlush(newAccount);
+                                saveAccount = accountRepository.saveAndFlush(newAccount);
                             }
+                            dailyLogService.initDayOff(saveAccount.accountId);
                             return true;
                         } else {
                             throw new NotFound("hr_id_not_found");
