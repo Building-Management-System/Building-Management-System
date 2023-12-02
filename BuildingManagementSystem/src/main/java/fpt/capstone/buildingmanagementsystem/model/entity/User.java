@@ -42,6 +42,9 @@ public class User {
     @Column(name = "telephone_number")
     String telephoneNumber;
     @NotNull
+    @Column(name = "address")
+    String address;
+    @NotNull
     @Column(name = "country")
     String country;
     @NotNull
@@ -50,6 +53,10 @@ public class User {
     @NotNull
     @Column(name = "email")
     String email;
+    @Column(name = "accepted_by")
+    String AcceptedBy;
+    @Column(name = "approved_date")
+    Date ApprovedDate;
     @NotNull
     @Column(name = "image")
     String image;

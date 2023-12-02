@@ -14,6 +14,7 @@ public class ChangeUserInfoRequest {
     String gender;
     String dateOfBirth;
     String telephoneNumber;
+    String address;
     String country;
     String city;
     String email;
