@@ -281,7 +281,7 @@ public class CheckoutAnalyzeSchedule {
         } else {
             dailyLog.setEarlyCheckout(false);
         }
-
+        //note
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
         if (getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour < 6) {
             double offHours = 8 - dailyLog.getTotalAttendance();
