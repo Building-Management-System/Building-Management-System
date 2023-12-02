@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.sql.Time;
@@ -176,7 +177,7 @@ class AttendanceControllerTest {
         AttendanceMessageRequest attendanceMessageRequest = new AttendanceMessageRequest();
         attendanceMessageRequest.setAttendanceRequestId("96486e20-0421-432a-aa43-b74f5275bb5c");
 
-        boolean result = attendanceController.acceptAttendanceRequest(attendanceMessageRequest);
+        ResponseEntity<?> result = attendanceController.acceptAttendanceRequest(attendanceMessageRequest);
         Assertions.assertEquals(true, result);
     }
 

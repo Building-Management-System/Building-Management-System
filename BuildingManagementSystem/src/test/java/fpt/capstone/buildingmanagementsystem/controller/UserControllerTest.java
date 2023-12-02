@@ -6,6 +6,7 @@ import fpt.capstone.buildingmanagementsystem.model.response.GetUserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserAccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.service.UserManageService;
+import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -45,16 +47,15 @@ class UserControllerTest {
         assertEquals(1, userList.size());
     }
 
+
     @Test
     void testGetInfoUser() throws Exception {
         GetUserInfoRequest getUserInfoRequest = new GetUserInfoRequest();
         getUserInfoRequest.setUserId("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6");
 
         ResponseEntity<?> result = userController.getInfoUser(getUserInfoRequest);
-        GetUserInfoResponse expected = new GetUserInfoResponse("John", "Doe",
-                "Boyyyy", "03/04/2001",
-                "0865965402", "LA",
-                "LA", "sontung02hn@gmail.com", "unknown","2", "tech D1");
+
+        GetUserInfoResponse expected = new GetUserInfoResponse("managertech1", Until.convertStringToDateTime("2023-11-08 08:07:29.0"),"John", "Doe", "manager", "Boyyyy", "03/04/2001", "0865965402", "LA",  "LA", "", "sontung02hn@gmail.com", "unknown", "2", "tech D1");
         assertEquals(200, result.getStatusCodeValue());
         assertEquals(expected, result.getBody());
 
@@ -96,10 +97,9 @@ class UserControllerTest {
 
     @Test
     void testGetManager() {
-        when(userManageService.getManagerByDepartmentId(anyString())).thenReturn(List.of(new UserInfoResponse("accountId", "firstName", "lastName", "image", "roleName")));
-
-        List<UserInfoResponse> result = userController.getManager("departmentId");
-        Assertions.assertEquals(List.of(new UserInfoResponse("accountId", "firstName", "lastName", "image", "roleName")), result);
+        String departmentid = "2";
+        List<UserInfoResponse> result = userController.getManager(departmentid);
+        Assertions.assertEquals(List.of(new UserInfoResponse("f2dbbf96-1a65-4e72-805d-ee10ca9b50a6", "managertech1", "John", "Doe", "unknown", "manager")), result);
     }
 
     @Test
