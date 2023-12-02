@@ -66,6 +66,7 @@ class AccountControllerUnitTest {
         assertEquals("employee", jwtResponse.getRole());
         assertEquals("f8dbabf3-34d5-4b19-97dd-d99d7b34e11f", jwtResponse.getAccountId());
     }
+    //note
 
     @Test
     public void testCreateAuthenticationToken_InvalidUsername() throws Exception {
