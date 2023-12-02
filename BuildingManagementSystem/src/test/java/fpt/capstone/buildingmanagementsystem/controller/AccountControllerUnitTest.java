@@ -253,6 +253,7 @@ class AccountControllerUnitTest {
         });
         assertEquals("Not_found_role", exception.getMessage());
     }
+    //note
 
     @Test
     public void testchangeRoleAccount_BadRequestDepartmentNotFound() throws Exception {
@@ -266,6 +267,7 @@ class AccountControllerUnitTest {
         });
         assertEquals("Not_found_department", exception.getMessage());
     }
+    //note
 
     @Test
     public void testchangeRoleAccount_ServerErrorReuestNULL() throws Exception {
