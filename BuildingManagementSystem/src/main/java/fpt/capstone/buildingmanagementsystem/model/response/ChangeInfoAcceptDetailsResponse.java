@@ -14,6 +14,7 @@ public class ChangeInfoAcceptDetailsResponse {
     String role;
     String department;
     String hireDate;
+    String genderBefore;
     String firstNameBefore;
     String imageBefore;
     String lastNameBefore;
@@ -23,6 +24,7 @@ public class ChangeInfoAcceptDetailsResponse {
     String addressBefore;
     String cityBefore;
     String countryBefore;
+    String genderAfter;
     String firstNameAfter;
     String imageAfter;
     String lastNameAfter;

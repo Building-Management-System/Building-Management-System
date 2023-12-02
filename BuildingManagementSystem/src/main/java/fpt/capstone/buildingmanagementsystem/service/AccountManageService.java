@@ -397,6 +397,8 @@ public class AccountManageService implements UserDetailsService {
         account.forEach(element -> {
             GetAllAccountResponse get = accountMapper.convertGetAllAccount(element);
             get.setDepartmentName(element.getUser().getDepartment().getDepartmentName());
+            get.setFirstName(element.getUser().getFirstName());
+            get.setLastName(element.getUser().getLastName());
             getAllAccountResponses.add(get);
         });
         return getAllAccountResponses;
