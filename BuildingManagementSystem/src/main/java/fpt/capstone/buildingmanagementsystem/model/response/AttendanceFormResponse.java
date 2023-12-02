@@ -24,6 +24,8 @@ public class AttendanceFormResponse {
 
     private String content;
 
+    private boolean status;
+
     private String requestMessageId;
 
     private TopicEnum topic;

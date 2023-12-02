@@ -114,6 +114,7 @@ public class RequestMessageService {
                         form.getManualFirstEntry() != null ? form.getManualFirstEntry().toString() : null,
                         form.getManualLastExit() != null ? form.getManualLastExit().toString() : null,
                         form.getContent(),
+                        form.isStatus(),
                         form.getRequestMessage().getRequestMessageId(),
                         form.getTopic()
                 ))
