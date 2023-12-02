@@ -49,6 +49,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -232,6 +233,7 @@ public class AccountManageService implements UserDetailsService {
         }
     }
 
+    @Transactional
     public boolean changeRoleAccount(ChangeRoleRequest changeRoleRequest) {
         try {
             String accountId = changeRoleRequest.getAccountId();
