@@ -193,6 +193,8 @@ public class UserManageService {
                 throw new NotFound("user_not_found");
             }
             getUserInfoResponse = userMapper.convertGetUserInfo(user.get());
+            getUserInfoResponse.setUserName(user.get().getAccount().getUsername());
+            getUserInfoResponse.setHireDate(user.get().getAccount().getCreatedDate());
             getUserInfoResponse.setDepartmentId(user.get().getDepartment().getDepartmentId());
             getUserInfoResponse.setDepartmentName(user.get().getDepartment().getDepartmentName());
         } else {
