@@ -14,11 +14,13 @@ public class GetUserInfoResponse {
     Date hireDate;
     String firstName;
     String lastName;
+    String roleName;
     String gender;
     String dateOfBirth;
     String telephoneNumber;
     String country;
     String city;
+    String address;
     String email;
     String image;
     String departmentId;

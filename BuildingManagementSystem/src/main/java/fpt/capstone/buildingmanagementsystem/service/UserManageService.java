@@ -17,7 +17,15 @@ import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.AcceptOrRejectChangeUserInfo;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
-import fpt.capstone.buildingmanagementsystem.model.response.*;
+import fpt.capstone.buildingmanagementsystem.model.response.ChangeInfoAcceptDetailsResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.EmployeeResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.GetAllUserInfoPending;
+import fpt.capstone.buildingmanagementsystem.model.response.GetUserInfoResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.HrDepartmentResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.ManagerInfoResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.ReceiveIdAndDepartmentIdResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.UserAccountResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.UserInfoResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
@@ -195,6 +203,8 @@ public class UserManageService {
             getUserInfoResponse = userMapper.convertGetUserInfo(user.get());
             getUserInfoResponse.setUserName(user.get().getAccount().getUsername());
             getUserInfoResponse.setHireDate(user.get().getAccount().getCreatedDate());
+            getUserInfoResponse.setAddress(user.get().getAddress());
+            getUserInfoResponse.setRoleName(user.get().getAccount().getRole().getRoleName());
             getUserInfoResponse.setDepartmentId(user.get().getDepartment().getDepartmentId());
             getUserInfoResponse.setDepartmentName(user.get().getDepartment().getDepartmentName());
         } else {
@@ -214,8 +224,8 @@ public class UserManageService {
         Optional<User> userOptional = userRepository.findByUserId(getUserInfoRequest.getUserId());
         Optional<UserPending> userPendingOptional = userPendingRepository.findById(getUserInfoRequest.getUserId());
         if (userOptional.isPresent() && userPendingOptional.isPresent()) {
-            User user= userOptional.get();
-            UserPending userPending=userPendingOptional.get();
+            User user = userOptional.get();
+            UserPending userPending = userPendingOptional.get();
             return ChangeInfoAcceptDetailsResponse
                     .builder()
                     .username(user.getAccount().getUsername()).role(user.getAccount().getRole().getRoleName())
