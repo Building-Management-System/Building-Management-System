@@ -30,8 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.EXECUTING;
-import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.*;
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
@@ -228,6 +227,10 @@ public class TicketManageService {
         });
         requestMessageS.forEach(requestMessage -> {
             if (requestMessage.getRequest().getTicketRequest().isStatus()) {
+                RequestTicket requestTicket = requestMessage.getRequest();
+                requestTicket.setUpdateDate(Until.generateRealTime());
+                requestTicket.setStatus(CLOSED);
+                requestTicketRepository.save(requestTicket);
                 Ticket ticket = requestMessage.getRequest().getTicketRequest();
                 ticket.setStatus(false);
                 ticket.setUpdateDate(Until.generateRealTime());
