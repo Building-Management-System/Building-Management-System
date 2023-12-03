@@ -12,6 +12,8 @@ import java.util.Date;
 public class GetAllAccountResponse {
     String accountId;
     String username;
+    String firstName;
+    String lastName;
     String roleName;
     String statusName;
     String statusId;

@@ -229,7 +229,7 @@ public class UserManageService {
             return ChangeInfoAcceptDetailsResponse
                     .builder()
                     .username(user.getAccount().getUsername()).role(user.getAccount().getRole().getRoleName())
-                    .department(user.getDepartment().getDepartmentName()).hireDate(user.getCreatedDate().toString())
+                    .department(user.getDepartment().getDepartmentName()).hireDate(user.getCreatedDate().toString()).genderBefore(user.getGender()).genderAfter(userPending.getGender())
                     .firstNameBefore(user.getFirstName()).imageBefore(user.getImage()).lastNameBefore(user.getLastName()).emailBefore(user.getEmail())
                     .dateOfBirthBefore(user.getDateOfBirth()).phoneBefore(user.getTelephoneNumber()).addressBefore(user.getAddress()).cityBefore(user.getCity())
                     .countryBefore(user.getCountry()).firstNameAfter(userPending.getFirstName()).imageAfter(userPending.getImage()).lastNameAfter(userPending.getLastName())

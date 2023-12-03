@@ -217,11 +217,22 @@ public class AccountManageService implements UserDetailsService {
                 String oldStatus = accountRepository.findByAccountId(accountId).get().getStatus().getStatusName();
                 if (!oldStatus.equals(changeStatusAccountRequest.getStatusName())) {
                     Optional<Status> status = statusRepository.findByStatusName(changeStatusAccountRequest.getStatusName());
-                    if (!status.isPresent()) {
+                    Optional<User> user = userRepository.findByUserId(changeStatusAccountRequest.getAccountId());
+                    if (status.isPresent() && user.isPresent()) {
+                        if (Objects.equals(user.get().getAccount().getRole().getRoleName(), "manager")) {
+                            throw new Conflict("manager_account_can_not_inactive");
+                        } else {
+                            if (Objects.equals(user.get().getAccount().getRole().getRoleName(), "hr")
+                                    ||Objects.equals(user.get().getAccount().getRole().getRoleName(), "admin")
+                                    ||Objects.equals(user.get().getAccount().getRole().getRoleName(), "security")) {
+                                ticketManageService.resetTicketData(user.get());
+                            }
+                            accountRepository.updateStatusAccount(status.get().statusId, accountId);
+                            return true;
+                        }
+                    } else {
                         throw new NotFound("status_not_found");
                     }
-                    accountRepository.updateStatusAccount(status.get().statusId, accountId);
-                    return true;
                 } else {
                     throw new BadRequest("new_status_existed");
                 }
@@ -397,6 +408,8 @@ public class AccountManageService implements UserDetailsService {
         account.forEach(element -> {
             GetAllAccountResponse get = accountMapper.convertGetAllAccount(element);
             get.setDepartmentName(element.getUser().getDepartment().getDepartmentName());
+            get.setFirstName(element.getUser().getFirstName());
+            get.setLastName(element.getUser().getLastName());
             getAllAccountResponses.add(get);
         });
         return getAllAccountResponses;

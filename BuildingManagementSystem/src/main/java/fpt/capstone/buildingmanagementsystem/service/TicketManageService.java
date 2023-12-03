@@ -5,11 +5,7 @@ import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.model.dto.RequestTicketDto;
 import fpt.capstone.buildingmanagementsystem.model.dto.TicketDto;
 import fpt.capstone.buildingmanagementsystem.model.dto.TicketRequestDto;
-import fpt.capstone.buildingmanagementsystem.model.entity.Account;
-import fpt.capstone.buildingmanagementsystem.model.entity.InactiveManagerTemp;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
-import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeReceiveIdRequest;
@@ -34,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.EXECUTING;
+import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.*;
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
@@ -216,7 +212,36 @@ public class TicketManageService {
         });
 
     }
-
+    public void resetTicketData(User user) {
+        List<RequestMessage> requestMessageR = requestMessageRepository.findAllByReceiver(user);
+        List<RequestMessage> requestMessageS = requestMessageRepository.findAllBySender(user);
+        requestMessageR.forEach(requestMessage1 -> {
+            if (requestMessage1.getRequest().getTicketRequest().isStatus()) {
+                requestMessage1.setReceiver(null);
+                requestMessage1.setUpdateDate(Until.generateRealTime());
+                requestMessageRepository.save(requestMessage1);
+                RequestTicket requestTicket = requestMessage1.getRequest();
+                requestTicket.setUpdateDate(Until.generateRealTime());
+                requestTicket.setStatus(PENDING);
+                requestTicketRepository.save(requestTicket);
+                Ticket ticket = requestMessage1.getRequest().getTicketRequest();
+                ticket.setUpdateDate(Until.generateRealTime());
+                ticketRepository.save(ticket);
+            }
+        });
+        requestMessageS.forEach(requestMessage -> {
+            if (requestMessage.getRequest().getTicketRequest().isStatus()) {
+                RequestTicket requestTicket = requestMessage.getRequest();
+                requestTicket.setUpdateDate(Until.generateRealTime());
+                requestTicket.setStatus(CLOSED);
+                requestTicketRepository.save(requestTicket);
+                Ticket ticket = requestMessage.getRequest().getTicketRequest();
+                ticket.setStatus(false);
+                ticket.setUpdateDate(Until.generateRealTime());
+                ticketRepository.save(ticket);
+            }
+        });
+    }
     public void closeAllTicketWhenAcceptEvaluate(String employeeId, int month, int year) {
         List<Ticket> tickets = ticketRepository.findByUserIdAndMonthAndYear(employeeId, month, year)
                 .stream()
