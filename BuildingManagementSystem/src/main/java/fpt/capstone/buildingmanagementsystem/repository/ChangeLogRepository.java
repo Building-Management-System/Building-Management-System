@@ -25,4 +25,5 @@ public interface ChangeLogRepository extends JpaRepository<ChangeLog, String> {
 
     @Query(value = "select * from change_log where employee_id = :employee_id and date = :date", nativeQuery = true)
     Optional<ChangeLog> getChangeLogDetailByUserIdAndDate(String employee_id, String date);
+    Optional<ChangeLog> findChangeLogByChangeLogId(String changeLogId);
 }
