@@ -223,8 +223,8 @@ public class AccountManageService implements UserDetailsService {
                             throw new Conflict("manager_account_can_not_inactive");
                         } else {
                             if (Objects.equals(user.get().getAccount().getRole().getRoleName(), "hr")
-                                    &&Objects.equals(user.get().getAccount().getRole().getRoleName(), "admin")
-                                    &&Objects.equals(user.get().getAccount().getRole().getRoleName(), "security")) {
+                                    ||Objects.equals(user.get().getAccount().getRole().getRoleName(), "admin")
+                                    ||Objects.equals(user.get().getAccount().getRole().getRoleName(), "security")) {
                                 ticketManageService.resetTicketData(user.get());
                             }
                             accountRepository.updateStatusAccount(status.get().statusId, accountId);
