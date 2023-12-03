@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.sql.Time;
 import java.util.List;
 
@@ -24,7 +25,8 @@ public class AttendanceDetailResponse {
     private boolean lateCheckin;
     private boolean earlyCheckout;
     private double permittedLeave;
-    private boolean nonPermittedLeave;
+    private double nonPermittedLeave;
+    private boolean leaveWithoutNotice;
     private double outsideWork;
     List<ControlLogResponse> controlLogResponse;
 }

@@ -8,16 +8,22 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.LeaveRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ChangeLogType;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.LateType;
 import fpt.capstone.buildingmanagementsystem.model.request.SaveChangeLogRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.AttendanceDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ControlLogResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.DailyLogResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAttendanceUserResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.LateFormResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.TotalAttendanceUser;
 import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
+import fpt.capstone.buildingmanagementsystem.repository.LateRequestFormRepositoryV2;
+import fpt.capstone.buildingmanagementsystem.repository.LeaveRequestFormRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.WorkingOutsideFormRepository;
 import fpt.capstone.buildingmanagementsystem.service.schedule.CheckoutAnalyzeSchedule;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import fpt.capstone.buildingmanagementsystem.validate.Validate;
@@ -59,6 +65,15 @@ public class AttendanceService {
 
     @Autowired
     RequestChangeLogService requestChangeLogService;
+
+    @Autowired
+    LeaveRequestFormRepository leaveRequestFormRepository;
+
+    @Autowired
+    LateRequestFormRepositoryV2 lateRequestFormRepository;
+
+    @Autowired
+    WorkingOutsideFormRepository workingOutsideFormRepository;
 
     SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 
@@ -145,26 +160,34 @@ public class AttendanceService {
             try {
                 Optional<DailyLog> dailyLogOptional = dailyLogRepository.getAttendanceDetailByUserIdAndDate(user_id, date);
                 if (dailyLogOptional.isPresent()) {
-                    DailyLog dailyLogs = dailyLogOptional.get();
-                    String name = dailyLogs.getUser().getFirstName() + " " + dailyLogs.getUser().getLastName();
-                    String username = dailyLogs.getUser().getAccount().getUsername();
+                    DailyLog dailyLog = dailyLogOptional.get();
+                    String name = dailyLog.getUser().getFirstName() + " " + dailyLog.getUser().getLastName();
+                    String username = dailyLog.getUser().getAccount().getUsername();
                     List<ControlLogLcd> controlLogLcds = controlLogLcdRepository.getControlLogLcdList(username, date);
                     controlLogLcds = controlLogLcds.stream()
                             .sorted((Comparator.comparing(ControlLogLcd::getTime)))
                             .collect(Collectors.toList());
-                    String departmentName = dailyLogs.getUser().getDepartment().getDepartmentName();
+                    String departmentName = dailyLog.getUser().getDepartment().getDepartmentName();
                     SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
-                    String dateDaily = sdf.format(Until.convertDateToCalender(dailyLogs.getDate()).getTime());
-                    Time checkin = dailyLogs.getCheckin();
-                    Time checkout = dailyLogs.getCheckout();
-                    double totalAttendance = dailyLogs.getTotalAttendance();
-                    double morningTotal = dailyLogs.getMorningTotal();
-                    double afternoonTotal = dailyLogs.getAfternoonTotal();
-                    boolean lateCheckin = dailyLogs.isLateCheckin();
-                    boolean earlyCheckout = dailyLogs.isEarlyCheckout();
-                    boolean nonPermittedLeave = dailyLogs.getNonPermittedLeave() > 0.0;
-                    double permittedLeave = dailyLogs.getPermittedLeave();
-                    double outsideWork = dailyLogs.getOutsideWork();
+                    String dateDaily = sdf.format(Until.convertDateToCalender(dailyLog.getDate()).getTime());
+                    Time checkin = dailyLog.getCheckin();
+                    Time checkout = dailyLog.getCheckout();
+                    double totalAttendance = dailyLog.getTotalAttendance();
+                    double morningTotal = dailyLog.getMorningTotal();
+                    double afternoonTotal = dailyLog.getAfternoonTotal();
+
+                    boolean lateCheckin = false;
+                    boolean earlyCheckout = false;
+                    boolean leaveWithoutNotice = false;
+                    double permittedLeave = dailyLog.getPermittedLeave();
+                    double nonPermittedLeave = dailyLog.getNonPermittedLeave();
+                    if (dailyLog.isViolate()) {
+                        lateCheckin = isViolateLateCheckin(dailyLog);
+                        earlyCheckout = isViolateEarlyCheckout(dailyLog);
+                        leaveWithoutNotice = isViolateNonPermittedLeave(dailyLog);
+                    }
+
+                    double outsideWork = dailyLog.getOutsideWork();
                     List<ControlLogResponse> controlLogResponse = new ArrayList<>();
                     controlLogLcds.forEach(element -> {
                         ControlLogResponse controlLogResponse1 = new ControlLogResponse();
@@ -176,7 +199,9 @@ public class AttendanceService {
                             .name(name).username(username).departmentName(departmentName).dateDaily(dateDaily)
                             .checkin(checkin).checkout(checkout).totalAttendance(totalAttendance)
                             .morningTotal(morningTotal).afternoonTotal(afternoonTotal).lateCheckin(lateCheckin)
-                            .earlyCheckout(earlyCheckout).permittedLeave(permittedLeave).nonPermittedLeave(nonPermittedLeave)
+                            .earlyCheckout(earlyCheckout).permittedLeave(permittedLeave)
+                            .nonPermittedLeave(nonPermittedLeave)
+                            .leaveWithoutNotice(leaveWithoutNotice)
                             .outsideWork(outsideWork).controlLogResponse(controlLogResponse)
                             .build();
                 } else {
@@ -188,6 +213,24 @@ public class AttendanceService {
         } else {
             throw new BadRequest("request_fail");
         }
+    }
+
+    private boolean isViolateLateCheckin(DailyLog dailyLog) {
+        List<LateFormResponse> findLateMorningAccepted = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(dailyLog.getUser().getUserId(), dailyLog.getDate(), LateType.LATE_MORNING);
+        return findLateMorningAccepted.isEmpty();
+    }
+
+    private boolean isViolateEarlyCheckout(DailyLog dailyLog) {
+        List<LateFormResponse> earlyCheckout = lateRequestFormRepository.findLateAndEarlyViolateByUserIdAndDate(dailyLog.getUser().getUserId(), dailyLog.getDate(), LateType.EARLY_AFTERNOON);
+        return earlyCheckout.isEmpty();
+    }
+
+    private boolean isViolateNonPermittedLeave(DailyLog dailyLog) {
+        if (dailyLog.getNonPermittedLeave() > 0) {
+            List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(dailyLog.getUser().getUserId(), dailyLog.getDate());
+            return leaveRequestForms.isEmpty();
+        }
+        return false;
     }
 
     public int getCheckWeekend(Date date) {

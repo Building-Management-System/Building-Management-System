@@ -206,7 +206,11 @@ public class TicketManageService {
             );
 
             ticket.setStatus(false);
-            requestTickets.forEach(requestTicket -> requestTicket.setStatus(RequestStatus.CLOSED));
+            ticket.setUpdateDate(Until.generateRealTime());
+            requestTickets.forEach(requestTicket -> {
+                requestTicket.setStatus(RequestStatus.CLOSED);
+                requestTicket.setUpdateDate(Until.generateRealTime());
+            });
             ticketRepository.save(ticket);
             requestTicketRepository.saveAll(requestTickets);
         });
