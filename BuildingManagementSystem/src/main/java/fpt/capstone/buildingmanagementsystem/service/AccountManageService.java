@@ -223,8 +223,8 @@ public class AccountManageService implements UserDetailsService {
                             throw new Conflict("manager_account_can_not_inactive");
                         } else {
                             if (Objects.equals(user.get().getAccount().getRole().getRoleName(), "hr")
-                                    ||Objects.equals(user.get().getAccount().getRole().getRoleName(), "admin")
-                                    ||Objects.equals(user.get().getAccount().getRole().getRoleName(), "security")) {
+                                    || Objects.equals(user.get().getAccount().getRole().getRoleName(), "admin")
+                                    || Objects.equals(user.get().getAccount().getRole().getRoleName(), "security")) {
                                 ticketManageService.resetTicketData(user.get());
                             }
                             accountRepository.updateStatusAccount(status.get().statusId, accountId);
@@ -249,7 +249,7 @@ public class AccountManageService implements UserDetailsService {
         try {
             String accountId = changeRoleRequest.getAccountId();
             if (accountId != null && changeRoleRequest.getRoleName() != null) {
-                Account account = accountRepository.findByAccountId(accountId)
+                Account user = accountRepository.findByAccountId(accountId)
                         .orElseThrow(() -> new BadRequest("Not_found_user"));
 
                 Role role = roleRepository.findByRoleName(changeRoleRequest.getRoleName())
@@ -268,7 +268,7 @@ public class AccountManageService implements UserDetailsService {
                         if (inactiveManagerTempOptional.isPresent()) {
                             InactiveManagerTemp inactiveManager = inactiveManagerTempOptional.get();
                             //update
-                            ticketManageService.updateTicketOfNewManager(account, inactiveManager);
+                            ticketManageService.updateTicketOfNewManager(user, inactiveManager);
                             //delete from temp
                             tempRepository.delete(inactiveManager);
                         }
@@ -277,11 +277,16 @@ public class AccountManageService implements UserDetailsService {
                         throw new Conflict("department_exist_manager");
                     }
                 }
+                if (Objects.equals(user.getRole().getRoleName(), "hr")
+                        || Objects.equals(user.getRole().getRoleName(), "admin")
+                        || Objects.equals(user.getRole().getRoleName(), "security")) {
+                    ticketManageService.resetTicketData(user.getUser());
+                }
 
-                if (Objects.equals(account.getRole().getRoleName(), "manager") &&
+                if (Objects.equals(user.getRole().getRoleName(), "manager") &&
                         !Objects.equals(changeRoleRequest.getRoleName(), "manager")) {
                     InactiveManagerTemp temp = InactiveManagerTemp.builder()
-                            .manager(account)
+                            .manager(user)
                             .department(department)
                             .build();
                     tempRepository.save(temp);
