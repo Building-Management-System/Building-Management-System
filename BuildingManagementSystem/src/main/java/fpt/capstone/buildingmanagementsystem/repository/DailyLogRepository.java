@@ -43,4 +43,8 @@ public interface DailyLogRepository extends JpaRepository<DailyLog, String> {
             "WHERE user_id LIKE :userId\n" +
             "AND date BETWEEN :fromDate AND :toDate", nativeQuery = true)
     List<DailyLog> getDailyLogsByUserAndFromDateAndToDate(@Param("userId") String userId, @Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
+    @Query(value = "SELECT *\n" +
+            "FROM daily_log\n" +
+            "WHERE date BETWEEN :fromDate AND :toDate", nativeQuery = true)
+    List<DailyLog> getDailyLogsByFromDateAndToDate( @Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
 }

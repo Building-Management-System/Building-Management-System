@@ -1,9 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.model.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
@@ -18,7 +15,8 @@ import java.sql.Date;
 @NoArgsConstructor
 @Getter
 @Setter
-@Entity
+@Builder
+@Entity(name = "holiday")
 public class Holiday {
     @Id
     @GeneratedValue(generator = "UUID")
@@ -35,10 +33,10 @@ public class Holiday {
     private String content;
 
     @Column
-    private Date from;
+    private Date fromDate;
 
     @Column
-    private Date to;
+    private Date toDate;
 
     @Column
     private java.util.Date createDate;
