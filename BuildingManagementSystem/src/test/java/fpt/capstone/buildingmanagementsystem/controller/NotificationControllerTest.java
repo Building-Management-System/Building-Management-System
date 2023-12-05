@@ -410,6 +410,7 @@ class NotificationControllerTest {
         boolean result = notificationController.setNotificationHidden(setNotificationHidden);
         Assertions.assertEquals(true, result);
     }
+    //change return
 
     @Test
     void testSetNotificationHidden_NotFoundUser() {
