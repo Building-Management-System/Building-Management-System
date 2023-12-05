@@ -11,5 +11,5 @@ class DenyControllerTest {
         String result = denyController.firstPage();
         Assertions.assertEquals("deny access", result);
     }
-    //note
+    //note fix
 }
