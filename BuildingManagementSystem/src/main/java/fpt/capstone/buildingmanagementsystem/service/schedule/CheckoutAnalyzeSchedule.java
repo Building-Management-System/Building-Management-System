@@ -94,7 +94,6 @@ public class CheckoutAnalyzeSchedule {
     @Scheduled(cron = "0 32 02 * * ?")
     @Transactional
     public void scheduledCheckoutAnalyst() {
-
         List<User> users = userRepository.findAll();
 
         List<DailyLog> dailyLogs = dailyLogRepository.findByDate(getYesterdayDate());
@@ -131,8 +130,9 @@ public class CheckoutAnalyzeSchedule {
 
         double workingOutsideChange = checkWorkingOutside(dailyLog, account, yesterday);
         boolean isViolateChange = checkViolate(dailyLog, account, yesterday);
-        saveToChangeLog(account, yesterday, workingOutsideChange, isViolateChange, "REQUEST");
-
+        if(workingOutsideChange > 0 && isViolateChange) {
+            saveToChangeLog(account, yesterday, workingOutsideChange, true, "REQUEST");
+        }
         logger.info(dailyLog + "");
         dailyLogRepository.save(dailyLog);
     }
@@ -160,7 +160,9 @@ public class CheckoutAnalyzeSchedule {
         offWork.setMonth(localDate.getMonthValue());
         offWork.setDateType(DailyLogService.getDateType(yesterday));
         double workingOutsideChange = checkWorkingOutside(offWork, account, yesterday);
-        saveToChangeLog(account, yesterday, workingOutsideChange, false, "REQUEST");
+        if(workingOutsideChange > 0) {
+            saveToChangeLog(account, yesterday, workingOutsideChange, false, "REQUEST");
+        }
         checkLeaveViolate(account, offWork, yesterday);
         return offWork;
     }
