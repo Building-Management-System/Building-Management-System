@@ -20,4 +20,7 @@ public class GetAllAccountResponse {
     String createdBy;
     Date createdDate;
     String departmentName;
+    String phone;
+    String email;
+    String gender;
 }

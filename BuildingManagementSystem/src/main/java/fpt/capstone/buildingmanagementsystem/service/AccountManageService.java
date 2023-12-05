@@ -415,6 +415,9 @@ public class AccountManageService implements UserDetailsService {
             get.setDepartmentName(element.getUser().getDepartment().getDepartmentName());
             get.setFirstName(element.getUser().getFirstName());
             get.setLastName(element.getUser().getLastName());
+            get.setEmail(element.getUser().getEmail());
+            get.setPhone(element.getUser().getTelephoneNumber());
+            get.setGender(element.getUser().getGender());
             getAllAccountResponses.add(get);
         });
         return getAllAccountResponses;

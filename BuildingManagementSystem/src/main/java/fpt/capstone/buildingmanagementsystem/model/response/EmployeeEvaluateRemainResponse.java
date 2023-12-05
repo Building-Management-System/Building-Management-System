@@ -11,6 +11,7 @@ import lombok.Setter;
 @Setter
 public class EmployeeEvaluateRemainResponse {
     private String employeeId;
+    private String userName;
     private int month;
     private int year;
 }
