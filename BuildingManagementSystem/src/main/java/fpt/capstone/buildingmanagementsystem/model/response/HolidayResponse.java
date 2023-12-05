@@ -13,6 +13,7 @@ import java.sql.Date;
 @Data
 @Builder
 public class HolidayResponse {
+    String holidayId;
     private String title;
     private String content;
     private Date fromDate;

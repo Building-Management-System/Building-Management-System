@@ -110,7 +110,7 @@ public class HolidayService {
         List<Holiday> holidayList=holidayRepository.findAll();
         List<HolidayResponse> holidayResponseList=new ArrayList<>();
         holidayList.forEach(holiday -> {
-            HolidayResponse holidayResponse= HolidayResponse.builder().username(holiday.getUser().getAccount().getUsername())
+            HolidayResponse holidayResponse= HolidayResponse.builder().holidayId(holiday.getHolidayId()).username(holiday.getUser().getAccount().getUsername())
                     .content(holiday.getContent()).title(holiday.getTitle()).fromDate(holiday.getFromDate()).toDate(holiday.getToDate()).build();
             holidayResponseList.add(holidayResponse);
         });
