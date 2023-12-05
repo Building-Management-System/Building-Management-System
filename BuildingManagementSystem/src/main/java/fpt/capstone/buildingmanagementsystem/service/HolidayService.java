@@ -28,6 +28,8 @@ import java.util.List;
 @Service
 public class HolidayService {
     @Autowired
+    AttendanceService attendanceService;
+    @Autowired
     HolidayRepository holidayRepository;
     @Autowired
     UserRepository userRepository;
@@ -71,7 +73,19 @@ public class HolidayService {
     public boolean deleteHoliday(HolidayDeleteRequest holidayDeleteRequest) {
         if (holidayDeleteRequest.getHolidayId() != null) {
             try {
+                Holiday holiday=holidayRepository.findById(holidayDeleteRequest.getHolidayId()).get();
                 holidayRepository.deleteById(holidayDeleteRequest.getHolidayId());
+                List<DailyLog> dailyLogs= dailyLogRepository.getDailyLogsByFromDateAndToDate(holiday.getFromDate(),holiday.getToDate());
+                List<DailyLog> convertHoliday= new ArrayList<>();
+                dailyLogs.forEach(dailyLog -> {
+                    if ((attendanceService.getCheckWeekend(dailyLog.getDate()) != Calendar.SATURDAY) && (attendanceService.getCheckWeekend(dailyLog.getDate()) != Calendar.SUNDAY)) {
+                        dailyLog.setDateType(DateType.NORMAL);
+                    }else {
+                        dailyLog.setDateType(DateType.WEEKEND);
+                    }
+                    convertHoliday.add(dailyLog);
+                });
+                dailyLogRepository.saveAll(convertHoliday);
                 return true;
             } catch (Exception e) {
                 throw new ServerError("Fail");
