@@ -326,6 +326,7 @@ public class MonthlyEvaluateService {
                 .collect(Collectors.toList());
 
         return employees.stream()
+                .filter(employee -> !employee.getAccount().getRole().getRoleName().equals("Manager"))
                 .map(employee -> new EmployeeEvaluateRemainResponse(
                         employee.getUserId(),
                         employee.getAccount().getUsername(),
