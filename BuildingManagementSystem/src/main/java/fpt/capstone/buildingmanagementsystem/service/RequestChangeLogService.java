@@ -113,10 +113,19 @@ public class RequestChangeLogService {
             //attendance
             if (changeLogRequest.getManualCheckIn() != null) {
                 Time checkin = Until.convertStringToTime(changeLogRequest.getManualCheckIn());
+                if (compareTime(checkin, dailyLog.getCheckout()) > 0) {
+                    return ResponseEntity.status(HttpStatus.CONFLICT)
+                            .body(changeLogRequest);
+                }
+
                 dailyLog.setCheckin(checkin);
             }
             if (changeLogRequest.getManualCheckOut() != null) {
                 Time checkout = Until.convertStringToTime(changeLogRequest.getManualCheckOut());
+                if (compareTime(checkout, dailyLog.getCheckin()) < 0) {
+                    return ResponseEntity.status(HttpStatus.CONFLICT)
+                            .body(changeLogRequest);
+                }
                 dailyLog.setCheckout(checkout);
             }
             //working outside
@@ -128,7 +137,7 @@ public class RequestChangeLogService {
                     //update khong co working outside
                     dailyLog.setCheckin(dailyLog.getSystemCheckIn());
                     dailyLog.setCheckout(dailyLog.getSystemCheckOut());
-                } else if(workingOutside == 1 || workingOutside == 0.5) {
+                } else if (workingOutside == 1 || workingOutside == 0.5) {
                     if (changeLogRequest.getType().equals(WorkingOutsideType.HALF_MORNING.toString())) {
                         checkin = startMorningTime;
                         if (compareTime(dailyLog.getCheckout(), endMorningTime) < 0 || dailyLog.getCheckout() == null) {
@@ -178,7 +187,7 @@ public class RequestChangeLogService {
         }
     }
 
-    public ChangeLogDetailResponse getChangeLogDetail(String change_log_id,String employee_id, String date) {
+    public ChangeLogDetailResponse getChangeLogDetail(String change_log_id, String employee_id, String date) {
         if (employee_id != null && Validate.validateDateFormat(date)) {
             try {
                 Optional<DailyLog> dailyLogOptional = dailyLogRepository.getAttendanceDetailByUserIdAndDate(employee_id, date);
