@@ -423,6 +423,7 @@ class NotificationControllerTest {
         assertEquals("Not_found_user", exception.getMessage());
 
     }
+    //try catch 404
 
     @Test
     void testSetNotificationHidden_NotFoundNoti() {
