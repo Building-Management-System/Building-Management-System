@@ -1,15 +1,17 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
+import fpt.capstone.buildingmanagementsystem.model.entity.Holiday;
 import fpt.capstone.buildingmanagementsystem.model.request.HolidayDeleteRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.HolidaySaveRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.ChatResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.HolidayResponse;
 import fpt.capstone.buildingmanagementsystem.service.HolidayService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.repository.query.Param;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -23,5 +25,9 @@ public class HolidayController {
     @PostMapping("deleteHoliday")
     public boolean deleteHoliday(@RequestBody HolidayDeleteRequest holidayDeleteRequest) {
         return holidayService.deleteHoliday(holidayDeleteRequest);
+    }
+    @GetMapping("/listAllHoliday")
+    public List<HolidayResponse> listAllHoliday() {
+        return holidayService.listAllHoliday();
     }
 }
