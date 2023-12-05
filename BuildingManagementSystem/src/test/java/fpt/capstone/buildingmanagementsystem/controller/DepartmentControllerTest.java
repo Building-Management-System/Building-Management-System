@@ -43,7 +43,7 @@ class DepartmentControllerTest {
         assertEquals(responseA, departmentResponses.get(0));
         assertEquals(responseB, departmentResponses.get(1));
     }
-    //note
+    //note fixed
 
     @Test
     void testGetDepartmentByManagerRole() {
