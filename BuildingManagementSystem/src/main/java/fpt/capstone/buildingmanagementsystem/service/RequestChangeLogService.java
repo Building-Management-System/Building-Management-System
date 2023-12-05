@@ -178,7 +178,7 @@ public class RequestChangeLogService {
         }
     }
 
-    public ChangeLogDetailResponse getChangeLogDetail(String employee_id, String date) {
+    public ChangeLogDetailResponse getChangeLogDetail(String change_log_id,String employee_id, String date) {
         if (employee_id != null && Validate.validateDateFormat(date)) {
             try {
                 Optional<DailyLog> dailyLogOptional = dailyLogRepository.getAttendanceDetailByUserIdAndDate(employee_id, date);
@@ -195,7 +195,7 @@ public class RequestChangeLogService {
                     String dateDaily = sdf.format(Until.convertDateToCalender(dailyLogs.getDate()).getTime());
                     Time checkin = dailyLogs.getCheckin();
                     Time checkout = dailyLogs.getCheckout();
-                    Optional<ChangeLog> changeLog = changeLogRepository.getChangeLogDetailByUserIdAndDate(employee_id, date);
+                    Optional<ChangeLog> changeLog = changeLogRepository.findChangeLogByChangeLogId(change_log_id);
                     Time checkinChange = null;
                     Time checkoutChange = null;
                     String dateDailyChange = null;

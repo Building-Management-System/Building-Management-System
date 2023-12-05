@@ -42,7 +42,7 @@ public class ChangeLogController {
     }
 
     @GetMapping("/getChangeLogDetail")
-    public ChangeLogDetailResponse getChangeLogDetail(@Param("employee_id") String employee_id, @Param("date") String date) {
-        return requestChangeLogService.getChangeLogDetail(employee_id, date);
+    public ChangeLogDetailResponse getChangeLogDetail(@Param("change_log_id") String change_log_id,@Param("employee_id") String employee_id, @Param("date") String date) {
+        return requestChangeLogService.getChangeLogDetail(change_log_id,employee_id, date);
     }
 }
