@@ -32,7 +32,7 @@ public class SecurityService {
     public List<LoadDeviceResponse> listAllDevice(){
         List<LoadDeviceResponse> loadDeviceResponseList= new ArrayList<>();
         deviceRepository.findAll().forEach(device -> {
-            LoadDeviceResponse loadDeviceResponse= LoadDeviceResponse.builder().deviceId(device.getDeviceId()).deviceName(device.getDeviceName()).build();
+            LoadDeviceResponse loadDeviceResponse= LoadDeviceResponse.builder().deviceId(device.getId()).deviceName(device.getDeviceName()).build();
             loadDeviceResponseList.add(loadDeviceResponse);
         });
         return loadDeviceResponseList;
