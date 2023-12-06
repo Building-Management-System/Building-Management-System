@@ -91,7 +91,7 @@ public class CheckoutAnalyzeSchedule {
     private static final Logger logger = LoggerFactory.getLogger(CheckoutAnalyzeSchedule.class);
 
     //cron = "0 01 0 * * ?"
-    @Scheduled(cron = "0 32 02 * * ?")
+    @Scheduled(cron = "0 56 1 * * ?")
     @Transactional
     public void scheduledCheckoutAnalyst() {
         List<User> users = userRepository.findAll();
@@ -246,6 +246,9 @@ public class CheckoutAnalyzeSchedule {
             if (compareTime(dailyLog.getCheckout(), startAfternoonTime) > 0) {
                 double afternoonTotal = roundDouble(getDistanceTime(dailyLog.getCheckout(), startAfternoonTime) / One_hour);
                 dailyLog.setAfternoonTotal(afternoonTotal);
+            } else {
+                dailyLog.setAfternoonTotal(0);
+
             }
         } else {
             double afternoonTotal = roundDouble(getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour);
@@ -286,13 +289,14 @@ public class CheckoutAnalyzeSchedule {
         //note
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
         if (getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour < 6) {
-            double offHours = 8 - dailyLog.getTotalAttendance();
+            double offHours = roundDouble(8 - dailyLog.getTotalAttendance());
             double permittedLeaveLeft = roundDouble(getPermittedLeaveLeft(account, dailyLog.getMonth(), year, dailyLog));
 
             isLeaveWithoutNoticeViolate = leaveRequestForms.isEmpty();
 
             if (offHours <= permittedLeaveLeft) {
                 dailyLog.setPermittedLeave(offHours);
+                dailyLog.setNonPermittedLeave(0);
                 updateDayOffLeft(dailyLog.getMonth(), account, permittedLeaveLeft - offHours, year);
             } else {
                 dailyLog.setPermittedLeave(permittedLeaveLeft);
