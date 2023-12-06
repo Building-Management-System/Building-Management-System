@@ -34,6 +34,7 @@ public interface UserRepository extends JpaRepository<User, String> {
             , @Param(value = "updated_date") Date updated_date, @Param(value = "user_id") String user_id);
 
     Optional<User> findByUserId(String userId);
+
     List<User> findAllByUserIdIn(List<String> userId);
 
     List<User> findAllByDepartment(Department department);
