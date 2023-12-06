@@ -6,6 +6,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.DayOff;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.LateType;
 import fpt.capstone.buildingmanagementsystem.model.response.LateFormResponse;
@@ -65,7 +66,8 @@ public class DailyLogService {
     private static final Logger logger = LoggerFactory.getLogger(DailyLogService.class);
 
 
-    public DailyLog mapControlLogToDailyLog(ControlLogLcd controlLogLcd) {
+    public void mapControlLogToDailyLog(ControlLogLcd controlLogLcd) {
+        if (controlLogLcd.getStatus().equals(ControlLogStatus.BLACK_LIST)) return;
         Account account = accountRepository.findByUsername(controlLogLcd.getPersionName())
                 .orElseThrow(() -> new BadRequest("Not_found_account"));
         Date dailyDate = new Date(controlLogLcd.getTime().getTime());
@@ -76,9 +78,13 @@ public class DailyLogService {
         if (dailyLogOptional.isPresent()) {
             DailyLog dailyLog = updateExistedDailyLog(dailyLogOptional.get(), dailyTime);
             logger.info(dailyLog + "");
-            return dailyLogRepository.save(dailyLog);
+            try {
+                dailyLogRepository.save(dailyLog);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else {
-            return addNewDailyLog(dailyDate, dailyTime, account);
+            addNewDailyLog(dailyDate, dailyTime, account);
         }
     }
 
@@ -127,7 +133,7 @@ public class DailyLogService {
         return dailyLog;
     }
 
-    private DailyLog addNewDailyLog(Date dailyDate, Time checkinTime, Account account) {
+    private void addNewDailyLog(Date dailyDate, Time checkinTime, Account account) {
         DailyLog dailyLog = DailyLog.builder()
                 .date(dailyDate)
                 .checkin(checkinTime)
@@ -151,7 +157,7 @@ public class DailyLogService {
         dailyLog.setDateType(getDateType(dailyDate));
         getLateCheckInDuration(dailyLog, account.getUser().getUserId(), dailyDate, checkinTime);
 
-        return dailyLogRepository.save(dailyLog);
+        dailyLogRepository.save(dailyLog);
     }
 
     public void getLateCheckInDuration(DailyLog dailyLog, String userId, Date date, Time checkinTime) {
@@ -265,6 +271,7 @@ public class DailyLogService {
         dayOffRepository.saveAll(dayOffs);
         return dayOffs;
     }
+
     public void initDayOff(String accountId) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new BadRequest("not_found_account"));

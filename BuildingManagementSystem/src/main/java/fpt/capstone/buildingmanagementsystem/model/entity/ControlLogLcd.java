@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -43,6 +45,11 @@ public class ControlLogLcd {
     private String personId;
 
     @Column
+    @JsonProperty("personType")
+    @Enumerated
+    private ControlLogStatus status;
+
+    @Column
     @JsonProperty("RecordID")
     private int recordId;
 
@@ -70,6 +77,12 @@ public class ControlLogLcd {
     @JsonProperty("time")
     private Date time;
 
+    @Column
+    private double temperature;
+
+    @Column
+    private double temperatureAlarm;
+
     @Lob
     @Column
     @JsonProperty("pic")
@@ -78,4 +91,8 @@ public class ControlLogLcd {
     @ManyToOne
     @JoinColumn(name = "accountId")
     private Account account;
+
+    @ManyToOne
+    @JoinColumn(name = "deviceId")
+    private Device device;
 }

@@ -90,6 +90,7 @@ public class CheckoutAnalyzeSchedule {
 
     private static final Logger logger = LoggerFactory.getLogger(CheckoutAnalyzeSchedule.class);
 
+    //todo: set cron by api
     //cron = "0 01 0 * * ?"
     @Scheduled(cron = "0 56 1 * * ?")
     @Transactional
@@ -286,7 +287,6 @@ public class CheckoutAnalyzeSchedule {
         } else {
             dailyLog.setEarlyCheckout(false);
         }
-        //note
         List<LeaveRequestForm> leaveRequestForms = leaveRequestFormRepository.findRequestByUserIdAndDate(account.getAccountId(), date);
         if (getDistanceTime(dailyLog.getCheckout(), dailyLog.getCheckin()) / One_hour < 6) {
             double offHours = roundDouble(8 - dailyLog.getTotalAttendance());
