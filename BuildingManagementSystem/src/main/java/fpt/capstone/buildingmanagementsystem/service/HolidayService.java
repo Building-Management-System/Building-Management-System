@@ -1,7 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
-import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.Holiday;
@@ -16,10 +15,11 @@ import fpt.capstone.buildingmanagementsystem.until.Until;
 import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -109,11 +109,16 @@ public class HolidayService {
             Timestamp timeStampYesterdayDate = new java.sql.Timestamp(sqlyesterdayDate.getTime());
             Timestamp timeStampFromDate = new java.sql.Timestamp(holiday.getFromDate().getTime());
             Timestamp timeStampToDate= new java.sql.Timestamp(holiday.getToDate().getTime());
-            if (timeStampToDate.getTime() - timeStampYesterdayDate.getTime() >= 0 && timeStampYesterdayDate.getTime() - timeStampFromDate.getTime() >= 0) {
+            if (timeStampToDate.getTime() - timeStampYesterdayDate.getTime() >= 0 &&
+                    timeStampYesterdayDate.getTime() - timeStampFromDate.getTime() >= 0) {
                 List<DailyLog> dailyLogs= new ArrayList<>();
                 dailyLogRepository.findByDate(sqlyesterdayDate).forEach(element -> {
                     element.setDateType(DateType.HOLIDAY);
+                    element.setPaidDay(1);
+                    element.setLateCheckin(false);
+                    element.setEarlyCheckout(false);
                     dailyLogs.add(element);
+
                 });
                 dailyLogRepository.saveAll(dailyLogs);
             }

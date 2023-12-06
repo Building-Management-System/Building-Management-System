@@ -6,9 +6,13 @@ import com.google.api.client.util.Base64;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
-import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.Device;
+import fpt.capstone.buildingmanagementsystem.model.entity.StrangerLogLcd;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DeviceRepository;
+import fpt.capstone.buildingmanagementsystem.repository.StrangerLogLcdRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +40,13 @@ public class LcdService {
     @Autowired
     AccountRepository accountRepository;
 
-    public DailyLog ExtractJsonLcdLog(String jsonStr) {
+    @Autowired
+    DeviceRepository deviceRepository;
+
+    @Autowired
+    StrangerLogLcdRepository strangerLogLcdRepository;
+
+    public void ExtractJsonLcdLog(String jsonStr) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(jsonStr);
@@ -49,24 +59,46 @@ public class LcdService {
                 ControlLogLcd controlLogLcd = ControlLogLcd.builder()
                         .operator(rootNode.path("operator").asText())
                         .personId(infoNode.path("personId").asText())
+                        .status(infoNode.path("personType").asInt() == 1 ? ControlLogStatus.WHITE_LIST : ControlLogStatus.BLACK_LIST)
                         .recordId(infoNode.path("RecordID").asInt())
                         .verifyStatus(infoNode.path("VerifyStatus").asInt())
                         .similarity1(infoNode.path("similarity1").asDouble())
                         .similarity2(infoNode.path("similarity2").asDouble())
                         .persionName(infoNode.path("persionName").asText())
                         .telnum(infoNode.path("telnum").asText())
+                        .temperature(infoNode.path("temperature").asDouble())
+                        .temperatureAlarm(infoNode.path("temperatureAlarm").asDouble())
                         .time(formatter.parse(time))
                         .pic(convertBase64ToByteArray(infoNode.path("pic").asText()))
                         .build();
+                String deviceId = rootNode.path("facesluiceId").asText();
+
+                Device device = deviceRepository.findById(deviceId)
+                        .orElseThrow(() -> new BadRequest("Not_found"));
+
                 Account account = accountRepository.findByUsername(controlLogLcd.getPersionName())
                         .orElseThrow(() -> new BadRequest("Not_found"));
                 controlLogLcd.setAccount(account);
+                controlLogLcd.setDevice(device);
                 controlLogLcdRepository.save(controlLogLcd);
-                return dailyLogService.mapControlLogToDailyLog(controlLogLcd);
-            } else {
+                dailyLogService.mapControlLogToDailyLog(controlLogLcd);
+            } else if (operator.equals(STRANGER_LOG)) {
+                String time = infoNode.path("time").asText();
+                StrangerLogLcd strangerLogLcd = StrangerLogLcd.builder()
+                        .snapId(infoNode.path("snapID").asInt())
+                        .direction(infoNode.path("direction").asText())
+                        .time(formatter.parse(time))
+                        .temperature(infoNode.path("temperature").asDouble())
+                        .temperatureAlarm(infoNode.path("temperatureAlarm").asDouble())
+                        .image(convertBase64ToByteArray(infoNode.path("pic").asText()))
+                        .build();
 
+                String deviceId = rootNode.path("facesluiceId").asText();
+                Device device = deviceRepository.findById(deviceId)
+                        .orElseThrow(() -> new BadRequest("Not_found"));
+                strangerLogLcd.setDevice(device);
+                strangerLogLcdRepository.save(strangerLogLcd);
             }
-            return null;
         } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }

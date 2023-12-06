@@ -10,6 +10,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,4 +25,8 @@ public class Room {
 
     @Column
     private String roomName;
+
+    @ManyToOne
+    @JoinColumn(name = "device_id")
+    private Device device;
 }

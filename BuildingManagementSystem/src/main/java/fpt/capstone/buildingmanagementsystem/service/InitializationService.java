@@ -4,6 +4,7 @@ import fpt.capstone.buildingmanagementsystem.mapper.AccountMapper;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.DayOff;
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
+import fpt.capstone.buildingmanagementsystem.model.entity.Device;
 import fpt.capstone.buildingmanagementsystem.model.entity.Role;
 import fpt.capstone.buildingmanagementsystem.model.entity.Room;
 import fpt.capstone.buildingmanagementsystem.model.entity.Status;
@@ -13,6 +14,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DayOffRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DeviceRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RoomRepository;
 import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 
@@ -48,6 +51,9 @@ public class InitializationService {
     @Autowired
     DayOffRepository dayOffRepository;
 
+    @Autowired
+    DeviceRepository deviceRepository;
+
     public void init() {
         int check1 = roleRepository.findAll().size();
         int check2 = statusRepository.findAll().size();
@@ -62,6 +68,7 @@ public class InitializationService {
             List<UserPendingStatus> userPendingStatusList = new ArrayList<>();
             List<Department> departmentList = new ArrayList<>();
             List<Room> roomList = new ArrayList<>();
+            List<Device> devices = new ArrayList<>();
             Role role1 = new Role("1", "hr");
             Role role2 = new Role("2", "admin");
             Role role3 = new Role("3", "manager");
@@ -100,10 +107,24 @@ public class InitializationService {
             departmentList.add(department7);
             departmentList.add(department8);
             departmentList.add(department9);
-            for (int i = 1; i < 10; i++) {
-                Room room = new Room(i, "R10" + i);
+
+            for (int i = 1; i < 6; i++) {
+                Device lcd = new Device(UUID.randomUUID().toString(), i + "", "Lcd_D" + i);
+                Room room = new Room(i, "Tech_D" + i, lcd);
                 roomList.add(room);
+                devices.add(lcd);
             }
+            Device lcdReal = new Device(UUID.randomUUID().toString(), "2032105", "Lcd_D6");
+            devices.add(lcdReal);
+            roomList.add(new Room(6, "Tech_D6", lcdReal));
+
+            for (int i = 7; i <= 11; i++) {
+                Device device = new Device(UUID.randomUUID().toString(), i + "", "Lcd_R10" + (i-6));
+                Room room = new Room(i, "R10" + i, device);
+                roomList.add(room);
+                devices.add(device);
+            }
+
             RegisterRequest registerRequest = new RegisterRequest("demo", "123", "hr", "human resources", "");
             Account newAccount = accountMapper.convertRegisterAccount(registerRequest, status2, role1);
             User user = User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
@@ -115,6 +136,7 @@ public class InitializationService {
             statusRepository.saveAll(statusList);
             userPendingStatusRepository.saveAll(userPendingStatusList);
             departmentRepository.saveAll(departmentList);
+            deviceRepository.saveAll(devices);
             roomRepository.saveAll(roomList);
             userRepository.save(user);
             dayOffRepository.saveAll(initEmployeeDayOff());
