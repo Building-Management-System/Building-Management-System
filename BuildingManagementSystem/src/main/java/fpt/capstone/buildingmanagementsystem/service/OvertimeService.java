@@ -26,7 +26,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,7 +60,7 @@ public class OvertimeService {
             List<OverTimeLogResponse> list = new ArrayList<>();
             if (user_id != null) {
                 List<OvertimeLog> overtimeLog1 = overTimeRepository.getOvertimeLog(user_id, month, year);
-                overtimeLog1=overtimeLog1.stream()
+                overtimeLog1 = overtimeLog1.stream()
                         .sorted((Comparator.comparing(OvertimeLog::getDate).reversed()))
                         .collect(Collectors.toList());
                 if (overtimeLog1.size() > 0) {
@@ -65,15 +70,15 @@ public class OvertimeService {
                         java.sql.Date sqlDate = java.sql.Date.valueOf(element.getDate().toString());
                         java.util.Date utilDate = new java.util.Date(sqlDate.getTime());
                         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
-                        if(element.getDateType()== TopicOvertime.WEEKEND_AND_NORMAL_DAY) {
+                        if (element.getDateType() == TopicOvertime.WEEKEND_AND_NORMAL_DAY) {
                             if ((attendanceService.getCheckWeekend(utilDate) != Calendar.SATURDAY)
                                     && (attendanceService.getCheckWeekend(utilDate) != Calendar.SUNDAY)) {
-                                dateType=DateType.NORMAL;
-                            }else {
-                                dateType=DateType.WEEKEND;
+                                dateType = DateType.NORMAL;
+                            } else {
+                                dateType = DateType.WEEKEND;
                             }
-                        }else {
-                            dateType=DateType.HOLIDAY;
+                        } else {
+                            dateType = DateType.HOLIDAY;
                         }
                         try {
                             overtimeLog = OverTimeLogResponse.builder().systemCheckIn(element.getStartTime())
@@ -118,7 +123,7 @@ public class OvertimeService {
         if (!dailyLogOptional.isPresent()) return new SystemTimeResponse();
         else {
             DailyLog dailyLog = dailyLogOptional.get();
-            DateType dateType = DailyLogService.getDateType(date);
+            DateType dateType = dailyLogService.getDateType(date);
             if (dateType.equals(DateType.NORMAL)) {
                 if (Validate.compareTime(dailyLog.getCheckin(), startOverTime) < 0
                         && Validate.compareTime(dailyLog.getCheckout(), startOverTime) > 0) {
@@ -143,12 +148,12 @@ public class OvertimeService {
 
         if (!dailyLog.getDateType().equals(DateType.NORMAL)) return;
 
-        if(Validate.compareTime(dailyLog.getCheckin(), startOverTime) < 0
+        if (Validate.compareTime(dailyLog.getCheckin(), startOverTime) < 0
                 && Validate.compareTime(dailyLog.getCheckout(), startOverTime) > 0) {
             dailyLog.setCheckout(otStart);
             dailyLogService.updateDailyLog(user, date, dailyLog.getCheckin(), dailyLog.getCheckout());
-        } else if(Validate.compareTime(dailyLog.getCheckin(), startOverTime) > 0
-                && Validate.compareTime(dailyLog.getCheckout(), dailyLog.getCheckin()) > 0){
+        } else if (Validate.compareTime(dailyLog.getCheckin(), startOverTime) > 0
+                && Validate.compareTime(dailyLog.getCheckout(), dailyLog.getCheckin()) > 0) {
             dailyLog.setCheckin(null);
             dailyLog.setCheckout(null);
             dailyLogService.updateDailyLog(user, date, dailyLog.getCheckin(), dailyLog.getCheckout());

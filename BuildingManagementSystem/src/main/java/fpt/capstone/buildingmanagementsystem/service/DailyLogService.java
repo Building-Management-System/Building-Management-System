@@ -55,6 +55,10 @@ public class DailyLogService {
     @Autowired
     DayOffRepository dayOffRepository;
 
+    @Autowired
+    HolidayService holidayService;
+
+
     private static final Time startMorningTime = Time.valueOf("08:30:00");
 
     private static final Time endMorningTime = Time.valueOf("12:00:00");
@@ -179,7 +183,7 @@ public class DailyLogService {
         }
     }
 
-    public static DateType getDateType(Date dailyDate) {
+    public DateType getDateType(Date dailyDate) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(dailyDate);
 
@@ -188,6 +192,8 @@ public class DailyLogService {
 
         if (isWeekend) {
             return DateType.WEEKEND;
+        } else if (holidayService.changeDailyLogToHoliday(dailyDate)) {
+            return DateType.HOLIDAY;
         } else {
             return DateType.NORMAL;
         }

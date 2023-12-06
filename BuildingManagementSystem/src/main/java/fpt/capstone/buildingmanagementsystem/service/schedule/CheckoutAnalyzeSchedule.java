@@ -78,6 +78,9 @@ public class CheckoutAnalyzeSchedule {
     @Autowired
     RequestChangeLogService requestChangeLogService;
 
+    @Autowired
+    DailyLogService dailyLogService;
+
     private static final Time startMorningTime = Time.valueOf("08:30:00");
 
     private static final Time endMorningTime = Time.valueOf("12:00:00");
@@ -128,10 +131,10 @@ public class CheckoutAnalyzeSchedule {
     private void getPersonalLastCheckout(Account account, Date yesterday) {
         DailyLog dailyLog = dailyLogRepository.getLastCheckoutOfDateByUserId(account.getAccountId(), yesterday)
                 .orElseThrow(() -> new BadRequest("Not_found"));
-
+        dailyLog.setDateType(dailyLogService.getDateType(yesterday));
         double workingOutsideChange = checkWorkingOutside(dailyLog, account, yesterday);
         boolean isViolateChange = checkViolate(dailyLog, account, yesterday);
-        if(workingOutsideChange > 0 && isViolateChange) {
+        if (workingOutsideChange > 0 && isViolateChange) {
             saveToChangeLog(account, yesterday, workingOutsideChange, true, "REQUEST");
         }
         logger.info(dailyLog + "");
@@ -159,9 +162,9 @@ public class CheckoutAnalyzeSchedule {
                 .build();
         LocalDate localDate = yesterday.toLocalDate();
         offWork.setMonth(localDate.getMonthValue());
-        offWork.setDateType(DailyLogService.getDateType(yesterday));
+        offWork.setDateType(dailyLogService.getDateType(yesterday));
         double workingOutsideChange = checkWorkingOutside(offWork, account, yesterday);
-        if(workingOutsideChange > 0) {
+        if (workingOutsideChange > 0) {
             saveToChangeLog(account, yesterday, workingOutsideChange, false, "REQUEST");
         }
         checkLeaveViolate(account, offWork, yesterday);
