@@ -38,7 +38,12 @@ public class HolidayController {
     }
 
     @PostMapping("/validateHolidayEmail")
-    public String validateHolidayEmail(@RequestBody UserRequest request) {
-        return holidayService.validateHolidayEmail(request.getUserName());
+    public boolean validateHolidayEmail(@RequestBody UserRequest request) {
+        return holidayService.sendHolidayEmail(request.getUserName());
+    }
+
+    @GetMapping("/checkHolidayCode")
+    public boolean checkHolidayCode(@RequestParam("code") String code, @RequestParam("user_id")String userId) {
+        return holidayService.checkHolidayCode(code, userId);
     }
 }

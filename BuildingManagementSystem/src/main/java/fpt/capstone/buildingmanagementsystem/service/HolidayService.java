@@ -5,6 +5,7 @@ import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.EmailCode;
 import fpt.capstone.buildingmanagementsystem.model.entity.Holiday;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
@@ -13,6 +14,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.HolidaySaveRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.HolidayResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
+import fpt.capstone.buildingmanagementsystem.repository.EmailCodeRepository;
 import fpt.capstone.buildingmanagementsystem.repository.HolidayRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
@@ -30,9 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 
-import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 import static fpt.capstone.buildingmanagementsystem.until.Until.getRandomString;
 
 
@@ -57,6 +57,9 @@ public class HolidayService {
 
     @Autowired
     EmailSender emailSender;
+
+    @Autowired
+    EmailCodeRepository emailCodeRepository;
 
     //check tất cả daily log nếu có rồi thì biến đổi theo fromDate và toDate
     public boolean saveHoliday(HolidaySaveRequest holidaySaveRequest) throws ParseException {
@@ -148,7 +151,7 @@ public class HolidayService {
         return false;
     }
 
-    public String validateHolidayEmail(String userName) {
+    public boolean sendHolidayEmail(String userName) {
         try {
             if (!accountRepository.existsByUsername(userName)) {
                 throw new NotFound("user_not_found");
@@ -157,12 +160,24 @@ public class HolidayService {
             Account account = accountRepository.findByUsername(userName)
                     .orElseThrow(() -> new BadRequest("Not_found_user"));
             String toEmail = account.getUser().getEmail();
-            String newPasswordEncode = passwordEncode.passwordEncoder().encode(code);
-            accountRepository.updatePassword(newPasswordEncode, generateRealTime(), userName);
+            EmailCode emailCode = EmailCode.builder()
+                    .code(code)
+                    .userId(account.getAccountId())
+                    .build();
+            emailCodeRepository.save(emailCode);
             emailSender.setMailSender(toEmail, "[Notification] - Password has been successfully reset!", "Your newly reset password is: " + code);
-            return code;
+            return true;
         } catch (ServerError e) {
             throw new ServerError("fail");
+        }
+    }
+
+    public boolean checkHolidayCode(String code, String userId) {
+        List<EmailCode> emailCodes = emailCodeRepository.findByCodeAndUserId(code, userId);
+        if (emailCodes.isEmpty()) return false;
+        else {
+            emailCodeRepository.deleteAll(emailCodes);
+            return true;
         }
     }
 }

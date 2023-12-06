@@ -329,7 +329,7 @@ public class AttendanceService {
                 .build();
         LocalDate localDate = dailyDate.toLocalDate();
         dailyLog.setMonth(localDate.getMonthValue());
-        dailyLog.setDateType(DailyLogService.getDateType(dailyDate));
+        dailyLog.setDateType(dailyLogService.getDateType(dailyDate));
         checkoutAnalyzeSchedule.updateTotalField(dailyLog);
         return dailyLog;
     }
