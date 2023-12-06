@@ -153,13 +153,13 @@ public class HolidayService {
 
     public boolean sendHolidayEmail(String userName) {
         try {
-            if (!accountRepository.existsByUsername(userName)) {
-                throw new NotFound("user_not_found");
-            }
             String code = getRandomString(6);
             Account account = accountRepository.findByUsername(userName)
                     .orElseThrow(() -> new BadRequest("Not_found_user"));
             String toEmail = account.getUser().getEmail();
+            if(toEmail.equals("unknown")) {
+                throw new NotFound("Not_found_email");
+            }
             EmailCode emailCode = EmailCode.builder()
                     .code(code)
                     .userId(account.getAccountId())
