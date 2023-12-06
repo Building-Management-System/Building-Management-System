@@ -410,6 +410,7 @@ class NotificationControllerTest {
         boolean result = notificationController.setNotificationHidden(setNotificationHidden);
         Assertions.assertEquals(true, result);
     }
+    //change return
 
     @Test
     void testSetNotificationHidden_NotFoundUser() {
@@ -422,6 +423,7 @@ class NotificationControllerTest {
         assertEquals("Not_found_user", exception.getMessage());
 
     }
+    //try catch 404
 
     @Test
     void testSetNotificationHidden_NotFoundNoti() {

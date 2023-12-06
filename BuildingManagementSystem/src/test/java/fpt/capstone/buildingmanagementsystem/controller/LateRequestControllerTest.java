@@ -32,7 +32,7 @@ class LateRequestControllerTest {
         boolean result = lateRequestController.acceptLateRequest(lateMessageRequest);
         Assertions.assertEquals(true, result);
     }
-    // not new
+    // note hot fix
 
     @Test
     void testRejectLateRequest() {
