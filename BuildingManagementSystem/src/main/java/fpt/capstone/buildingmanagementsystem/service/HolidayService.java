@@ -1,7 +1,9 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
+import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.Holiday;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
@@ -9,15 +11,17 @@ import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DateType;
 import fpt.capstone.buildingmanagementsystem.model.request.HolidayDeleteRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.HolidaySaveRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.HolidayResponse;
+import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
 import fpt.capstone.buildingmanagementsystem.repository.HolidayRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import fpt.capstone.buildingmanagementsystem.service.schedule.CheckoutAnalyzeSchedule;
+import fpt.capstone.buildingmanagementsystem.until.EmailSender;
 import fpt.capstone.buildingmanagementsystem.until.Until;
 import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -27,6 +31,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
+
+import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
+import static fpt.capstone.buildingmanagementsystem.until.Until.getRandomString;
 
 
 @Service
@@ -41,6 +48,16 @@ public class HolidayService {
     DailyLogRepository dailyLogRepository;
     @Autowired
     CheckoutAnalyzeSchedule checkoutAnalyzeSchedule;
+
+    @Autowired
+    AccountRepository accountRepository;
+
+    @Autowired
+    PasswordEncode passwordEncode;
+
+    @Autowired
+    EmailSender emailSender;
+
     //check tất cả daily log nếu có rồi thì biến đổi theo fromDate và toDate
     public boolean saveHoliday(HolidaySaveRequest holidaySaveRequest) throws ParseException {
         if (holidaySaveRequest.getUserId() != null && holidaySaveRequest.getTitle() != null && holidaySaveRequest.getContent() != null
@@ -94,7 +111,7 @@ public class HolidayService {
                     } else {
                         dailyLog.setDateType(DateType.WEEKEND);
                     }
-                    checkoutAnalyzeSchedule.checkViolate(dailyLog,dailyLog.getUser().getAccount(), dailyLog.getDate());
+                    checkoutAnalyzeSchedule.checkViolate(dailyLog, dailyLog.getUser().getAccount(), dailyLog.getDate());
                     convertHoliday.add(dailyLog);
                 });
                 dailyLogRepository.saveAll(convertHoliday);
@@ -106,17 +123,19 @@ public class HolidayService {
             throw new BadRequest("request_fails");
         }
     }
-    public List<HolidayResponse> listAllHoliday(){
-        List<Holiday> holidayList=holidayRepository.findAll();
-        List<HolidayResponse> holidayResponseList=new ArrayList<>();
+
+    public List<HolidayResponse> listAllHoliday() {
+        List<Holiday> holidayList = holidayRepository.findAll();
+        List<HolidayResponse> holidayResponseList = new ArrayList<>();
         holidayList.forEach(holiday -> {
-            HolidayResponse holidayResponse= HolidayResponse.builder().holidayId(holiday.getHolidayId()).username(holiday.getUser().getAccount().getUsername())
+            HolidayResponse holidayResponse = HolidayResponse.builder().holidayId(holiday.getHolidayId()).username(holiday.getUser().getAccount().getUsername())
                     .content(holiday.getContent()).title(holiday.getTitle()).fromDate(holiday.getFromDate()).toDate(holiday.getToDate()).build();
             holidayResponseList.add(holidayResponse);
         });
         return holidayResponseList;
     }
-    public boolean changeDailyLogToHoliday(String dailyLogId,Date date) {
+
+    public boolean changeDailyLogToHoliday(String dailyLogId, Date date) {
         List<Holiday> holidayList = holidayRepository.findAll();
         boolean check = false;
         for (Holiday holiday : holidayList) {
@@ -124,7 +143,7 @@ public class HolidayService {
             Timestamp timeStampFromDate = new java.sql.Timestamp(holiday.getFromDate().getTime());
             Timestamp timeStampToDate = new java.sql.Timestamp(holiday.getToDate().getTime());
             if (timeStampToDate.getTime() - timeStampYesterdayDate.getTime() >= 0 && timeStampYesterdayDate.getTime() - timeStampFromDate.getTime() >= 0) {
-                List<DailyLog> dailyLogs =dailyLogRepository.findByDate(date);
+                List<DailyLog> dailyLogs = dailyLogRepository.findByDate(date);
                 for (DailyLog dailyLog : dailyLogs) {
                     if (Objects.equals(dailyLog.getDailyId(), dailyLogId)) {
                         check = true;
@@ -134,5 +153,23 @@ public class HolidayService {
             }
         }
         return check;
+    }
+
+    public boolean validateHolidayEmail(String userName) {
+        try {
+            if (!accountRepository.existsByUsername(userName)) {
+                throw new NotFound("user_not_found");
+            }
+            String newPassword = getRandomString(8);
+            Account account = accountRepository.findByUsername(userName)
+                    .orElseThrow(() -> new BadRequest("Not_found_user"));
+            String toEmail = account.getUser().getEmail();
+            String newPasswordEncode = passwordEncode.passwordEncoder().encode(newPassword);
+            accountRepository.updatePassword(newPasswordEncode, generateRealTime(), userName);
+            emailSender.setMailSender(toEmail, "[Notification] - Password has been successfully reset!", "Your newly reset password is: " + newPassword);
+            return true;
+        } catch (ServerError e) {
+            throw new ServerError("fail");
+        }
     }
 }
