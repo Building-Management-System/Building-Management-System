@@ -135,39 +135,32 @@ public class HolidayService {
         return holidayResponseList;
     }
 
-    public boolean changeDailyLogToHoliday(String dailyLogId, Date date) {
+    public boolean changeDailyLogToHoliday(Date date) {
         List<Holiday> holidayList = holidayRepository.findAll();
-        boolean check = false;
         for (Holiday holiday : holidayList) {
             Timestamp timeStampYesterdayDate = new java.sql.Timestamp(date.getTime());
             Timestamp timeStampFromDate = new java.sql.Timestamp(holiday.getFromDate().getTime());
             Timestamp timeStampToDate = new java.sql.Timestamp(holiday.getToDate().getTime());
             if (timeStampToDate.getTime() - timeStampYesterdayDate.getTime() >= 0 && timeStampYesterdayDate.getTime() - timeStampFromDate.getTime() >= 0) {
-                List<DailyLog> dailyLogs = dailyLogRepository.findByDate(date);
-                for (DailyLog dailyLog : dailyLogs) {
-                    if (Objects.equals(dailyLog.getDailyId(), dailyLogId)) {
-                        check = true;
-                        break;
-                    }
-                }
+                return true;
             }
         }
-        return check;
+        return false;
     }
 
-    public boolean validateHolidayEmail(String userName) {
+    public String validateHolidayEmail(String userName) {
         try {
             if (!accountRepository.existsByUsername(userName)) {
                 throw new NotFound("user_not_found");
             }
-            String newPassword = getRandomString(8);
+            String code = getRandomString(6);
             Account account = accountRepository.findByUsername(userName)
                     .orElseThrow(() -> new BadRequest("Not_found_user"));
             String toEmail = account.getUser().getEmail();
-            String newPasswordEncode = passwordEncode.passwordEncoder().encode(newPassword);
+            String newPasswordEncode = passwordEncode.passwordEncoder().encode(code);
             accountRepository.updatePassword(newPasswordEncode, generateRealTime(), userName);
-            emailSender.setMailSender(toEmail, "[Notification] - Password has been successfully reset!", "Your newly reset password is: " + newPassword);
-            return true;
+            emailSender.setMailSender(toEmail, "[Notification] - Password has been successfully reset!", "Your newly reset password is: " + code);
+            return code;
         } catch (ServerError e) {
             throw new ServerError("fail");
         }

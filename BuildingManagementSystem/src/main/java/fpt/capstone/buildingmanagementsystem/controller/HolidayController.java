@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.controller;
 
 import fpt.capstone.buildingmanagementsystem.model.request.HolidayDeleteRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.HolidaySaveRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.UserRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.HolidayResponse;
 import fpt.capstone.buildingmanagementsystem.service.HolidayService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class HolidayController {
     }
 
     @PostMapping("/validateHolidayEmail")
-    public boolean validateHolidayEmail(@RequestParam("user_name") String userName) {
-        return holidayService.validateHolidayEmail(userName);
+    public String validateHolidayEmail(@RequestBody UserRequest request) {
+        return holidayService.validateHolidayEmail(request.getUserName());
     }
 }
