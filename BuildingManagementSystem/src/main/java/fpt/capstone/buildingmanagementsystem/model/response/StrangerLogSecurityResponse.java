@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class StrangerLogSecurityResponse {
+    private String strangerLogId;
     private int snapId;
     private String deviceName;
     private String deviceId;

@@ -52,7 +52,7 @@ public class SecurityService {
                 Room room=roomRepository.findByDevice(element.getDevice());
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String formattedDate = dateFormat.format(element.getTime());
-                ControlLogSecurityResponse controlLogSecurityResponse= ControlLogSecurityResponse.builder().image(element.getPic()).timeRecord(formattedDate)
+                ControlLogSecurityResponse controlLogSecurityResponse= ControlLogSecurityResponse.builder().ControlLogId(element.getControlLogId()).image(element.getPic()).timeRecord(formattedDate)
                         .username(element.getPersionName()).lastName(user.getLastName()).firstName(user.getFirstName()).department(user.getDepartment().getDepartmentName())
                         .room(room.getRoomName()).verifyType(element.getStatus().toString()).build();
                 controlLogSecurityResponseList.add(controlLogSecurityResponse);
@@ -76,7 +76,7 @@ public class SecurityService {
                 Room room=roomRepository.findByDevice(element.getDevice());
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String formattedDate = dateFormat.format(element.getTime());
-                StrangerLogSecurityResponse strangerLogSecurityResponse= StrangerLogSecurityResponse.builder().snapId(element.getSnapId()).time(formattedDate)
+                StrangerLogSecurityResponse strangerLogSecurityResponse= StrangerLogSecurityResponse.builder().strangerLogId(element.getStrangerLogId()).snapId(element.getSnapId()).time(formattedDate)
                         .deviceName(element.getDevice().getDeviceName()).deviceId(element.getDevice().getDeviceId()).image(element.getImage())
                         .temperature(element.getTemperature()).room(room.getRoomName()).build();
                 strangerLogSecurityResponses.add(strangerLogSecurityResponse);

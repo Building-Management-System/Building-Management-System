@@ -12,6 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 public class ControlLogSecurityResponse {
+    String ControlLogId;
     byte[] image;
     String username;
     String firstName;
