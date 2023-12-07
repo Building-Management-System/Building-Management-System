@@ -37,6 +37,7 @@ class DepartmentServiceTest {
 
         assertEquals(9, result.size());
     }
+    //bug
 
     @Test
     void testGetDepartmentByManagerRole() {
