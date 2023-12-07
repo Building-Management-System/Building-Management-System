@@ -101,6 +101,7 @@ class LiveChatControllerTest {
         boolean result = liveChatController.removeFromChat(new RemoveUserAndChangeAdminRequest("chatId", "userId"));
         Assertions.assertEquals(true, result);
     }
+    //change
 
     @Test
     void testReadChat() {
