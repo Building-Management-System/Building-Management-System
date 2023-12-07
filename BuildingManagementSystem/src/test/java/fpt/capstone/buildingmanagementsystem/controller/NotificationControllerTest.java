@@ -75,6 +75,7 @@ class NotificationControllerTest {
         boolean result = notificationController.saveNewNotification(jsonData, new MockMultipartFile[]{imageFile}, new MockMultipartFile[]{docxFile});
         assertEquals(true, result);
     }
+    //update result
 
     private MockMultipartFile createMockMultipartFile(String paramName, String fileName) throws Exception {
         Path filePath = Paths.get("D:\\Wallpaper\\" + fileName);

@@ -93,6 +93,7 @@ class LiveChatControllerTest {
         ListChatResponse result = liveChatController.updateChat(new UpdateGroupChatRequest("chatId", "isGroup", "chatName", List.of("String")));
         Assertions.assertEquals(new ListChatResponse("chatId", "chatName", "isGroupChat", List.of("String"), List.of(new UserInfoResponse("accountId", "username", "firstName", "lastName", "image", "roleName")), new GregorianCalendar(2023, Calendar.DECEMBER, 7, 22, 25).getTime(), "read", "admin"), result);
     }
+    //try upload file
 
     @Test
     void testRemoveFromChat() {
