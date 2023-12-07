@@ -117,6 +117,7 @@ class LiveChatControllerTest {
         boolean result = liveChatController.updateChange(new RemoveUserAndChangeAdminRequest("chatId", "userId"));
         Assertions.assertEquals(true, result);
     }
+    //Fix expected
 
     @Test
     void testGetFileChatDownload() {
