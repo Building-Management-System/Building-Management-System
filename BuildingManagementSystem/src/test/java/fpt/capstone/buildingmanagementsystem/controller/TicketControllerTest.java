@@ -105,7 +105,7 @@ class TicketControllerTest {
         assertEquals("receiver_id_not_found", exception.getMessage());
 
     }
-    //try new catch
+    //fixed
 
     @Test
     void testChangeReceiveIdRequest_NotFoundNull() {
