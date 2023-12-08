@@ -50,4 +50,5 @@ class DepartmentServiceTest {
         List<DepartmentResponse> result = departmentService.getDepartmentHaveManager();
         Assertions.assertEquals(6, result.size());
     }
+    //New
 }
