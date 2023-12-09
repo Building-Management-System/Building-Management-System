@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.repository;
 
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.Device;
 import fpt.capstone.buildingmanagementsystem.model.entity.DeviceAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,4 +11,6 @@ import java.util.List;
 @Repository
 public interface DeviceAccountRepository extends JpaRepository<DeviceAccount, String> {
     List<DeviceAccount> findByDevice(Device device);
+
+    boolean existsDeviceAccountByAccountAndDevice(Account account, Device device);
 }

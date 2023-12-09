@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
+import fpt.capstone.buildingmanagementsystem.model.request.AccountDeviceRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceRoomRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceStatusRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.DeviceAccountResponse;
@@ -26,6 +27,11 @@ public class DeviceController {
     @GetMapping("/getAllDevice")
     public List<DeviceRoomResponse> getAllDevice() {
         return deviceService.getAllDevice();
+    }
+
+    @PostMapping("/createDeviceAccount")
+    public ResponseEntity<?> createDeviceAccount(@RequestBody AccountDeviceRequest request) {
+        return deviceService.registerNewAccount(request);
     }
 
     @PostMapping("/updateDevice")

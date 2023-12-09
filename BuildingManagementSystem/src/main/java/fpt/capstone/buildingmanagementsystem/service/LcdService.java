@@ -14,8 +14,6 @@ import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DeviceRepository;
 import fpt.capstone.buildingmanagementsystem.repository.StrangerLogLcdRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +23,7 @@ import java.text.SimpleDateFormat;
 
 @Component
 public class LcdService {
-    private static final Logger logger = LoggerFactory.getLogger(LcdService.class);
+//    private static final Logger logger = LoggerFactory.getLogger(LcdService.class);
     private static final String CONTROL_LOG = "RecPush";
 
     private static final String STRANGER_LOG = "StrSnapPush";
@@ -60,7 +58,7 @@ public class LcdService {
                 ControlLogLcd controlLogLcd = ControlLogLcd.builder()
                         .operator(rootNode.path("operator").asText())
                         .personId(infoNode.path("personId").asText())
-                        .status(infoNode.path("personType").asInt() == 1 ? ControlLogStatus.WHITE_LIST : ControlLogStatus.BLACK_LIST)
+                        .status(infoNode.path("PersonType").asInt() == 1 ? ControlLogStatus.WHITE_LIST : ControlLogStatus.BLACK_LIST)
                         .recordId(infoNode.path("RecordID").asInt())
                         .verifyStatus(infoNode.path("VerifyStatus").asInt())
                         .similarity1(infoNode.path("similarity1").asDouble())

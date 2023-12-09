@@ -2,11 +2,13 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.Device;
 import fpt.capstone.buildingmanagementsystem.model.entity.DeviceAccount;
 import fpt.capstone.buildingmanagementsystem.model.entity.Room;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DeviceStatus;
+import fpt.capstone.buildingmanagementsystem.model.request.AccountDeviceRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceRoomRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceStatusRequest;
@@ -18,11 +20,13 @@ import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DeviceAccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DeviceRepository;
 import fpt.capstone.buildingmanagementsystem.repository.RoomRepository;
+import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -178,6 +182,88 @@ public class DeviceService {
 
         response.setAccountLcdResponses(deviceAccounts);
         return response;
+    }
+
+    public ResponseEntity<?> registerNewAccount(AccountDeviceRequest request) {
+        try {
+            if (request.getAccountId() != null
+                    || request.getRoomIdString() != null
+                    || request.getStartDate() != null) {
+                Account account = accountRepository.findById(request.getAccountId())
+                        .orElseThrow(() -> new BadRequest("Not_found_user"));
+
+                int roomId = Integer.parseInt(request.getRoomIdString());
+                Room room = roomRepository.findById(roomId)
+                        .orElseThrow(() -> new BadRequest("Not_found_room"));
+
+                boolean isExistAccount = deviceAccountRepository.existsDeviceAccountByAccountAndDevice(account, room.getDevice());
+
+                if (isExistAccount) {
+                    return ResponseEntity.status(HttpStatus.CONFLICT).body(request);
+                }
+
+
+                Date fromDate = Until.convertStringToDate(request.getStartDate());
+                Date toDate = null;
+                if (request.getEndDate() != null) {
+                    toDate = Until.convertStringToDate(request.getEndDate());
+                    if (fromDate.compareTo(toDate) > 0) {
+                        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                                .body(request);
+                    }
+                }
+
+                DeviceAccount deviceAccount = DeviceAccount.builder()
+                        .startDate(fromDate)
+                        .createdDate(Until.generateRealTime())
+                        .updateDate(Until.generateRealTime())
+                        .status(ControlLogStatus.WHITE_LIST)
+                        .device(room.getDevice())
+                        .account(account)
+                        .build();
+                if (toDate != null) deviceAccount.setEndDate(toDate);
+                DeviceAccount saveTo = deviceAccountRepository.save(deviceAccount);
+                return ResponseEntity.ok(messageSetupMqtt(saveTo.getAccount().getAccountId(), request.getStartDate(), request.getEndDate(), saveTo.getDevice().getDeviceId()));
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(request);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getCause());
+        }
+    }
+
+    public String messageSetupMqtt(String accountId, String startDate, String endDate, String deviceLcdId) {
+        return "{\n" +
+                "\"messageId\":\"AddPersonslist2020-04-13T19:07:00_00001\",\n" +
+                " \"DataBegin\":\"BeginFlag\",\n" +
+                " \"operator\":\"AddPersons\", \n" +
+                "\"PersonNum\":\"1000\", \n" +
+                "\"info\":\n" +
+                "[\n" +
+                "\t{\n" +
+                "\t\t\"customId\":\"" + accountId + "\", \n" +
+                "\t\t\"name\":\"test000\",\n" +
+                "\t\t\"nation\":1,\n" +
+                "\t\t\"gender\":0,\n" +
+                "\t\t\"birthday\":\"1992-06-13\", \n" +
+                "\t\t\"address\":\" Baoan District, Shenzhen City, Guangdong Province \",\n" +
+                "\t\t\"idCard\":\""+deviceLcdId+"\", \n" +
+                "\t\t\"tempCardType\":0, \n" +
+                "\t\t\"EffectNumber\":3,\n" +
+                "\t\t \"cardValidBegin\":\""+startDate+" 00:00:00\", \n" +
+                "\t\t\"cardValidEnd\":\""+endDate+" 00:00:00\", \n" +
+                "\t\t\"telnum1\":\"13690880000\",\n" +
+                "\t\t \"native\":\" Shenzhen , Guangdong \", \n" +
+                "\t\t\"cardType2\":0, \"notes\":\"\",\n" +
+                "\t\t \"personType\":0, \n" +
+                "\t\t\"cardType\":0,\n" +
+                "\t\t\"picURI\":\"https://btgongpluss.oss-cn-beijing.aliyuncs.com/bigheadphoto/xxx.jpg\"\n" +
+                "\t }\n" +
+                "]\n" +
+                "\n" +
+                " \"DataEnd\":\"EndFlag\" \n" +
+                "}\n";
     }
 }
 

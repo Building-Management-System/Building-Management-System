@@ -36,10 +36,16 @@ public class DeviceAccount {
     private String deviceAccountId;
 
     @Column
-    private Date startDate;
+    private java.sql.Date startDate;
 
     @Column
-    private Date endDate;
+    private java.sql.Date endDate;
+
+    @Column
+    private Date createdDate;
+
+    @Column
+    private Date updateDate;
 
     @Column
     @Enumerated(EnumType.STRING)
