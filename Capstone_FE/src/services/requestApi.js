@@ -379,6 +379,9 @@ const requestApi = {
       }  if (error.response.status === 409) {
         toast.error('Request overtime is only created for the previous day')
       }
+      if(error.response.status === 500 ){
+        toast.error('System log attendance is not exist')
+      }
     }
   },
   requestOutSideWorkForm: async (data, navigate ) => {

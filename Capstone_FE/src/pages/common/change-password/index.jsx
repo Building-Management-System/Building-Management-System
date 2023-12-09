@@ -7,7 +7,8 @@ import {
   CardContent,
   Divider,
   Grid,
-  TextField
+  TextField,
+  Typography
 } from '@mui/material'
 import { useFormik } from 'formik'
 import { useDispatch, useSelector } from 'react-redux'
@@ -48,6 +49,8 @@ const AdminChanagePassword = () => {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)'
+          ,width:'1000px',
+          height:'500px'
         }}>
         <Grid container>
           <Grid item xs={12}>
@@ -69,7 +72,9 @@ const AdminChanagePassword = () => {
                           required
                         />
                         {formik.touched.oldPassword && formik.errors.oldPassword ? (
-                          <p className="text-danger">{formik.errors.oldPassword}</p>
+                          <Typography sx={{ color: 'red', textAlign: 'left', fontSize: '15px' }}>
+                          {formik.errors.oldPassword}
+                        </Typography>
                         ) : null}
                       </Grid>
                       <Grid item xs={7}>
@@ -84,7 +89,9 @@ const AdminChanagePassword = () => {
                           required
                         />
                         {formik.touched.newPassword && formik.errors.newPassword ? (
-                          <p className="text-danger">{formik.errors.newPassword}</p>
+                          <Typography sx={{ color: 'red', textAlign: 'left', fontSize: '15px' }}>
+                          {formik.errors.newPassword}
+                        </Typography>
                         ) : null}
                       </Grid>
                       <Grid item xs={7}>
@@ -99,7 +106,10 @@ const AdminChanagePassword = () => {
                           onChange={formik.handleChange}
                         />
                         {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
-                          <p className="text-danger">{formik.errors.confirmPassword}</p>
+                          
+                          <Typography sx={{ color: 'red', textAlign: 'left', fontSize: '15px' }}>
+                          {formik.errors.confirmPassword}
+                        </Typography>
                         ) : null}
                       </Grid>
                     </Grid>
