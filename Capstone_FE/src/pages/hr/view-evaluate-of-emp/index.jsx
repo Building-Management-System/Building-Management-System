@@ -315,7 +315,7 @@ const ViewEmpEvaluateReport = () => {
             Back
           </Button>
           <Box>  
-          {evaluate.approvedDate !== null && (
+          {evaluate.approvedDate === null && (
             <>
               <Button
                 variant="contained"

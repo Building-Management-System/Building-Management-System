@@ -218,6 +218,13 @@ const EmpLogManagement = () => {
           marginLeft: '10px',
           fontSize: '12px'
         }
+        const buttonStyle2 = {
+          width: '85px',
+          marginLeft: '10px',
+          fontSize: '11px',
+          backgroundColor: 'red'
+        }
+     
         if (
           params.row.evaluateEnum !== null &&
           params.row.approvedDate !== null &&
@@ -229,7 +236,7 @@ const EmpLogManagement = () => {
                 variant="contained"
                 onClick={() => navigate(`/log-attendance-emp/${params.row.employeeId}/${format(month, 'yyyy-MM')}`)}
                 style={buttonStyle}>
-                Detail
+                 View Log
               </Button>
               <Button
                 variant="contained"
@@ -238,7 +245,8 @@ const EmpLogManagement = () => {
                     `/update-evaluate/${params.row.employeeId}/${format(month, 'yyyy-MM')}`
                   )
                 }
-                style={{ backgroundColor: 'red', fontSize: '12px', marginLeft: '10px' }}>
+                style={ buttonStyle2 }
+                >
                 Re-Evaluate
               </Button>
             </>
@@ -254,7 +262,7 @@ const EmpLogManagement = () => {
                 variant="contained"
                 onClick={() => navigate(`/log-attendance-emp/${params.row.employeeId}/${format(month, 'yyyy-MM')}`)}
                 style={buttonStyle}>
-                Detail
+                View Log
               </Button>
               <Box sx={{ marginLeft: '0px' }}>
                 <Button variant="contained" onClick={() =>
@@ -277,6 +285,14 @@ const EmpLogManagement = () => {
               <Button
                 variant="contained"
                 onClick={() => navigate(`/log-attendance-emp/${params.row.employeeId}/${format(month, 'yyyy-MM')}`)}
+                style={buttonStyle}>
+                View Log
+              </Button>
+              <Button
+                variant='contained'
+                onClick={() => {
+                  navigate(`/manager-check-evaluate-report-emp/${params.row.employeeId}/${(params.row.month)}-${(params.row.year)}`)
+                }}
                 style={buttonStyle}>
                 Detail
               </Button>
@@ -306,7 +322,7 @@ const EmpLogManagement = () => {
       </Box>
 
       <Box display="flex" alignItems="center" mt={3} sx={{ marginLeft: 'auto' }}>
-     
+
         {isSearchClicked && employeeNames.length > 0 && (
           <FormControl sx={{ width: '280px' }}>
             <InputLabel id="demo-simple-select-label">Employee Remaining</InputLabel>
@@ -328,11 +344,11 @@ const EmpLogManagement = () => {
             </Select>
           </FormControl>
         )}
-           {isSearchClicked && listLog.length > 0 && listLog[0].department && listLog[0].department.departmentName && (
+        {isSearchClicked && listLog.length > 0 && listLog[0].department && listLog[0].department.departmentName && (
           <Typography variant="h6" sx={{ marginLeft: employeeNames.length > 0 ? '30px' : 0 }}>
             <span>Department: </span>
             <span style={{ color: 'red' }}>{listLog[0].department.departmentName}</span>
-            <span style={{ color: 'red' }}>{listEmployees[0].departmentName}</span>
+       
           </Typography>
         )}
       </Box>

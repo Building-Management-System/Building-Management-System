@@ -1,32 +1,29 @@
 import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableRow,
-    TextField,
-    Typography,
-    Box
-  } from '@mui/material'
-  import { LocalizationProvider } from '@mui/x-date-pickers'
-  import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-  import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-  import { format } from 'date-fns'
-  import { useEffect, useState } from 'react'
-  import { BASE_URL } from '../../../services/constraint'
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  TextField,
+  Typography
+} from '@mui/material'
+import { format } from 'date-fns'
+import { useEffect, useState } from 'react'
+import { BASE_URL } from '../../../services/constraint'
   
-  import axiosClient from '../../../utils/axios-config'
-  import { useNavigate, useParams } from 'react-router-dom'
-  import { toast } from 'react-toastify'
   import { useSelector } from 'react-redux'
-  import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import axiosClient from '../../../utils/axios-config'
+import { formatDateNotTime } from '../../../utils/formatDate'
   const ViewEmpEvaluateReportByManager = () => {
     const { employee_id, date } = useParams()
     const [evaluate, setEvaluate] = useState([])
@@ -160,18 +157,6 @@ import {
               />
             </Grid>
           </Grid>
-  
-          <Grid item xs={6} width="48%" mt={2}>
-            <Typography fontWeight="500">Report By Month-Year</Typography>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                views={['year', 'month']}
-                openTo="year"
-                value={date}
-                renderInput={(props) => <TextField sx={{ width: '100%' }} {...props} disabled />}
-              />
-            </LocalizationProvider>
-          </Grid>
           <TableContainer
             component={Paper}
             elevation={3}
@@ -250,7 +235,13 @@ import {
               {`${evaluate.evaluateEnum}`}
             </span>
           </Typography>
-          <Typography>Note</Typography>
+          <Typography style={{ fontStyle: 'italic', fontWeight: 'bold', color:'red' }}>
+            Approve Date:{' '}
+         
+              {`${formatDateNotTime(evaluate.approvedDate)}`}
+         
+          </Typography>
+          <Typography>NOTE</Typography>
           <TextField
             sx={{ width: '100%', backgroundColor: '#f0f0f0' }}
             InputProps={{ readOnly: true }}
