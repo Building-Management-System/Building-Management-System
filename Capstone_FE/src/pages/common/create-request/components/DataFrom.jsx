@@ -895,7 +895,7 @@ const LeaveRequest = ({ userId }) => {
             receivedId: receiveIdAndDepartment?.managerInfoResponse?.managerId
           }
         }
-
+ 
         console.log(data)
         requestApi.requestLeaveForm(data, navigate)
       } catch (error) {
