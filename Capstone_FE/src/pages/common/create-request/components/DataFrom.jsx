@@ -55,7 +55,6 @@ const AttendenceFrom = ({ userId }) => {
   const handleChangeTo = (event) => {
     setIsTo(event.target.checked)
   }
-
   const formik = useFormik({
     initialValues: {
       title: '',
@@ -95,7 +94,6 @@ const AttendenceFrom = ({ userId }) => {
       }
     }
   })
-
   return (
     <Box p={3} pl={0}>
       <form onSubmit={formik.handleSubmit}>
@@ -904,8 +902,8 @@ const LeaveRequest = ({ userId }) => {
     }
   })
 
-  console.log(dateFrom.format('YYYY-MM-DD'))
-  console.log(dateTo.format('YYYY-MM-DD'))
+  // console.log(dateFrom.format('YYYY-MM-DD'))
+  // console.log(dateTo.format('YYYY-MM-DD'))
   return (
     <Box p={3} pl={0}>
       <form onSubmit={formik.handleSubmit}>
@@ -1031,7 +1029,6 @@ const LeaveRequest = ({ userId }) => {
     </Box>
   )
 }
-
 const WorkingOutSideRequest = () => {
   const [date, setDate] = useState(dayjs(new Date()))
   const [outSideType, setOutSideType] = useState('HALF_MORNING')
@@ -1093,7 +1090,6 @@ const WorkingOutSideRequest = () => {
       }
     }
   })
-
   return (
     <Box p={3} pl={0}>
       <form onSubmit={formik.handleSubmit}>
@@ -1181,5 +1177,4 @@ const WorkingOutSideRequest = () => {
     </Box>
   )
 }
-
 export { AttendenceFrom, LeaveRequest, OtFrom, OtherRequest, LateRequest, WorkingOutSideRequest }
