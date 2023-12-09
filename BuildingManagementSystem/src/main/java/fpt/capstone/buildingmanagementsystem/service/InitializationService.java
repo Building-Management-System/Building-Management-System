@@ -111,20 +111,44 @@ public class InitializationService {
             departmentList.add(department9);
 
             for (int i = 1; i < 6; i++) {
-                Device lcd = new Device(UUID.randomUUID().toString(), i + "", "Lcd_D" + i, DeviceStatus.ACTIVE, "url", "note", Until.generateRealTime(),Until.generateRealTime());
+                Device lcd = Device.builder()
+                        .deviceName("Lcd_D" + i)
+                        .deviceId(i + "")
+                        .status(DeviceStatus.ACTIVE)
+                        .deviceUrl("url")
+                        .deviceNote("note")
+                        .createdDate(Until.generateRealTime())
+                        .updateDate(Until.generateRealTime())
+                        .build();
                 Room room = new Room(i, "Tech_D" + i, lcd);
                 roomList.add(room);
                 devices.add(lcd);
             }
-            Device lcdReal = new Device(UUID.randomUUID().toString(), "2032105", "Lcd_D6", DeviceStatus.ACTIVE, "url", "note", Until.generateRealTime(),Until.generateRealTime());
+            Device lcdReal = Device.builder()
+                    .deviceName("Lcd_D6")
+                    .deviceId("2032105")
+                    .status(DeviceStatus.ACTIVE)
+                    .deviceUrl("url")
+                    .deviceNote("note")
+                    .createdDate(Until.generateRealTime())
+                    .updateDate(Until.generateRealTime())
+                    .build();
             devices.add(lcdReal);
             roomList.add(new Room(6, "Tech_D6", lcdReal));
 
             for (int i = 7; i <= 11; i++) {
-                Device device = new Device(UUID.randomUUID().toString(), i + "", "Lcd_R10" + (i-6), DeviceStatus.ACTIVE, "url", "note", Until.generateRealTime(),Until.generateRealTime());
-                Room room = new Room(i, "R10" + i, device);
+                Device lcd = Device.builder()
+                        .deviceName("Lcd_R10" + (i - 6))
+                        .deviceId(i + "")
+                        .status(DeviceStatus.ACTIVE)
+                        .deviceUrl("url")
+                        .deviceNote("note")
+                        .createdDate(Until.generateRealTime())
+                        .updateDate(Until.generateRealTime())
+                        .build();
+                Room room = new Room(i, "R10" + i, lcd);
                 roomList.add(room);
-                devices.add(device);
+                devices.add(lcd);
             }
 
             RegisterRequest registerRequest = new RegisterRequest("demo", "123", "hr", "human resources", "");

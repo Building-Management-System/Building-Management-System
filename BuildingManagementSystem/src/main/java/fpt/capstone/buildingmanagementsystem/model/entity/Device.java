@@ -51,7 +51,7 @@ public class Device {
     private String deviceNote;
 
     @Column
-    private Date CreatedDate;
+    private Date createdDate;
 
     @Column
     private Date updateDate;
