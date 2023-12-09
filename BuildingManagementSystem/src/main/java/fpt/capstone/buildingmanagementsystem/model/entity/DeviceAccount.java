@@ -1,6 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.model.entity;
 
-import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DeviceStatus;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +15,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.util.Date;
 
 @AllArgsConstructor
@@ -24,35 +26,30 @@ import java.util.Date;
 @Setter
 @Entity
 @ToString
-public class Device {
+public class DeviceAccount {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(
             name = "UUID",
             strategy = "org.hibernate.id.UUIDGenerator"
     )
-    @Column(name = "deviceId")
-    private String id;
-
-    @Column(name = "device_lcd_id")
-    private String deviceId;
+    private String deviceAccountId;
 
     @Column
-    private String deviceName;
+    private Date startDate;
+
+    @Column
+    private Date endDate;
 
     @Column
     @Enumerated(EnumType.STRING)
-    private DeviceStatus status = DeviceStatus.ACTIVE;
+    private ControlLogStatus status;
 
-    @Column
-    private String deviceUrl;
+    @ManyToOne
+    @JoinColumn(name = "device_id")
+    private Device device;
 
-    @Column
-    private String deviceNote;
-
-    @Column
-    private Date CreatedDate;
-
-    @Column
-    private Date updateDate;
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
 }

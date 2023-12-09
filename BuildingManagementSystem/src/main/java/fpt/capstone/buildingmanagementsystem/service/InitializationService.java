@@ -10,6 +10,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Room;
 import fpt.capstone.buildingmanagementsystem.model.entity.Status;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DeviceStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DayOffRepository;
@@ -20,6 +21,7 @@ import fpt.capstone.buildingmanagementsystem.repository.RoomRepository;
 import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserPendingStatusRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -109,17 +111,17 @@ public class InitializationService {
             departmentList.add(department9);
 
             for (int i = 1; i < 6; i++) {
-                Device lcd = new Device(UUID.randomUUID().toString(), i + "", "Lcd_D" + i);
+                Device lcd = new Device(UUID.randomUUID().toString(), i + "", "Lcd_D" + i, DeviceStatus.ACTIVE, "url", "note", Until.generateRealTime(),Until.generateRealTime());
                 Room room = new Room(i, "Tech_D" + i, lcd);
                 roomList.add(room);
                 devices.add(lcd);
             }
-            Device lcdReal = new Device(UUID.randomUUID().toString(), "2032105", "Lcd_D6");
+            Device lcdReal = new Device(UUID.randomUUID().toString(), "2032105", "Lcd_D6", DeviceStatus.ACTIVE, "url", "note", Until.generateRealTime(),Until.generateRealTime());
             devices.add(lcdReal);
             roomList.add(new Room(6, "Tech_D6", lcdReal));
 
             for (int i = 7; i <= 11; i++) {
-                Device device = new Device(UUID.randomUUID().toString(), i + "", "Lcd_R10" + (i-6));
+                Device device = new Device(UUID.randomUUID().toString(), i + "", "Lcd_R10" + (i-6), DeviceStatus.ACTIVE, "url", "note", Until.generateRealTime(),Until.generateRealTime());
                 Room room = new Room(i, "R10" + i, device);
                 roomList.add(room);
                 devices.add(device);

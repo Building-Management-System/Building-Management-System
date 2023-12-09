@@ -9,6 +9,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.Device;
 import fpt.capstone.buildingmanagementsystem.model.entity.StrangerLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DeviceStatus;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DeviceRepository;
@@ -73,7 +74,7 @@ public class LcdService {
                         .build();
                 String deviceId = rootNode.path("facesluiceId").asText();
 
-                Device device = deviceRepository.findById(deviceId)
+                Device device = deviceRepository.findByDeviceIdAndStatus(deviceId, DeviceStatus.ACTIVE)
                         .orElseThrow(() -> new BadRequest("Not_found"));
 
                 Account account = accountRepository.findByUsername(controlLogLcd.getPersionName())
@@ -81,7 +82,9 @@ public class LcdService {
                 controlLogLcd.setAccount(account);
                 controlLogLcd.setDevice(device);
                 controlLogLcdRepository.save(controlLogLcd);
-                dailyLogService.mapControlLogToDailyLog(controlLogLcd);
+                if (controlLogLcd.getStatus().equals(ControlLogStatus.WHITE_LIST)) {
+                    dailyLogService.mapControlLogToDailyLog(controlLogLcd);
+                }
             } else if (operator.equals(STRANGER_LOG)) {
                 String time = infoNode.path("time").asText();
                 StrangerLogLcd strangerLogLcd = StrangerLogLcd.builder()
@@ -94,7 +97,7 @@ public class LcdService {
                         .build();
 
                 String deviceId = rootNode.path("facesluiceId").asText();
-                Device device = deviceRepository.findById(deviceId)
+                Device device = deviceRepository.findByDeviceIdAndStatus(deviceId, DeviceStatus.ACTIVE)
                         .orElseThrow(() -> new BadRequest("Not_found"));
                 strangerLogLcd.setDevice(device);
                 strangerLogLcdRepository.save(strangerLogLcd);

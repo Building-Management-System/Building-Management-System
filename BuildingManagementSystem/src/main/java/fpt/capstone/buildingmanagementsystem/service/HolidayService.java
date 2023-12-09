@@ -157,7 +157,7 @@ public class HolidayService {
             Account account = accountRepository.findByUsername(userName)
                     .orElseThrow(() -> new BadRequest("Not_found_user"));
             String toEmail = account.getUser().getEmail();
-            if(toEmail.equals("unknown")) {
+            if (toEmail.equals("unknown")) {
                 throw new NotFound("Not_found_email");
             }
             EmailCode emailCode = EmailCode.builder()
@@ -165,7 +165,7 @@ public class HolidayService {
                     .userId(account.getAccountId())
                     .build();
             emailCodeRepository.save(emailCode);
-            emailSender.setMailSender(toEmail, "[Notification] - Password has been successfully reset!", "Your newly reset password is: " + code);
+            emailSender.setMailSender(toEmail, "[Notification] - BMS verify code: " + code, "Code:" + code + "\nCode can only be used once!");
             return true;
         } catch (ServerError e) {
             throw new ServerError("fail");
