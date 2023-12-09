@@ -107,6 +107,7 @@ const userApi = {
       }
     }
   },
+  
   changeUserStatus: async (data, dispatch) => {
     dispatch(changeUserStatusStart())
     try {
@@ -180,6 +181,23 @@ const userApi = {
       let res = axiosClient.get(`${BASE_URL}/getAllDepartmentEmployee`, {
         params: {
           department_id: data,
+        }
+      })
+      return res;
+    } catch (error) {
+      if (error.response.status === 404) {
+        toast.error("Error!")
+      }
+    }
+  },
+
+  getDailYLog: (user_id, date) => {
+    try {
+      let res = axiosClient.get(`${BASE_URL}/getDailyLogAttendanceOfEmployee`, {
+        params: {
+          user_id: user_id,
+          date: date,
+        
         }
       })
       return res;
