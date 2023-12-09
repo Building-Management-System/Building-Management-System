@@ -67,7 +67,7 @@ class OvertimeControllerTest {
         );
         assertEquals(expectedResponse, result);
     }
-    //update expected
+    //update  expected
 
     @Test
     void testGetOvertimeListUser_UserIdNull(){
@@ -79,7 +79,7 @@ class OvertimeControllerTest {
                 () -> overtimeController.getOvertimeListUser(user_id, month, year));
         Assertions.assertEquals("user_id_null", exception.getMessage());
     }
-    //try let bank not null
+    //try exception
 
     @Test
     void testGetOvertimeListUser_ListNull(){
@@ -91,6 +91,7 @@ class OvertimeControllerTest {
                 () -> overtimeController.getOvertimeListUser(user_id, month, year));
         Assertions.assertEquals("list_null", exception.getMessage());
     }
+    //catch notfound
 
     @Test
     void testGetOvertimeSystem() throws ParseException {
