@@ -36,10 +36,10 @@ public class DeviceAccount {
     private String deviceAccountId;
 
     @Column
-    private java.sql.Date startDate;
+    private Date startDate;
 
     @Column
-    private java.sql.Date endDate;
+    private Date endDate;
 
     @Column
     private Date createdDate;

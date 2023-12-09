@@ -19,6 +19,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
 import fpt.capstone.buildingmanagementsystem.model.entity.Role;
 import fpt.capstone.buildingmanagementsystem.model.entity.Status;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.request.AccountDeviceRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangePasswordRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeRoleRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeStatusAccountRequest;
@@ -42,6 +43,7 @@ import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import fpt.capstone.buildingmanagementsystem.until.EmailSender;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -50,6 +52,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -62,6 +65,9 @@ import static fpt.capstone.buildingmanagementsystem.until.Until.getRandomString;
 
 @Service
 public class AccountManageService implements UserDetailsService {
+
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     @Autowired
     DailyLogRepository dailyLogRepository;
     @Autowired
@@ -100,6 +106,9 @@ public class AccountManageService implements UserDetailsService {
     @Autowired
     DailyLogService dailyLogService;
 
+    @Autowired
+    DeviceService deviceService;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Account> userAccount = accountRepository.findByUsername(username);
@@ -116,7 +125,7 @@ public class AccountManageService implements UserDetailsService {
                 grantList);
     }
 
-    public boolean saveNewAccount(RegisterRequest registerRequest) {
+    public ResponseEntity<?> saveNewAccount(RegisterRequest registerRequest) {
         try {
             if (registerRequest.getPassword() != null && registerRequest.getUsername() != null
                     && registerRequest.getRole() != null && registerRequest.getDepartmentName() != null
@@ -145,9 +154,19 @@ public class AccountManageService implements UserDetailsService {
                             } else {
                                 newAccount.setUser(user);
                                 saveAccount = accountRepository.saveAndFlush(newAccount);
+
                             }
                             dailyLogService.initDayOff(saveAccount.accountId);
-                            return true;
+
+                            if(registerRequest.roomId != null) {
+                                AccountDeviceRequest request = AccountDeviceRequest.builder()
+                                        .accountId(saveAccount.accountId)
+                                        .roomIdString(registerRequest.getRoomId())
+                                        .startDate(dateFormat.format(saveAccount.createdDate))
+                                        .build();
+                                return deviceService.registerNewAccount(request);
+                            }
+                            return ResponseEntity.ok(true);
                         } else {
                             throw new NotFound("hr_id_not_found");
                         }

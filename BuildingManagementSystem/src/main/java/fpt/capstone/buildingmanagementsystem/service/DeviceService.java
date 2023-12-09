@@ -26,7 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -195,24 +194,16 @@ public class DeviceService {
                 int roomId = Integer.parseInt(request.getRoomIdString());
                 Room room = roomRepository.findById(roomId)
                         .orElseThrow(() -> new BadRequest("Not_found_room"));
+                java.util.Date fromDate = Until.convertStringToDateTime(request.getStartDate());
 
-                boolean isExistAccount = deviceAccountRepository.existsDeviceAccountByAccountAndDevice(account, room.getDevice());
-
-                if (isExistAccount) {
-                    return ResponseEntity.status(HttpStatus.CONFLICT).body(request);
-                }
-
-
-                Date fromDate = Until.convertStringToDate(request.getStartDate());
-                Date toDate = null;
+                java.util.Date toDate = null;
                 if (request.getEndDate() != null) {
-                    toDate = Until.convertStringToDate(request.getEndDate());
+                    toDate = Until.convertStringToDateTime(request.getEndDate());
                     if (fromDate.compareTo(toDate) > 0) {
                         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
                                 .body(request);
                     }
                 }
-
                 DeviceAccount deviceAccount = DeviceAccount.builder()
                         .startDate(fromDate)
                         .createdDate(Until.generateRealTime())
@@ -233,6 +224,8 @@ public class DeviceService {
         }
     }
 
+//    public ResponseEntity<?> changeAccountStatus()
+
     public String messageSetupMqtt(String accountId, String startDate, String endDate, String deviceLcdId) {
         return "{\n" +
                 "\"messageId\":\"AddPersonslist2020-04-13T19:07:00_00001\",\n" +
@@ -248,11 +241,11 @@ public class DeviceService {
                 "\t\t\"gender\":0,\n" +
                 "\t\t\"birthday\":\"1992-06-13\", \n" +
                 "\t\t\"address\":\" Baoan District, Shenzhen City, Guangdong Province \",\n" +
-                "\t\t\"idCard\":\""+deviceLcdId+"\", \n" +
+                "\t\t\"idCard\":\"" + deviceLcdId + "\", \n" +
                 "\t\t\"tempCardType\":0, \n" +
                 "\t\t\"EffectNumber\":3,\n" +
-                "\t\t \"cardValidBegin\":\""+startDate+" 00:00:00\", \n" +
-                "\t\t\"cardValidEnd\":\""+endDate+" 00:00:00\", \n" +
+                "\t\t \"cardValidBegin\":\"" + startDate + "\", \n" +
+                "\t\t\"cardValidEnd\":\"" + endDate + "\", \n" +
                 "\t\t\"telnum1\":\"13690880000\",\n" +
                 "\t\t \"native\":\" Shenzhen , Guangdong \", \n" +
                 "\t\t\"cardType2\":0, \"notes\":\"\",\n" +

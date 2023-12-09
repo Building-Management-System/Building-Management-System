@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 
@@ -151,7 +150,7 @@ public class InitializationService {
                 devices.add(lcd);
             }
 
-            RegisterRequest registerRequest = new RegisterRequest("demo", "123", "hr", "human resources", "");
+            RegisterRequest registerRequest = new RegisterRequest("demo", "123", "hr", "human resources", "", "");
             Account newAccount = accountMapper.convertRegisterAccount(registerRequest, status2, role1);
             User user = User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
                     .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
