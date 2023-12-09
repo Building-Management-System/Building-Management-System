@@ -155,16 +155,16 @@ public class InitializationService {
             Account newAccount = accountMapper.convertRegisterAccount(registerRequest, status2, role1);
             User user = User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
                     .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
-                            generateRealTime()).image("unknown").updatedDate(generateRealTime()).department(department3)
+                            generateRealTime()).address("unknown").image("unknown").updatedDate(generateRealTime()).account(newAccount).department(department3)
                     .build();
-            user.setAccount(newAccount);
+            newAccount.setUser(user);
             roleRepository.saveAll(roleList);
             statusRepository.saveAll(statusList);
             userPendingStatusRepository.saveAll(userPendingStatusList);
             departmentRepository.saveAll(departmentList);
             deviceRepository.saveAll(devices);
             roomRepository.saveAll(roomList);
-            userRepository.save(user);
+            accountRepository.saveAndFlush(newAccount);
             dayOffRepository.saveAll(initEmployeeDayOff());
         }
     }
