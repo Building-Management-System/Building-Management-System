@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.controller;
 
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceRoomRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceStatusRequest;
+import fpt.capstone.buildingmanagementsystem.model.response.DeviceAccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.DeviceRoomResponse;
 import fpt.capstone.buildingmanagementsystem.service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -34,6 +36,11 @@ public class DeviceController {
     @PostMapping("updateDeviceStatus")
     public ResponseEntity<?> updateDeviceStatus(@RequestBody DeviceStatusRequest request) {
         return deviceService.updateDeviceStatus(request);
+    }
+
+    @GetMapping("getDeviceDetail")
+    public DeviceAccountResponse getDeviceDetail(@RequestParam("device_id") String deviceId) {
+        return deviceService.getDeviceDetail(deviceId);
     }
 
 }
