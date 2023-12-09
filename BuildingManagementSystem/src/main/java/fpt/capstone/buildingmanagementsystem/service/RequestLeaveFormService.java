@@ -3,6 +3,7 @@ package fpt.capstone.buildingmanagementsystem.service;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
+import fpt.capstone.buildingmanagementsystem.exception.UnprocessableEntity;
 import fpt.capstone.buildingmanagementsystem.mapper.LeaveRequestFormMapper;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
@@ -25,6 +26,7 @@ import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
 import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.until.Until;
+import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -72,7 +74,8 @@ public class RequestLeaveFormService {
 
     @Autowired
     DailyLogRepository dailyLogRepository;
-
+    @Autowired
+    Validate validate;
     public boolean getLeaveFormUser(SendLeaveFormRequest sendLeaveFormRequest) {
         try {
             if (sendLeaveFormRequest.getContent() != null &&
@@ -82,40 +85,44 @@ public class RequestLeaveFormService {
                     sendLeaveFormRequest.getToDate() != null
             ) {
                 if (checkValidate(sendLeaveFormRequest)) {
-                    List<User> listUserReceiver = new ArrayList<>();
-                    Optional<User> send_user = userRepository.findByUserId(sendLeaveFormRequest.getUserId());
-                    Optional<Department> department = departmentRepository.findByDepartmentId(sendLeaveFormRequest.getDepartmentId());
-                    if (sendLeaveFormRequest.getReceivedId() != null) {
-                        Optional<User> receive_user = userRepository.findByUserId(sendLeaveFormRequest.getReceivedId());
-                        listUserReceiver.add(receive_user.get());
-                    } else {
-                        listUserReceiver = userRepository.findAllByDepartment(department.get());
-                    }
-                    if (send_user.isPresent() && department.isPresent()) {
-                        String id_ticket = "LV_" + Until.generateId();
-                        String id_request_ticket = "LV_" + Until.generateId();
-                        Ticket ticket = Ticket.builder()
-                                .ticketId(id_ticket)
-                                .topic(LEAVE_REQUEST)
-                                .status(true)
-                                .createDate(Until.generateRealTime())
-                                .updateDate(Until.generateRealTime())
-                                .build();
-                        ticketRepository.save(ticket);
-                        saveLeaveRequest(sendLeaveFormRequest, send_user, department, id_request_ticket, ticket);
-                        for (User receive_user : listUserReceiver) {
-                            automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
-                                    ticket.getTicketId(),
-                                    send_user.get(),
-                                    receive_user,
-                                    ticket.getTopic(),
-                                    true,
-                                    null
-                            ));
+                    if (validate.checkValidateExistsEvaluate(sendLeaveFormRequest.getUserId(), sendLeaveFormRequest.getFromDate())) {
+                        List<User> listUserReceiver = new ArrayList<>();
+                        Optional<User> send_user = userRepository.findByUserId(sendLeaveFormRequest.getUserId());
+                        Optional<Department> department = departmentRepository.findByDepartmentId(sendLeaveFormRequest.getDepartmentId());
+                        if (sendLeaveFormRequest.getReceivedId() != null) {
+                            Optional<User> receive_user = userRepository.findByUserId(sendLeaveFormRequest.getReceivedId());
+                            listUserReceiver.add(receive_user.get());
+                        } else {
+                            listUserReceiver = userRepository.findAllByDepartment(department.get());
                         }
-                        return true;
+                        if (send_user.isPresent() && department.isPresent()) {
+                            String id_ticket = "LV_" + Until.generateId();
+                            String id_request_ticket = "LV_" + Until.generateId();
+                            Ticket ticket = Ticket.builder()
+                                    .ticketId(id_ticket)
+                                    .topic(LEAVE_REQUEST)
+                                    .status(true)
+                                    .createDate(Until.generateRealTime())
+                                    .updateDate(Until.generateRealTime())
+                                    .build();
+                            ticketRepository.save(ticket);
+                            saveLeaveRequest(sendLeaveFormRequest, send_user, department, id_request_ticket, ticket);
+                            for (User receive_user : listUserReceiver) {
+                                automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
+                                        ticket.getTicketId(),
+                                        send_user.get(),
+                                        receive_user,
+                                        ticket.getTopic(),
+                                        true,
+                                        null
+                                ));
+                            }
+                            return true;
+                        } else {
+                            throw new NotFound("not_found");
+                        }
                     } else {
-                        throw new NotFound("not_found");
+                        throw new UnprocessableEntity("evaluate_existed");
                     }
                 } else {
                     throw new BadRequest("date_time_input_wrong");

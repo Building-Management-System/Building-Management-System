@@ -35,4 +35,9 @@ public class CustomHandleException {
     public ErrorMessage conflict(Exception exception) {
         return new ErrorMessage("409", exception.getMessage());
     }
+    @ExceptionHandler(UnprocessableEntity.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorMessage unprocessableEntity(Exception exception) {
+        return new ErrorMessage("422", exception.getMessage());
+    }
 }

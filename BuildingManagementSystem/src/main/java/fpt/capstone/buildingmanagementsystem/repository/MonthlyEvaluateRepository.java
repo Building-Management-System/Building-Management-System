@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface MonthlyEvaluateRepository extends JpaRepository<MonthlyEvaluate, String> {
     Optional<MonthlyEvaluate> findByEmployeeAndMonthAndYear(User user, int month, int year);
     Optional<MonthlyEvaluate> findByEvaluateId(String id);
-
+    boolean existsByEmployeeAndMonthAndYear(User user, int month, int year);
     @Query(value = "SELECT me.*\n" +
             "FROM monthly_evaluate me\n" +
             "JOIN user u ON u.user_id = me.employee\n" +
