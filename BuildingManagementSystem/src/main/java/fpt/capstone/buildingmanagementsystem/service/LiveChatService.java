@@ -253,7 +253,7 @@ public class LiveChatService {
         Optional<User> user = userRepository.findByUserId(userId);
         List<ChatUser> chatUser = chatUserRepository.findAllByUser_UserIdIsNot(userId);
         for (ChatUser userChat : chatUser) {
-            if (!userChat.getChat().isGroupChat()) {
+            if (!userChat.getChat().isGroupChat() || Objects.equals(userChat.getUser().getAccount().getStatus().getStatusName(), "inactive")) {
                 userList.remove(userChat.getUser());
             }
         }
