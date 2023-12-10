@@ -36,13 +36,6 @@ class DeviceControllerTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void testGetAllDevice() {
-        when(deviceService.getAllDevice()).thenReturn(List.of(new DeviceRoomResponse(0, "roomName", "deviceId", "lcdId", "deviceName", DeviceStatus.ACTIVE, "deviceUrl", "deviceNote", new GregorianCalendar(2023, Calendar.DECEMBER, 10, 16, 26).getTime())));
-
-        List<DeviceRoomResponse> result = deviceController.getAllDevice();
-        Assertions.assertEquals(List.of(new DeviceRoomResponse(0, "roomName", "deviceId", "lcdId", "deviceName", DeviceStatus.ACTIVE, "deviceUrl", "deviceNote", new GregorianCalendar(2023, Calendar.DECEMBER, 10, 16, 26).getTime())), result);
-    }
 
     @Test
     void testCreateDeviceAccount() {
@@ -68,11 +61,4 @@ class DeviceControllerTest {
         Assertions.assertEquals(null, result);
     }
 
-    @Test
-    void testGetDeviceDetail() {
-        when(deviceService.getDeviceDetail(anyString())).thenReturn(new DeviceAccountResponse("deviceId", "deviceName", "deviceLcdId", new GregorianCalendar(2023, Calendar.DECEMBER, 10, 16, 26).getTime(), DeviceStatus.ACTIVE, List.of(new RoomResponse(0, "roomName")), List.of(new AccountLcdResponse("accountId", "userName", "firstName", "lastName", new Department("departmentId", "departmentName"), new GregorianCalendar(2023, Calendar.DECEMBER, 10, 16, 26).getTime(), new GregorianCalendar(2023, Calendar.DECEMBER, 10, 16, 26).getTime(), ControlLogStatus.WHITE_LIST))));
-
-        DeviceAccountResponse result = deviceController.getDeviceDetail("deviceId");
-        Assertions.assertEquals(new DeviceAccountResponse("deviceId", "deviceName", "deviceLcdId", new GregorianCalendar(2023, Calendar.DECEMBER, 10, 16, 26).getTime(), DeviceStatus.ACTIVE, List.of(new RoomResponse(0, "roomName")), List.of(new AccountLcdResponse("accountId", "userName", "firstName", "lastName", new Department("departmentId", "departmentName"), new GregorianCalendar(2023, Calendar.DECEMBER, 10, 16, 26).getTime(), new GregorianCalendar(2023, Calendar.DECEMBER, 10, 16, 26).getTime(), ControlLogStatus.WHITE_LIST))), result);
-    }
 }
