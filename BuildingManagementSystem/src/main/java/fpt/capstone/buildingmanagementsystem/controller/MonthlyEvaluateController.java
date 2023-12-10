@@ -8,6 +8,8 @@ import fpt.capstone.buildingmanagementsystem.model.response.EmployeeEvaluateRema
 import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateSummaryResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationAcceptResponse;
+import fpt.capstone.buildingmanagementsystem.service.ChangeLogReportDetailPDFService;
+import fpt.capstone.buildingmanagementsystem.service.EmployeeEvaluateDetailPDFService;
 import fpt.capstone.buildingmanagementsystem.service.MonthlyEvaluateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +20,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
 @CrossOrigin
 public class MonthlyEvaluateController {
-
+    @Autowired
+    EmployeeEvaluateDetailPDFService employeeEvaluateDetailPDFService;
     @Autowired
     MonthlyEvaluateService monthlyEvaluateService;
 
@@ -35,6 +39,10 @@ public class MonthlyEvaluateController {
     @PostMapping("/getIndividualEvaluate")
     public MonthlyEvaluateResponse getEvaluate(@RequestBody MonthlyEvaluateRequest monthlyEvaluateRequest) {
         return monthlyEvaluateService.getMonthlyEvaluateOfEmployee(monthlyEvaluateRequest);
+    }
+    @PostMapping("/exportIndividualEvaluate")
+    public  ResponseEntity<byte[]> exportEvaluate(@RequestBody MonthlyEvaluateRequest monthlyEvaluateRequest) throws IOException {
+        return employeeEvaluateDetailPDFService.export(monthlyEvaluateRequest);
     }
 
     @PostMapping("/updateEvaluateRecord")
