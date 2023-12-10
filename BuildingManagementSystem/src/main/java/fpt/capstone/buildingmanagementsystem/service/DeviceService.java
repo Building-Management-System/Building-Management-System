@@ -262,7 +262,8 @@ public class DeviceService {
 
         deviceAccount.setStatus(request.getStatus());
         try {
-            return ResponseEntity.ok(deviceAccountRepository.save(deviceAccount));
+            deviceAccountRepository.save(deviceAccount);
+            return ResponseEntity.ok(true);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(e.getCause());
