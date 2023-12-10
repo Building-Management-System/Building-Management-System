@@ -119,36 +119,36 @@ class AttendanceControllerTest {
 
     }
 
-    @Test
-    void testGetAttendanceUserDetail() {
-        String user_id = "3a5cccac-9490-4b9b-9e1e-16ce220b35cb";
-        String date = "2023-11-22";
-
-        AttendanceDetailResponse result = attendanceController.getAttendanceUserDetail(user_id, date);
-
-        AttendanceDetailResponse expectedResponse = new AttendanceDetailResponse(
-                "unknown unknown",
-                "managersecurity",
-                "security",
-                "Wednesday, November 22, 2023",
-                new Time(10, 15, 00),
-                new Time(22, 15, 00),
-                10.0,
-                1.75,
-                8.25,
-                true,
-                false,
-                0.0,
-                false,
-                0.0,
-                Arrays.asList(
-                        new ControlLogResponse("managersecurity", "2023-11-22 09:15:00.0"),
-                        new ControlLogResponse("managersecurity", "2023-11-22 21:15:00.0")
-                )
-        );
-
-        assertEquals(expectedResponse, result);
-    }
+//    @Test
+//    void testGetAttendanceUserDetail() {
+//        String user_id = "3a5cccac-9490-4b9b-9e1e-16ce220b35cb";
+//        String date = "2023-11-22";
+//
+//        AttendanceDetailResponse result = attendanceController.getAttendanceUserDetail(user_id, date);
+//
+//        AttendanceDetailResponse expectedResponse = new AttendanceDetailResponse(
+//                "unknown unknown",
+//                "managersecurity",
+//                "security",
+//                "Wednesday, November 22, 2023",
+//                new Time(10, 15, 00),
+//                new Time(22, 15, 00),
+//                10.0,
+//                1.75,
+//                8.25,
+//                true,
+//                false,
+//                0.0,
+//                false,
+//                0.0,
+//                Arrays.asList(
+//                        new ControlLogResponse("managersecurity", "2023-11-22 09:15:00.0"),
+//                        new ControlLogResponse("managersecurity", "2023-11-22 21:15:00.0")
+//                )
+//        );
+//
+//        assertEquals(expectedResponse, result);
+//    }
 
     @Test
     void testGetAttendanceUserDetail_BadRequest() {

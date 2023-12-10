@@ -227,7 +227,7 @@ public class RequestChangeLogService {
                         checkinChange = changeLog.get().getCheckin();
                         checkoutChange = changeLog.get().getCheckout();
                         dateDailyChange = sdf.format(Until.convertDateToCalender(changeLog.get().getCreatedDate()).getTime());
-                        changeFrom = changeLog.get().getManager().getAccount().getUsername();
+                        changeFrom = changeLog.get().getChangeType().toString();
                         violate = changeLog.get().isViolate();
                         outSideWork = changeLog.get().getOutsideWork();
                         reason = changeLog.get().getReason();

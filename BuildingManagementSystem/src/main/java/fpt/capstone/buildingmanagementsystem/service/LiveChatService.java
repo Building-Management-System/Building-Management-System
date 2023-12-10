@@ -249,9 +249,13 @@ public class LiveChatService {
 
     public List<UserInfoResponse> getAllChatUserSingle(String userId) {
         List<UserInfoResponse> userInfoResponses = new ArrayList<>();
-        List<User> userList = userRepository.findAll();
+        List<User> userList = userRepository.findAllByAccount_Status_StatusName("active");
         Optional<User> user = userRepository.findByUserId(userId);
-        List<ChatUser> chatUser = chatUserRepository.findAllByUser_UserIdIsNot(userId);
+        List<ChatUser> chatUserToGetId=chatUserRepository.findAllByUser_UserId(userId);
+        List<ChatUser> chatUser = new ArrayList<>();
+        for (ChatUser userChat : chatUserToGetId) {
+            chatUser.addAll(chatUserRepository.find(userChat.getChat().getId(),userId));
+        }
         for (ChatUser userChat : chatUser) {
             if (!userChat.getChat().isGroupChat()) {
                 userList.remove(userChat.getUser());
