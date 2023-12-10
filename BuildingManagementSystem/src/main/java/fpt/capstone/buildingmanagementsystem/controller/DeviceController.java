@@ -2,7 +2,6 @@ package fpt.capstone.buildingmanagementsystem.controller;
 
 import fpt.capstone.buildingmanagementsystem.model.request.AccountDeviceRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeRecordStatusRequest;
-import fpt.capstone.buildingmanagementsystem.model.request.ChangeStatusRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceRoomRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceStatusRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.DeviceAccountResponse;

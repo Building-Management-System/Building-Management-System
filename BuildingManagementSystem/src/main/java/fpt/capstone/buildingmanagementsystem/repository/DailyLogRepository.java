@@ -1,7 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.repository;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
-import fpt.capstone.buildingmanagementsystem.model.entity.DayOff;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
