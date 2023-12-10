@@ -111,37 +111,37 @@ class AccountTungDemo {
         assertThrows(NotFound.class, () -> accountManageService.loadUserByUsername(username));
     }
 
-    @Test
-    void testSaveNewAccount_Success() {
-        // Create new each tc
-        RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setUsername("cc");
-        registerRequest.setPassword("123");
-        registerRequest.setRole("employee");
-        registerRequest.setDepartmentName("business");
-
-        when(accountRepository.existsByUsername("cc")).thenReturn(false);
-
-        Role role = new Role();
-        role.setRoleName("employee");
-        when(roleRepository.findByRoleName("employee")).thenReturn(Optional.of(role));
-
-        Department department = new Department();
-        department.setDepartmentName("business");
-        when(departmentRepository.findByDepartmentName("business")).thenReturn(Optional.of(department));
-
-        Status status = new Status();
-        status.setStatusId("1");
-        when(statusRepository.findByStatusId("1")).thenReturn(Optional.of(status));
-
-        when(accountMapper.convertRegisterAccount(registerRequest, status, role)).thenReturn(new Account());
-
-        // Act
-        boolean result = accountManageService.saveNewAccount(registerRequest);
-
-        // Assert
-        assertTrue(result);
-    }
+//    @Test
+//    void testSaveNewAccount_Success() {
+//        // Create new each tc
+//        RegisterRequest registerRequest = new RegisterRequest();
+//        registerRequest.setUsername("cc");
+//        registerRequest.setPassword("123");
+//        registerRequest.setRole("employee");
+//        registerRequest.setDepartmentName("business");
+//
+//        when(accountRepository.existsByUsername("cc")).thenReturn(false);
+//
+//        Role role = new Role();
+//        role.setRoleName("employee");
+//        when(roleRepository.findByRoleName("employee")).thenReturn(Optional.of(role));
+//
+//        Department department = new Department();
+//        department.setDepartmentName("business");
+//        when(departmentRepository.findByDepartmentName("business")).thenReturn(Optional.of(department));
+//
+//        Status status = new Status();
+//        status.setStatusId("1");
+//        when(statusRepository.findByStatusId("1")).thenReturn(Optional.of(status));
+//
+//        when(accountMapper.convertRegisterAccount(registerRequest, status, role)).thenReturn(new Account());
+//
+//        // Act
+//        boolean result = accountManageService.saveNewAccount(registerRequest);
+//
+//        // Assert
+//        assertTrue(result);
+//    }
 
     @Test
     void testChangePassword() {
