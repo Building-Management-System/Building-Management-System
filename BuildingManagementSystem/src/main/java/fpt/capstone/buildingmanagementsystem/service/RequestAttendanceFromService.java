@@ -3,12 +3,9 @@ package fpt.capstone.buildingmanagementsystem.service;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
+import fpt.capstone.buildingmanagementsystem.exception.UnprocessableEntity;
 import fpt.capstone.buildingmanagementsystem.mapper.AttendanceRequestFormMapper;
-import fpt.capstone.buildingmanagementsystem.model.entity.Department;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
-import fpt.capstone.buildingmanagementsystem.model.entity.Ticket;
-import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.AttendanceRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
@@ -16,31 +13,20 @@ import fpt.capstone.buildingmanagementsystem.model.request.AttendanceMessageRequ
 import fpt.capstone.buildingmanagementsystem.model.request.SendAttendanceFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendOtherFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.NotificationAcceptResponse;
-import fpt.capstone.buildingmanagementsystem.repository.AttendanceRequestFormRepository;
-import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.TicketRepositoryv2;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.until.Until;
+import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.ATTENDANCE_REQUEST;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateTime;
-import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateStartTimeAndEndTime;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.*;
 
 @Service
 public class RequestAttendanceFromService {
@@ -70,6 +56,8 @@ public class RequestAttendanceFromService {
 
     @Autowired
     AttendanceService attendanceService;
+    @Autowired
+    Validate validate;
 
     public boolean getAttendanceUser(SendAttendanceFormRequest sendAttendanceFormRequest) {
         try {
@@ -79,35 +67,39 @@ public class RequestAttendanceFromService {
                     sendAttendanceFormRequest.getTitle() != null
             ) {
                 if (checkValidate(sendAttendanceFormRequest)) {
-                    Optional<User> send_user = userRepository.findByUserId(sendAttendanceFormRequest.getUserId());
-                    Optional<Department> department = departmentRepository.findByDepartmentId(sendAttendanceFormRequest.getDepartmentId());
-                    List<User> listUserReceiver = new ArrayList<>();
-                    if (sendAttendanceFormRequest.getReceivedId() != null) {
-                        Optional<User> receive_user = userRepository.findByUserId(sendAttendanceFormRequest.getReceivedId());
-                        listUserReceiver.add(receive_user.get());
-                    } else {
-                        listUserReceiver = userRepository.findAllByDepartment(department.get());
-                    }
-                    if (send_user.isPresent() && department.isPresent()) {
-                        String id_ticket = "AT_" + Until.generateId();
-                        String id_request_ticket = "AT_" + Until.generateId();
-                        Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(ATTENDANCE_REQUEST).status(true).createDate(Until.generateRealTime())
-                                .updateDate(Until.generateRealTime()).build();
-                        ticketRepository.save(ticket);
-                        saveAttendanceRequest(sendAttendanceFormRequest, send_user, department, id_request_ticket, ticket);
-                        for (User receive_user : listUserReceiver) {
-                            automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
-                                    ticket.getTicketId(),
-                                    send_user.get(),
-                                    receive_user,
-                                    ticket.getTopic(),
-                                    true,
-                                    null
-                            ));
+                    if (validate.checkValidateExistsEvaluate(sendAttendanceFormRequest.getUserId(), sendAttendanceFormRequest.getManualDate())) {
+                        Optional<User> send_user = userRepository.findByUserId(sendAttendanceFormRequest.getUserId());
+                        Optional<Department> department = departmentRepository.findByDepartmentId(sendAttendanceFormRequest.getDepartmentId());
+                        List<User> listUserReceiver = new ArrayList<>();
+                        if (sendAttendanceFormRequest.getReceivedId() != null) {
+                            Optional<User> receive_user = userRepository.findByUserId(sendAttendanceFormRequest.getReceivedId());
+                            listUserReceiver.add(receive_user.get());
+                        } else {
+                            listUserReceiver = userRepository.findAllByDepartment(department.get());
                         }
-                        return true;
+                        if (send_user.isPresent() && department.isPresent()) {
+                            String id_ticket = "AT_" + Until.generateId();
+                            String id_request_ticket = "AT_" + Until.generateId();
+                            Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(ATTENDANCE_REQUEST).status(true).createDate(Until.generateRealTime())
+                                    .updateDate(Until.generateRealTime()).build();
+                            ticketRepository.save(ticket);
+                            saveAttendanceRequest(sendAttendanceFormRequest, send_user, department, id_request_ticket, ticket);
+                            for (User receive_user : listUserReceiver) {
+                                automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
+                                        ticket.getTicketId(),
+                                        send_user.get(),
+                                        receive_user,
+                                        ticket.getTopic(),
+                                        true,
+                                        null
+                                ));
+                            }
+                            return true;
+                        } else {
+                            throw new NotFound("not_found");
+                        }
                     } else {
-                        throw new NotFound("not_found");
+                        throw new UnprocessableEntity("evaluate_existed");
                     }
                 } else {
                     throw new BadRequest("date_time_input_wrong");
@@ -215,14 +207,18 @@ public class RequestAttendanceFromService {
         return check1 && check2 && check3 && check4;
     }
 
-    private void saveAttendanceRequest(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, String id_request_ticket, Ticket ticket) throws ParseException {
+    private void saveAttendanceRequest(SendAttendanceFormRequest
+                                               sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, String
+                                               id_request_ticket, Ticket ticket) throws ParseException {
         RequestTicket requestTicket = RequestTicket.builder().requestId(id_request_ticket).createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())
                 .status(PENDING).ticketRequest(ticket).title(sendAttendanceFormRequest.getTitle()).user(send_user.get()).build();
         saveAttendanceMessage(sendAttendanceFormRequest, send_user, department, requestTicket);
     }
 
-    private void saveAttendanceMessage(SendAttendanceFormRequest sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket requestTicket) throws ParseException {
+    private void saveAttendanceMessage(SendAttendanceFormRequest
+                                               sendAttendanceFormRequest, Optional<User> send_user, Optional<Department> department, RequestTicket
+                                               requestTicket) throws ParseException {
         RequestMessage requestMessage = RequestMessage.builder().createDate(Until.generateRealTime())
                 .updateDate(Until.generateRealTime())
                 .sender(send_user.get()).request(requestTicket).department(department.get()).build();
@@ -342,11 +338,13 @@ public class RequestAttendanceFromService {
         }
     }
 
-    private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest) {
+    private void executeRequestDecision(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest
+            sendOtherFormRequest) {
         executeDuplicate(requestTickets, ticket, sendOtherFormRequest, requestOtherService);
     }
 
-    static void executeDuplicate(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest sendOtherFormRequest, RequestOtherService requestOtherService) {
+    static void executeDuplicate(List<RequestTicket> requestTickets, Ticket ticket, SendOtherFormRequest
+            sendOtherFormRequest, RequestOtherService requestOtherService) {
         requestOtherService.getOtherFormUserExistRequest(sendOtherFormRequest);
 
         if (!requestTickets.isEmpty()) {

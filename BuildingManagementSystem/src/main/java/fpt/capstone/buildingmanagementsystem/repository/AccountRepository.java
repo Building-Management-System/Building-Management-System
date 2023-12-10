@@ -20,6 +20,8 @@ public interface AccountRepository extends JpaRepository<Account, String> {
 
     Boolean existsByUsername(String username);
 
+    List<Account> findByAccountIdIn(List<String> accountIds);
+
     @Transactional
     @Modifying
     @Query(value = "UPDATE account SET password = :password,updated_date = :updated_date where username = :username", nativeQuery = true)

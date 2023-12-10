@@ -3,14 +3,17 @@ package fpt.capstone.buildingmanagementsystem.service;
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
+import fpt.capstone.buildingmanagementsystem.exception.UnprocessableEntity;
 import fpt.capstone.buildingmanagementsystem.mapper.WorkingOutsideMapper;
 import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.entity.requestForm.WorkingOutsideRequestForm;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.ApprovalNotificationRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.SendLeaveFormRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SendWorkingOutSideRequest;
 import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.until.Until;
+import fpt.capstone.buildingmanagementsystem.validate.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,7 @@ import java.util.*;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.ANSWERED;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.RequestStatus.PENDING;
 import static fpt.capstone.buildingmanagementsystem.model.enumEnitty.TopicEnum.OUTSIDE_REQUEST;
+import static fpt.capstone.buildingmanagementsystem.validate.Validate.validateDateFormat;
 
 @Service
 public class RequestOutSideWorkFromService {
@@ -39,46 +43,55 @@ public class RequestOutSideWorkFromService {
     UserRepository userRepository;
     @Autowired
     AutomaticNotificationService automaticNotificationService;
-
+    @Autowired
+    Validate validate;
     public boolean getOutSideFormUser(SendWorkingOutSideRequest sendWorkingOutSideRequest) {
         try {
-            if (sendWorkingOutSideRequest.getContent()  != null &&
+            if (sendWorkingOutSideRequest.getContent() != null &&
                     sendWorkingOutSideRequest.getDepartmentId() != null &&
                     sendWorkingOutSideRequest.getTitle() != null &&
                     sendWorkingOutSideRequest.getDate() != null &&
                     sendWorkingOutSideRequest.getType() != null
             ) {
-                List<User> listUserReceiver = new ArrayList<>();
-                Optional<User> send_user = userRepository.findByUserId(sendWorkingOutSideRequest.getUserId());
-                Optional<Department> department = departmentRepository.findByDepartmentId(sendWorkingOutSideRequest.getDepartmentId());
-                if (sendWorkingOutSideRequest.getReceivedId() != null) {
-                    Optional<User> receive_user = userRepository.findByUserId(sendWorkingOutSideRequest.getReceivedId());
-                    listUserReceiver.add(receive_user.get());
-                } else {
-                    listUserReceiver = userRepository.findAllByDepartment(department.get());
-                }
-                if (send_user.isPresent() && department.isPresent()) {
-                    String id_ticket = "OW_" + Until.generateId();
-                    String id_request_ticket = "OW_" + Until.generateId();
-                    //
-                    Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(OUTSIDE_REQUEST).status(true).createDate(Until.generateRealTime())
-                            .updateDate(Until.generateRealTime()).build();
-                    ticketRepository.save(ticket);
-                    //
-                    saveOutSideRequest(sendWorkingOutSideRequest, send_user, department, id_request_ticket, ticket);
-                    for (User receive_user : listUserReceiver) {
-                        automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
-                                ticket.getTicketId(),
-                                send_user.get(),
-                                receive_user,
-                                ticket.getTopic(),
-                                true,
-                                null
-                        ));
+                if (checkValidate(sendWorkingOutSideRequest)) {
+                    if (validate.checkValidateExistsEvaluate(sendWorkingOutSideRequest.getUserId(), sendWorkingOutSideRequest.getDate())) {
+                        List<User> listUserReceiver = new ArrayList<>();
+                        Optional<User> send_user = userRepository.findByUserId(sendWorkingOutSideRequest.getUserId());
+                        Optional<Department> department = departmentRepository.findByDepartmentId(sendWorkingOutSideRequest.getDepartmentId());
+                        if (sendWorkingOutSideRequest.getReceivedId() != null) {
+                            Optional<User> receive_user = userRepository.findByUserId(sendWorkingOutSideRequest.getReceivedId());
+                            listUserReceiver.add(receive_user.get());
+                        } else {
+                            listUserReceiver = userRepository.findAllByDepartment(department.get());
+                        }
+                        if (send_user.isPresent() && department.isPresent()) {
+                            String id_ticket = "OW_" + Until.generateId();
+                            String id_request_ticket = "OW_" + Until.generateId();
+                            //
+                            Ticket ticket = Ticket.builder().ticketId(id_ticket).topic(OUTSIDE_REQUEST).status(true).createDate(Until.generateRealTime())
+                                    .updateDate(Until.generateRealTime()).build();
+                            ticketRepository.save(ticket);
+                            //
+                            saveOutSideRequest(sendWorkingOutSideRequest, send_user, department, id_request_ticket, ticket);
+                            for (User receive_user : listUserReceiver) {
+                                automaticNotificationService.sendApprovalTicketNotification(new ApprovalNotificationRequest(
+                                        ticket.getTicketId(),
+                                        send_user.get(),
+                                        receive_user,
+                                        ticket.getTopic(),
+                                        true,
+                                        null
+                                ));
+                            }
+                            return true;
+                        } else {
+                            throw new NotFound("not_found");
+                        }
+                    } else {
+                        throw new UnprocessableEntity("evaluate_existed");
                     }
-                    return true;
                 } else {
-                    throw new NotFound("not_found");
+                    throw new BadRequest("date_time_input_wrong");
                 }
             } else {
                 throw new BadRequest("request_fail");
@@ -88,9 +101,13 @@ public class RequestOutSideWorkFromService {
         }
     }
 
+    private static boolean checkValidate(SendWorkingOutSideRequest sendWorkingOutSideRequest) throws ParseException {
+        return validateDateFormat(sendWorkingOutSideRequest.getDate());
+    }
+
     public boolean getOutSideFormUserExistTicket(SendWorkingOutSideRequest sendWorkingOutSideRequest) {
         try {
-            if (sendWorkingOutSideRequest.getContent()  != null &&
+            if (sendWorkingOutSideRequest.getContent() != null &&
                     sendWorkingOutSideRequest.getDepartmentId() != null &&
                     sendWorkingOutSideRequest.getTitle() != null &&
                     sendWorkingOutSideRequest.getTicketId() != null &&
@@ -120,7 +137,7 @@ public class RequestOutSideWorkFromService {
         try {
             if (sendWorkingOutSideRequest.getContent() != null &&
                     sendWorkingOutSideRequest.getDepartmentId() != null &&
-                    sendWorkingOutSideRequest.getRequestId() != null&&
+                    sendWorkingOutSideRequest.getRequestId() != null &&
                     sendWorkingOutSideRequest.getDate() != null &&
                     sendWorkingOutSideRequest.getType() != null
             ) {

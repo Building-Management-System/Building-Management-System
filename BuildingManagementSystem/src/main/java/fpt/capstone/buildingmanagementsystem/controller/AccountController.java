@@ -27,7 +27,7 @@ public class AccountController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public ResponseEntity<?> saveUser(@RequestBody RegisterRequest registerRequest) throws Exception {
-        return ResponseEntity.ok(accountManageService.saveNewAccount(registerRequest));
+        return accountManageService.saveNewAccount(registerRequest);
     }
 
     @RequestMapping(value = "/getAllAccount", method = RequestMethod.GET)

@@ -11,4 +11,5 @@ public class RegisterRequest {
     public String role;
     public String departmentName;
     public String hrId;
+    public String roomId;
 }

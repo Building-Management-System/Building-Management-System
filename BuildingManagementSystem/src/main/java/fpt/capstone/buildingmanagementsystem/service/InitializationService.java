@@ -10,6 +10,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Room;
 import fpt.capstone.buildingmanagementsystem.model.entity.Status;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.entity.UserPendingStatus;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DeviceStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DayOffRepository;
@@ -20,12 +21,12 @@ import fpt.capstone.buildingmanagementsystem.repository.RoomRepository;
 import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserPendingStatusRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static fpt.capstone.buildingmanagementsystem.until.Until.generateRealTime;
 
@@ -109,36 +110,60 @@ public class InitializationService {
             departmentList.add(department9);
 
             for (int i = 1; i < 6; i++) {
-                Device lcd = new Device(UUID.randomUUID().toString(), i + "", "Lcd_D" + i);
+                Device lcd = Device.builder()
+                        .deviceName("Lcd_D" + i)
+                        .deviceId(i + "")
+                        .status(DeviceStatus.ACTIVE)
+                        .deviceUrl("url")
+                        .deviceNote("note")
+                        .createdDate(Until.generateRealTime())
+                        .updateDate(Until.generateRealTime())
+                        .build();
                 Room room = new Room(i, "Tech_D" + i, lcd);
                 roomList.add(room);
                 devices.add(lcd);
             }
-            Device lcdReal = new Device(UUID.randomUUID().toString(), "2032105", "Lcd_D6");
+            Device lcdReal = Device.builder()
+                    .deviceName("Lcd_D6")
+                    .deviceId("2032105")
+                    .status(DeviceStatus.ACTIVE)
+                    .deviceUrl("url")
+                    .deviceNote("note")
+                    .createdDate(Until.generateRealTime())
+                    .updateDate(Until.generateRealTime())
+                    .build();
             devices.add(lcdReal);
             roomList.add(new Room(6, "Tech_D6", lcdReal));
 
             for (int i = 7; i <= 11; i++) {
-                Device device = new Device(UUID.randomUUID().toString(), i + "", "Lcd_R10" + (i-6));
-                Room room = new Room(i, "R10" + i, device);
+                Device lcd = Device.builder()
+                        .deviceName("Lcd_R10" + (i - 6))
+                        .deviceId(i + "")
+                        .status(DeviceStatus.ACTIVE)
+                        .deviceUrl("url")
+                        .deviceNote("note")
+                        .createdDate(Until.generateRealTime())
+                        .updateDate(Until.generateRealTime())
+                        .build();
+                Room room = new Room(i, "R10" + i, lcd);
                 roomList.add(room);
-                devices.add(device);
+                devices.add(lcd);
             }
 
-            RegisterRequest registerRequest = new RegisterRequest("demo", "123", "hr", "human resources", "");
+            RegisterRequest registerRequest = new RegisterRequest("demo", "123", "hr", "human resources", "", "");
             Account newAccount = accountMapper.convertRegisterAccount(registerRequest, status2, role1);
             User user = User.builder().city("unknown").country("unknown").email("unknown").firstName("unknown")
                     .lastName("unknown").dateOfBirth("unknown").telephoneNumber("unknown").gender("unknown").createdDate(
-                            generateRealTime()).image("unknown").updatedDate(generateRealTime()).department(department3)
+                            generateRealTime()).address("unknown").image("unknown").updatedDate(generateRealTime()).account(newAccount).department(department3)
                     .build();
-            user.setAccount(newAccount);
+            newAccount.setUser(user);
             roleRepository.saveAll(roleList);
             statusRepository.saveAll(statusList);
             userPendingStatusRepository.saveAll(userPendingStatusList);
             departmentRepository.saveAll(departmentList);
             deviceRepository.saveAll(devices);
             roomRepository.saveAll(roomList);
-            userRepository.save(user);
+            accountRepository.saveAndFlush(newAccount);
             dayOffRepository.saveAll(initEmployeeDayOff());
         }
     }

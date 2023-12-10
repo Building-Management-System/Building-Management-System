@@ -1,6 +1,13 @@
 package fpt.capstone.buildingmanagementsystem.validate;
 
+import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
+import fpt.capstone.buildingmanagementsystem.exception.NotFound;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.repository.MonthlyEvaluateRepository;
+import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.service.MonthlyEvaluateService;
 import fpt.capstone.buildingmanagementsystem.until.Until;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Time;
@@ -9,10 +16,17 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
 public class Validate {
+    @Autowired
+    MonthlyEvaluateService monthlyEvaluateService;
+    @Autowired
+    UserRepository userRepository;
+    @Autowired
+    MonthlyEvaluateRepository monthlyEvaluateRepository;
     public static final String DATE_FORMAT = "^\\d{4}\\-(0[1-9]|1[0-2])\\-(0[1-9]|1\\d|2\\d|3[01])$";
     public static final String TIME_FORMAT = "^(2[0-3]|1[0-9]||0[0-9])\\:([0-5][0-9]|)\\:([0-5][0-9]|)$";
     public static final String DATE_TIME_FORMAT = "^\\d{4}\\-(0[1-9]|1[0-2])\\-(0[1-9]|1\\d|2\\d|3[01])\\s(2[0-3]|1[0-9]||0[0-9])\\:([0-5][0-9]|)\\:([0-5][0-9]|)$";
@@ -26,7 +40,16 @@ public class Validate {
         }
         return false;
     }
-
+    public boolean checkValidateExistsEvaluate(String employeeId,String dateString) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = dateFormat.parse(dateString);
+        int year = date.getYear() + 1900; // getYear() returns the year minus 1900
+        int month = date.getMonth() + 1;
+        User user = userRepository.findById(employeeId)
+                .orElseThrow(() -> new NotFound("Not_found_user"));
+        boolean check = monthlyEvaluateRepository.existsByEmployeeAndMonthAndYear(user, month, year);
+        return !check;
+    }
     public static boolean validateDateTime(String time) {
         if (Pattern.matches(TIME_FORMAT, time.toString())) {
             return true;
@@ -60,6 +83,17 @@ public class Validate {
         Timestamp timestampStartTime = new java.sql.Timestamp(startDate1.getTime());
         Timestamp timestampEndTime = new java.sql.Timestamp(endDate1.getTime());
         if (timestampEndTime.getTime() - timestampStartTime.getTime() < 0) {
+            return false;
+        }
+        return true;
+    }
+    public static boolean validateStartDateAndEndDate2(String startDate, String endDate) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate1 = dateFormat.parse(startDate.toString());
+        Date endDate1 = dateFormat.parse(endDate.toString());
+        Timestamp timestampStartTime = new java.sql.Timestamp(startDate1.getTime());
+        Timestamp timestampEndTime = new java.sql.Timestamp(endDate1.getTime());
+        if (timestampEndTime.getTime() - timestampStartTime.getTime() <= 0) {
             return false;
         }
         return true;

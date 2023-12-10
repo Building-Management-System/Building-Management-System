@@ -9,12 +9,11 @@ import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.Device;
 import fpt.capstone.buildingmanagementsystem.model.entity.StrangerLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DeviceStatus;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DeviceRepository;
 import fpt.capstone.buildingmanagementsystem.repository.StrangerLogLcdRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +23,7 @@ import java.text.SimpleDateFormat;
 
 @Component
 public class LcdService {
-    private static final Logger logger = LoggerFactory.getLogger(LcdService.class);
+//    private static final Logger logger = LoggerFactory.getLogger(LcdService.class);
     private static final String CONTROL_LOG = "RecPush";
 
     private static final String STRANGER_LOG = "StrSnapPush";
@@ -59,7 +58,7 @@ public class LcdService {
                 ControlLogLcd controlLogLcd = ControlLogLcd.builder()
                         .operator(rootNode.path("operator").asText())
                         .personId(infoNode.path("personId").asText())
-                        .status(infoNode.path("personType").asInt() == 1 ? ControlLogStatus.WHITE_LIST : ControlLogStatus.BLACK_LIST)
+                        .status(infoNode.path("PersonType").asInt() == 1 ? ControlLogStatus.WHITE_LIST : ControlLogStatus.BLACK_LIST)
                         .recordId(infoNode.path("RecordID").asInt())
                         .verifyStatus(infoNode.path("VerifyStatus").asInt())
                         .similarity1(infoNode.path("similarity1").asDouble())
@@ -73,7 +72,7 @@ public class LcdService {
                         .build();
                 String deviceId = rootNode.path("facesluiceId").asText();
 
-                Device device = deviceRepository.findById(deviceId)
+                Device device = deviceRepository.findByDeviceIdAndStatus(deviceId, DeviceStatus.ACTIVE)
                         .orElseThrow(() -> new BadRequest("Not_found"));
 
                 Account account = accountRepository.findByUsername(controlLogLcd.getPersionName())
@@ -81,7 +80,9 @@ public class LcdService {
                 controlLogLcd.setAccount(account);
                 controlLogLcd.setDevice(device);
                 controlLogLcdRepository.save(controlLogLcd);
-                dailyLogService.mapControlLogToDailyLog(controlLogLcd);
+                if (controlLogLcd.getStatus().equals(ControlLogStatus.WHITE_LIST)) {
+                    dailyLogService.mapControlLogToDailyLog(controlLogLcd);
+                }
             } else if (operator.equals(STRANGER_LOG)) {
                 String time = infoNode.path("time").asText();
                 StrangerLogLcd strangerLogLcd = StrangerLogLcd.builder()
@@ -94,7 +95,7 @@ public class LcdService {
                         .build();
 
                 String deviceId = rootNode.path("facesluiceId").asText();
-                Device device = deviceRepository.findById(deviceId)
+                Device device = deviceRepository.findByDeviceIdAndStatus(deviceId, DeviceStatus.ACTIVE)
                         .orElseThrow(() -> new BadRequest("Not_found"));
                 strangerLogLcd.setDevice(device);
                 strangerLogLcdRepository.save(strangerLogLcd);
