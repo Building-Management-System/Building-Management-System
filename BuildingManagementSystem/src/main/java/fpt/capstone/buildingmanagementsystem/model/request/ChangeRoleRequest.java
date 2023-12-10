@@ -11,4 +11,5 @@ public class ChangeRoleRequest {
     public String accountId;
     public String roleName;
     public String departmentId;
+    public String roomId;
 }

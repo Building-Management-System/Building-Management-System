@@ -12,5 +12,7 @@ import java.util.List;
 public interface DeviceAccountRepository extends JpaRepository<DeviceAccount, String> {
     List<DeviceAccount> findByDevice(Device device);
 
-    List<DeviceAccount> findByAccountAndDevice(Account account, Device device);
+    List<DeviceAccount> findByDeviceAndAccount(Device device, Account account);
+
+    List<DeviceAccount> findByAccount(Account account);
 }

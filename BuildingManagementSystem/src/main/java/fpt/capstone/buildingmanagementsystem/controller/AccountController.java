@@ -46,7 +46,7 @@ public class AccountController {
     }
 
     @RequestMapping(value = "/changeRoleAccount", method = RequestMethod.POST)
-    public boolean changeRoleAccount(@RequestBody ChangeRoleRequest changeRoleRequest) throws Exception {
+    public ResponseEntity<?> changeRoleAccount(@RequestBody ChangeRoleRequest changeRoleRequest) throws Exception {
         return accountManageService.changeRoleAccount(changeRoleRequest);
     }
 
