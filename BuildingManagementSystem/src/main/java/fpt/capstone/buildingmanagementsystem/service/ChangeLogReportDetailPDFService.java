@@ -76,31 +76,26 @@ public class ChangeLogReportDetailPDFService {
         document.add(attendanceChange);
 
         if(changeLogDetailResponse.getCheckinChange()==null){
-            document.add(new Paragraph("    Check In Change: "+"None"));
+            document.add(new Paragraph("    Check In Change: "+"none"));
         }else{
             document.add(new Paragraph("    Check In Change: "+changeLogDetailResponse.getCheckinChange()));
         }
         if(changeLogDetailResponse.getCheckoutChange()==null){
-            document.add(new Paragraph("    Check Out Change: "+"None"));
+            document.add(new Paragraph("    Check Out Change: "+"none"));
         }else{
             document.add(new Paragraph("    Check Out Change: "+changeLogDetailResponse.getCheckoutChange()));
         }
         document.add(new Paragraph("    Date Change: "+changeLogDetailResponse.getDateDailyChange()));
+        document.add(new Paragraph("    Change from: "+changeLogDetailResponse.getChangeFrom()));
 
-        Account account=accountRepository.findByUsername(changeLogDetailResponse.getChangeFrom()).get();
-        if(Objects.equals(account.getRole().getRoleName(), "manager")) {
-            document.add(new Paragraph("    Change from: Manager Edit"));
-        }else{
-            document.add(new Paragraph("    Change from: Employee Request"));
-        }
 
         Paragraph log = new Paragraph("4. Log", font2);
         log.setAlignment(Paragraph.ALIGN_LEFT);
         document.add(log);
         if(changeLogDetailResponse.getOutSideWork()==-1){
-            document.add(new Paragraph("    Outside Work: False"));
+            document.add(new Paragraph("    Outside Work: none"));
         }else {
-            document.add(new Paragraph("    Outside Work: True"));
+            document.add(new Paragraph("    Outside Work: "+changeLogDetailResponse.getOutSideWork()));
         }
         document.add(new Paragraph("    Violate: "+changeLogDetailResponse.isViolate()));
 
