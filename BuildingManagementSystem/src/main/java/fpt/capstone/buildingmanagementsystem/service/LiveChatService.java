@@ -254,7 +254,7 @@ public class LiveChatService {
         List<ChatUser> chatUserToGetId=chatUserRepository.findAllByUser_UserId(userId);
         List<ChatUser> chatUser = new ArrayList<>();
         for (ChatUser userChat : chatUserToGetId) {
-            chatUser.add(chatUserRepository.find(userChat.getChat().getId(),userId).get());
+            chatUser.addAll(chatUserRepository.find(userChat.getChat().getId(),userId));
         }
         for (ChatUser userChat : chatUser) {
             if (!userChat.getChat().isGroupChat()) {

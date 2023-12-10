@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface ChatUserRepository extends JpaRepository<ChatUser, String> {
     List<ChatUser> findAllByChat_Id(String chatId);
     @Query(value = "select * from chat_user where chat_id = :chat_id and user_id != :user_id", nativeQuery = true)
-    Optional<ChatUser> find(String chat_id,String user_id);
+    List<ChatUser> find(String chat_id,String user_id);
     List<ChatUser> findAllByUser_UserId(String userId);
     boolean existsByUserAndChat(User user,Chat chat);
     @Transactional
