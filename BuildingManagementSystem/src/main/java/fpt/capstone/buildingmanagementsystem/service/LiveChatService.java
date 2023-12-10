@@ -249,11 +249,11 @@ public class LiveChatService {
 
     public List<UserInfoResponse> getAllChatUserSingle(String userId) {
         List<UserInfoResponse> userInfoResponses = new ArrayList<>();
-        List<User> userList = userRepository.findAll();
+        List<User> userList = userRepository.findAllByAccount_Status_StatusName("active");
         Optional<User> user = userRepository.findByUserId(userId);
         List<ChatUser> chatUser = chatUserRepository.findAllByUser_UserIdIsNot(userId);
         for (ChatUser userChat : chatUser) {
-            if (!userChat.getChat().isGroupChat() || Objects.equals(userChat.getUser().getAccount().getStatus().getStatusName(), "inactive")) {
+            if (!userChat.getChat().isGroupChat()) {
                 userList.remove(userChat.getUser());
             }
         }
