@@ -5,8 +5,10 @@ import com.lowagie.text.Font;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.response.ChangeLogDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ControlLogResponse;
+import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,9 +17,12 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 @Service
 public class ChangeLogReportDetailPDFService {
+    @Autowired
+    AccountRepository accountRepository;
     @Autowired
     RequestChangeLogService requestChangeLogService;
     private void writeTableHeader(PdfPTable table) {
@@ -81,12 +86,22 @@ public class ChangeLogReportDetailPDFService {
             document.add(new Paragraph("    Check Out Change: "+changeLogDetailResponse.getCheckoutChange()));
         }
         document.add(new Paragraph("    Date Change: "+changeLogDetailResponse.getDateDailyChange()));
-        document.add(new Paragraph("    Change from: "+changeLogDetailResponse.getChangeFrom()));
+
+        Account account=accountRepository.findByUsername(changeLogDetailResponse.getChangeFrom()).get();
+        if(Objects.equals(account.getRole().getRoleName(), "manager")) {
+            document.add(new Paragraph("    Change from: Manager Edit"));
+        }else{
+            document.add(new Paragraph("    Change from: Employee Request"));
+        }
 
         Paragraph log = new Paragraph("4. Log", font2);
         log.setAlignment(Paragraph.ALIGN_LEFT);
         document.add(log);
-        document.add(new Paragraph("    Outside Work: "+changeLogDetailResponse.getOutSideWork()));
+        if(changeLogDetailResponse.getOutSideWork()==-1){
+            document.add(new Paragraph("    Outside Work: False"));
+        }else {
+            document.add(new Paragraph("    Outside Work: True"));
+        }
         document.add(new Paragraph("    Violate: "+changeLogDetailResponse.isViolate()));
 
         Paragraph reason = new Paragraph("5. Reason", font2);
