@@ -69,8 +69,17 @@ public class ChangeLogReportDetailPDFService {
         Paragraph attendanceChange = new Paragraph("3. Attendance Change", font2);
         attendanceChange.setAlignment(Paragraph.ALIGN_LEFT);
         document.add(attendanceChange);
-        document.add(new Paragraph("    Check In Change: "+changeLogDetailResponse.getCheckinChange()));
-        document.add(new Paragraph("    Check Out Change: "+changeLogDetailResponse.getCheckoutChange()));
+
+        if(changeLogDetailResponse.getCheckinChange()==null){
+            document.add(new Paragraph("    Check In Change: "+"None"));
+        }else{
+            document.add(new Paragraph("    Check In Change: "+changeLogDetailResponse.getCheckinChange()));
+        }
+        if(changeLogDetailResponse.getCheckoutChange()==null){
+            document.add(new Paragraph("    Check Out Change: "+"None"));
+        }else{
+            document.add(new Paragraph("    Check Out Change: "+changeLogDetailResponse.getCheckoutChange()));
+        }
         document.add(new Paragraph("    Date Change: "+changeLogDetailResponse.getDateDailyChange()));
         document.add(new Paragraph("    Change from: "+changeLogDetailResponse.getChangeFrom()));
 
