@@ -75,7 +75,6 @@ public class EmployeeEvaluateDetailPDFService {
         document.add(new Paragraph("    Permitted leave: " + monthlyEvaluateOfEmployee.getPermittedLeave()));
         document.add(new Paragraph("    Non-permitted leave: " + monthlyEvaluateOfEmployee.getNonPermittedLeave()));
         document.add(new Paragraph("    Overtime (h): " + monthlyEvaluateOfEmployee.getOverTime()));
-        document.add(new Paragraph("    Permitted Leave: " + monthlyEvaluateOfEmployee.getPermittedLeave()));
         document.add(new Paragraph("    Violate (times): " + monthlyEvaluateOfEmployee.getViolate()));
         document.add(new Paragraph("    Paid day(day): " + monthlyEvaluateOfEmployee.getPaidDay()));
 
