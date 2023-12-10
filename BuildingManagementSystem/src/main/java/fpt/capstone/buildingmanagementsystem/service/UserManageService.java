@@ -219,6 +219,12 @@ public class UserManageService {
         if (users.isEmpty()) return userInfoResponses;
         return getUserInfoResponses(userInfoResponses, users);
     }
+    public List<UserInfoResponse> getAllUserInfoActive() {
+        List<UserInfoResponse> userInfoResponses = new ArrayList<>();
+        List<User> users = userRepository.findAllByAccount_Status_StatusName("active");
+        if (users.isEmpty()) return userInfoResponses;
+        return getUserInfoResponses(userInfoResponses, users);
+    }
 
     public ChangeInfoAcceptDetailsResponse getChangeInfoDetail(GetUserInfoRequest getUserInfoRequest) {
         Optional<User> userOptional = userRepository.findByUserId(getUserInfoRequest.getUserId());
@@ -306,6 +312,11 @@ public class UserManageService {
 
     public List<UserAccountResponse> getUserAccount(String userId) {
         return userRepositoryV2.getUserAccount().stream()
+                .filter(user -> !user.getAccountId().equals(userId))
+                .collect(Collectors.toList());
+    }
+    public List<UserAccountResponse> getUserAccountActive(String userId) {
+        return userRepositoryV2.getUserAccountActive().stream()
                 .filter(user -> !user.getAccountId().equals(userId))
                 .collect(Collectors.toList());
     }

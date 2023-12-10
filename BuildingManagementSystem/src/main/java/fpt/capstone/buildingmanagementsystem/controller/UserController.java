@@ -58,7 +58,10 @@ public class UserController {
     public ResponseEntity<?> getAllUserInfo() {
         return ResponseEntity.ok(userManageService.getAllUserInfo());
     }
-
+    @RequestMapping(value = "/getAllUserInfoActive", method = RequestMethod.GET)
+    public ResponseEntity<?> getAllUserInfoActive() {
+        return ResponseEntity.ok(userManageService.getAllUserInfoActive());
+    }
     @RequestMapping(value = "/getManagerByDepartment", method = RequestMethod.GET)
     public List<UserInfoResponse> getManager(@RequestParam("department") String departmentId) {
         return userManageService.getManagerByDepartmentId(departmentId);
@@ -67,6 +70,10 @@ public class UserController {
     @RequestMapping(value = "/getUserAccount", method = RequestMethod.GET)
     public List<UserAccountResponse> getUserAccount(@RequestParam("userId") String userId) {
         return userManageService.getUserAccount(userId);
+    }
+    @RequestMapping(value = "/getUserAccountActive", method = RequestMethod.GET)
+    public List<UserAccountResponse> getUserAccountActive(@RequestParam("userId") String userId) {
+        return userManageService.getUserAccountActive(userId);
     }
 
     @RequestMapping(value = "/getAllDepartmentEmployee", method = RequestMethod.GET)
