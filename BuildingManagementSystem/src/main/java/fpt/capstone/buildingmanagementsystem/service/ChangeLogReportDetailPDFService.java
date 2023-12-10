@@ -86,7 +86,13 @@ public class ChangeLogReportDetailPDFService {
             document.add(new Paragraph("    Check Out Change: "+changeLogDetailResponse.getCheckoutChange()));
         }
         document.add(new Paragraph("    Date Change: "+changeLogDetailResponse.getDateDailyChange()));
-        document.add(new Paragraph("    Change from: "+changeLogDetailResponse.getChangeFrom()));
+        if(Objects.equals(changeLogDetailResponse.getChangeFrom(), "FROM_REQUEST")) {
+            document.add(new Paragraph("    Change from: Employee request"));
+        }else if(Objects.equals(changeLogDetailResponse.getChangeFrom(), "FROM_EDIT")) {
+            document.add(new Paragraph("    Change from: Manager edit"));
+        }else if(Objects.equals(changeLogDetailResponse.getChangeFrom(), "OTHER")) {
+            document.add(new Paragraph("    Change from: Other"));
+        }
 
 
         Paragraph log = new Paragraph("4. Log", font2);
