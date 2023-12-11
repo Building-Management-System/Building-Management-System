@@ -95,4 +95,8 @@ public class ControlLogLcd {
     @ManyToOne
     @JoinColumn(name = "deviceId")
     private Device device;
+
+    @ManyToOne
+    @JoinColumn(name = "roomId")
+    private Room room;
 }
