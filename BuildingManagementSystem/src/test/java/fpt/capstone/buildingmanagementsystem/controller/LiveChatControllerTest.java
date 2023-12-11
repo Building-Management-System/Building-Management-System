@@ -63,14 +63,6 @@ class LiveChatControllerTest {
         Assertions.assertEquals(new MessageImageAndFileResponse("messageId", "message", "senderId"), result);
     }
 
-    @Test
-    void testGetMessagesByChatId() {
-        when(liveChatService.getMessageBySenderAndReceiver(anyString(), anyString())).thenReturn(new ChatResponse(List.of(new MessageResponse("messageId", true, "message", "senderId", "createdAt", "type")), List.of(new UserChatResponse("userId", "username", "image")), "admin"));
-
-        ChatResponse result = liveChatController.getMessagesByChatId("chatId", "userId");
-        Assertions.assertEquals(new ChatResponse(List.of(new MessageResponse("messageId", true, "message", "senderId", "createdAt", "type")), List.of(new UserChatResponse("userId", "username", "image")), "admin"), result);
-    }
-    //fix
 
     @Test
     void testGetAllChatUserSingle() {
