@@ -98,7 +98,7 @@ public class AttendanceDetailPDFService {
         }
         document.add(table);
         document.close();
-        
+
         byte[] byteArray = byteArrayOutputStream.toByteArray();
         String file = Base64.getEncoder().encodeToString(byteArray);
         String fileName="AttendanceDetail_"+attendanceDetailResponse.getUsername()+"_"+date+".pdf";
