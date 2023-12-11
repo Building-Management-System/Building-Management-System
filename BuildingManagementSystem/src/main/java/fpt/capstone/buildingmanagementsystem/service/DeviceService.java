@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
+import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.Device;
 import fpt.capstone.buildingmanagementsystem.model.entity.DeviceAccount;
@@ -9,6 +10,8 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Room;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DeviceStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.AccountDeviceRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangeRecordStatusRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangeStatusRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceRoomRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceStatusRequest;
@@ -65,11 +68,6 @@ public class DeviceService {
         Device device = deviceRepository.findById(request.getDeviceId())
                 .orElseThrow(() -> new NotFound("Not_found_device"));
 
-        if (!device.getStatus().equals(DeviceStatus.INACTIVE)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(device);
-        }
-
         if (request.getDeviceLcdId() != null) {
             device.setDeviceId(request.getDeviceLcdId());
         }
@@ -81,22 +79,29 @@ public class DeviceService {
             device.setDeviceUrl(request.getDeviceUrl());
         }
 
-        List<Room> roomExist = roomRepository.getRoomByInActiveDevice(request.getNewRoomId());
-        if (!roomExist.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(device);
-        }
-        Room room = roomRepository.findById(request.getNewRoomId())
-                .orElseThrow(() -> new BadRequest("Not_found_room"));
+        if(!request.getNewRoomId().isEmpty()) {
+            if (!device.getStatus().equals(DeviceStatus.INACTIVE)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Device_is_active");
+            }
+            int roomId = Integer.parseInt(request.getNewRoomId());
+            List<Room> roomExist = roomRepository.getRoomByInActiveDevice(roomId);
+            if (roomExist.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("Room_contained_device_active");
+            }
+            Room room = roomRepository.findById(roomId)
+                    .orElseThrow(() -> new BadRequest("Not_found_room"));
 
-        room.setDevice(device);
+            room.setDevice(device);
+            roomRepository.save(room);
+        }
         try {
             deviceRepository.save(device);
-            roomRepository.save(room);
-            return ResponseEntity.ok(room);
+            return ResponseEntity.ok(device);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(e.getCause());
+                    .body("fail");
         }
     }
 
@@ -168,6 +173,7 @@ public class DeviceService {
         List<AccountLcdResponse> deviceAccounts = deviceAccountRepository.findByDevice(device)
                 .stream()
                 .map(deviceAccount -> new AccountLcdResponse(
+                        deviceAccount.getDeviceAccountId(),
                         deviceAccount.getAccount().accountId,
                         deviceAccount.getAccount().getUsername(),
                         deviceAccount.getAccount().getUser().getFirstName(),
@@ -204,6 +210,33 @@ public class DeviceService {
                                 .body(request);
                     }
                 }
+                List<DeviceAccount> deviceAccounts = deviceAccountRepository.findByDeviceAndAccount(room.getDevice(), account);
+
+                for (DeviceAccount deviceAccount : deviceAccounts) {
+                    if (deviceAccount.getStartDate().compareTo(fromDate) == 0) {
+                        if ((deviceAccount.getEndDate() == null && toDate == null)) {
+                            if (deviceAccount.getStatus().equals(ControlLogStatus.BLACK_LIST)) {
+                                deviceAccount.setStatus(ControlLogStatus.WHITE_LIST);
+                                deviceAccountRepository.save(deviceAccount);
+                                int status = deviceAccount.getStatus().equals(ControlLogStatus.WHITE_LIST) ? 1 : 0;
+                                return ResponseEntity.ok(messageEditPerson(deviceAccount.getDevice().getDeviceId(), account.getAccountId(), status));
+                            }
+                            return ResponseEntity.status(HttpStatus.CONFLICT)
+                                    .body(request);
+                        }
+                        if (deviceAccount.getEndDate() != null && toDate != null && deviceAccount.getEndDate().compareTo(toDate) == 0) {
+                            if (deviceAccount.getStatus().equals(ControlLogStatus.BLACK_LIST)) {
+                                deviceAccount.setStatus(ControlLogStatus.WHITE_LIST);
+                                deviceAccountRepository.save(deviceAccount);
+                                int status = deviceAccount.getStatus().equals(ControlLogStatus.WHITE_LIST) ? 1 : 0;
+                                return ResponseEntity.ok(messageEditPerson(deviceAccount.getDevice().getDeviceId(), account.getAccountId(), status));
+                            }
+                            return ResponseEntity.status(HttpStatus.CONFLICT)
+                                    .body(request);
+                        }
+                    }
+                }
+
                 DeviceAccount deviceAccount = DeviceAccount.builder()
                         .startDate(fromDate)
                         .createdDate(Until.generateRealTime())
@@ -219,16 +252,59 @@ public class DeviceService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(request);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(e.getCause());
         }
     }
 
-//    public ResponseEntity<?> changeAccountStatus()
+    public ResponseEntity<?> changeRecordStatus(ChangeRecordStatusRequest request) {
+        DeviceAccount deviceAccount = deviceAccountRepository.findById(request.getDeviceAccountId())
+                .orElseThrow(() -> new BadRequest("Not_found_record"));
+
+        deviceAccount.setStatus(request.getStatus());
+        try {
+            deviceAccountRepository.save(deviceAccount);
+            return ResponseEntity.ok(true);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getCause());
+        }
+    }
+
+    public boolean changeAccountStatus(ChangeStatusRequest request) {
+        try {
+            Account account = accountRepository.findById(request.getAccountId())
+                    .orElseThrow(() -> new BadRequest("Not_found_user"));
+
+            List<DeviceAccount> deviceAccounts = deviceAccountRepository.findByAccount(account);
+
+            deviceAccounts.forEach(deviceAccount -> deviceAccount.setStatus(request.getStatus()));
+
+            deviceAccountRepository.saveAll(deviceAccounts);
+
+            return true;
+        } catch (Exception e) {
+            throw new ServerError("fails");
+        }
+    }
+
+    public void deleteAccountDevice(String accountId) {
+        Account account = accountRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new BadRequest("Not_found_account"));
+
+        List<DeviceAccount> deviceAccounts = deviceAccountRepository.findByAccount(account);
+
+        try {
+            deviceAccountRepository.deleteAll(deviceAccounts);
+        } catch (Exception e) {
+            throw new ServerError("fails");
+        }
+    }
+
 
     public String messageSetupMqtt(String accountId, String startDate, String endDate, String deviceLcdId) {
         return "{\n" +
-                "\"messageId\":\"AddPersonslist2020-04-13T19:07:00_00001\",\n" +
                 " \"DataBegin\":\"BeginFlag\",\n" +
                 " \"operator\":\"AddPersons\", \n" +
                 "\"PersonNum\":\"1000\", \n" +
@@ -257,6 +333,20 @@ public class DeviceService {
                 "\n" +
                 " \"DataEnd\":\"EndFlag\" \n" +
                 "}\n";
+    }
+
+    public String messageEditPerson(String lcdDeviceId, String accountId, int status) {
+        return "{ \n" +
+                "\"operator\": \" EditPerson-Ac k \", \n" +
+                "\"info\": \n" +
+                "{ \n" +
+                "\"facesluiceId\":\"" + lcdDeviceId + "\", \n" +
+                "\"personId\":\"" + accountId + "\", \n" +
+                " \t\t\"result\":\"ok\", \n" +
+                "\"detail\":\"\" \n" +
+                "\"personType\":\"" + status + "\"" +
+                "}\n" +
+                " }\n";
     }
 }
 

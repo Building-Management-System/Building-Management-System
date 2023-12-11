@@ -24,7 +24,6 @@ public interface DailyLogRepository extends JpaRepository<DailyLog, String> {
     List<DailyLog> findAllByUserAndMonth(User user, int month);
 
     Optional<DailyLog> findByUserAndDate(User user, Date date);
-
     @Query(value = "SELECT *\n" +
             "FROM daily_log\n" +
             "WHERE user_id LIKE :accountId AND date LIKE :date\n" +

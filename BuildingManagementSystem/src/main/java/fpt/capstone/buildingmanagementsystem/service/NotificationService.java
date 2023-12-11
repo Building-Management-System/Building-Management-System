@@ -352,7 +352,7 @@ public class NotificationService {
         List<PersonalPriority> existedPriority = personalPriorityRepository.findByNotificationAndUser(notification, user);
 
         try {
-            if(existedPriority.isEmpty()){
+            if (existedPriority.isEmpty()) {
                 personalPriorityRepository.save(personalPriority);
             }
             return true;
@@ -409,6 +409,33 @@ public class NotificationService {
                 throw new Conflict("fail");
             }
         } catch (Exception e) {
+            throw new ServerError("fail");
+        }
+    }
+
+    public void hiddenNotificationSendAll(User user) {
+        List<Notification> notifications = notificationRepository.getSendToAllNotification();
+        List<NotificationHidden> hiddens = new ArrayList<>();
+        notifications.forEach(notification -> {
+            NotificationHidden hidden = NotificationHidden.builder()
+                    .user(user)
+                    .notification(notification)
+                    .build();
+            hiddens.add(hidden);
+        });
+        try {
+            notificationHiddenRepository.saveAll(hiddens);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ServerError("fail");
+        }
+    }
+
+    public void deleteFromHiddenNotification(User user) {
+        try {
+            notificationHiddenRepository.deleteAllByUser(user);
+        } catch (Exception e) {
+            e.printStackTrace();
             throw new ServerError("fail");
         }
     }

@@ -15,6 +15,9 @@ import java.util.Date;
 @Getter
 @Setter
 public class AccountLcdResponse {
+
+    private String deviceAccountId;
+
     private String accountId;
 
     private String userName;

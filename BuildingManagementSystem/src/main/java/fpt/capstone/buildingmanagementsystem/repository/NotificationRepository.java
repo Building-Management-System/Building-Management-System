@@ -69,4 +69,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
             "JOIN department d ON d.department_id = u.department_id\n" +
             "WHERE d.department_id LIKE :departmentId", nativeQuery = true)
     List<Notification> getNotificationByDepartment(@Param("departmentId") String departmentId);
+
+    @Query(value = "SELECT *\n" +
+            "FROM notification n\n" +
+            "JOIN notification_receiver nr ON n.notification_id = nr.notification_id\n" +
+            "WHERE send_all_status = TRUE;", nativeQuery = true)
+    List<Notification> getSendToAllNotification();
 }

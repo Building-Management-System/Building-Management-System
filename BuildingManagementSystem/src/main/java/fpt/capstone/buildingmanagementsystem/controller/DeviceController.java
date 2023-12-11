@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.controller;
 
 import fpt.capstone.buildingmanagementsystem.model.request.AccountDeviceRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangeRecordStatusRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceRoomRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceStatusRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.DeviceAccountResponse;
@@ -47,6 +48,16 @@ public class DeviceController {
     @GetMapping("getDeviceDetail")
     public DeviceAccountResponse getDeviceDetail(@RequestParam("device_id") String deviceId) {
         return deviceService.getDeviceDetail(deviceId);
+    }
+
+//    @PostMapping("changeAccountStatus")
+//    public ResponseEntity<?> changeAccountStatus(@RequestBody ChangeStatusRequest request) {
+//        return deviceService.changeAccountStatus(request);
+//    }
+
+    @PostMapping("changeRecordStatus")
+    public ResponseEntity<?> changeRecordStatus(@RequestBody ChangeRecordStatusRequest request) {
+        return deviceService.changeRecordStatus(request);
     }
 
 }

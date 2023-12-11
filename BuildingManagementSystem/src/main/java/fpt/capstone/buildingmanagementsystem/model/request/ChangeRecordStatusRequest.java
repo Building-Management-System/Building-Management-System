@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.model.request;
 
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,14 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class DeviceRoomRequest {
-    private String deviceId;
-
-    private String newRoomId;
-
-    private String deviceName;
-
-    private String deviceLcdId;
-
-    private String deviceUrl;
+public class ChangeRecordStatusRequest {
+    String deviceAccountId;
+    ControlLogStatus status;
 }

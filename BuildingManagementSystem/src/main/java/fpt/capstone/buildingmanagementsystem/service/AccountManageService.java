@@ -11,6 +11,7 @@ import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.ChatMessage;
 import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.DayOff;
 import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.entity.InactiveManagerTemp;
 import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
@@ -19,10 +20,12 @@ import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
 import fpt.capstone.buildingmanagementsystem.model.entity.Role;
 import fpt.capstone.buildingmanagementsystem.model.entity.Status;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.AccountDeviceRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangePasswordRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeRoleRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeStatusAccountRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangeStatusRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.GetUserInfoRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ResetPasswordRequest;
@@ -31,6 +34,7 @@ import fpt.capstone.buildingmanagementsystem.model.response.GetAllAccountRespons
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.ChatMessageRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
+import fpt.capstone.buildingmanagementsystem.repository.DayOffRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
 import fpt.capstone.buildingmanagementsystem.repository.InactiveManagerTempRepository;
 import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
@@ -41,6 +45,7 @@ import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
 import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import fpt.capstone.buildingmanagementsystem.until.EmailSender;
+import fpt.capstone.buildingmanagementsystem.until.Until;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -84,6 +89,9 @@ public class AccountManageService implements UserDetailsService {
     EmailSender emailSender;
     @Autowired
     AccountRepository accountRepository;
+
+    @Autowired
+    DayOffRepository dayOffRepository;
     @Autowired
     RoleRepository roleRepository;
     @Autowired
@@ -109,6 +117,9 @@ public class AccountManageService implements UserDetailsService {
     @Autowired
     DeviceService deviceService;
 
+    @Autowired
+    NotificationService notificationService;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Account> userAccount = accountRepository.findByUsername(username);
@@ -125,6 +136,7 @@ public class AccountManageService implements UserDetailsService {
                 grantList);
     }
 
+    @Transactional
     public ResponseEntity<?> saveNewAccount(RegisterRequest registerRequest) {
         try {
             if (registerRequest.getPassword() != null && registerRequest.getUsername() != null
@@ -158,7 +170,11 @@ public class AccountManageService implements UserDetailsService {
                             }
                             dailyLogService.initDayOff(saveAccount.accountId);
 
-                            if(registerRequest.roomId != null) {
+                            // hidden notification
+                            notificationService.hiddenNotificationSendAll(saveAccount.getUser());
+
+                            // add to device_account
+                            if (!registerRequest.roomId.isEmpty()) {
                                 AccountDeviceRequest request = AccountDeviceRequest.builder()
                                         .accountId(saveAccount.accountId)
                                         .roomIdString(registerRequest.getRoomId())
@@ -226,6 +242,7 @@ public class AccountManageService implements UserDetailsService {
         throw new BadRequest("password_wrong");
     }
 
+    @Transactional
     public boolean changeStatusAccount(ChangeStatusAccountRequest changeStatusAccountRequest) {
         try {
             String accountId = changeStatusAccountRequest.getAccountId();
@@ -247,7 +264,9 @@ public class AccountManageService implements UserDetailsService {
                                 ticketManageService.resetTicketData(user.get());
                             }
                             accountRepository.updateStatusAccount(status.get().statusId, accountId);
-                            return true;
+                            ControlLogStatus controlLogStatus = changeStatusAccountRequest.statusName.equals("active") ? ControlLogStatus.WHITE_LIST : ControlLogStatus.BLACK_LIST;
+                            return deviceService.changeAccountStatus(new ChangeStatusRequest(accountId, controlLogStatus));
+
                         }
                     } else {
                         throw new NotFound("status_not_found");
@@ -264,7 +283,7 @@ public class AccountManageService implements UserDetailsService {
     }
 
     @Transactional
-    public boolean changeRoleAccount(ChangeRoleRequest changeRoleRequest) {
+    public ResponseEntity<?> changeRoleAccount(ChangeRoleRequest changeRoleRequest) {
         try {
             String accountId = changeRoleRequest.getAccountId();
             if (accountId != null && changeRoleRequest.getRoleName() != null) {
@@ -291,7 +310,7 @@ public class AccountManageService implements UserDetailsService {
                             //delete from temp
                             tempRepository.delete(inactiveManager);
                         }
-                        return true;
+                        return ResponseEntity.ok(changeRoleRequest);
                     } else {
                         throw new Conflict("department_exist_manager");
                     }
@@ -311,7 +330,16 @@ public class AccountManageService implements UserDetailsService {
                     tempRepository.save(temp);
                 }
                 accountRepository.updateRoleAccount(newRoleId, accountId);
-                return true;
+
+                if (!changeRoleRequest.getRoomId().isEmpty() && !changeRoleRequest.getDepartmentId().equals(user.getUser().getDepartment().getDepartmentId())) {
+                    AccountDeviceRequest request = AccountDeviceRequest.builder()
+                            .accountId(accountId)
+                            .roomIdString(changeRoleRequest.getRoomId())
+                            .startDate(dateFormat.format(Until.generateRealTime()))
+                            .build();
+                    return deviceService.registerNewAccount(request);
+                }
+                return ResponseEntity.ok(changeRoleRequest);
             } else {
                 throw new ServerError("request_fail");
             }
@@ -347,6 +375,7 @@ public class AccountManageService implements UserDetailsService {
         return roleMapper.convertRegisterAccount(role.get());
     }
 
+    @Transactional
     public boolean deleteAccount(String username, String hrId) {
         if (username != null) {
             Optional<Account> userAccount = accountRepository.findByUsername(username);
@@ -369,6 +398,11 @@ public class AccountManageService implements UserDetailsService {
                         && checkpoint7.size() == 0
                         && accountRepository.findByUsername(userAccount.get().getCreatedBy()).isPresent()
                         && hrId.equals(accountRepository.findByUsername(userAccount.get().getCreatedBy()).get().getAccountId())) {
+                    DayOff dayOff = dayOffRepository.findByAccount(userAccount.get())
+                            .orElseThrow(() -> new BadRequest("Not_found_day_off"));
+                    dayOffRepository.delete(dayOff);
+                    notificationService.deleteFromHiddenNotification(userAccount.get().getUser());
+                    deviceService.deleteAccountDevice(userAccount.get().getAccountId());
                     accountRepository.delete(userAccount.get());
                     return true;
                 } else {
