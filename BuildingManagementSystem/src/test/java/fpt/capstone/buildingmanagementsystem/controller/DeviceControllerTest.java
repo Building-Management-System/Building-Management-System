@@ -4,6 +4,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.Department;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DeviceStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.AccountDeviceRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.ChangeRecordStatusRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceRoomRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceStatusRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.AccountLcdResponse;
@@ -36,7 +37,6 @@ class DeviceControllerTest {
         MockitoAnnotations.openMocks(this);
     }
 
-
     @Test
     void testCreateDeviceAccount() {
         when(deviceService.registerNewAccount(any())).thenReturn(null);
@@ -49,7 +49,7 @@ class DeviceControllerTest {
     void testUpdateDevice() {
         when(deviceService.updateDevice(any())).thenReturn(null);
 
-        ResponseEntity<?> result = deviceController.updateDevice(new DeviceRoomRequest("deviceId", 0, "deviceName", "deviceLcdId", "deviceUrl"));
+        ResponseEntity<?> result = deviceController.updateDevice(new DeviceRoomRequest("deviceId", "newRoomId", "deviceName", "deviceLcdId", "deviceUrl"));
         Assertions.assertEquals(null, result);
     }
 
@@ -61,4 +61,11 @@ class DeviceControllerTest {
         Assertions.assertEquals(null, result);
     }
 
+    @Test
+    void testChangeRecordStatus() {
+        when(deviceService.changeRecordStatus(any())).thenReturn(null);
+
+        ResponseEntity<?> result = deviceController.changeRecordStatus(new ChangeRecordStatusRequest("deviceAccountId", ControlLogStatus.WHITE_LIST));
+        Assertions.assertEquals(null, result);
+    }
 }

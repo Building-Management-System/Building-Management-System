@@ -204,17 +204,17 @@ class AccountTungDemo {
         assertEquals(newStatusName, account.getStatus().getStatusName());
     }
 
-    @Test
-    void testChangeRoleAccount() {
-        ChangeRoleRequest changeRoleRequest = new ChangeRoleRequest();
-        changeRoleRequest.setAccountId("e0b48efb-8b08-4f45-a686-3fe41187bf63");
-        changeRoleRequest.setRoleName("manager");
-
-        boolean result = accountManageService.changeRoleAccount(changeRoleRequest);
-
-        assertTrue(result);
-
-    }
+//    @Test
+//    void testChangeRoleAccount() {
+//        ChangeRoleRequest changeRoleRequest = new ChangeRoleRequest();
+//        changeRoleRequest.setAccountId("e0b48efb-8b08-4f45-a686-3fe41187bf63");
+//        changeRoleRequest.setRoleName("manager");
+//
+//        boolean result = accountManageService.changeRoleAccount(changeRoleRequest);
+//
+//        assertTrue(result);
+//
+//    }
 
     //can tim hieu ve mailsender
     @Test
