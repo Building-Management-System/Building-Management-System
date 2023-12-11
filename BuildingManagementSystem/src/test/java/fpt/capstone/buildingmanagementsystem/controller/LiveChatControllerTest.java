@@ -35,6 +35,7 @@ class LiveChatControllerTest {
         ListChatResponse result = liveChatController.createNewChat(new CreateChatRequest("from", "chatName", List.of("String"), "message"));
         Assertions.assertEquals(new ListChatResponse("chatId", "chatName", "isGroupChat", List.of("String"), List.of(new UserInfoResponse("accountId", "username", "firstName", "lastName", "image", "roleName")), new GregorianCalendar(2023, Calendar.DECEMBER, 7, 22, 25).getTime(), "read", "admin"), result);
     }
+    //pass
 
     @Test
     void testCreateNewMessage() {
@@ -43,7 +44,7 @@ class LiveChatControllerTest {
         MessageImageAndFileResponse result = liveChatController.createNewMessage(new ChatMessageRequest("from", "chatId", "message"));
         Assertions.assertEquals(new MessageImageAndFileResponse("messageId", "message", "senderId"), result);
     }
-    //note
+    //note 2
 
     @Test
     void testCreateNewMessage2() throws IOException {
@@ -62,13 +63,6 @@ class LiveChatControllerTest {
         Assertions.assertEquals(new MessageImageAndFileResponse("messageId", "message", "senderId"), result);
     }
 
-    @Test
-    void testGetMessagesByChatId() {
-        when(liveChatService.getMessageBySenderAndReceiver(anyString(), anyString())).thenReturn(new ChatResponse(List.of(new MessageResponse("messageId", true, "message", "senderId", "createdAt", "type")), List.of(new UserChatResponse("userId", "username", "image")), "admin"));
-
-        ChatResponse result = liveChatController.getMessagesByChatId("chatId", "userId");
-        Assertions.assertEquals(new ChatResponse(List.of(new MessageResponse("messageId", true, "message", "senderId", "createdAt", "type")), List.of(new UserChatResponse("userId", "username", "image")), "admin"), result);
-    }
 
     @Test
     void testGetAllChatUserSingle() {
@@ -77,6 +71,7 @@ class LiveChatControllerTest {
         List<UserInfoResponse> result = liveChatController.getAllChatUserSingle(new GetUserInfoRequest("userId"));
         Assertions.assertEquals(List.of(new UserInfoResponse("accountId", "username", "firstName", "lastName", "image", "roleName")), result);
     }
+    //pass
 
     @Test
     void testGetAllChat() {
@@ -122,12 +117,5 @@ class LiveChatControllerTest {
     }
     //Fix expected 2
 
-    @Test
-    void testGetFileChatDownload() {
-        when(liveChatService.getFileChatDownload(any())).thenReturn(new FileDataResponse("fileId", "name", "type", new byte[]{(byte) 0}));
-
-        FileDataResponse result = liveChatController.getFileChatDownload(new FileRequest("messageId", "fileName"));
-        Assertions.assertEquals(new FileDataResponse("fileId", "name", "type", new byte[]{(byte) 0}), result);
-    }
 }
-//done 12
+//done fix

@@ -256,10 +256,14 @@ public class NotificationServiceV2 {
         List<String> notificationIds = notifications.stream().map(Notification::getNotificationId)
                 .collect(Collectors.toList());
 
-        List<ImageResponse> imageResponses = notificationImageAndFileResponse.getImageByNotificationIn(notificationIds);
+        List<ImageResponse> imageResponses = new ArrayList<>();
 
-        List<NotificationFileResponseV2> fileResponses = notificationImageAndFileResponse.getFileByNotificationIn(notificationIds);
+        List<NotificationFileResponseV2> fileResponses = new ArrayList<>();
 
+        if(!notificationIds.isEmpty()) {
+            imageResponses =notificationImageAndFileResponse.getImageByNotificationIn(notificationIds);
+            fileResponses = notificationImageAndFileResponse.getFileByNotificationIn(notificationIds);
+        }
         Map<String, Long> images = imageResponses.stream()
                 .collect(Collectors.groupingBy(ImageResponse::getNotificationId, Collectors.counting()));
 

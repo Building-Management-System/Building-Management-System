@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.controller;
 
 import fpt.capstone.buildingmanagementsystem.model.request.AttendanceMessageRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.AttendanceDetailResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.FilePdfResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAttendanceUserResponse;
 import fpt.capstone.buildingmanagementsystem.service.AttendanceDetailPDFService;
 import fpt.capstone.buildingmanagementsystem.service.AttendanceService;
@@ -42,7 +43,7 @@ public class AttendanceController {
         return attendanceService.getAttendanceDetail(user_id, date);
     }
     @GetMapping("/exportAttendanceUserDetail")
-    public ResponseEntity<byte[]> exportAttendanceUserDetail(@Param("user_id") String user_id, @Param("date") String date) throws IOException {
+    public FilePdfResponse exportAttendanceUserDetail(@Param("user_id") String user_id, @Param("date") String date) throws IOException {
         return attendanceDetailPDFService.export(user_id, date);
     }
 

@@ -287,7 +287,7 @@ public class AccountManageService implements UserDetailsService {
         try {
             String accountId = changeRoleRequest.getAccountId();
             if (accountId != null && changeRoleRequest.getRoleName() != null) {
-                Account user = accountRepository.findByAccountId(accountId)
+                Account account = accountRepository.findByAccountId(accountId)
                         .orElseThrow(() -> new BadRequest("Not_found_user"));
 
                 Role role = roleRepository.findByRoleName(changeRoleRequest.getRoleName())
@@ -306,7 +306,7 @@ public class AccountManageService implements UserDetailsService {
                         if (inactiveManagerTempOptional.isPresent()) {
                             InactiveManagerTemp inactiveManager = inactiveManagerTempOptional.get();
                             //update
-                            ticketManageService.updateTicketOfNewManager(user, inactiveManager);
+                            ticketManageService.updateTicketOfNewManager(account, inactiveManager);
                             //delete from temp
                             tempRepository.delete(inactiveManager);
                         }
@@ -315,23 +315,25 @@ public class AccountManageService implements UserDetailsService {
                         throw new Conflict("department_exist_manager");
                     }
                 }
-                if (Objects.equals(user.getRole().getRoleName(), "hr")
-                        || Objects.equals(user.getRole().getRoleName(), "admin")
-                        || Objects.equals(user.getRole().getRoleName(), "security")) {
-                    ticketManageService.resetTicketData(user.getUser());
+                if (Objects.equals(account.getRole().getRoleName(), "hr")
+                        || Objects.equals(account.getRole().getRoleName(), "admin")
+                        || Objects.equals(account.getRole().getRoleName(), "security")) {
+                    ticketManageService.resetTicketData(account.getUser());
                 }
 
-                if (Objects.equals(user.getRole().getRoleName(), "manager") &&
+                if (Objects.equals(account.getRole().getRoleName(), "manager") &&
                         !Objects.equals(changeRoleRequest.getRoleName(), "manager")) {
                     InactiveManagerTemp temp = InactiveManagerTemp.builder()
-                            .manager(user)
+                            .manager(account)
                             .department(department)
                             .build();
                     tempRepository.save(temp);
                 }
+                account.getUser().setDepartment(department);
+                userRepository.save(account.getUser());
                 accountRepository.updateRoleAccount(newRoleId, accountId);
 
-                if (!changeRoleRequest.getRoomId().isEmpty() && !changeRoleRequest.getDepartmentId().equals(user.getUser().getDepartment().getDepartmentId())) {
+                if (!changeRoleRequest.getRoomId().isEmpty() && !changeRoleRequest.getDepartmentId().equals(account.getUser().getDepartment().getDepartmentId())) {
                     AccountDeviceRequest request = AccountDeviceRequest.builder()
                             .accountId(accountId)
                             .roomIdString(changeRoleRequest.getRoomId())

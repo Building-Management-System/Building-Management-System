@@ -4,10 +4,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.EditEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.EmployeeEvaluateRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.EvaluateByHrRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.MonthlyEvaluateRequest;
-import fpt.capstone.buildingmanagementsystem.model.response.EmployeeEvaluateRemainResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.MonthlyEvaluateSummaryResponse;
-import fpt.capstone.buildingmanagementsystem.model.response.NotificationAcceptResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.*;
 import fpt.capstone.buildingmanagementsystem.service.ChangeLogReportDetailPDFService;
 import fpt.capstone.buildingmanagementsystem.service.EmployeeEvaluateDetailPDFService;
 import fpt.capstone.buildingmanagementsystem.service.MonthlyEvaluateService;
@@ -41,7 +38,7 @@ public class MonthlyEvaluateController {
         return monthlyEvaluateService.getMonthlyEvaluateOfEmployee(monthlyEvaluateRequest);
     }
     @PostMapping("/exportIndividualEvaluate")
-    public  ResponseEntity<byte[]> exportEvaluate(@RequestBody MonthlyEvaluateRequest monthlyEvaluateRequest) throws IOException {
+    public FilePdfResponse exportEvaluate(@RequestBody MonthlyEvaluateRequest monthlyEvaluateRequest) throws IOException {
         return employeeEvaluateDetailPDFService.export(monthlyEvaluateRequest);
     }
 

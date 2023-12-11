@@ -8,6 +8,7 @@ import com.lowagie.text.pdf.PdfWriter;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.response.ChangeLogDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ControlLogResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.FilePdfResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Objects;
 
 @Service
@@ -37,7 +39,7 @@ public class ChangeLogReportDetailPDFService {
         table.addCell(cell);
     }
 
-    public ResponseEntity<byte[]> export(String changeLogId, String userId, String date) throws DocumentException, IOException {
+    public FilePdfResponse export(String changeLogId, String userId, String date) throws DocumentException, IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, byteArrayOutputStream);
@@ -124,13 +126,11 @@ public class ChangeLogReportDetailPDFService {
         document.add(table);
         document.close();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData("attachment", "ChangeLogReportDetail_"+changeLogDetailResponse.getUsername()+"_"+date+".pdf");
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(byteArrayOutputStream.size())
-                .body(byteArrayOutputStream.toByteArray());
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        String file = Base64.getEncoder().encodeToString(byteArray);
+        String fileName="ChangeLogReportDetail_"+changeLogDetailResponse.getUsername()+"_"+date+".pdf";
+        String fileContent=MediaType.APPLICATION_PDF.toString();
+        return FilePdfResponse.builder().file(file).fileName(fileName).fileContentType(fileContent).build();
     }
 
 }

@@ -4,6 +4,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.ChangeLogRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.SaveChangeLogRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.ChangeLogDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ChangeLogResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.FilePdfResponse;
 import fpt.capstone.buildingmanagementsystem.service.ChangeLogReportDetailPDFService;
 import fpt.capstone.buildingmanagementsystem.service.ChangeLogService;
 import fpt.capstone.buildingmanagementsystem.service.RequestChangeLogService;
@@ -50,7 +51,7 @@ public class ChangeLogController {
         return requestChangeLogService.getChangeLogDetail(change_log_id,employee_id, date);
     }
     @GetMapping("/exportChangeLogReportDetail")
-    public ResponseEntity<byte[]> exportChangeLogReportDetail(@Param("change_log_id") String change_log_id,@Param("employee_id") String employee_id, @Param("date") String date) throws IOException {
+    public FilePdfResponse exportChangeLogReportDetail(@Param("change_log_id") String change_log_id, @Param("employee_id") String employee_id, @Param("date") String date) throws IOException {
         return changeLogReportDetailPDFService.export(change_log_id,employee_id, date);
     }
 }

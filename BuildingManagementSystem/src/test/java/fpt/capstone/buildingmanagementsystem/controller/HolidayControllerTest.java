@@ -36,6 +36,7 @@ class HolidayControllerTest {
         boolean result = holidayController.saveHoliday(new HolidaySaveRequest("title", "content", "toDate", "fromDate", "userId"));
         Assertions.assertEquals(true, result);
     }
+    //pass
 
     @Test
     void testDeleteHoliday() {
@@ -44,6 +45,7 @@ class HolidayControllerTest {
         boolean result = holidayController.deleteHoliday(new HolidayDeleteRequest("holidayId"));
         Assertions.assertEquals(true, result);
     }
+    //pass
 
     @Test
     void testListAllHoliday() {
@@ -52,6 +54,7 @@ class HolidayControllerTest {
         List<HolidayResponse> result = holidayController.listAllHoliday();
         Assertions.assertEquals(List.of(new HolidayResponse("holidayId", "title", "content", null, null, "username")), result);
     }
+    //pass
 
     @Test
     void testValidateHolidayEmail() {
@@ -60,6 +63,7 @@ class HolidayControllerTest {
         boolean result = holidayController.validateHolidayEmail(new UserRequest("userName"));
         Assertions.assertEquals(true, result);
     }
+    //pass
 
     @Test
     void testCheckHolidayCode() {
@@ -68,5 +72,6 @@ class HolidayControllerTest {
         boolean result = holidayController.checkHolidayCode("code", "userId");
         Assertions.assertEquals(true, result);
     }
+    //pass
 }
 //

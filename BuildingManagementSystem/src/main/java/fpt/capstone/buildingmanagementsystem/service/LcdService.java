@@ -70,7 +70,7 @@ public class LcdService {
                         .time(formatter.parse(time))
                         .pic(convertBase64ToByteArray(infoNode.path("pic").asText()))
                         .build();
-                String deviceId = rootNode.path("facesluiceId").asText();
+                String deviceId = infoNode.path("facesluiceId").asText();
 
                 Device device = deviceRepository.findByDeviceIdAndStatus(deviceId, DeviceStatus.ACTIVE)
                         .orElseThrow(() -> new BadRequest("Not_found"));
@@ -86,7 +86,7 @@ public class LcdService {
             } else if (operator.equals(STRANGER_LOG)) {
                 String time = infoNode.path("time").asText();
                 StrangerLogLcd strangerLogLcd = StrangerLogLcd.builder()
-                        .snapId(infoNode.path("snapID").asInt())
+                        .snapId(infoNode.path("SnapID").asInt())
                         .direction(infoNode.path("direction").asText())
                         .time(formatter.parse(time))
                         .temperature(infoNode.path("temperature").asDouble())

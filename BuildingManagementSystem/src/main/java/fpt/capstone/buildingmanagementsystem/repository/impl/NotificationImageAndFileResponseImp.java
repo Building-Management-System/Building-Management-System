@@ -20,6 +20,7 @@ public class NotificationImageAndFileResponseImp implements NotificationImageAnd
 
     @Override
     public List<ImageResponse> getImageByNotificationIn(List<String> notificationIds) {
+
         String query = "SELECT i.image_id as imageId," +
                 "i.image_file_name as imageName," +
                 "i.notification_id as notificationId\n" +
