@@ -68,11 +68,6 @@ public class DeviceService {
         Device device = deviceRepository.findById(request.getDeviceId())
                 .orElseThrow(() -> new NotFound("Not_found_device"));
 
-        if (!device.getStatus().equals(DeviceStatus.INACTIVE)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(device);
-        }
-
         if (request.getDeviceLcdId() != null) {
             device.setDeviceId(request.getDeviceLcdId());
         }
@@ -84,22 +79,29 @@ public class DeviceService {
             device.setDeviceUrl(request.getDeviceUrl());
         }
 
-        List<Room> roomExist = roomRepository.getRoomByInActiveDevice(request.getNewRoomId());
-        if (!roomExist.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(device);
-        }
-        Room room = roomRepository.findById(request.getNewRoomId())
-                .orElseThrow(() -> new BadRequest("Not_found_room"));
+        if(!request.getNewRoomId().isEmpty()) {
+            if (!device.getStatus().equals(DeviceStatus.INACTIVE)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Device_is_active");
+            }
+            int roomId = Integer.parseInt(request.getNewRoomId());
+            List<Room> roomExist = roomRepository.getRoomByInActiveDevice(roomId);
+            if (roomExist.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("Room_contained_device_active");
+            }
+            Room room = roomRepository.findById(roomId)
+                    .orElseThrow(() -> new BadRequest("Not_found_room"));
 
-        room.setDevice(device);
+            room.setDevice(device);
+            roomRepository.save(room);
+        }
         try {
             deviceRepository.save(device);
-            roomRepository.save(room);
-            return ResponseEntity.ok(room);
+            return ResponseEntity.ok(device);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(e.getCause());
+                    .body("fail");
         }
     }
 

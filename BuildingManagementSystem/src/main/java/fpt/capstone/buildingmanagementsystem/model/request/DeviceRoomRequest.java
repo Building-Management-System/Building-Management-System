@@ -12,7 +12,7 @@ import lombok.Setter;
 public class DeviceRoomRequest {
     private String deviceId;
 
-    private int newRoomId;
+    private String newRoomId;
 
     private String deviceName;
 
