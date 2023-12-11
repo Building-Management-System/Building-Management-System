@@ -7,12 +7,14 @@ import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.entity.Device;
+import fpt.capstone.buildingmanagementsystem.model.entity.Room;
 import fpt.capstone.buildingmanagementsystem.model.entity.StrangerLogLcd;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.DeviceStatus;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.ControlLogLcdRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DeviceRepository;
+import fpt.capstone.buildingmanagementsystem.repository.RoomRepository;
 import fpt.capstone.buildingmanagementsystem.repository.StrangerLogLcdRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,10 +22,11 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 @Component
 public class LcdService {
-//    private static final Logger logger = LoggerFactory.getLogger(LcdService.class);
+    //    private static final Logger logger = LoggerFactory.getLogger(LcdService.class);
     private static final String CONTROL_LOG = "RecPush";
 
     private static final String STRANGER_LOG = "StrSnapPush";
@@ -44,6 +47,9 @@ public class LcdService {
 
     @Autowired
     StrangerLogLcdRepository strangerLogLcdRepository;
+
+    @Autowired
+    RoomRepository roomRepository;
 
     public void ExtractJsonLcdLog(String jsonStr) {
         try {
@@ -74,15 +80,19 @@ public class LcdService {
 
                 Device device = deviceRepository.findByDeviceIdAndStatus(deviceId, DeviceStatus.ACTIVE)
                         .orElseThrow(() -> new BadRequest("Not_found"));
-
+                List<Room> rooms = roomRepository.getRoomByDevice(deviceId);
                 Account account = accountRepository.findByUsername(controlLogLcd.getPersionName())
                         .orElseThrow(() -> new BadRequest("Not_found"));
                 controlLogLcd.setAccount(account);
                 controlLogLcd.setDevice(device);
+                if (!rooms.isEmpty()) {
+                    controlLogLcd.setRoom(rooms.get(0));
+                }
                 controlLogLcdRepository.save(controlLogLcd);
                 if (controlLogLcd.getStatus().equals(ControlLogStatus.WHITE_LIST)) {
                     dailyLogService.mapControlLogToDailyLog(controlLogLcd);
                 }
+
             } else if (operator.equals(STRANGER_LOG)) {
                 String time = infoNode.path("time").asText();
                 StrangerLogLcd strangerLogLcd = StrangerLogLcd.builder()
@@ -97,6 +107,10 @@ public class LcdService {
                 String deviceId = rootNode.path("facesluiceId").asText();
                 Device device = deviceRepository.findByDeviceIdAndStatus(deviceId, DeviceStatus.ACTIVE)
                         .orElseThrow(() -> new BadRequest("Not_found"));
+                List<Room> rooms = roomRepository.getRoomByDevice(deviceId);
+                if (!rooms.isEmpty()) {
+                    strangerLogLcd.setRoom(rooms.get(0));
+                }
                 strangerLogLcd.setDevice(device);
                 strangerLogLcdRepository.save(strangerLogLcd);
             }
