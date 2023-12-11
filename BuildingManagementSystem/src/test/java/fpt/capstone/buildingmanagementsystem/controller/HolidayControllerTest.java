@@ -63,6 +63,7 @@ class HolidayControllerTest {
         boolean result = holidayController.validateHolidayEmail(new UserRequest("userName"));
         Assertions.assertEquals(true, result);
     }
+    //pass
 
     @Test
     void testCheckHolidayCode() {
