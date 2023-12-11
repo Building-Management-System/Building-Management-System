@@ -79,26 +79,35 @@ public class DeviceService {
             device.setDeviceUrl(request.getDeviceUrl());
         }
 
-        if(!request.getNewRoomId().isEmpty()) {
-            if (!device.getStatus().equals(DeviceStatus.INACTIVE)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Device_is_active");
-            }
-            int roomId = Integer.parseInt(request.getNewRoomId());
-            List<Room> roomExist = roomRepository.getRoomByInActiveDevice(roomId);
-            if (roomExist.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body("Room_contained_device_active");
-            }
-            Room room = roomRepository.findById(roomId)
-                    .orElseThrow(() -> new BadRequest("Not_found_room"));
-
-            room.setDevice(device);
-            roomRepository.save(room);
+        if (!device.getStatus().equals(DeviceStatus.INACTIVE)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Device_is_active");
         }
+        int roomId = Integer.parseInt(request.getNewRoomId());
+        List<Room> roomExist = roomRepository.getRoomByInActiveDevice(roomId);
+        if (roomExist.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Room_contained_device_active");
+        }
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new BadRequest("Not_found_room"));
+
+        room.setDevice(device);
+        roomRepository.save(room);
         try {
-            deviceRepository.save(device);
-            return ResponseEntity.ok(device);
+            Device deviceResponse = deviceRepository.save(device);
+            DeviceRoomResponse response = new DeviceRoomResponse(
+                room.getRoomId(),
+                    room.getRoomName(),
+                    deviceResponse.getId(),
+                    deviceResponse.getDeviceId(),
+                    deviceResponse.getDeviceName(),
+                    deviceResponse.getStatus(),
+                    deviceResponse.getDeviceUrl(),
+                    deviceResponse.getDeviceNote(),
+                    deviceResponse.getUpdateDate()
+            );
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("fail");
@@ -181,7 +190,8 @@ public class DeviceService {
                         deviceAccount.getAccount().getUser().getDepartment(),
                         deviceAccount.getStartDate(),
                         deviceAccount.getEndDate(),
-                        deviceAccount.getStatus()
+                        deviceAccount.getStatus(),
+                        ""
                 ))
                 .collect(Collectors.toList());
 
@@ -247,7 +257,20 @@ public class DeviceService {
                         .build();
                 if (toDate != null) deviceAccount.setEndDate(toDate);
                 DeviceAccount saveTo = deviceAccountRepository.save(deviceAccount);
-                return ResponseEntity.ok(messageSetupMqtt(saveTo.getAccount().getAccountId(), request.getStartDate(), request.getEndDate(), saveTo.getDevice().getDeviceId()));
+                String messageSetupMqtt = messageSetupMqtt(saveTo.getAccount().getAccountId(), request.getStartDate(), request.getEndDate(), saveTo.getDevice().getDeviceId());
+                AccountLcdResponse response = AccountLcdResponse.builder()
+                        .deviceAccountId(saveTo.getDeviceAccountId())
+                        .accountId(saveTo.getAccount().getAccountId())
+                        .userName(saveTo.getAccount().getUsername())
+                        .firstName(saveTo.getAccount().getUser().getFirstName())
+                        .lastName(saveTo.getAccount().getUser().getLastName())
+                        .department(saveTo.getAccount().getUser().getDepartment())
+                        .startDate(saveTo.getStartDate())
+                        .endDate(saveTo.getEndDate())
+                        .status(saveTo.getStatus())
+                        .messageSetupMqtt(messageSetupMqtt)
+                        .build();
+                return ResponseEntity.ok(response);
             }
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(request);

@@ -33,4 +33,6 @@ public class AccountLcdResponse {
     private Date endDate;
 
     private ControlLogStatus status;
+
+    private String messageSetupMqtt;
 }
