@@ -117,6 +117,9 @@ public class AccountManageService implements UserDetailsService {
     @Autowired
     DeviceService deviceService;
 
+    @Autowired
+    NotificationService notificationService;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Account> userAccount = accountRepository.findByUsername(username);
@@ -167,6 +170,10 @@ public class AccountManageService implements UserDetailsService {
                             }
                             dailyLogService.initDayOff(saveAccount.accountId);
 
+                            // hidden notification
+                            notificationService.hiddenNotificationSendAll(saveAccount.getUser());
+
+                            // add to device_account
                             if (!registerRequest.roomId.isEmpty()) {
                                 AccountDeviceRequest request = AccountDeviceRequest.builder()
                                         .accountId(saveAccount.accountId)
@@ -394,6 +401,7 @@ public class AccountManageService implements UserDetailsService {
                     DayOff dayOff = dayOffRepository.findByAccount(userAccount.get())
                             .orElseThrow(() -> new BadRequest("Not_found_day_off"));
                     dayOffRepository.delete(dayOff);
+                    notificationService.deleteFromHiddenNotification(userAccount.get().getUser());
                     deviceService.deleteAccountDevice(userAccount.get().getAccountId());
                     accountRepository.delete(userAccount.get());
                     return true;
