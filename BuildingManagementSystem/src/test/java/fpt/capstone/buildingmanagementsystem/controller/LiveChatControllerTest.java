@@ -35,6 +35,7 @@ class LiveChatControllerTest {
         ListChatResponse result = liveChatController.createNewChat(new CreateChatRequest("from", "chatName", List.of("String"), "message"));
         Assertions.assertEquals(new ListChatResponse("chatId", "chatName", "isGroupChat", List.of("String"), List.of(new UserInfoResponse("accountId", "username", "firstName", "lastName", "image", "roleName")), new GregorianCalendar(2023, Calendar.DECEMBER, 7, 22, 25).getTime(), "read", "admin"), result);
     }
+    //pass
 
     @Test
     void testCreateNewMessage() {
