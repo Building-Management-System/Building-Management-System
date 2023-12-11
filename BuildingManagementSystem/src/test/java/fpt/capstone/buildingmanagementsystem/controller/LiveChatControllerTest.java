@@ -44,7 +44,7 @@ class LiveChatControllerTest {
         MessageImageAndFileResponse result = liveChatController.createNewMessage(new ChatMessageRequest("from", "chatId", "message"));
         Assertions.assertEquals(new MessageImageAndFileResponse("messageId", "message", "senderId"), result);
     }
-    //note
+    //note 2
 
     @Test
     void testCreateNewMessage2() throws IOException {
