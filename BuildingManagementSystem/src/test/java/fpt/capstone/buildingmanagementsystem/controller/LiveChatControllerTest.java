@@ -79,6 +79,7 @@ class LiveChatControllerTest {
         List<UserInfoResponse> result = liveChatController.getAllChatUserSingle(new GetUserInfoRequest("userId"));
         Assertions.assertEquals(List.of(new UserInfoResponse("accountId", "username", "firstName", "lastName", "image", "roleName")), result);
     }
+    //pass
 
     @Test
     void testGetAllChat() {
@@ -132,4 +133,4 @@ class LiveChatControllerTest {
         Assertions.assertEquals(new FileDataResponse("fileId", "name", "type", new byte[]{(byte) 0}), result);
     }
 }
-//done 12
+//done
