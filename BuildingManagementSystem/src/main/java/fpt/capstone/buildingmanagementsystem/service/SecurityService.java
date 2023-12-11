@@ -49,12 +49,12 @@ public class SecurityService {
                     startDate, endDate, controlLogAndStrangerLogSearchRequest.getDeviceId());
             controlLogLcdList.forEach(element -> {
                 User user = accountRepository.findByUsername(element.getPersionName()).get().getUser();
-                Room room = roomRepository.findByDevice(element.getDevice());
+                String room = element.getRoom().getRoomName();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String formattedDate = dateFormat.format(element.getTime());
                 ControlLogSecurityResponse controlLogSecurityResponse = ControlLogSecurityResponse.builder().ControlLogId(element.getControlLogId()).image(element.getPic()).timeRecord(formattedDate)
                         .username(element.getPersionName()).lastName(user.getLastName()).firstName(user.getFirstName()).department(user.getDepartment().getDepartmentName())
-                        .room(room.getRoomName()).verifyType(element.getStatus().toString()).build();
+                        .room(room).verifyType(element.getStatus().toString()).build();
                 controlLogSecurityResponseList.add(controlLogSecurityResponse);
             });
             return controlLogSecurityResponseList;
@@ -74,12 +74,12 @@ public class SecurityService {
             List<StrangerLogLcd> strangerLogLcdList = strangerLogLcdRepository.getStrangerLogLcdListByDateAndDevice(
                     startDate, endDate, controlLogAndStrangerLogSearchRequest.getDeviceId());
             strangerLogLcdList.forEach(element -> {
-                Room room = roomRepository.findByDevice(element.getDevice());
+                String room = element.getRoom().getRoomName();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String formattedDate = dateFormat.format(element.getTime());
                 StrangerLogSecurityResponse strangerLogSecurityResponse = StrangerLogSecurityResponse.builder().strangerLogId(element.getStrangerLogId()).snapId(element.getSnapId()).time(formattedDate)
                         .deviceName(element.getDevice().getDeviceName()).deviceId(element.getDevice().getDeviceId()).image(element.getImage())
-                        .temperature(element.getTemperature()).room(room.getRoomName()).build();
+                        .temperature(element.getTemperature()).room(room).build();
                 strangerLogSecurityResponses.add(strangerLogSecurityResponse);
             });
             return strangerLogSecurityResponses;
@@ -99,7 +99,8 @@ public class SecurityService {
             return ControlLogDetailResponse.builder().hireDate(dateFormat.format(account.getCreatedDate())).account(account.getUsername()).avatar(account.getUser().getImage())
                     .role(account.getRole().getRoleName()).department(account.getUser().getDepartment().getDepartmentName())
                     .image(controlLogLcd.getPic()).deviceId(controlLogLcd.getDevice().getDeviceId()).deviceName(controlLogLcd.getDevice().getDeviceName())
-                    .time(dateFormat1.format(controlLogLcd.getTime())).similar(controlLogLcd.getSimilarity1()).operator(controlLogLcd.getOperator()).personId(controlLogLcd.getPersonId())
+                    .time(dateFormat1.format(controlLogLcd.getTime())).similar(controlLogLcd.getSimilarity1()).
+                    operator(controlLogLcd.getOperator()).personId(controlLogLcd.getPersonId())
                     .verifyStatus(controlLogLcd.getStatus().toString()).Temperature(controlLogLcd.getTemperature())
                     .build();
         } else {
@@ -142,7 +143,7 @@ public class SecurityService {
                     .sorted((Comparator.comparing(ControlLogLcd::getTime)).reversed())
                     .collect(Collectors.toList());
             list.forEach(controlLogLcd -> {
-                Room room = roomRepository.findByDevice(controlLogLcd.getDevice());
+                Room room = controlLogLcd.getRoom();
                 SimpleDateFormat dateFormat1 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                 Account account = controlLogLcd.getAccount();
                 ControlLogByAccountResponse controlLogSecurityResponse = ControlLogByAccountResponse.builder()
