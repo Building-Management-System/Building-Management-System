@@ -45,6 +45,7 @@ class HolidayControllerTest {
         boolean result = holidayController.deleteHoliday(new HolidayDeleteRequest("holidayId"));
         Assertions.assertEquals(true, result);
     }
+    //pass
 
     @Test
     void testListAllHoliday() {
