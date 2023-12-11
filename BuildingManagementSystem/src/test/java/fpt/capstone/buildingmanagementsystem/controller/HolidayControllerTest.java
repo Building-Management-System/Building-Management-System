@@ -72,5 +72,6 @@ class HolidayControllerTest {
         boolean result = holidayController.checkHolidayCode("code", "userId");
         Assertions.assertEquals(true, result);
     }
+    //pass
 }
 //
