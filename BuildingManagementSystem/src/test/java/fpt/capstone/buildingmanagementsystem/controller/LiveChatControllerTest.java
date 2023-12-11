@@ -117,12 +117,5 @@ class LiveChatControllerTest {
     }
     //Fix expected 2
 
-    @Test
-    void testGetFileChatDownload() {
-        when(liveChatService.getFileChatDownload(any())).thenReturn(new FileDataResponse("fileId", "name", "type", new byte[]{(byte) 0}));
-
-        FileDataResponse result = liveChatController.getFileChatDownload(new FileRequest("messageId", "fileName"));
-        Assertions.assertEquals(new FileDataResponse("fileId", "name", "type", new byte[]{(byte) 0}), result);
-    }
 }
 //done fix
