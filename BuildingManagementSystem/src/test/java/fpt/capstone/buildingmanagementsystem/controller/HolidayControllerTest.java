@@ -36,6 +36,7 @@ class HolidayControllerTest {
         boolean result = holidayController.saveHoliday(new HolidaySaveRequest("title", "content", "toDate", "fromDate", "userId"));
         Assertions.assertEquals(true, result);
     }
+    //pass
 
     @Test
     void testDeleteHoliday() {
