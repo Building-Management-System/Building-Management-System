@@ -54,6 +54,7 @@ class HolidayControllerTest {
         List<HolidayResponse> result = holidayController.listAllHoliday();
         Assertions.assertEquals(List.of(new HolidayResponse("holidayId", "title", "content", null, null, "username")), result);
     }
+    //pass
 
     @Test
     void testValidateHolidayEmail() {
