@@ -53,6 +53,7 @@ class DeviceControllerTest {
         ResponseEntity<?> result = deviceController.updateDevice(new DeviceRoomRequest("deviceId", "newRoomId", "deviceName", "deviceLcdId", "deviceUrl"));
         Assertions.assertEquals(null, result);
     }
+    //fixed conflict
 
     @Test
     void testUpdateDeviceStatus() {
