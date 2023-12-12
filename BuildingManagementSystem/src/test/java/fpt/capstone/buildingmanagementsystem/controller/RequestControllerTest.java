@@ -220,6 +220,7 @@ class  RequestControllerTest {
         boolean result = requestController.requestOtherForm(sendOtherFormRequest);
         assertEquals(true, result);
     }
+    //pass
 
     @Test
     void testRequestOtherFormExistTicket() {
