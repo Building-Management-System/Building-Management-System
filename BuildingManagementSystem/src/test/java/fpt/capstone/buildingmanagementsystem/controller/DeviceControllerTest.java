@@ -62,6 +62,7 @@ class DeviceControllerTest {
         ResponseEntity<?> result = deviceController.updateDeviceStatus(new DeviceStatusRequest("id", DeviceStatus.ACTIVE, "deviceNote"));
         Assertions.assertEquals(null, result);
     }
+    //pass
 
     @Test
     void testChangeRecordStatus() {
@@ -70,4 +71,5 @@ class DeviceControllerTest {
         ResponseEntity<?> result = deviceController.changeRecordStatus(new ChangeRecordStatusRequest("deviceAccountId", ControlLogStatus.WHITE_LIST));
         Assertions.assertEquals(null, result);
     }
+    //update expected
 }
