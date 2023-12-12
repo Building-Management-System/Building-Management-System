@@ -64,7 +64,7 @@ public class LcdService {
                 ControlLogLcd controlLogLcd = ControlLogLcd.builder()
                         .operator(rootNode.path("operator").asText())
                         .personId(infoNode.path("personId").asText())
-                        .status(infoNode.path("PersonType").asInt() == 1 ? ControlLogStatus.WHITE_LIST : ControlLogStatus.BLACK_LIST)
+                        .status(infoNode.path("PersonType").asInt() == 0 ? ControlLogStatus.WHITE_LIST : ControlLogStatus.BLACK_LIST)
                         .recordId(infoNode.path("RecordID").asInt())
                         .verifyStatus(infoNode.path("VerifyStatus").asInt())
                         .similarity1(infoNode.path("similarity1").asDouble())
@@ -80,7 +80,7 @@ public class LcdService {
 
                 Device device = deviceRepository.findByDeviceIdAndStatus(deviceId, DeviceStatus.ACTIVE)
                         .orElseThrow(() -> new BadRequest("Not_found"));
-                List<Room> rooms = roomRepository.getRoomByDevice(deviceId);
+                List<Room> rooms = roomRepository.getRoomByDevice(device.getId());
                 Account account = accountRepository.findByUsername(controlLogLcd.getPersionName())
                         .orElseThrow(() -> new BadRequest("Not_found"));
                 controlLogLcd.setAccount(account);
@@ -104,10 +104,10 @@ public class LcdService {
                         .image(convertBase64ToByteArray(infoNode.path("pic").asText()))
                         .build();
 
-                String deviceId = rootNode.path("facesluiceId").asText();
+                String deviceId = infoNode.path("facesluiceId").asText();
                 Device device = deviceRepository.findByDeviceIdAndStatus(deviceId, DeviceStatus.ACTIVE)
                         .orElseThrow(() -> new BadRequest("Not_found"));
-                List<Room> rooms = roomRepository.getRoomByDevice(deviceId);
+                List<Room> rooms = roomRepository.getRoomByDevice(device.getId());
                 if (!rooms.isEmpty()) {
                     strangerLogLcd.setRoom(rooms.get(0));
                 }
