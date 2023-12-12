@@ -44,6 +44,7 @@ class DeviceControllerTest {
         ResponseEntity<?> result = deviceController.createDeviceAccount(new AccountDeviceRequest("accountId", "roomIdString", "startDate", "endDate"));
         Assertions.assertEquals(null, result);
     }
+    //pass
 
     @Test
     void testUpdateDevice() {
