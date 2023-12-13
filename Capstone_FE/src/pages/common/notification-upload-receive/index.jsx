@@ -50,7 +50,7 @@ const NotificationUploadReceive = () => {
   }
   const handleHidden = (user) => {
     Swal.fire({
-      title: 'Are you sure to hidden this notification?',
+      title: 'Are you sure to delete this notification?',
       icon: 'warning',
       cancelButtonText: 'Cancel',
       showCancelButton: true,
