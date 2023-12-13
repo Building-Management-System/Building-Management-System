@@ -176,6 +176,7 @@ class AttendanceControllerTest {
 
         assertEquals("request_fail", exception.getMessage());
     }
+    //done
 
     @Test
     void testAcceptAttendanceRequest() {
