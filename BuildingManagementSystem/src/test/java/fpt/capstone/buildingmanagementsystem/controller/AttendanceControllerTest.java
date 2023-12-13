@@ -92,6 +92,7 @@ class AttendanceControllerTest {
         assertEquals(expectedDailyLogList, response.getDailyLogList());
 
     }
+    //test
 
     @Test
     void testGetAttendanceUser_BadRequest() {
@@ -105,6 +106,7 @@ class AttendanceControllerTest {
         assertEquals("request_fail", exception.getMessage());
 
     }
+
 
     @Test
     void testGetAttendanceUser_NotFound() {
@@ -160,6 +162,7 @@ class AttendanceControllerTest {
 
         assertEquals("request_fail", exception.getMessage());
     }
+    //demo
 
     @Test
     void testGetAttendanceUserDetail_NotFound() {
