@@ -62,8 +62,8 @@ const Data = () => {
                   <MenuItem value="">Service Type</MenuItem>
 
                   <MenuItem value="leave_request">Leave Request</MenuItem>
-                  <MenuItem value="ot_request">OT Request</MenuItem>
-                  <MenuItem value="late_request">Late Request</MenuItem>
+                  <MenuItem value="ot_request">OverTime Request</MenuItem>
+                  <MenuItem value="late_request">Late/Early Request</MenuItem>
                   <MenuItem value="attendence_request">Attendance Request</MenuItem>
                   <MenuItem value="other_request">Other Request</MenuItem>
                   <MenuItem value="working_request"> Working OutSide</MenuItem>
