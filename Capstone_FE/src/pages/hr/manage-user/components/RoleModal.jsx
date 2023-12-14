@@ -135,8 +135,8 @@ const RoleModal = ({ open, handleClose, user, setAllUser }) => {
               <MenuItem value="manager">Manager</MenuItem>
             </Select>
           </FormControl>
-          {role === 'manager' ||
-            (role === 'employee' && (
+          {
+            role === 'employee' ? (
               <>
                 <FormControl fullWidth sx={{ mb: 2 }}>
                   <InputLabel id="demo-simple-select-label">Department</InputLabel>
@@ -171,7 +171,40 @@ const RoleModal = ({ open, handleClose, user, setAllUser }) => {
                   </Select>
                 </FormControl>
               </>
-            ))}
+            ): role === 'manager' && <>
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel id="demo-simple-select-label">Department</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={department}
+                label="Department"
+                onChange={handleChangeDepartment}>
+                {allDepartmentTech.map((item) => (
+                  <MenuItem key={item.departmentId} value={item.departmentId}>
+                    {item.departmentName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth sx={{ mb: 2, mt: 1 }}>
+              <InputLabel id="demo-simple-select-label">Room</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={room}
+                onChange={(e) => setRoom(e.target.value)}
+                label="Room"
+                name="room"
+                InputLabelProps={{ shrink: true }}>
+                {listRooms.map((item, index) => (
+                  <MenuItem key={index} value={item.roomId}>
+                    {item.roomName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </>}
 
           <Box width="100%" display="flex" justifyContent="flex-end">
             <LoadingButton

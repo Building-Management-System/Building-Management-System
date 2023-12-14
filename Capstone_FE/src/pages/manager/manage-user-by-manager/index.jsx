@@ -8,15 +8,13 @@ import userApi from '../../../services/userApi'
 import axiosClient from '../../../utils/axios-config'
 import formatDate from '../../../utils/formatDate'
 import DataTableManageUser from './components/DataTable'
-import RoleModal from './components/RoleModal'
 const ManageUserByManager = () => {
   const userId = useSelector((state) => state.auth.login.currentUser.accountId)
   const [allUser, setAllUser] = useState([])
-  const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [info, setInfo] = useState('')
   const navigate = useNavigate()
-  const handleClose = () => setOpen(false)
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -153,7 +151,6 @@ const ManageUserByManager = () => {
         isLoading={isLoading}
         departmentName={departmentName}
       />
-      <RoleModal setAllUser={setAllUser} open={open} handleClose={handleClose} />
     </>
   )
 }

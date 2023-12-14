@@ -23,8 +23,6 @@ const DataTableManageUser = ({ rows, columns, handleOpenCreateAccount, isLoading
   return (   
     <Box 
       sx={{
-        height: '700px', 
-
         "& .MuiDataGrid-root": {
           border: "none",
         },

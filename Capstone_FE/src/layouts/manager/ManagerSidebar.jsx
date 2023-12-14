@@ -163,7 +163,7 @@ const ManagerSidebar = () => {
             }
           }}>
           <MenuItem
-            active={activeIndex === 8}
+            active={activeIndex === 13}
             icon={<GroupIcon />}
             component={<Link to="/manage-user-by-manager" onClick={() => setActiveIndex(13)} />}>
             {' '}

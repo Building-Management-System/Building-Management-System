@@ -1,26 +1,13 @@
 import { Box, LinearProgress } from "@mui/material";
 import {
-  DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarFilterButton
+  DataGrid
 } from "@mui/x-data-grid";
 
 
-const DataTableManageUser = ({ rows, columns, isLoading,departmentName }) => {
-  const filteredRows = rows.filter(row => row.departmentName === departmentName && row.roleName === 'employee' && row.statusName === 'active') ;
+const DataTableListChangeLog = ({ rows, columns, isLoading }) => {
 
-  function CustomToolbar() {
-    return (
-      <GridToolbarContainer>
-        <Box display="flex" justifyContent="space-between" width="100%">
-          <Box display="flex" gap={1}>
-            <GridToolbarFilterButton />
-            <GridToolbarExport />
-          </Box>
-        </Box>
-      </GridToolbarContainer>
-    )
-  }
   return (   
-    <Box 
+    <Box
     sx={{
       "& .MuiDataGrid-root": {
         border: "none",
@@ -42,7 +29,7 @@ const DataTableManageUser = ({ rows, columns, isLoading,departmentName }) => {
       },
       "& .MuiDataGrid-footerContainer": {
         borderTop: "1px solid rgba(224, 224, 224, 1)",
-        backgroundColor: "#fff",
+        backgroundColor: "rgb(248, 249, 250)",
       },
       "& .MuiCheckbox-root": {
         color: `"#b7ebde" !important`,
@@ -71,19 +58,18 @@ const DataTableManageUser = ({ rows, columns, isLoading,departmentName }) => {
         disableRowSelectionOnClick
         showCellVerticalBorder
         showColumnVerticalBorder
-        rows={filteredRows}
+        rows={rows}
         columns={columns}
-        slots={{ toolbar: CustomToolbar, loadingOverlay: LinearProgress }}
+        slots={{ loadingOverlay: LinearProgress }}
         initialState={{
-          pagination: { paginationModel: { pageSize: 10 }},
+          pagination: { paginationModel: { pageSize: 5 } },
         }}
-        pageSizeOptions={[5, 10, 15]}
+        pageSizeOptions={[5, 10, 20, 50]}
         loading={isLoading}
-        getRowId={(row) => row.accountId}
+        getRowId={(row) => row.evaluateId}
       />
-      
     </Box>
   );
 };
 
-export default DataTableManageUser;
+export default DataTableListChangeLog;

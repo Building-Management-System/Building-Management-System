@@ -34,7 +34,7 @@ const EmpLogManagement = () => {
       }
     }
     getListEmpByDepartment()
-  }, [userInfo?.departmentId])
+  }, [listLog])
   const [isSearchClicked, setIsSearchClicked] = useState(false);
   const [employeeNames, setEmployeeNames] = useState([]);
   useEffect(() => {
@@ -101,7 +101,7 @@ const EmpLogManagement = () => {
       width: 150
     },
     {
-      field: '',
+      field: 'name',
       headerName: 'Name',
       width: 200,
       renderCell: (params) => {

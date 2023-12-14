@@ -97,6 +97,7 @@ import ControlLogDetail from '../pages/security/control-log-detail'
 import DeviceManage from '../pages/security/device-manage'
 import ListAllControlLogByAccount from '../pages/security/security-controlLog-by-account'
 import DeviceDetail from '../pages/security/device-detail'
+import EmpLogEvaluate from '../pages/manager/emp-evaluate-management'
 
 const ManageUser = lazy(() => import('../pages/hr/manage-user'))
 const NotificationDetail = lazy(() => import('../pages/common/notification-detail'))
@@ -604,6 +605,14 @@ export default function Router() {
               element: (
                 <Suspense fallback={<>Loading...</>}>
                   <LogEmpAttendanceById />
+                </Suspense>
+              )
+            },
+            {
+              path: MANAGER_PATH.EMP_LOG_EVALUATE,
+              element: (
+                <Suspense fallback={<>Loading...</>}>
+                  <EmpLogEvaluate />
                 </Suspense>
               )
             },

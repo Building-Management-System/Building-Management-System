@@ -6,6 +6,7 @@ import { BASE_URL } from './constraint'
 
 const authApi = {
   loginUser: async (data, dispatch, navigate) => {
+    const date = new Date()
     dispatch(loginStart())
     try {
       const response = await axios.post(`${BASE_URL}/login`, data)
@@ -18,9 +19,14 @@ const authApi = {
       } else if (response.data.role === 'employee') {
         navigate('/check-attendance-employee')
       } else if (response.data.role === 'manager') {
-        navigate('/request-list-manager')
-      }
-      else if (response.data.role === 'security') {
+        const dayOfMonth = date.getDate()
+        const currentDate = date.toISOString().split('T')[0]
+        if (dayOfMonth >= 1 && dayOfMonth <= 20) {
+          navigate(`/emp-log-evaluate/${currentDate}`)
+        } else {
+          navigate('manage-user-by-manager')
+        }
+      } else if (response.data.role === 'security') {
         navigate('/ticket-list-security')
       }
     } catch (error) {
@@ -54,7 +60,7 @@ const authApi = {
         toast.error(`Username can't be blank!`)
       }
     }
-  },
+  }
 }
 
 export default authApi
