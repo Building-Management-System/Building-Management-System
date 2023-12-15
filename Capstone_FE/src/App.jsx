@@ -1,7 +1,6 @@
 import { ThemeProvider } from '@mui/material'
 import './App.css'
 import { theme } from './themes/theme'
-
 import { ProSidebarProvider } from 'react-pro-sidebar'
 import { Helmet } from 'react-helmet'
 import { ToastContainer } from 'react-toastify'
