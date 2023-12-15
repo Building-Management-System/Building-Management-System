@@ -25,6 +25,7 @@ import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import ViewSidebarIcon from '@mui/icons-material/ViewSidebar';
 import GroupIcon from '@mui/icons-material/Group';
+import logoImage from '../../assets/images/vite.jpg';
 const ManagerSidebar = () => {
   const { collapseSidebar, toggleSidebar, broken, collapsed } = useProSidebar()
   const [activeIndex, setActiveIndex] = useState(() => {
@@ -90,9 +91,21 @@ const ManagerSidebar = () => {
           ml="15px"
           height="65px">
           {!collapsed ? (
-            <Typography fontWeight="800" color="#000" fontSize="22px" sx={{ cursor: 'pointer' }}>
+            <Typography sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+            <Avatar
+              alt="BMS Logo"
+              src={logoImage}
+              sx={{
+                width: 40,
+                height: 40,
+                marginRight: 1,
+                borderRadius: '0%'
+              }}
+            />
+            <Typography fontWeight="800" color="#000" fontSize="22px">
               BMS
             </Typography>
+          </Typography>
           ) : null}
           <IconButton
             onClick={() => {

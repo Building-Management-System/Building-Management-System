@@ -25,6 +25,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import FactCheckIcon from '@mui/icons-material/FactCheck'
 import EventBusyIcon from '@mui/icons-material/EventBusy'
 import Swal from 'sweetalert2'
+import logoImage from '../../assets/images/vite.jpg';
 const HrSidebar = () => {
   const { collapseSidebar, toggleSidebar, broken, collapsed } = useProSidebar()
   const navigate = useNavigate()
@@ -106,9 +107,21 @@ const HrSidebar = () => {
           ml="15px"
           height="65px">
           {!collapsed ? (
-            <Typography fontWeight="800" color="#000" fontSize="22px" sx={{ cursor: 'pointer' }}>
+            <Typography sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+            <Avatar
+              alt="BMS Logo"
+              src={logoImage}
+              sx={{
+                width: 40,
+                height: 40,
+                marginRight: 1,
+                borderRadius: '0%'
+              }}
+            />
+            <Typography fontWeight="800" color="#000" fontSize="22px">
               BMS
             </Typography>
+          </Typography>
           ) : null}
           <IconButton
             onClick={() => {

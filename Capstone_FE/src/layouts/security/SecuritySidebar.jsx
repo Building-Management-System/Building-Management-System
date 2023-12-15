@@ -22,6 +22,7 @@ import { Menu, MenuItem, Sidebar, SubMenu, useProSidebar } from 'react-pro-sideb
 import { Link } from 'react-router-dom'
 import { storage } from '../../firebase/config'
 import useAuth from '../../hooks/useAuth'
+import logoImage from '../../assets/images/vite.jpg';
 const SecuritySideBar = () => {
     const { collapseSidebar, toggleSidebar, broken, collapsed } = useProSidebar()
     const [activeIndex, setActiveIndex] = useState(() => {
@@ -43,12 +44,12 @@ const SecuritySideBar = () => {
                                         : window.location.pathname === '/notification-department-manager'
                                             ? 7
                                             : window.location.pathname === '/control-log-security'
-                                            ? 9
-                                            : window.location.pathname === '/stranger-log-security'
-                                            ? 10
-                                            : window.location.pathname === '/device-manage-security'
-                                            ? 20
-                                            : 0
+                                                ? 9
+                                                : window.location.pathname === '/stranger-log-security'
+                                                    ? 10
+                                                    : window.location.pathname === '/device-manage-security'
+                                                        ? 20
+                                                        : 0
         return initialIndex
     })
     const [userProfileImage, setUserProfileImage] = useState('')
@@ -82,8 +83,20 @@ const SecuritySideBar = () => {
                     ml="15px"
                     height="65px">
                     {!collapsed ? (
-                        <Typography fontWeight="800" color="#000" fontSize="22px" sx={{ cursor: 'pointer' }}>
-                            BMS
+                        <Typography sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                            <Avatar
+                                alt="BMS Logo"
+                                src={logoImage}
+                                sx={{
+                                    width: 40,
+                                    height: 40,
+                                    marginRight: 1,
+                                    borderRadius: '0%'
+                                }}
+                            />
+                            <Typography fontWeight="800" color="#000" fontSize="22px">
+                                BMS
+                            </Typography>
                         </Typography>
                     ) : null}
                     <IconButton
@@ -260,7 +273,7 @@ const SecuritySideBar = () => {
                     </SubMenu>
                 </Menu>
 
-               
+
                 <Menu
                     menuItemStyles={{
                         button: ({ active }) => {
@@ -276,12 +289,12 @@ const SecuritySideBar = () => {
                         }
                     }}>
                     <MenuItem
-                                active={activeIndex ===20}
-                                icon={<ContactMailIcon />}
-                                component={<Link to="/device-manage-security" onClick={() => setActiveIndex(20)} />}>
-                                {' '}
-                                Device Management
-                            </MenuItem>
+                        active={activeIndex === 20}
+                        icon={<ContactMailIcon />}
+                        component={<Link to="/device-manage-security" onClick={() => setActiveIndex(20)} />}>
+                        {' '}
+                        Device Management
+                    </MenuItem>
                 </Menu>
             </Sidebar>
         </>

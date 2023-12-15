@@ -1,9 +1,10 @@
 import ChatIcon from '@mui/icons-material/Chat'
-import { Box, Divider, IconButton, Typography, Link } from '@mui/material'
+import { Box, Divider, IconButton, Typography, Link, Avatar } from '@mui/material'
 import AccountPopover from '../../../../components/AccountPopover'
 import NotificationsPopover from '../../../../components/NotificationsPopover'
 import { Link as LinkRouter } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import logoImage from '../../../../assets/images/vite.jpg';
 const ChatTopbar = () => {
   const currentUser = useSelector((state) => state.auth.login?.currentUser)
   return (
@@ -16,33 +17,93 @@ const ChatTopbar = () => {
         height="65px"
         bgcolor="#fff">
         {currentUser?.role === 'hr' ? (
-          <LinkRouter to="/manage-user" style={{textDecoration: 'none'}}>
-            <Typography fontWeight="800" color="#000" fontSize="22px" sx={{ cursor: 'pointer' }}>
-              BMS
+          <LinkRouter to="/manage-user" style={{ textDecoration: 'none' }}>
+            <Typography sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <Avatar
+                alt="BMS Logo"
+                src={logoImage}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  marginRight: 1,
+                  borderRadius: '0%'
+                }}
+              />
+              <Typography fontWeight="800" color="#000" fontSize="22px">
+                BMS
+              </Typography>
             </Typography>
           </LinkRouter>
         ) : currentUser?.role === 'employee' ? (
-          <LinkRouter to="/check-attendance-employee" style={{textDecoration: 'none'}}>
-            <Typography fontWeight="800" color="#000" fontSize="22px" sx={{ cursor: 'pointer' }}>
-              BMS
+          <LinkRouter to="/check-attendance-employee" style={{ textDecoration: 'none' }}>
+            <Typography sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <Avatar
+                alt="BMS Logo"
+                src={logoImage}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  marginRight: 1,
+                  borderRadius: '0%'
+                }}
+              />
+              <Typography fontWeight="800" color="#000" fontSize="22px">
+                BMS
+              </Typography>
             </Typography>
           </LinkRouter>
         ) : currentUser?.role === 'manager' ? (
-          <LinkRouter to="/request-list-manager" style={{textDecoration: 'none'}}>
-            <Typography fontWeight="800" color="#000" fontSize="22px" sx={{ cursor: 'pointer' }}>
-              BMS
+          <LinkRouter to="/request-list-manager" style={{ textDecoration: 'none' }}>
+            <Typography sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <Avatar
+                alt="BMS Logo"
+                src={logoImage}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  marginRight: 1,
+                  borderRadius: '0%'
+                }}
+              />
+              <Typography fontWeight="800" color="#000" fontSize="22px">
+                BMS
+              </Typography>
             </Typography>
           </LinkRouter>
         ) : currentUser?.role === 'admin' ? (
-          <LinkRouter to="/request-list-admin" style={{textDecoration: 'none'}}>
-            <Typography fontWeight="800" color="#000" fontSize="22px" sx={{ cursor: 'pointer' }}>
-              BMS
+          <LinkRouter to="/request-list-admin" style={{ textDecoration: 'none' }}>
+            <Typography sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <Avatar
+                alt="BMS Logo"
+                src={logoImage}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  marginRight: 1,
+                  borderRadius: '0%'
+                }}
+              />
+              <Typography fontWeight="800" color="#000" fontSize="22px">
+                BMS
+              </Typography>
             </Typography>
           </LinkRouter>
         ) : currentUser?.role === 'security' ? (
-          <LinkRouter to="/ticket-list-security" style={{textDecoration: 'none'}}>
-            <Typography fontWeight="800" color="#000" fontSize="22px" sx={{ cursor: 'pointer' }}>
-              BMS
+          <LinkRouter to="/ticket-list-security" style={{ textDecoration: 'none' }}>
+            <Typography sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <Avatar
+                alt="BMS Logo"
+                src={logoImage}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  marginRight: 1,
+                  borderRadius: '0%'
+                }}
+              />
+              <Typography fontWeight="800" color="#000" fontSize="22px">
+                BMS
+              </Typography>
             </Typography>
           </LinkRouter>
         ) : (
