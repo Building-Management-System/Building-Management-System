@@ -243,7 +243,7 @@ const Chat = () => {
 
   useEffect(() => {
     imgurlAvatar()
-  }, [allChatList])
+  }, [])
 
   const handleChange = (newMessage) => {
     setNewMessage(newMessage)

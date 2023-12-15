@@ -263,7 +263,7 @@ const EmpLogEvaluate = () => {
           Evaluate employee (Date: {`${month}/${year}`})
         </Typography>
         <Typography fontSize="25px" color="#000" fontWeight="bold" sx={{ m: '0 0 5px 0' }}>
-          Department: {userInfo?.departmentName}
+          Department: {listLog[0]?.department?.departmentName}
         </Typography>
         {employeeNames.length > 0 ? (
           <>

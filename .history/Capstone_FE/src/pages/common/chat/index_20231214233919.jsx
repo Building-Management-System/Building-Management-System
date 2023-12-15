@@ -96,13 +96,13 @@ const Chat = () => {
   const handleCloseChangeAdmin = () => setOpenChangeAdmin(false)
   const debouncedSearch = useDebounce(searchTerm, 500)
   const navigate = useNavigate()
-  // useEffect(() => {
-  //   scroll.current?.scrollIntoView( {
-  //     behavior: 'smooth',
-  //     block: 'end',
-  //     inline: 'nearest'
-  //   })
-  // }, [messages])
+  useEffect(() => {
+    scroll.current?.scrollIntoView( {
+      behavior: 'smooth',
+      block: 'end',
+      inline: 'nearest'
+    })
+  }, [messages])
   
   const currentUserId = useSelector((state) => state.auth.login.currentUser.accountId)
 

@@ -329,7 +329,7 @@ const EmpLogManagement = () => {
           </FormControl>
         )}
            {isSearchClicked && listLog.length > 0 && listLog[0].department && listLog[0].department.departmentName && (
-          <Typography variant="h6" sx={{ marginLeft: employeeNames.length > 0 ? '30px' : 0 }}>
+          <Typography variant="h6" sx={{ marginLeft: '30px' }}>
             <span>Department: </span>
             <span style={{ color: 'red' }}>{listLog[0].department.departmentName}</span>
             <span style={{ color: 'red' }}>{listEmployees[0].departmentName}</span>

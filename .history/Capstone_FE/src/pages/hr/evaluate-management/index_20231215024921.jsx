@@ -316,18 +316,18 @@ const EvaluateManagement = () => {
 
                     <Typography>
                         <span>Department: </span>
-                        <span >{listLog[0].department.departmentName}</span>
+                        <span style={{ color: 'red' }}>{listLog[0].department.departmentName}</span>
                     </Typography>
 
                     {showManagerInfo && listmanager.length > 0 && (
                         <div style={{ display: 'flex', gap: '50px' }}>
                             <Typography style={{ marginTop: '20px' }}>
                                 <span>Manager Name: </span>
-                                <span>{listmanager.map(manager => `${manager.firstName} ${manager.lastName}`).join(', ')}</span>
+                                <span style={{ color: '#32CD32' }}>{listmanager.map(manager => `${manager.firstName} ${manager.lastName}`).join(', ')}</span>
                             </Typography>
                             <Typography style={{ marginTop: '20px' }}>
                                 <span>Manager Account: </span>
-                                <span>{listmanager.map(manager => `${manager.username} `)}</span>
+                                <span style={{ color: '#32CD32' }}>{listmanager.map(manager => `${manager.username} `)}</span>
                             </Typography>
                         </div>
                     )}

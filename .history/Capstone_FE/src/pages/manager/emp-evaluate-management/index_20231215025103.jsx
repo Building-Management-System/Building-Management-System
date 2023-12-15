@@ -200,13 +200,19 @@ const EmpLogEvaluate = () => {
             <>
               <Button
                 variant="contained"
-                onClick={() => navigate(`/log-attendance-emp/${params.row.employeeId}/${date}`)}
+                onClick={() =>
+                  navigate(
+                    `/log-attendance-emp/${params.row.employeeId}/${date}`
+                  )
+                }
                 style={buttonStyle}>
                 Detail
               </Button>
               <Button
                 variant="contained"
-                onClick={() => navigate(`/update-evaluate/${params.row.employeeId}/${date}`)}
+                onClick={() =>
+                  navigate(`/update-evaluate/${params.row.employeeId}/${date}`)
+                }
                 style={{ backgroundColor: 'red', fontSize: '12px', marginLeft: '10px' }}>
                 Re-Evaluate
               </Button>
@@ -221,14 +227,22 @@ const EmpLogEvaluate = () => {
             <>
               <Button
                 variant="contained"
-                onClick={() => navigate(`/log-attendance-emp/${params.row.employeeId}/${date}`)}
+                onClick={() =>
+                  navigate(
+                    `/log-attendance-emp/${params.row.employeeId}/${date}`
+                  )
+                }
                 style={buttonStyle}>
                 Detail
               </Button>
               <Box sx={{ marginLeft: '0px' }}>
                 <Button
                   variant="contained"
-                  onClick={() => navigate(`/update-evaluate/${params.row.employeeId}/${date}`)}
+                  onClick={() =>
+                    navigate(
+                      `/update-evaluate/${params.row.employeeId}/${date}`
+                    )
+                  }
                   style={buttonStyle}>
                   Edit
                 </Button>
@@ -244,7 +258,11 @@ const EmpLogEvaluate = () => {
             <>
               <Button
                 variant="contained"
-                onClick={() => navigate(`/log-attendance-emp/${params.row.employeeId}/${date}`)}
+                onClick={() =>
+                  navigate(
+                    `/log-attendance-emp/${params.row.employeeId}/${date}`
+                  )
+                }
                 style={buttonStyle}>
                 Detail
               </Button>
@@ -260,49 +278,40 @@ const EmpLogEvaluate = () => {
       <ChatTopbar />
       <Box p={3}>
         <Typography fontSize="30px" color="#000" fontWeight="bold" sx={{ m: '0 0 5px 0' }}>
-          Evaluate employee (Date: {`${month}/${year}`})
+          Evaluate employee (Date: {`${month}/${year}`}) 
         </Typography>
         <Typography fontSize="25px" color="#000" fontWeight="bold" sx={{ m: '0 0 5px 0' }}>
-          Department: {userInfo?.departmentName}
+        Department: {listLog[0]?.department?.departmentName}
         </Typography>
-        {employeeNames.length > 0 ? (
-          <>
-            <Box display="flex" alignItems="center" mt={3} sx={{ marginLeft: 'auto' }}>
-              <FormControl sx={{ width: '280px' }}>
-                <InputLabel id="demo-simple-select-label">Employee Remaining</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  label="Employee Remaining"
-                  value={employee}
-                  onChange={(event) => {
-                    const selectedEmployeeId = event.target.value
-                    setEmployee(selectedEmployeeId)
-                    navigate(`/create-evaluate/${selectedEmployeeId}/${date}`)
-                  }}>
-                  {employeeNames.map((item, index) => (
-                    <MenuItem key={index} value={item.employeeId}>
-                      {item.userName}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
+        <Box display="flex" alignItems="center" mt={3} sx={{ marginLeft: 'auto' }}>
+          {employeeNames.length > 0 ? (
+            <FormControl sx={{ width: '280px' }}>
+              <InputLabel id="demo-simple-select-label">Employee Remaining</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                label="Employee Remaining"
+                value={employee}
+                onChange={(event) => {
+                  const selectedEmployeeId = event.target.value
+                  setEmployee(selectedEmployeeId)
+                  navigate(`/create-evaluate/${selectedEmployeeId}/${date}`)
+                }}>
+                {employeeNames.map((item, index) => (
+                  <MenuItem key={index} value={item.employeeId}>
+                    {item.userName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          ): <>haha</>}
 
-            <Box mt={3}>
-              <DataTableListChangeLog rows={listLog} columns={columns} isLoading={isLoading} />
-            </Box>
-          </>
-        ) : <> 
-            <Typography mt={3} display='block' fontSize="20px" width='100%' textAlign='center'>You have evaluated all employees this month.</Typography>
-        </>}
-        <Box display='flex' justifyContent='center'>
-        <Button
-          variant="contained"
-          onClick={() => navigate('/manage-user-by-manager')}
-          sx={{ mt: 2 }}>
-          Back to Dashboard
-        </Button>
         </Box>
+
+          <Box mt={3}>
+            <DataTableListChangeLog rows={listLog} columns={columns} isLoading={isLoading} />
+          </Box>
+          
+          <Button variant='contained' onClick={() => navigate('/manage-user-by-manager')} sx={{mt: 2}}>Back to Dashboard</Button>
       </Box>
     </>
   )

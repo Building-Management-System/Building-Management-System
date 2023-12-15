@@ -243,7 +243,7 @@ const Chat = () => {
 
   useEffect(() => {
     imgurlAvatar()
-  }, [allChatList])
+  }, [])
 
   const handleChange = (newMessage) => {
     setNewMessage(newMessage)
@@ -445,7 +445,7 @@ const Chat = () => {
 
   useEffect(() => {
     imgurlMessage()
-  }, [messages])
+  }, [])
 
   const handleDownloadFile = async (item) => {
     let data = {

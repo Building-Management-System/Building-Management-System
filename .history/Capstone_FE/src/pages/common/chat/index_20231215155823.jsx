@@ -502,7 +502,7 @@ const Chat = () => {
 
   useEffect(() => {
     imgurlUserAvatar()
-  }, [userAvatar])
+  }, [])
 
   const handleUpdateChat = async () => {
     if(selectedUserGroup.length > 1 && chatName === ''){
