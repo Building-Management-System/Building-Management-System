@@ -40,7 +40,7 @@ const CreateEvaluate = () => {
   const [show, setShow] = useState(false)
   const [userAttendance, setUserAttendance] = useState('')
   const [dailyLog, setDailyLog] = useState([])
-  const [status, setStatus] = useState('GOOD')
+  const [status, setStatus] = useState(0)
   const [selectedOption, setSelectedOption] = useState('option1')
   const { employee_id, date } = useParams()
   const [overTimeData, setOverTimeDate] = useState([])

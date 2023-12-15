@@ -40,7 +40,7 @@ const ChatTopbar = () => {
             </Typography>
           </LinkRouter>
         ) : currentUser?.role === 'security' ? (
-          <LinkRouter to="/ticket-list-security" style={{textDecoration: 'none'}}>
+          <LinkRouter to="/manage-user" style={{textDecoration: 'none'}}>
             <Typography fontWeight="800" color="#000" fontSize="22px" sx={{ cursor: 'pointer' }}>
               BMS
             </Typography>
