@@ -1,13 +1,12 @@
 import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled'
 import AddIcon from '@mui/icons-material/Add'
-import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn'
 import CheckIcon from '@mui/icons-material/Check'
 import CloseIcon from '@mui/icons-material/Close'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye'
 import RunningWithErrorsIcon from '@mui/icons-material/RunningWithErrors'
-import { Skeleton } from '@mui/material'
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Skeleton } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Collapse from '@mui/material/Collapse'
@@ -22,62 +21,55 @@ import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import * as React from 'react'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import Swal from 'sweetalert2'
 import requestApi from '../../../services/requestApi'
-function formatDate(date) {
-  const createDate = new Date(date);
-  const year = createDate.getFullYear().toString().slice(-2);
-  const month = String(createDate.getMonth() + 1).padStart(2, '0');
-  const day = String(createDate.getDate()).padStart(2, '0');
-  const hours = String(createDate.getHours()).padStart(2, '0');
-  const minutes = String(createDate.getMinutes()).padStart(2, '0');
-  const seconds = String(createDate.getSeconds()).padStart(2, '0');
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
+import formatDate from '../../../utils/formatDate'
+import { toast } from 'react-toastify'
 function Row(props) {
   const { row } = props
-  const [open, setOpen] = useState(false)
-  const [updateRow, setUpdateRow] = useState(row)
-  console.log(updateRow);
-  const handleAcceptOtherRequest = (ticketId) => {
-    Swal.fire({
-      title: 'Are you sure to finish this request?',
-      icon: 'question',
-      cancelButtonText: 'Cancel!',
-      showCancelButton: true,
-      cancelButtonColor: 'red',
-      confirmButtonColor: 'green'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        try {
-          let data = {
-            ticketId: ticketId,
-          };
-          requestApi.acceptStatutOtherRequest(data);
-          setUpdateRow((prevRow) => ({
-            ...prevRow,
-            status: false,
-            requestTickets: [
-              {
-                ...prevRow.requestTickets[0],
-                requestStatus: 'CLOSED',
-              },
-            ],
-          }));
-          toast.success('Request Finish successfully!');
-        } catch (error) {
-          toast.error('Failed to Finish request. Please try again.');
-        }
-      }
-    })
-    
+  const [open, setOpen] = React.useState(false)
+  const navigate = useNavigate()
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const handleOpenConfirmDialog = () => {
+    setConfirmOpen(true);
   };
 
-  const navigate = useNavigate()
+  const handleCloseConfirmDialog = () => {
+    setConfirmOpen(false);
+  };
+  const handelAcceptOtherRequest = async (ticketId) => {
+    try {
+      let data = {
+        ticketId: ticketId,
+      };
+      await requestApi.acceptStatutOtherRequest(data);
+
+      toast.success('Request Finish successfully!', {
+        autoClose: 800,
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      toast.error('Failed to Finish request. Please try again.', {
+        autoClose: 3000,
+      });
+    }
+  };
+  function formatDate(date) {
+    const createDate = new Date(date);
+    const year = createDate.getFullYear().toString().slice(-2);
+    const month = String(createDate.getMonth() + 1).padStart(2, '0');
+    const day = String(createDate.getDate()).padStart(2, '0');
+    const hours = String(createDate.getHours()).padStart(2, '0');
+    const minutes = String(createDate.getMinutes()).padStart(2, '0');
+    const seconds = String(createDate.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
   return (
     <>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
@@ -87,15 +79,15 @@ function Row(props) {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {updateRow.ticketId.slice(0, 10)}
+          {row.ticketId.slice(0, 10)}
         </TableCell>
         <TableCell component="th" scope="row">
-          {updateRow.topic}
+          {row.topic}
         </TableCell>
-        <TableCell>{updateRow.requestTickets[updateRow.requestTickets.length - 1].title}</TableCell>
-        <TableCell>{formatDate(updateRow.createDate)}</TableCell>
-        <TableCell>{formatDate(updateRow.updateDate)}</TableCell>
-        <TableCell> {updateRow.status === false ? (
+        <TableCell>{row.requestTickets[row.requestTickets.length - 1].title}</TableCell>
+        <TableCell>{formatDate(row.createDate)}</TableCell>
+        <TableCell>{formatDate(row.updateDate)}</TableCell>
+        <TableCell> {row.status === false ? (
           <Box
             width="80%"
             margin="0 auto"
@@ -106,7 +98,7 @@ function Row(props) {
             borderRadius="4px">
             <Typography color="#a9a9a9">CLOSE</Typography>
           </Box>
-        ) : updateRow.status === true ? (
+        ) : row.status === true ? (
           <Box
             width="80%"
             margin="0 auto"
@@ -119,26 +111,46 @@ function Row(props) {
           </Box>
         ) : null}</TableCell>
         <TableCell style={{ width: '20px', fontWeight: 'bold', fontSize: '18px' }}>
-          {updateRow.status === true ? (
-            <IconButton onClick={() => navigate(`/create-request-existed/${updateRow.ticketId}`)}>
+          {row.topic !== 'ROOM_REQUEST' && row.status === true ? (
+            <IconButton onClick={() => navigate(`/create-request-existed/${row.ticketId}`)}>
               <AddIcon />
             </IconButton>
           ) : null}
         </TableCell>
         <TableCell>
-          {updateRow.topic === 'OTHER_REQUEST' && updateRow.status === true ? (
-            <Button onClick={() => handleAcceptOtherRequest(updateRow.ticketId)}>
+          {row.topic === 'OTHER_REQUEST' && row.status === true ? (
+            <Button onClick={handleOpenConfirmDialog}>
               <CloseIcon />
               <Typography fontSize={'13px'} color="#000">
                 Finish
               </Typography>
             </Button>
           ) : null}
-
+          <Dialog
+            open={confirmOpen}
+            onClose={handleCloseConfirmDialog}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">{"Are you sure?"}</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                This action will finish the request. Do you want to proceed?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => handelAcceptOtherRequest(row.ticketId)} color="primary" autoFocus>
+                Yes
+              </Button>
+              <Button onClick={handleCloseConfirmDialog} color="primary">
+                No
+              </Button>
+            </DialogActions>
+          </Dialog>
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Typography variant="h6" gutterBottom component="div">
@@ -149,16 +161,16 @@ function Row(props) {
                   <TableRow>
                     <TableCell style={{ width: '120px' }}>Request ID</TableCell>
                     <TableCell style={{ width: '200px' }} align="center">Status</TableCell>
-                    <TableCell style={{ width: '200px' }}>Receiver</TableCell>
+                    <TableCell style={{ width: '50px' }}>Receiver</TableCell>
                     <TableCell style={{ width: '100px' }} >Create Date</TableCell>
                     <TableCell style={{ width: '100px' }} >Update Date</TableCell>
                     <TableCell style={{ width: '100px' }}>Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {updateRow.requestTickets.map((request_row) => (
+                  {row.requestTickets.map((request_row) => (
                     <TableRow key={request_row.requestId}>
-                      <TableCell style={{ width: '120px' }} component="th" scope="row">
+                      <TableCell component="th" scope="row">
                         {request_row.requestId.slice(0, 10)}
                       </TableCell>
                       <TableCell>
@@ -222,22 +234,17 @@ function Row(props) {
                       </TableCell>
                       <TableCell key={request_row.userId}
                       >{request_row.receiverFirstName} {request_row.receiverLastName}</TableCell>
-                      <TableCell style={{ width: '150px' }}>{formatDate(request_row.requestCreateDate)}</TableCell>
-                      <TableCell style={{ width: '150px' }}>{formatDate(request_row.requestUpdateDate)}</TableCell>
+                      <TableCell>{formatDate(request_row.requestCreateDate)}</TableCell>
+                      <TableCell>{formatDate(request_row.requestUpdateDate)}</TableCell>
                       <TableCell>
-                        {updateRow.topic !== 'ROOM_REQUEST' ? (
-                          <IconButton
-                            sx={{ color: '#1565c0' }}
-                            onClick={() => navigate(`/request-detail/${request_row.requestId}`)}>
-                            <RemoveRedEyeIcon />
-                          </IconButton>
-                        ) : (
-                          <IconButton
-                            sx={{ color: '#1565c0' }}
-                            onClick={() => navigate(`/book-room-detail/${request_row.requestId}`)}>
-                            <AssignmentTurnedInIcon />
-                          </IconButton>
-                        )}
+                        <IconButton
+                          sx={{ color: '#1565c0' }}
+                          onClick={() =>
+                            navigate(`/request-detail/${request_row.requestId}`)
+                          }>
+                          <RemoveRedEyeIcon />
+                        </IconButton>
+
                       </TableCell>
                     </TableRow>
                   ))}
@@ -277,7 +284,7 @@ const TableRowsLoader = ({ rowsNum }) => {
     </TableRow>
   ))
 }
-export default function RequestListEmployee() {
+export default function RequestListAdmin() {
   const currentUser = useSelector((state) => state.auth.login?.currentUser);
   const [listRequestAndTicket, setListRequestAndTicket] = useState([])
   const [page, setPage] = useState(0)
@@ -311,10 +318,8 @@ export default function RequestListEmployee() {
             label="Search"
             value={searchTerm}
             fullWidth
+            placeholder='ID, Topic, Title, Date, Status'
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Title, Topic, Date, ID"
-
-
           />
         </Paper>
         <Box display="flex" alignItems="center" gap={1} sx={{ marginTop: '16px' }}>
@@ -330,19 +335,19 @@ export default function RequestListEmployee() {
             <TableHead>
               <TableRow>
                 <TableCell style={{ width: '10px' }} />
-                <TableCell style={{ width: '100px', fontWeight: 'bold', fontSize: '18px' }}>
+                <TableCell style={{ width: '160px', fontWeight: 'bold', fontSize: '18px' }}>
                   TicketID
                 </TableCell>
-                <TableCell style={{ width: '80px', fontWeight: 'bold', fontSize: '18px' }}>
+                <TableCell style={{ width: '160px', fontWeight: 'bold', fontSize: '18px' }}>
                   Topic
                 </TableCell>
-                <TableCell style={{ width: '250px', fontWeight: 'bold', fontSize: '18px' }}>
+                <TableCell style={{ width: '200px', fontWeight: 'bold', fontSize: '18px' }}>
                   Title
                 </TableCell>
-                <TableCell style={{ width: '250px', fontWeight: 'bold', fontSize: '18px' }}>
+                <TableCell style={{ width: '150px', fontWeight: 'bold', fontSize: '18px' }}>
                   Create Date
                 </TableCell>
-                <TableCell style={{ width: '250px', fontWeight: 'bold', fontSize: '18px' }}>
+                <TableCell style={{ width: '150px', fontWeight: 'bold', fontSize: '18px' }}>
                   Update Date
                 </TableCell>
                 <TableCell align='center' style={{ width: '100px', fontWeight: 'bold', fontSize: '18px' }}>
@@ -351,6 +356,7 @@ export default function RequestListEmployee() {
                 <TableCell style={{ width: '20px', fontWeight: 'bold', fontSize: '18px' }}>
                   Action
                 </TableCell>
+
                 <TableCell style={{ width: '20px', fontWeight: 'bold', fontSize: '18px' }}>
 
                 </TableCell>

@@ -26,7 +26,7 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import Swal from 'sweetalert2'
+import { Swal } from 'sweetalert2'
 import requestApi from '../../../services/requestApi'
 function formatDate(date) {
   const createDate = new Date(date);
@@ -127,14 +127,13 @@ function Row(props) {
         </TableCell>
         <TableCell>
           {updateRow.topic === 'OTHER_REQUEST' && updateRow.status === true ? (
-            <Button onClick={() => handleAcceptOtherRequest(updateRow.ticketId)}>
+            <Button onClick={handleAcceptOtherRequest}>
               <CloseIcon />
               <Typography fontSize={'13px'} color="#000">
                 Finish
               </Typography>
             </Button>
           ) : null}
-
         </TableCell>
       </TableRow>
       <TableRow>

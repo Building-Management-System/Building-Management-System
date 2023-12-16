@@ -7,7 +7,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye'
 import RunningWithErrorsIcon from '@mui/icons-material/RunningWithErrors'
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Skeleton } from '@mui/material'
+import { Skeleton } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Collapse from '@mui/material/Collapse'
@@ -26,6 +26,7 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import Swal from 'sweetalert2'
 import requestApi from '../../../services/requestApi'
 function formatDate(date) {
   const createDate = new Date(date);
@@ -40,32 +41,40 @@ function formatDate(date) {
 function Row(props) {
   const { row } = props
   const [open, setOpen] = useState(false)
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [updateRow, setUpdateRow] = useState(row)
   console.log(updateRow);
-  const handleOpenConfirmDialog = () => {
-    setConfirmOpen(true);
-  };
-
-  const handleCloseConfirmDialog = () => {
-    setConfirmOpen(false);
-  };
-  const handleAcceptOtherRequest = async (ticketId) => {
-    try {
-      let data = {
-        ticketId: ticketId,
-      };
-      await requestApi.acceptStatutOtherRequest(data);
-      setUpdateRow({ ...updateRow, status: false })
-      toast.success('Request Finish successfully!');
-      // setTimeout(() => {
-      //   window.location.reload();
-      // }, 1000);
-    } catch (error) {
-      toast.error('Failed to Finish request. Please try again.', {
-        autoClose: 3000,
-      });
-    }
+  const handleAcceptOtherRequest = (ticketId) => {
+    Swal.fire({
+      title: 'Are you sure to finish this request?',
+      icon: 'question',
+      cancelButtonText: 'Cancel!',
+      showCancelButton: true,
+      cancelButtonColor: 'red',
+      confirmButtonColor: 'green'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        try {
+          let data = {
+            ticketId: ticketId,
+          };
+          requestApi.acceptStatutOtherRequest(data);
+          setUpdateRow((prevRow) => ({
+            ...prevRow,
+            status: false,
+            requestTickets: [
+              {
+                ...prevRow.requestTickets[0],
+                requestStatus: 'CLOSED',
+              },
+            ],
+          }));
+          toast.success('Request Finish successfully!');
+        } catch (error) {
+          toast.error('Failed to Finish request. Please try again.');
+        }
+      }
+    })
+    
   };
 
   const navigate = useNavigate()
@@ -118,34 +127,14 @@ function Row(props) {
         </TableCell>
         <TableCell>
           {updateRow.topic === 'OTHER_REQUEST' && updateRow.status === true ? (
-            <Button onClick={handleOpenConfirmDialog}>
+            <Button onClick={() => handleAcceptOtherRequest(updateRow.ticketId)}>
               <CloseIcon />
               <Typography fontSize={'13px'} color="#000">
                 Finish
               </Typography>
             </Button>
           ) : null}
-          <Dialog
-            open={confirmOpen}
-            onClose={handleCloseConfirmDialog}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-          >
-            <DialogTitle id="alert-dialog-title">{"Are you sure?"}</DialogTitle>
-            <DialogContent>
-              <DialogContentText id="alert-dialog-description">
-                This action will finish the request. Do you want to proceed?
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => handleAcceptOtherRequest(updateRow.ticketId)} color="primary" autoFocus>
-                Yes
-              </Button>
-              <Button onClick={handleCloseConfirmDialog} color="primary">
-                No
-              </Button>
-            </DialogActions>
-          </Dialog>
+
         </TableCell>
       </TableRow>
       <TableRow>
