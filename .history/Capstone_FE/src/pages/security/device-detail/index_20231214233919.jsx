@@ -190,18 +190,6 @@ const DeviceDetail = () => {
         status: status
       }
       await securityApi.changeRecordStatus(data)
-      setAccountLCD((prevAccountLCD) =>
-        prevAccountLCD.map((account) => {
-          if (account.deviceAccountId === deviceAccId) {
-            return {
-              ...account,
-              status: status
-            }
-          } else {
-            return account
-          }
-        })
-      )
       toast.success('Update successfully ')
       handleCloseStatus()
     } catch (error) {

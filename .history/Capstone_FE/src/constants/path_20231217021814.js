@@ -115,4 +115,6 @@ export const SECURITY = {
     CONTROL_LOG_DETAIL_SECURITY: '/control-log-detail-security/:username/:controlLogId',
     // CONTROL_LOG_DETAIL_SECURITY: '/control-log-detail-security',
     STRANGER_LOG_SECURITY: '/stranger-log-security',
+    DEVICE_MANAGE_SECURITY: '/device-manage-security',
+    DEVICE_DETAIL_SECURITY: '/device-detail-security/:device_id',
 }

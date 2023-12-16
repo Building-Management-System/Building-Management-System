@@ -41,8 +41,7 @@ function Row(props) {
   const { row } = props
   const [open, setOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [updateRow, setUpdateRow] = useState(row)
-  console.log(updateRow);
+
   const handleOpenConfirmDialog = () => {
     setConfirmOpen(true);
   };
@@ -56,7 +55,7 @@ function Row(props) {
         ticketId: ticketId,
       };
       await requestApi.acceptStatutOtherRequest(data);
-      setUpdateRow({ ...updateRow, status: false })
+      
       toast.success('Request Finish successfully!');
       // setTimeout(() => {
       //   window.location.reload();
@@ -68,6 +67,8 @@ function Row(props) {
     }
   };
 
+  console.log(row);
+
   const navigate = useNavigate()
   return (
     <>
@@ -78,15 +79,15 @@ function Row(props) {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {updateRow.ticketId.slice(0, 10)}
+          {row.ticketId.slice(0, 10)}
         </TableCell>
         <TableCell component="th" scope="row">
-          {updateRow.topic}
+          {row.topic}
         </TableCell>
-        <TableCell>{updateRow.requestTickets[updateRow.requestTickets.length - 1].title}</TableCell>
-        <TableCell>{formatDate(updateRow.createDate)}</TableCell>
-        <TableCell>{formatDate(updateRow.updateDate)}</TableCell>
-        <TableCell> {updateRow.status === false ? (
+        <TableCell>{row.requestTickets[row.requestTickets.length - 1].title}</TableCell>
+        <TableCell>{formatDate(row.createDate)}</TableCell>
+        <TableCell>{formatDate(row.updateDate)}</TableCell>
+        <TableCell> {row.status === false ? (
           <Box
             width="80%"
             margin="0 auto"
@@ -97,7 +98,7 @@ function Row(props) {
             borderRadius="4px">
             <Typography color="#a9a9a9">CLOSE</Typography>
           </Box>
-        ) : updateRow.status === true ? (
+        ) : row.status === true ? (
           <Box
             width="80%"
             margin="0 auto"
@@ -110,14 +111,14 @@ function Row(props) {
           </Box>
         ) : null}</TableCell>
         <TableCell style={{ width: '20px', fontWeight: 'bold', fontSize: '18px' }}>
-          {updateRow.status === true ? (
-            <IconButton onClick={() => navigate(`/create-request-existed/${updateRow.ticketId}`)}>
+          {row.status === true ? (
+            <IconButton onClick={() => navigate(`/create-request-existed/${row.ticketId}`)}>
               <AddIcon />
             </IconButton>
           ) : null}
         </TableCell>
         <TableCell>
-          {updateRow.topic === 'OTHER_REQUEST' && updateRow.status === true ? (
+          {row.topic === 'OTHER_REQUEST' && row.status === true ? (
             <Button onClick={handleOpenConfirmDialog}>
               <CloseIcon />
               <Typography fontSize={'13px'} color="#000">
@@ -138,7 +139,7 @@ function Row(props) {
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => handleAcceptOtherRequest(updateRow.ticketId)} color="primary" autoFocus>
+              <Button onClick={() => handleAcceptOtherRequest(row.ticketId)} color="primary" autoFocus>
                 Yes
               </Button>
               <Button onClick={handleCloseConfirmDialog} color="primary">
@@ -167,7 +168,7 @@ function Row(props) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {updateRow.requestTickets.map((request_row) => (
+                  {row.requestTickets.map((request_row) => (
                     <TableRow key={request_row.requestId}>
                       <TableCell style={{ width: '120px' }} component="th" scope="row">
                         {request_row.requestId.slice(0, 10)}
@@ -236,7 +237,7 @@ function Row(props) {
                       <TableCell style={{ width: '150px' }}>{formatDate(request_row.requestCreateDate)}</TableCell>
                       <TableCell style={{ width: '150px' }}>{formatDate(request_row.requestUpdateDate)}</TableCell>
                       <TableCell>
-                        {updateRow.topic !== 'ROOM_REQUEST' ? (
+                        {row.topic !== 'ROOM_REQUEST' ? (
                           <IconButton
                             sx={{ color: '#1565c0' }}
                             onClick={() => navigate(`/request-detail/${request_row.requestId}`)}>

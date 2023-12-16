@@ -204,7 +204,7 @@ const DeviceManage = () => {
               )}
               <Button
                 variant="contained"
-                onClick={() => navigate(`/device-detail-admin/${params.row.deviceId}`)}>
+                onClick={() => navigate(`/device-detail-security/${params.row.deviceId}`)}>
                 Detail
               </Button>
             </Box>

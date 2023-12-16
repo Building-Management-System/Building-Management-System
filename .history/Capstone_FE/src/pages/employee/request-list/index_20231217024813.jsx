@@ -56,7 +56,7 @@ function Row(props) {
         ticketId: ticketId,
       };
       await requestApi.acceptStatutOtherRequest(data);
-      setUpdateRow({ ...updateRow, status: false })
+      
       toast.success('Request Finish successfully!');
       // setTimeout(() => {
       //   window.location.reload();

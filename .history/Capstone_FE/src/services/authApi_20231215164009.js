@@ -22,7 +22,7 @@ const authApi = {
         navigate('/check-attendance-employee')
       } else if (response.data.role === 'manager') {
         const dayOfMonth = date.getDate()
-        const currentDate = previousMonthDate.toISOString().split('T')[0]
+        const currentDate = date.toISOString().split('T')[0]
         if (dayOfMonth >= 1 && dayOfMonth <= 20) {
           navigate(`/emp-log-evaluate/${currentDate}`)
         } else {

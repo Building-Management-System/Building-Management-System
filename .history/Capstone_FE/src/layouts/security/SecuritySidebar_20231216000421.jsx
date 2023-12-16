@@ -22,6 +22,7 @@ import { Menu, MenuItem, Sidebar, SubMenu, useProSidebar } from 'react-pro-sideb
 import { Link } from 'react-router-dom'
 import { storage } from '../../firebase/config'
 import useAuth from '../../hooks/useAuth'
+import logoImage from '../../assets/images/vite.jpg';
 const SecuritySideBar = () => {
     const { collapseSidebar, toggleSidebar, broken, collapsed } = useProSidebar()
     const [activeIndex, setActiveIndex] = useState(() => {
@@ -30,23 +31,25 @@ const SecuritySideBar = () => {
                 ? 0
                 : window.location.pathname === '/security-ticket'
                     ? 2
-                    : window.location.pathname === '/notification-list-security'
+                    : window.location.pathname === '/notification-list-manager'
                         ? 3
-                        : window.location.pathname === '/notification-draft-security'
+                        : window.location.pathname === '/notification-draft-manager'
                             ? 4
-                            : window.location.pathname === '/notification-send-security'
+                            : window.location.pathname === '/notification-send-manager'
                                 ? 5
-                                : window.location.pathname === '/notification-receive-security'
+                                : window.location.pathname === '/notification-receive-manager'
                                     ? 6
-                                    : window.location.pathname === '/notification-scheduled-security'
+                                    : window.location.pathname === '/notification-scheduled-manager'
                                         ? 8
-                                        : window.location.pathname === '/notification-department-security'
+                                        : window.location.pathname === '/notification-department-manager'
                                             ? 7
                                             : window.location.pathname === '/control-log-security'
-                                            ? 9
-                                            : window.location.pathname === '/stranger-log-security'
-                                            ? 10
-                                            :  0
+                                                ? 9
+                                                : window.location.pathname === '/stranger-log-security'
+                                                    ? 10
+                                                    : window.location.pathname === '/device-manage-security'
+                                                        ? 20
+                                                        : 0
         return initialIndex
     })
     const [userProfileImage, setUserProfileImage] = useState('')
@@ -80,8 +83,20 @@ const SecuritySideBar = () => {
                     ml="15px"
                     height="65px">
                     {!collapsed ? (
-                        <Typography fontWeight="800" color="#000" fontSize="22px" sx={{ cursor: 'pointer' }}>
-                            BMS
+                        <Typography sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                            <Avatar
+                                alt="BMS Logo"
+                                src={logoImage}
+                                sx={{
+                                    width: 40,
+                                    height: 40,
+                                    marginRight: 1,
+                                    borderRadius: '0%'
+                                }}
+                            />
+                            <Typography fontWeight="800" color="#000" fontSize="22px">
+                                BMS
+                            </Typography>
                         </Typography>
                     ) : null}
                     <IconButton
@@ -258,8 +273,29 @@ const SecuritySideBar = () => {
                     </SubMenu>
                 </Menu>
 
-               
-                
+
+                <Menu
+                    menuItemStyles={{
+                        button: ({ active }) => {
+                            return {
+                                backgroundColor: active ? 'rgb(237, 231, 246)' : undefined,
+                                color: '#000',
+                                '&:hover': {
+                                    backgroundColor: 'rgb(237, 231, 246)',
+                                    color: 'rgb(94, 53, 177)',
+                                    borderRadius: '10px'
+                                }
+                            }
+                        }
+                    }}>
+                    <MenuItem
+                        active={activeIndex === 20}
+                        icon={<ContactMailIcon />}
+                        component={<Link to="/device-manage-security" onClick={() => setActiveIndex(20)} />}>
+                        {' '}
+                        Device Management
+                    </MenuItem>
+                </Menu>
             </Sidebar>
         </>
     )

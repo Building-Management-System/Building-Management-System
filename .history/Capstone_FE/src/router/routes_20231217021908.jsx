@@ -266,15 +266,7 @@ export default function Router() {
               <BookListDetail />
             </Suspense>
           )
-        },
-        {
-          path: ADMIN_PATH.DEVICE_DETAIL_ADMIN,
-          element: (
-            <Suspense fallback={<>Loading...</>}>
-              <DeviceDetail />
-            </Suspense>
-          )
-        },
+        }
       ]
     },
     {
@@ -895,6 +887,14 @@ export default function Router() {
                 </Suspense>
               )
             },
+            {
+              path: SECURITY.DEVICE_DETAIL_SECURITY,
+              element: (
+                <Suspense fallback={<>Loading...</>}>
+                  <DeviceDetail />
+                </Suspense>
+              )
+            },
           ]
         },
       ]
@@ -913,6 +913,14 @@ export default function Router() {
               element: (
                 <Suspense fallback={<>Loading...</>}>
                   <SecurityTicket />
+                </Suspense>
+              )
+            },
+            {
+              path: SECURITY.DEVICE_MANAGE_SECURITY,
+              element: (
+                <Suspense fallback={<>Loading...</>}>
+                  <DeviceManage />
                 </Suspense>
               )
             },
