@@ -24,7 +24,6 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import requestApi from '../../../services/requestApi'
-import useAuth from '../../../hooks/useAuth'
 function formatDate(date) {
   const createDate = new Date(date);
   const year = createDate.getFullYear().toString().slice(-2);
@@ -41,7 +40,6 @@ function Row(props) {
   const [open, setOpen] = useState(false)
   const currentUser = useSelector((state) => state.auth.login?.currentUser)
   const [updateRow, setUpdateRow] = useState(row)
-  const userInfo = useAuth()
   const navigate = useNavigate()
   const handleAcceptRequest = (requestId) => {
     let data = {
@@ -55,8 +53,6 @@ function Row(props) {
         {
           ...prevRow.requestTickets[0],
           requestStatus: 'EXECUTING',
-          receiverFirstName: userInfo?.firstName,
-          receiverLastName: userInfo?.lastName
         },
       ],
     }));
@@ -83,16 +79,16 @@ function Row(props) {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {updateRow.ticketId.slice(0, 10)}
+          {row.ticketId.slice(0, 10)}
         </TableCell>
         <TableCell component="th" scope="row">
-          {updateRow.topic}
+          {row.topic}
         </TableCell>
-        <TableCell>{updateRow.requestTickets[updateRow.requestTickets.length - 1].title}</TableCell>
-        <TableCell>{formatDate(updateRow.createDate)}</TableCell>
-        <TableCell>{formatDate(updateRow.updateDate)}</TableCell>
+        <TableCell>{row.requestTickets[row.requestTickets.length - 1].title}</TableCell>
+        <TableCell>{formatDate(row.createDate)}</TableCell>
+        <TableCell>{formatDate(row.updateDate)}</TableCell>
         <TableCell>
-          {updateRow.status === false ? (
+          {row.status === false ? (
             <Box
               width="80%"
               margin="0 auto"
@@ -103,7 +99,7 @@ function Row(props) {
               borderRadius="4px">
               <Typography color="#a9a9a9">CLOSE</Typography>
             </Box>
-          ) : updateRow.status === true ? (
+          ) : row.status === true ? (
             <Box
               width="80%"
               margin="0 auto"
@@ -117,7 +113,7 @@ function Row(props) {
           ) : null}
         </TableCell>
         <TableCell>
-          {updateRow.topic === 'OTHER_REQUEST' ? (
+          {row.topic === 'OTHER_REQUEST' ? (
             <Box
               width="80%"
               margin="0 auto"
@@ -156,7 +152,7 @@ function Row(props) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {updateRow.requestTickets.map((request_row) => (
+                  {row.requestTickets.map((request_row) => (
                     <TableRow key={request_row.requestId}>
                       <TableCell component="th" scope="row">
                         {request_row.requestId.slice(0, 10)}

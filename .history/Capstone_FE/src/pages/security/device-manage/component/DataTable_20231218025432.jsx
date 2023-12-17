@@ -1,6 +1,7 @@
 import { Box, LinearProgress } from '@mui/material'
-import { styled } from '@mui/material/styles'
 import { DataGrid } from '@mui/x-data-grid'
+import Header from '../../../../components/Header'
+import { styled } from '@mui/material/styles'
 const StripedDataGrid = styled(DataGrid)(() => ({
   '.late-checkin-cell .MuiDataGrid-cellContent': {
     color: 'red'
@@ -64,10 +65,7 @@ const DataTableDeviceManage = ({  columns,rows, isLoading }) => {
           slots={{loadingOverlay: LinearProgress }}
           showCellVerticalBorder
           showColumnVerticalBorder
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
-          }}
-          pageSizeOptions={[5, 10, 25]}
+          rowsPerPageOptions={[50]}
           loading={isLoading}
           columns={columns}
           rows={rows}

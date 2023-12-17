@@ -57,6 +57,7 @@ const style = {
 }
 
 const TicketDetail = () => {
+  const scrollbarsRef = useRef()
   const [request, setRequest] = useState([])
   const [roleSender, setRoleSender] = useState(null)
   const [content, setContent] = useState('')
@@ -104,7 +105,8 @@ const TicketDetail = () => {
           createDate: formattedDate,
           imageSender: imageUser
         }
-      }
+      },
+
     ])
     setContent('')
   }
@@ -191,6 +193,10 @@ const TicketDetail = () => {
   }
 
   console.log(request[0])
+
+  useEffect(() => {
+    scrollbarsRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [])
 
   const handleRejectRequest = async () => {
     if (request[0]?.object?.topic === 'ATTENDANCE_REQUEST') {
@@ -960,7 +966,9 @@ const TicketDetail = () => {
             <Box flex="1">{checkTopic()}</Box>
             <Box flex="4">
               <form onSubmit={handleSendMessage}>
-                <div style={{ overflow: 'auto', backgroundColor: '#f5f7f9', maxHeight: '430px' }}>
+                <div
+                  ref={scrollbarsRef}
+                  style={{ overflow: 'auto', backgroundColor: '#f5f7f9', maxHeight: '430px' }}>
                   <Box m={2} sx={{ left: '0' }}>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                       <Button variant="outlined">{request[0]?.object?.topic}</Button>
@@ -1113,7 +1121,7 @@ const TicketDetail = () => {
                                   }}></Typography>
                               </StyledPaperAns>
                             </div>
-                          ) : (
+                          ) : index !== 0 && request[index]?.requestMessageResponse?.senderId !== userId ? (
                             <div ref={scroll}>
                               <StyledPaperAns>
                                 <Box display="flex" justifyContent="space-between">
@@ -1152,11 +1160,48 @@ const TicketDetail = () => {
                                   }}></Typography>
                               </StyledPaperAns>
                             </div>
+                          ): index !== 0 && request[index]?.requestMessageResponse?.senderId === userId && (
+                            <div ref={scroll}>
+                              <StyledPaperAns>
+                                <Box display="flex" justifyContent="space-between">
+                                  <Box display="flex" gap={1} alignItems="center" mb={2}>
+                                    {req?.requestMessageResponse?.imageSender === null ? (
+                                      <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
+                                    ) : (
+                                      <Avatar src={imageSender} alt="Avatar" />
+                                    )}
+                                    <Box display="flex" flexDirection="column">
+                                      <Typography fontSize="16px" variant="body1">
+                                        {req?.requestMessageResponse?.senderFirstName === null ||
+                                        req?.requestMessageResponse?.senderLastName === null ? (
+                                          <>unknown</>
+                                        ) : (
+                                          <>
+                                            {' '}
+                                            {req?.requestMessageResponse?.senderFirstName}{' '}
+                                            {req?.requestMessageResponse?.senderLastName}
+                                          </>
+                                        )}
+                                      </Typography>
+                                      <Typography
+                                        sx={{ textTransform: 'capitalize' }}
+                                        fontSize="12px"
+                                        variant="body1">
+                                        {userRole}
+                                      </Typography>
+                                    </Box>
+                                  </Box>
+                                  <Box>{req?.requestMessageResponse?.createDate}</Box>
+                                </Box>
+                                <Typography
+                                  dangerouslySetInnerHTML={{
+                                    __html: req?.object?.content
+                                  }}></Typography>
+                              </StyledPaperAns>
+                            </div>
                           )}
                         </>
                       )}
-
-
                     </>
                   ))}
                 </div>
