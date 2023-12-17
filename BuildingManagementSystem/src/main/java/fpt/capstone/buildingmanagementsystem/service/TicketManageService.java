@@ -186,7 +186,7 @@ public class TicketManageService {
             }
         });
 
-        //close all tickets are send of old manager
+        //close all tickets are send by old manager
         Map<String, List<TicketRequestDto>> ticketSends = ticketRepositoryv2.getTicketRequestBySenderId(inactiveManager.getManager().getAccountId())
                 .stream()
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
