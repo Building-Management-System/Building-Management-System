@@ -150,9 +150,9 @@ function Row(props) {
                       Status
                     </TableCell>
                     <TableCell style={{ width: '50px' }}>Receiver</TableCell>
-                    <TableCell style={{ width: '100px' }}>Create Date</TableCell>
-                    <TableCell style={{ width: '100px' }}>Update Date</TableCell>
-                    <TableCell style={{ width: '100px' }}>Action</TableCell>
+                    <TableCell style={{ width: '250px' }}>Create Date</TableCell>
+                    <TableCell style={{  width: '250px' }}>Update Date</TableCell>
+                    <TableCell style={{  width: '250px' }}>Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

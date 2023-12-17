@@ -1113,7 +1113,7 @@ const TicketDetail = () => {
                                   }}></Typography>
                               </StyledPaperAns>
                             </div>
-                          ) : (
+                          ) : index !== 0 && request[index]?.requestMessageResponse?.senderId !== userId ? (
                             <div ref={scroll}>
                               <StyledPaperAns>
                                 <Box display="flex" justifyContent="space-between">
@@ -1122,6 +1122,45 @@ const TicketDetail = () => {
                                       <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
                                     ) : (
                                       <Avatar src={imageReceiver} alt="Avatar" />
+                                    )}
+                                    <Box display="flex" flexDirection="column">
+                                      <Typography fontSize="16px" variant="body1">
+                                        {req?.requestMessageResponse?.senderFirstName === null ||
+                                        req?.requestMessageResponse?.senderLastName === null ? (
+                                          <>unknown</>
+                                        ) : (
+                                          <>
+                                            {' '}
+                                            {req?.requestMessageResponse?.senderFirstName}{' '}
+                                            {req?.requestMessageResponse?.senderLastName}
+                                          </>
+                                        )}
+                                      </Typography>
+                                      <Typography
+                                        sx={{ textTransform: 'capitalize' }}
+                                        fontSize="12px"
+                                        variant="body1">
+                                        {userRole}
+                                      </Typography>
+                                    </Box>
+                                  </Box>
+                                  <Box>{req?.requestMessageResponse?.createDate}</Box>
+                                </Box>
+                                <Typography
+                                  dangerouslySetInnerHTML={{
+                                    __html: req?.object?.content
+                                  }}></Typography>
+                              </StyledPaperAns>
+                            </div>
+                          ): index !== 0 && request[index]?.requestMessageResponse?.senderId === userId && (
+                            <div ref={scroll}>
+                              <StyledPaperAns>
+                                <Box display="flex" justifyContent="space-between">
+                                  <Box display="flex" gap={1} alignItems="center" mb={2}>
+                                    {req?.requestMessageResponse?.imageSender === null ? (
+                                      <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
+                                    ) : (
+                                      <Avatar src={imageSender} alt="Avatar" />
                                     )}
                                     <Box display="flex" flexDirection="column">
                                       <Typography fontSize="16px" variant="body1">

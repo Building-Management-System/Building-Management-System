@@ -64,10 +64,7 @@ const DataTableDeviceManage = ({  columns,rows, isLoading }) => {
           slots={{loadingOverlay: LinearProgress }}
           showCellVerticalBorder
           showColumnVerticalBorder
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
-          }}
-          pageSizeOptions={[5, 10, 25]}
+          rowsPerPageOptions={[50]}
           loading={isLoading}
           columns={columns}
           rows={rows}

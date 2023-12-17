@@ -1,6 +1,7 @@
 import { Box, LinearProgress } from '@mui/material'
-import { styled } from '@mui/material/styles'
 import { DataGrid } from '@mui/x-data-grid'
+import Header from '../../../../components/Header'
+import { styled } from '@mui/material/styles'
 const StripedDataGrid = styled(DataGrid)(() => ({
   '.late-checkin-cell .MuiDataGrid-cellContent': {
     color: 'red'
@@ -12,7 +13,7 @@ const StripedDataGrid = styled(DataGrid)(() => ({
     color: '#DAA520	'
   }
 }))
-const DataTableDeviceManage = ({  columns,rows, isLoading }) => {
+const DataTableDeviceManage = ({  columns,rows }) => {
   return (
     <>
       <Box
@@ -64,11 +65,19 @@ const DataTableDeviceManage = ({  columns,rows, isLoading }) => {
           slots={{loadingOverlay: LinearProgress }}
           showCellVerticalBorder
           showColumnVerticalBorder
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
+          rowsPerPageOptions={[50]}
+          getRowClassName={(params) => {
+            const isLateCheckin = params.row.lateCheckin === true;
+            const isEarlyCheckout = params.row.earlyCheckout === true;
+            const isWeekend =
+              params.row.dateDaily &&
+              (params.row.dateDaily.startsWith('Sunday') ||
+                params.row.dateDaily.startsWith('Saturday'));
+          
+            return (isLateCheckin ? 'late-checkin-cell ' : '') + (isWeekend ? 'weekend-cell' : '') +  (isEarlyCheckout ? 'early-checkout-cell' : '');
           }}
-          pageSizeOptions={[5, 10, 25]}
-          loading={isLoading}
+          
+        //   loading={isLoading}
           columns={columns}
           rows={rows}
           getRowId={(row) => row.deviceId + row.roomId}

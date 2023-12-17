@@ -1,11 +1,8 @@
 import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled'
-import AutorenewIcon from '@mui/icons-material/Autorenew'
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn'
 import CheckIcon from '@mui/icons-material/Check'
-import CloseIcon from '@mui/icons-material/Close'
-import HeadsetMicIcon from '@mui/icons-material/HeadsetMic'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'
 import { Skeleton } from '@mui/material'
 import Box from '@mui/material/Box'
 import Collapse from '@mui/material/Collapse'
@@ -20,29 +17,21 @@ import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import RunningWithErrorsIcon from '@mui/icons-material/RunningWithErrors'
+import CloseIcon from '@mui/icons-material/Close'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye'
 import requestApi from '../../../services/requestApi'
-import useAuth from '../../../hooks/useAuth'
-function formatDate(date) {
-  const createDate = new Date(date);
-  const year = createDate.getFullYear().toString().slice(-2);
-  const month = String(createDate.getMonth() + 1).padStart(2, '0');
-  const day = String(createDate.getDate()).padStart(2, '0');
-  const hours = String(createDate.getHours()).padStart(2, '0');
-  const minutes = String(createDate.getMinutes()).padStart(2, '0');
-  const seconds = String(createDate.getSeconds()).padStart(2, '0');
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
+import formatDate from '../../../utils/formatDate'
 function Row(props) {
-
   const { row } = props
   const [open, setOpen] = useState(false)
   const currentUser = useSelector((state) => state.auth.login?.currentUser)
+  const navigate = useNavigate()
   const [updateRow, setUpdateRow] = useState(row)
   const userInfo = useAuth()
-  const navigate = useNavigate()
   const handleAcceptRequest = (requestId) => {
     let data = {
       requestId: requestId,
@@ -60,9 +49,6 @@ function Row(props) {
         },
       ],
     }));
-    // setTimeout(function () {
-    //   location.reload()
-    // }, 500)
   }
   function formatDate(date) {
     const createDate = new Date(date);
@@ -92,6 +78,7 @@ function Row(props) {
         <TableCell>{formatDate(updateRow.createDate)}</TableCell>
         <TableCell>{formatDate(updateRow.updateDate)}</TableCell>
         <TableCell>
+          {' '}
           {updateRow.status === false ? (
             <Box
               width="80%"
@@ -116,19 +103,6 @@ function Row(props) {
             </Box>
           ) : null}
         </TableCell>
-        <TableCell>
-          {updateRow.topic === 'OTHER_REQUEST' ? (
-            <Box
-              width="80%"
-              margin="0 auto"
-              p="5px"
-              display="flex"
-              justifyContent="center"
-              bgcolor={''}
-              borderRadius="4px">
-            </Box>
-          ) : null}
-        </TableCell>
         {/* <TableCell style={{ width: '20px', fontWeight: 'bold', fontSize: '18px' }}>
           <IconButton  >
             <AddIcon />
@@ -149,10 +123,11 @@ function Row(props) {
                     <TableCell style={{ width: '200px' }} align="center">
                       Status
                     </TableCell>
-                    <TableCell style={{ width: '50px' }}>Receiver</TableCell>
+                    <TableCell style={{ width: '200px' }}>Receiver</TableCell>
                     <TableCell style={{ width: '100px' }}>Create Date</TableCell>
                     <TableCell style={{ width: '100px' }}>Update Date</TableCell>
-                    <TableCell style={{ width: '100px' }}>Action</TableCell>
+                    <TableCell style={{ width: '10px' }}></TableCell>
+                    <TableCell style={{ width: '10px' }}></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -185,7 +160,7 @@ function Row(props) {
                             alignItems="center"
                             bgcolor={'#2e7c67'}
                             borderRadius="4px">
-                            <HeadsetMicIcon />
+                            <CheckIcon />
                             <Typography color="#fff">{request_row.requestStatus}</Typography>
                           </Box>
                         ) : request_row.requestStatus === 'EXECUTING' ? (
@@ -198,7 +173,7 @@ function Row(props) {
                             alignItems="center"
                             bgcolor={'#6495ED'}
                             borderRadius="4px">
-                            <AutorenewIcon />
+                            <RunningWithErrorsIcon />
                             <Typography color="#000">{request_row.requestStatus}</Typography>
                           </Box>
                         ) : request_row.requestStatus === 'CLOSED' ? (
@@ -217,14 +192,25 @@ function Row(props) {
                         ) : null}
                       </TableCell>
                       <TableCell key={request_row.userId}>
-                        {request_row.receiverFirstName} {request_row.receiverLastName}
+                        {request_row.receiverFirstName}{request_row.receiverLastName}
                       </TableCell>
                       <TableCell>{formatDate(request_row.requestCreateDate)}</TableCell>
                       <TableCell>{formatDate(request_row.requestUpdateDate)}</TableCell>
                       <TableCell>
-                        <IconButton onClick={() => navigate(`/request-detail/${request_row.requestId}`)} sx={{ color: '#1565c0' }}>
-                          <QuestionAnswerIcon />
-                        </IconButton>
+                        {updateRow.topic === 'ROOM_REQUEST' ? (
+                          <IconButton
+                            disabled={request_row.requestStatus === 'PENDING' ? true : false}
+                            sx={{ color: '#1565c0' }}
+                            onClick={() => navigate(`/room-detail/${request_row.requestId}`)}>
+                            <AssignmentTurnedInIcon />
+                          </IconButton>
+                        ) : (
+                          <IconButton
+                            sx={{ color: '#1565c0' }}
+                            onClick={() => navigate(`/request-detail/${request_row.requestId}`)}>
+                            <RemoveRedEyeIcon />
+                          </IconButton>
+                        )}
                         <IconButton
                           disabled={request_row.requestStatus === 'PENDING' ? false : true}
                           onClick={() => handleAcceptRequest(request_row.requestId)}
@@ -243,7 +229,6 @@ function Row(props) {
     </>
   )
 }
-
 const TableRowsLoader = ({ rowsNum }) => {
   return [...Array(rowsNum)].map((row, index) => (
     <TableRow key={index}>
@@ -271,14 +256,12 @@ const TableRowsLoader = ({ rowsNum }) => {
     </TableRow>
   ))
 }
-
-export default function ManageTicketListHr() {
+export default function ManageTicketListAdmin() {
   const [listRequestAndTicket, setListRequestAndTicket] = useState([])
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-
   const handleChangePage = (event, newPage) => {
     setPage(newPage)
   }
@@ -291,15 +274,12 @@ export default function ManageTicketListHr() {
   useEffect(() => {
     setIsLoading(true)
     const fetchListRequestAndTicketByAdmin = async () => {
-      const response = await requestApi.getAllRequestAndTicketByHr()
+      const response = await requestApi.getAllRequestAndTicketByAdmin()
       setListRequestAndTicket(response)
       setIsLoading(false)
     }
-
     fetchListRequestAndTicketByAdmin()
   }, [])
-
-  console.log(listRequestAndTicket)
 
   return (
     <Box display="flex" height="100vh" bgcolor="rgb(238, 242, 246)">
@@ -309,8 +289,8 @@ export default function ManageTicketListHr() {
             label="Search"
             value={searchTerm}
             fullWidth
-            onChange={(e) => setSearchTerm(e.target.value)}
             placeholder='ID, Topic, Title, Date, Status'
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </Paper>
         <Box display="flex" alignItems="center" gap={1} sx={{ marginTop: '16px' }}>
@@ -330,22 +310,23 @@ export default function ManageTicketListHr() {
                 <TableCell style={{ width: '160px', fontWeight: 'bold', fontSize: '18px' }}>
                   Topic
                 </TableCell>
-                <TableCell style={{ width: '500px', fontWeight: 'bold', fontSize: '18px' }}>
+                <TableCell style={{ width: '200px', fontWeight: 'bold', fontSize: '18px' }}>
                   Title
                 </TableCell>
-                <TableCell style={{ width: '250px', fontWeight: 'bold', fontSize: '18px' }}>
+                <TableCell style={{ width: '150px', fontWeight: 'bold', fontSize: '18px' }}>
                   Create Date
                 </TableCell>
-                <TableCell style={{ width: '250px', fontWeight: 'bold', fontSize: '18px' }}>
+                <TableCell style={{ width: '150px', fontWeight: 'bold', fontSize: '18px' }}>
                   Update Date
                 </TableCell>
                 <TableCell
                   align="center"
-                  style={{ width: '90px', fontWeight: 'bold', fontSize: '18px' }}>
+                  style={{ width: '100px', fontWeight: 'bold', fontSize: '18px' }}>
                   Status
                 </TableCell>
-
-
+                {/* <TableCell style={{ width: '20px', fontWeight: 'bold', fontSize: '18px' }}>
+                  Action
+                </TableCell> */}
               </TableRow>
             </TableHead>
             {isLoading ? (

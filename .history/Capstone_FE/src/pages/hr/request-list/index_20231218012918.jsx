@@ -24,7 +24,6 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import requestApi from '../../../services/requestApi'
-import useAuth from '../../../hooks/useAuth'
 function formatDate(date) {
   const createDate = new Date(date);
   const year = createDate.getFullYear().toString().slice(-2);
@@ -41,7 +40,6 @@ function Row(props) {
   const [open, setOpen] = useState(false)
   const currentUser = useSelector((state) => state.auth.login?.currentUser)
   const [updateRow, setUpdateRow] = useState(row)
-  const userInfo = useAuth()
   const navigate = useNavigate()
   const handleAcceptRequest = (requestId) => {
     let data = {
@@ -55,8 +53,6 @@ function Row(props) {
         {
           ...prevRow.requestTickets[0],
           requestStatus: 'EXECUTING',
-          receiverFirstName: userInfo?.firstName,
-          receiverLastName: userInfo?.lastName
         },
       ],
     }));

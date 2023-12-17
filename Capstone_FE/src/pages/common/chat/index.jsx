@@ -178,6 +178,7 @@ const Chat = () => {
     }
     fetchAllChatList()
   }, [])
+  
   useEffect(() => {
     if (isActiveUser !== '') {
       setIsLoadingChat(true)
