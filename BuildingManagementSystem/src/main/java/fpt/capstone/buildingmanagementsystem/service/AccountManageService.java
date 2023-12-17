@@ -325,7 +325,7 @@ public class AccountManageService implements UserDetailsService {
                         !Objects.equals(changeRoleRequest.getRoleName(), "manager")) {
                     InactiveManagerTemp temp = InactiveManagerTemp.builder()
                             .manager(account)
-                            .department(department)
+                            .department(account.getUser().getDepartment())
                             .build();
                     tempRepository.save(temp);
                 }
