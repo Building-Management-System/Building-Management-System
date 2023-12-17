@@ -160,6 +160,7 @@ public class AccountManageService implements UserDetailsService {
                                 if (checkManagerOfDepartment(registerRequest.getDepartmentName())) {
                                     newAccount.setUser(user);
                                     saveAccount = accountRepository.saveAndFlush(newAccount);
+                                    ticketManageService.updateTicketOfNewManager(saveAccount);
                                 } else {
                                     throw new Conflict("department_exist_manager");
                                 }
@@ -325,7 +326,7 @@ public class AccountManageService implements UserDetailsService {
                         !Objects.equals(changeRoleRequest.getRoleName(), "manager")) {
                     InactiveManagerTemp temp = InactiveManagerTemp.builder()
                             .manager(account)
-                            .department(department)
+                            .department(account.getUser().getDepartment())
                             .build();
                     tempRepository.save(temp);
                 }

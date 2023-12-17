@@ -322,13 +322,15 @@ public class MonthlyEvaluateService {
                 .collect(Collectors.toMap(monthlyEvaluate -> monthlyEvaluate.getEmployee().getUserId(), Function.identity()));
 
         List<User> employees = userRepository.findAllByDepartment(department)
-                .stream().filter(employee -> !monthlyEvaluates.containsKey(employee.getUserId()))
+                .stream()
+                .filter(employee -> !monthlyEvaluates.containsKey(employee.getUserId()) && Until.getMonth(employee.getAccount().getCreatedDate()) <= month)
                 .collect(Collectors.toList());
 
         return employees.stream()
                 .filter(employee -> !employee.getAccount().getRole().getRoleName().equals("manager"))
                 .map(employee -> new EmployeeEvaluateRemainResponse(
                         employee.getUserId(),
+                        employee.createdDate,
                         employee.getAccount().getUsername(),
                         month,
                         year
