@@ -160,6 +160,10 @@ public class AccountManageService implements UserDetailsService {
                                 if (checkManagerOfDepartment(registerRequest.getDepartmentName())) {
                                     newAccount.setUser(user);
                                     saveAccount = accountRepository.saveAndFlush(newAccount);
+                                    List<InactiveManagerTemp> inactiveManagerTemps = tempRepository.findByDepartment(saveAccount.getUser().getDepartment());
+                                    if(!inactiveManagerTemps.isEmpty()) {
+                                        tempRepository.deleteAll(inactiveManagerTemps);
+                                    }
                                     ticketManageService.updateTicketOfNewManager(saveAccount);
                                 } else {
                                     throw new Conflict("department_exist_manager");
