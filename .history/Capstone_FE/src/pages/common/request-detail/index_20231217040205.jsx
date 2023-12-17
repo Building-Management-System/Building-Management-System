@@ -98,7 +98,7 @@ const TicketDetail = () => {
             createDate: formattedDate,
             imageSender: imageUser
           }
-        },
+        }
       ])
     setContent('')
   }
@@ -373,7 +373,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -703,7 +702,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -788,7 +786,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -804,7 +801,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -829,7 +825,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )
@@ -893,7 +888,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -909,7 +903,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -934,7 +927,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )

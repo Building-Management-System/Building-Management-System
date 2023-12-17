@@ -24,8 +24,6 @@ import userApi from '../../../services/userApi'
 import ChatTopbar from '../chat/components/ChatTopbar'
 import './components/style.css'
 import { toast } from 'react-toastify'
-import useAuth from '../../../hooks/useAuth'
-import { format } from 'date-fns'
 ClassicEditor.defaultConfig = {
   toolbar: {
     items: ['heading', '|', 'bold', 'italic', '|', 'bulletedList', 'numberedList']
@@ -66,16 +64,10 @@ const TicketDetail = () => {
   const [open, setOpen] = useState(false)
   const [imageReceiver, setImageReceiver] = useState('')
   const [imageSender, setImageSender] = useState('')
-  const [imageUser, setImageUser] = useState('')
   const navigate = useNavigate()
   const currentUser = useSelector((state) => state.auth.login?.currentUser)
   const userRole = useSelector((state) => state.auth.login?.currentUser.role)
   const userId = useSelector((state) => state.auth.login?.currentUser?.accountId)
-  const userInfo = useAuth()
-  const currentDate = new Date()
-  const formattedDate = format(currentDate, 'yyyy-MM-dd HH:mm:ss', { timeZone: 'UTC' });
-
-
   const handleSendMessage = (e) => {
     e.preventDefault()
     let data = {
@@ -85,24 +77,14 @@ const TicketDetail = () => {
       departmentId: request[0]?.requestMessageResponse?.receiverDepartment?.departmentId
     }
 
-    requestApi.otherFormExistRequest(data)    
-      setRequest((prevRequest) => [
-        ...prevRequest,
-        {
-          object: {
-            content: content
-          },
-          requestMessageResponse: {
-            senderFirstName: userInfo?.firstName,
-            senderLastName: userInfo?.lastName,
-            createDate: formattedDate,
-            imageSender: imageUser
-          }
-        },
-      ])
+    requestApi.otherFormExistRequest(data)
+    // setRequest((prevRequest) => [...prevRequest, {object: {content: content, requestMessageResponse: {senderFirstName:}}}]);
     setContent('')
+    setTimeout(function () {
+      location.reload()
+    }, 500)
   }
-  console.log(userInfo);
+
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
   useEffect(() => {
@@ -130,7 +112,7 @@ const TicketDetail = () => {
     }
     getMessageDetail()
   }, [])
-  console.log(request)
+  console.log(request);
   useEffect(() => {
     if (request.length !== 0) {
       const getRoleByID = async () => {
@@ -268,20 +250,6 @@ const TicketDetail = () => {
     imgurlSender()
   }
 
-  const imgurlUser = async () => {
-    const storageRef = ref(storage, `/${userInfo?.image}`)
-    try {
-      const url = await getDownloadURL(storageRef)
-      setImageUser(url)
-    } catch (error) {
-      console.error('Error getting download URL:', error)
-    }
-  }
-
-  if (userInfo) {
-    imgurlUser()
-  }
-
   console.log(request[0]?.requestMessageResponse?.receiverId)
   console.log(currentUser?.accountId)
 
@@ -373,7 +341,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -591,10 +558,10 @@ const TicketDetail = () => {
                       variant="body2"
                       color="text.primary">
                       Status :
-                      {request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
+                      {
+                      request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
                         <span style={{ color: 'red' }}> Closed</span>
-                      ) : request[0]?.requestMessageResponse?.requestTicketStatus ===
-                        'EXECUTING' ? (
+                      ) : request[0]?.requestMessageResponse?.requestTicketStatus === 'EXECUTING' ? (
                         <span style={{ color: 'blue' }}> Executing</span>
                       ) : request[0]?.requestMessageResponse?.requestTicketStatus === 'ANSWERED' ? (
                         <span style={{ color: 'green' }}> Answered</span>
@@ -703,7 +670,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -788,7 +754,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -804,7 +769,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -829,7 +793,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )
@@ -893,7 +856,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -909,7 +871,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -934,7 +895,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )
@@ -1114,7 +1074,6 @@ const TicketDetail = () => {
                     request[0]?.requestMessageResponse?.receiverId === currentUser?.accountId ? (
                       <CKEditor
                         editor={ClassicEditor}
-                        data={content}
                         onChange={(event, editor) => {
                           const data = editor.getData()
                           setContent(data)
@@ -1126,7 +1085,6 @@ const TicketDetail = () => {
                   ) : request[0]?.requestMessageResponse?.requestTicketStatus != 'CLOSED' ? (
                     <CKEditor
                       editor={ClassicEditor}
-                      data={content}
                       onChange={(event, editor) => {
                         const data = editor.getData()
                         setContent(data)
@@ -1145,19 +1103,18 @@ const TicketDetail = () => {
                     </Button>
                     {currentUser?.role === 'hr' ||
                     currentUser?.role === 'admin' ||
-                    currentUser?.role === 'security'
-                      ? request[0]?.requestMessageResponse?.requestTicketStatus != 'CLOSED' &&
-                        request[0]?.requestMessageResponse?.receiverId ===
-                          currentUser?.accountId && (
-                          <Button sx={{ mr: 2 }} type="submit" variant="contained" color="primary">
-                            Send
-                          </Button>
-                        )
-                      : request[0]?.requestMessageResponse?.requestTicketStatus != 'CLOSED' && (
-                          <Button sx={{ mr: 2 }} type="submit" variant="contained" color="primary">
-                            Send
-                          </Button>
-                        )}
+                    currentUser?.role === 'security' ? (
+                      request[0]?.requestMessageResponse?.requestTicketStatus != 'CLOSED' &&
+                      request[0]?.requestMessageResponse?.receiverId === currentUser?.accountId && (
+                        <Button sx={{ mr: 2 }} type="submit" variant="contained" color="primary">
+                          Send
+                        </Button>
+                      ) 
+                    ) : request[0]?.requestMessageResponse?.requestTicketStatus != 'CLOSED' && (
+                      <Button sx={{ mr: 2 }} type="submit" variant="contained" color="primary">
+                        Send
+                      </Button>
+                    )}
                   </Box>
                 </Box>
               </form>

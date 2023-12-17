@@ -66,7 +66,6 @@ const TicketDetail = () => {
   const [open, setOpen] = useState(false)
   const [imageReceiver, setImageReceiver] = useState('')
   const [imageSender, setImageSender] = useState('')
-  const [imageUser, setImageUser] = useState('')
   const navigate = useNavigate()
   const currentUser = useSelector((state) => state.auth.login?.currentUser)
   const userRole = useSelector((state) => state.auth.login?.currentUser.role)
@@ -85,22 +84,25 @@ const TicketDetail = () => {
       departmentId: request[0]?.requestMessageResponse?.receiverDepartment?.departmentId
     }
 
-    requestApi.otherFormExistRequest(data)    
-      setRequest((prevRequest) => [
-        ...prevRequest,
-        {
-          object: {
-            content: content
-          },
-          requestMessageResponse: {
-            senderFirstName: userInfo?.firstName,
-            senderLastName: userInfo?.lastName,
-            createDate: formattedDate,
-            imageSender: imageUser
-          }
+    requestApi.otherFormExistRequest(data)
+    setRequest((prevRequest) => [
+      ...prevRequest,
+      {
+        object: {
+          content: content
         },
-      ])
+        requestMessageResponse: {
+          senderFirstName: userInfo?.firstName,
+          senderLastName: userInfo?.lastName,
+          createDate: formattedDate,
+          
+        }
+      }
+    ])
     setContent('')
+    // setTimeout(function () {
+    //   location.reload()
+    // }, 500)
   }
   console.log(userInfo);
   const handleOpen = () => setOpen(true)
@@ -268,20 +270,6 @@ const TicketDetail = () => {
     imgurlSender()
   }
 
-  const imgurlUser = async () => {
-    const storageRef = ref(storage, `/${userInfo?.image}`)
-    try {
-      const url = await getDownloadURL(storageRef)
-      setImageUser(url)
-    } catch (error) {
-      console.error('Error getting download URL:', error)
-    }
-  }
-
-  if (userInfo) {
-    imgurlUser()
-  }
-
   console.log(request[0]?.requestMessageResponse?.receiverId)
   console.log(currentUser?.accountId)
 
@@ -373,7 +361,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -703,7 +690,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -788,7 +774,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -804,7 +789,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -829,7 +813,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )
@@ -893,7 +876,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -909,7 +891,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -934,7 +915,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )
@@ -1114,7 +1094,6 @@ const TicketDetail = () => {
                     request[0]?.requestMessageResponse?.receiverId === currentUser?.accountId ? (
                       <CKEditor
                         editor={ClassicEditor}
-                        data={content}
                         onChange={(event, editor) => {
                           const data = editor.getData()
                           setContent(data)
@@ -1126,7 +1105,6 @@ const TicketDetail = () => {
                   ) : request[0]?.requestMessageResponse?.requestTicketStatus != 'CLOSED' ? (
                     <CKEditor
                       editor={ClassicEditor}
-                      data={content}
                       onChange={(event, editor) => {
                         const data = editor.getData()
                         setContent(data)

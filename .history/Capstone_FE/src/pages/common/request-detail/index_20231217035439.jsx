@@ -85,7 +85,8 @@ const TicketDetail = () => {
       departmentId: request[0]?.requestMessageResponse?.receiverDepartment?.departmentId
     }
 
-    requestApi.otherFormExistRequest(data)    
+    requestApi.otherFormExistRequest(data)
+    if(request[0].requestMessageResponse.senderId === userId){    
       setRequest((prevRequest) => [
         ...prevRequest,
         {
@@ -98,9 +99,28 @@ const TicketDetail = () => {
             createDate: formattedDate,
             imageSender: imageUser
           }
-        },
+        }
       ])
+    }else{
+      setRequest((prevRequest) => [
+        ...prevRequest,
+        {
+          object: {
+            content: content
+          },
+          requestMessageResponse: {
+            senderFirstName: userInfo?.firstName,
+            senderLastName: userInfo?.lastName,
+            createDate: formattedDate,
+            imageSender: imageUser,
+          }
+        }
+      ])
+    }
     setContent('')
+    // setTimeout(function () {
+    //   location.reload()
+    // }, 500)
   }
   console.log(userInfo);
   const handleOpen = () => setOpen(true)
@@ -373,7 +393,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -703,7 +722,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -788,7 +806,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -804,7 +821,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -829,7 +845,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )
@@ -893,7 +908,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -909,7 +923,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -934,7 +947,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )

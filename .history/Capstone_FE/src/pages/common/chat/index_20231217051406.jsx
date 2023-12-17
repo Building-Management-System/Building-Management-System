@@ -45,6 +45,7 @@ import { BASE_URL } from '../../../services/constraint'
 import axiosClient from '../../../utils/axios-config'
 import './components/Chat.css'
 import ChatTopbar from './components/ChatTopbar'
+import ScrollableFeed from 'react-scrollable-feed'
 const style = {
   position: 'absolute',
   top: '50%',
@@ -178,6 +179,7 @@ const Chat = () => {
     }
     fetchAllChatList()
   }, [])
+
   useEffect(() => {
     if (isActiveUser !== '') {
       setIsLoadingChat(true)
@@ -790,13 +792,6 @@ const Chat = () => {
                                       <img
                                         style={{ width: '100%', height: '100%' }}
                                         src={messageImage[index]}
-                                        onLoad={() => {
-                                          scroll.current.scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'end',
-                                            inline: 'nearest'
-                                          })
-                                        }}
                                       />
                                     ) : (
                                       item?.type === 'file' && (
@@ -848,16 +843,7 @@ const Chat = () => {
                                         {item?.message}
                                       </Typography>
                                     ) : item?.type === 'image' ? (
-                                      <img
-                                        onLoad={() => {
-                                          scroll.current.scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'end',
-                                            inline: 'nearest'
-                                          })
-                                        }}
-                                        src={messageImage[index]}
-                                      />
+                                      <img src={messageImage[index]} />
                                     ) : (
                                       item?.type === 'file' && (
                                         <div
@@ -920,13 +906,6 @@ const Chat = () => {
                                         <img
                                           style={{ width: '100%', height: '100%' }}
                                           src={messageImage[index]}
-                                          onLoad={() => {
-                                            scroll.current.scrollIntoView({
-                                              behavior: 'smooth',
-                                              block: 'end',
-                                              inline: 'nearest'
-                                            })
-                                          }}
                                         />
                                       ) : (
                                         item?.type === 'file' && (
@@ -962,28 +941,28 @@ const Chat = () => {
                           </>
                         ) : (
                           <>
-                            <div ref={scroll}>
-                              <Box display="flex" alignItems="center" gap="5px">
-                                <Box mt="-14px">
-                                  <Tooltip
-                                    title={
+                            <Box display="flex" alignItems="center" gap="5px">
+                              <Box mt="-14px">
+                                <Tooltip
+                                  title={
+                                    userAvatar[
+                                      userAvatar.findIndex(
+                                        (avatar) => avatar.userId === item.senderId
+                                      )
+                                    ].username
+                                  }>
+                                  <Avatar
+                                    src={
                                       userAvatar[
                                         userAvatar.findIndex(
                                           (avatar) => avatar.userId === item.senderId
                                         )
-                                      ].username
-                                    }>
-                                    <Avatar
-                                      src={
-                                        userAvatar[
-                                          userAvatar.findIndex(
-                                            (avatar) => avatar.userId === item.senderId
-                                          )
-                                        ].image
-                                      }
-                                    />
-                                  </Tooltip>
-                                </Box>
+                                      ].image
+                                    }
+                                  />
+                                </Tooltip>
+                              </Box>
+                              <div ref={scroll}>
                                 <div style={{ alignItems: 'flex-start' }} className="message">
                                   <div className="messageTop">
                                     <div
@@ -1000,16 +979,7 @@ const Chat = () => {
                                           {item?.message}
                                         </Typography>
                                       ) : item?.type === 'image' ? (
-                                        <img
-                                          onLoad={() => {
-                                            scroll.current.scrollIntoView({
-                                              behavior: 'smooth',
-                                              block: 'end',
-                                              inline: 'nearest'
-                                            })
-                                          }}
-                                          src={messageImage[index]}
-                                        />
+                                        <img src={messageImage[index]} />
                                       ) : (
                                         item?.type === 'file' && (
                                           <div
@@ -1040,8 +1010,8 @@ const Chat = () => {
                                     {moment(item.createdAt).fromNow()}
                                   </Typography>
                                 </div>
-                              </Box>
-                            </div>
+                              </div>
+                            </Box>
                           </>
                         )
                       )}

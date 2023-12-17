@@ -45,6 +45,7 @@ import { BASE_URL } from '../../../services/constraint'
 import axiosClient from '../../../utils/axios-config'
 import './components/Chat.css'
 import ChatTopbar from './components/ChatTopbar'
+import ScrollableFeed from 'react-scrollable-feed'
 const style = {
   position: 'absolute',
   top: '50%',
@@ -95,7 +96,12 @@ const Chat = () => {
   const handleCloseChangeAdmin = () => setOpenChangeAdmin(false)
   const debouncedSearch = useDebounce(searchTerm, 500)
   const navigate = useNavigate()
-
+  useEffect(() => {
+    scroll.current?.scrollIntoView( {
+      behavior: 'smooth'
+    })
+  }, [messages])
+  
   const currentUserId = useSelector((state) => state.auth.login.currentUser.accountId)
 
   useEffect(() => {
@@ -106,6 +112,7 @@ const Chat = () => {
     }
     fetchAllUser()
   }, [])
+
 
   useEffect(() => {
     const fetchAllUserSingleChat = async () => {
@@ -118,7 +125,7 @@ const Chat = () => {
     fetchAllUserSingleChat()
   }, [])
 
-  console.log(messages)
+  console.log(messages);
   useEffect(() => {
     setChatName(isActiveUser?.chatName)
     setUserGroupUpdate(isActiveUser?.user)
@@ -127,7 +134,7 @@ const Chat = () => {
 
   const handleCreateNewChat = async () => {
     if (option === 'group') {
-      if (selectedUser.length > 1 && chatName !== '' && chatNameMessage !== '') {
+      if(selectedUser.length > 1 && chatName !== '' && chatNameMessage !== ''){
         const data = {
           from: currentUserId,
           to: selectedUser,
@@ -140,29 +147,29 @@ const Chat = () => {
         setSelectedUser([])
         handleClose()
         toast.success('Create new Chat successfully!!!!')
-      } else if (selectedUser.length <= 1) {
+      }else if(selectedUser.length <= 1){
         toast.error('Please select at least two people')
-      } else if (chatName === '' || chatNameMessage === '') {
+      }else if(chatName === '' || chatNameMessage === ''){
         toast.error(`Chat name or message can't be blank`)
-      } else {
+      }else {
         toast.error(`All field can't be blank`)
       }
     } else if (option === 'single') {
-      if (selectedUserSingleChat.length > 0 && chatNameMessage !== '') {
-        const data = {
-          from: currentUserId,
-          to: [selectedUserSingleChat],
-          message: chatNameMessage
-        }
-        const res = await chatApi.createNewChat(data)
-        setAllChatList((prev) => [res, ...prev])
-        setChatNameMessage('')
-        setAllUserSingleChat(
-          allUserSingleChat.filter((user) => user.accountId !== selectedUserSingleChat)
-        )
-        handleClose()
-        toast.success('Create new Chat successfully!!!!')
-      } else {
+      if(selectedUserSingleChat.length > 0  && chatNameMessage !== ''){
+      const data = {
+        from: currentUserId,
+        to: [selectedUserSingleChat],
+        message: chatNameMessage
+      }
+      const res = await chatApi.createNewChat(data)
+      setAllChatList((prev) => [res, ...prev])
+      setChatNameMessage('')
+      setAllUserSingleChat(
+        allUserSingleChat.filter((user) => user.accountId !== selectedUserSingleChat)
+      )
+      handleClose()
+      toast.success('Create new Chat successfully!!!!')
+      }else{
         toast.error(`User or message can't be blank`)
       }
     }
@@ -178,6 +185,8 @@ const Chat = () => {
     }
     fetchAllChatList()
   }, [])
+
+
   useEffect(() => {
     if (isActiveUser !== '') {
       setIsLoadingChat(true)
@@ -196,20 +205,14 @@ const Chat = () => {
       getMessage()
     }
   }, [isActiveUser?.chatId])
-
-  useEffect(() => {
-    scroll?.current?.scrollIntoView({
-      behavior: 'smooth'
-    })
-  }, [messages])
   const imgurlAvatar = async () => {
     try {
       if (allChatList.length > 0) {
         const downloadURLPromises = allChatList.map(async (item) => {
           if (item.avatar && Array.isArray(item.avatar)) {
             const avatarPromises = item.avatar.map(async (avatarItem) => {
-              const storageRef = ref(storage, `/${avatarItem}`)
-              return getDownloadURL(storageRef)
+                const storageRef = ref(storage, `/${avatarItem}`)
+                return getDownloadURL(storageRef)
             })
             return Promise.all(avatarPromises)
           } else {
@@ -232,8 +235,8 @@ const Chat = () => {
   }
   useEffect(() => {
     imgurlAvatar()
-  }, [allChatList])
-  console.log(allChatList)
+  },[allChatList])
+  console.log(allChatList);
   const handleChange = (newMessage) => {
     setNewMessage(newMessage)
   }
@@ -353,22 +356,22 @@ const Chat = () => {
       }
     } else {
       try {
-        if (newMessage !== '') {
+        if(newMessage !== ''){
           const res = await axiosClient.post(`${BASE_URL}/createNewMessage`, data)
-          setMessages(messages.concat(message))
-          socket.current.emit('send-msg', {
-            from: currentUserId,
-            to: isActiveUser.user.map((item) => {
-              return item.accountId
-            }),
-            user: isActiveUser.user,
-            message: newMessage,
-            senderId: res.senderId,
-            messageId: res.messageId,
-            type: 'text'
-          })
-          setNewMessage('')
-        } else {
+        setMessages(messages.concat(message))
+        socket.current.emit('send-msg', {
+          from: currentUserId,
+          to: isActiveUser.user.map((item) => {
+            return item.accountId
+          }),
+          user: isActiveUser.user,
+          message: newMessage,
+          senderId: res.senderId,
+          messageId: res.messageId,
+          type: 'text'
+        })
+        setNewMessage('')
+        }else{
           toast.error("Message can't be blank")
         }
       } catch (error) {
@@ -386,6 +389,7 @@ const Chat = () => {
     }
   }, [currentUserId])
 
+
   useEffect(() => {
     if (socket.current) {
       socket.current.on('msg-receive', (msg) => {
@@ -399,6 +403,7 @@ const Chat = () => {
       })
     }
   }, [arrivalMessage])
+
 
   useEffect(() => {
     arrivalMessage && setMessages((pre) => [...pre, arrivalMessage])
@@ -468,8 +473,8 @@ const Chat = () => {
     try {
       if (userAvatar.length > 0) {
         const downloadURLPromises = userAvatar.map((item) => {
-          const storageRef = ref(storage, `/${item.image}`)
-          return getDownloadURL(storageRef)
+            const storageRef = ref(storage, `/${item.image}`)
+            return getDownloadURL(storageRef)
         })
         const downloadURLs = await Promise.all(downloadURLPromises)
         const result = userAvatar.map((obj, index) => {
@@ -488,9 +493,9 @@ const Chat = () => {
   useEffect(() => {
     imgurlUserAvatar()
   }, [userAvatar])
-  console.log(userAvatar)
+  console.log(userAvatar);
   const handleUpdateChat = async () => {
-    if (selectedUserGroup.length > 1 && chatName === '') {
+    if(selectedUserGroup.length > 1 && chatName === ''){
       const selectedUserGroupId = selectedUserGroup.map((item) => {
         return item.accountId
       })
@@ -501,22 +506,22 @@ const Chat = () => {
         chatName: chatName,
         userId: selectedUserGroupId
       }
-
+  
       const res = await chatApi.updateChat(data)
-
+  
       setAllChatList((prev) => {
         return prev.map((chat) => (chat.chatId === res.chatId ? res : chat))
       })
-
+  
       setIsActiveUser(res)
       handleCloseUpdateGroup()
-    } else {
+    }else{
       toast.error(`Chat name can't be blank or number member in the group must be greater than 1`)
     }
   }
 
   const handleChangeAdmin = () => {
-    if (userChangeAdmin !== '') {
+    if(userChangeAdmin !== ''){
       const data = {
         chatId: isActiveUser?.chatId,
         userId: userChangeAdmin
@@ -525,7 +530,7 @@ const Chat = () => {
       setIsActiveUser({ ...isActiveUser, admin: userChangeAdmin })
       // setAllChatList((prev) => [res, ...prev])
       handleCloseChangeAdmin()
-    } else {
+    }else{
       toast.error('Please choose user you want to change admin')
     }
   }
@@ -771,7 +776,123 @@ const Chat = () => {
                       {messages.map((item, index) =>
                         item?.myself === true ? (
                           <>
-                            <div ref={scroll}>
+                          <div ref={scroll}>
+                            <div  className="message own">
+                              <div className="messageTop">
+                                <div
+                                  style={{
+                                    backgroundColor: item?.type === 'image' ? '#f5f7f9' : '#1877f2'
+                                  }}
+                                  className="messageText">
+                                  {item?.type === 'text' ? (
+                                    <Typography
+                                      color="#fff"
+                                      sx={{ lineHeight: 1.3, letterSpacing: 0 }}>
+                                      {item?.message}
+                                    </Typography>
+                                  ) : item?.type === 'image' ? (
+                                    <img
+                                      style={{ width: '100%', height: '100%' }}
+                                      src={messageImage[index]}
+                                    />
+                                  ) : (
+                                    item?.type === 'file' && (
+                                      <div
+                                        style={{
+                                          display: 'flex',
+                                          gap: '5px',
+                                          cursor: 'pointer',
+                                          color: '#fff'
+                                        }}
+                                        onClick={() => handleDownloadFile(item)}>
+                                        <TextSnippetIcon />
+                                        <Typography>{item.message}</Typography>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                              <Typography
+                                sx={{
+                                  lineHeight: 1.3,
+                                  letterSpacing: 0,
+                                  fontWeight: 500,
+                                  fontFamily: 'none',
+                                  fontSize: '13px'
+                                }}
+                                alignSelf="flex-end">
+                                {moment(item.createdAt).fromNow()}
+                              </Typography>
+                            </div>
+                          </div>
+                          </>
+                        ) : (
+                          <>
+                          <div ref={scroll}>
+                            <div
+                              
+                              style={{ alignItems: 'flex-start' }}
+                              className="message">
+                              <div className="messageTop">
+                                <div
+                                  style={{
+                                    backgroundColor:
+                                      item?.type === 'image' ? '#f5f7f9' : 'rgb(245, 241, 241)',
+                                    color: '#000'
+                                  }}
+                                  className="messageText">
+                                  {item?.type === 'text' ? (
+                                    <Typography
+                                      color="#000"
+                                      sx={{ lineHeight: 1.3, letterSpacing: 0 }}>
+                                      {item?.message}
+                                    </Typography>
+                                  ) : item?.type === 'image' ? (
+                                    <img src={messageImage[index]} />
+                                  ) : (
+                                    item?.type === 'file' && (
+                                      <div
+                                        style={{ display: 'flex', gap: '5px', cursor: 'pointer' }}
+                                        onClick={() => handleDownloadFile(item)}>
+                                        <TextSnippetIcon />
+                                        <Typography>{item.message}</Typography>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                              <Typography
+                                sx={{
+                                  lineHeight: 1.3,
+                                  letterSpacing: 0,
+                                  fontWeight: 500,
+                                  fontFamily: 'none',
+                                  fontSize: '12px',
+                                  color: '#000',
+                                  ml: '10px'
+                                }}
+                                alignSelf="flex-start">
+                                {moment(item.createdAt).fromNow()}
+                              </Typography>
+                            </div>
+                          </div>
+                          </>
+                        )
+                      )}
+
+                    </Box>
+                  ) : (
+                    <Box sx={{ overflowY: 'auto', pr: 1 }}>
+                      {messages.map((item, index) =>
+                        item?.myself === true ? (
+                          <>
+                            <Box
+                              display="flex"
+                              justifyContent="flex-end"
+                              alignItems="center"
+                              gap="5px"
+                              ref={scroll}
+                              >
                               <div className="message own">
                                 <div className="messageTop">
                                   <div
@@ -781,22 +902,17 @@ const Chat = () => {
                                     }}
                                     className="messageText">
                                     {item?.type === 'text' ? (
-                                      <Typography
-                                        color="#fff"
-                                        sx={{ lineHeight: 1.3, letterSpacing: 0 }}>
-                                        {item?.message}
-                                      </Typography>
+                                      <>
+                                        <Typography
+                                          color="#fff"
+                                          sx={{ lineHeight: 1.3, letterSpacing: 0 }}>
+                                          {item?.message}
+                                        </Typography>
+                                      </>
                                     ) : item?.type === 'image' ? (
                                       <img
                                         style={{ width: '100%', height: '100%' }}
                                         src={messageImage[index]}
-                                        onLoad={() => {
-                                          scroll.current.scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'end',
-                                            inline: 'nearest'
-                                          })
-                                        }}
                                       />
                                     ) : (
                                       item?.type === 'file' && (
@@ -827,12 +943,37 @@ const Chat = () => {
                                   {moment(item.createdAt).fromNow()}
                                 </Typography>
                               </div>
-                            </div>
+                              
+                            </Box>
                           </>
                         ) : (
                           <>
-                            <div ref={scroll}>
-                              <div style={{ alignItems: 'flex-start' }} className="message">
+                            <Box display="flex" alignItems="center" gap="5px">
+                              <Box mt="-14px">
+                                <Tooltip
+                                  title={
+                                    userAvatar[
+                                      userAvatar.findIndex(
+                                        (avatar) => avatar.userId === item.senderId
+                                      )
+                                    ].username
+                                  }>
+                                  <Avatar
+                                    src={
+                                      userAvatar[
+                                        userAvatar.findIndex(
+                                          (avatar) => avatar.userId === item.senderId
+                                        )
+                                      ].image
+                                    }
+                                  />
+                                </Tooltip>                               
+                              </Box>
+                              <div ref={scroll}>
+                              <div
+
+                                style={{ alignItems: 'flex-start' }}
+                                className="message">
                                 <div className="messageTop">
                                   <div
                                     style={{
@@ -848,20 +989,15 @@ const Chat = () => {
                                         {item?.message}
                                       </Typography>
                                     ) : item?.type === 'image' ? (
-                                      <img
-                                        onLoad={() => {
-                                          scroll.current.scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'end',
-                                            inline: 'nearest'
-                                          })
-                                        }}
-                                        src={messageImage[index]}
-                                      />
+                                      <img src={messageImage[index]} />
                                     ) : (
                                       item?.type === 'file' && (
                                         <div
-                                          style={{ display: 'flex', gap: '5px', cursor: 'pointer' }}
+                                          style={{
+                                            display: 'flex',
+                                            gap: '5px',
+                                            cursor: 'pointer'
+                                          }}
                                           onClick={() => handleDownloadFile(item)}>
                                           <TextSnippetIcon />
                                           <Typography>{item.message}</Typography>
@@ -884,167 +1020,12 @@ const Chat = () => {
                                   {moment(item.createdAt).fromNow()}
                                 </Typography>
                               </div>
-                            </div>
+                              </div>
+                            </Box>
                           </>
                         )
                       )}
-                    </Box>
-                  ) : (
-                    <Box sx={{ overflowY: 'auto', pr: 1 }}>
-                      {messages.map((item, index) =>
-                        item?.myself === true ? (
-                          <>
-                            <div ref={scroll}>
-                              <Box
-                                display="flex"
-                                justifyContent="flex-end"
-                                alignItems="center"
-                                gap="5px">
-                                <div className="message own">
-                                  <div className="messageTop">
-                                    <div
-                                      style={{
-                                        backgroundColor:
-                                          item?.type === 'image' ? '#f5f7f9' : '#1877f2'
-                                      }}
-                                      className="messageText">
-                                      {item?.type === 'text' ? (
-                                        <>
-                                          <Typography
-                                            color="#fff"
-                                            sx={{ lineHeight: 1.3, letterSpacing: 0 }}>
-                                            {item?.message}
-                                          </Typography>
-                                        </>
-                                      ) : item?.type === 'image' ? (
-                                        <img
-                                          style={{ width: '100%', height: '100%' }}
-                                          src={messageImage[index]}
-                                          onLoad={() => {
-                                            scroll.current.scrollIntoView({
-                                              behavior: 'smooth',
-                                              block: 'end',
-                                              inline: 'nearest'
-                                            })
-                                          }}
-                                        />
-                                      ) : (
-                                        item?.type === 'file' && (
-                                          <div
-                                            style={{
-                                              display: 'flex',
-                                              gap: '5px',
-                                              cursor: 'pointer',
-                                              color: '#fff'
-                                            }}
-                                            onClick={() => handleDownloadFile(item)}>
-                                            <TextSnippetIcon />
-                                            <Typography>{item.message}</Typography>
-                                          </div>
-                                        )
-                                      )}
-                                    </div>
-                                  </div>
-                                  <Typography
-                                    sx={{
-                                      lineHeight: 1.3,
-                                      letterSpacing: 0,
-                                      fontWeight: 500,
-                                      fontFamily: 'none',
-                                      fontSize: '13px'
-                                    }}
-                                    alignSelf="flex-end">
-                                    {moment(item.createdAt).fromNow()}
-                                  </Typography>
-                                </div>
-                              </Box>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div ref={scroll}>
-                              <Box display="flex" alignItems="center" gap="5px">
-                                <Box mt="-14px">
-                                  <Tooltip
-                                    title={
-                                      userAvatar[
-                                        userAvatar.findIndex(
-                                          (avatar) => avatar.userId === item.senderId
-                                        )
-                                      ].username
-                                    }>
-                                    <Avatar
-                                      src={
-                                        userAvatar[
-                                          userAvatar.findIndex(
-                                            (avatar) => avatar.userId === item.senderId
-                                          )
-                                        ].image
-                                      }
-                                    />
-                                  </Tooltip>
-                                </Box>
-                                <div style={{ alignItems: 'flex-start' }} className="message">
-                                  <div className="messageTop">
-                                    <div
-                                      style={{
-                                        backgroundColor:
-                                          item?.type === 'image' ? '#f5f7f9' : 'rgb(245, 241, 241)',
-                                        color: '#000'
-                                      }}
-                                      className="messageText">
-                                      {item?.type === 'text' ? (
-                                        <Typography
-                                          color="#000"
-                                          sx={{ lineHeight: 1.3, letterSpacing: 0 }}>
-                                          {item?.message}
-                                        </Typography>
-                                      ) : item?.type === 'image' ? (
-                                        <img
-                                          onLoad={() => {
-                                            scroll.current.scrollIntoView({
-                                              behavior: 'smooth',
-                                              block: 'end',
-                                              inline: 'nearest'
-                                            })
-                                          }}
-                                          src={messageImage[index]}
-                                        />
-                                      ) : (
-                                        item?.type === 'file' && (
-                                          <div
-                                            style={{
-                                              display: 'flex',
-                                              gap: '5px',
-                                              cursor: 'pointer'
-                                            }}
-                                            onClick={() => handleDownloadFile(item)}>
-                                            <TextSnippetIcon />
-                                            <Typography>{item.message}</Typography>
-                                          </div>
-                                        )
-                                      )}
-                                    </div>
-                                  </div>
-                                  <Typography
-                                    sx={{
-                                      lineHeight: 1.3,
-                                      letterSpacing: 0,
-                                      fontWeight: 500,
-                                      fontFamily: 'none',
-                                      fontSize: '12px',
-                                      color: '#000',
-                                      ml: '10px'
-                                    }}
-                                    alignSelf="flex-start">
-                                    {moment(item.createdAt).fromNow()}
-                                  </Typography>
-                                </div>
-                              </Box>
-                            </div>
-                          </>
-                        )
-                      )}
+
                     </Box>
                   )}
                   <div className="chat-sender">

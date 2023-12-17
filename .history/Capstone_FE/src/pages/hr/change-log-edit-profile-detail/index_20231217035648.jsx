@@ -46,6 +46,9 @@ const ChangeLogEditProfileDetail = () => {
           hrId: currentUser.accountId
         }
         profileApi.acceptUserInfo(data)
+        setTimeout(() => {
+          navigate(-1)
+        },800)
       }
     })
   }

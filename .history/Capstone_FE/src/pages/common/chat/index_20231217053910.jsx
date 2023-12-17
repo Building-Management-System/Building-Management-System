@@ -45,6 +45,7 @@ import { BASE_URL } from '../../../services/constraint'
 import axiosClient from '../../../utils/axios-config'
 import './components/Chat.css'
 import ChatTopbar from './components/ChatTopbar'
+import ScrollableFeed from 'react-scrollable-feed'
 const style = {
   position: 'absolute',
   top: '50%',
@@ -178,6 +179,7 @@ const Chat = () => {
     }
     fetchAllChatList()
   }, [])
+
   useEffect(() => {
     if (isActiveUser !== '') {
       setIsLoadingChat(true)
@@ -198,10 +200,19 @@ const Chat = () => {
   }, [isActiveUser?.chatId])
 
   useEffect(() => {
-    scroll?.current?.scrollIntoView({
-      behavior: 'smooth'
-    })
-  }, [messages])
+    if (scroll.current) {
+      const imageElements = scroll.current.querySelectorAll("img");
+      imageElements.forEach((img) => {
+        img.onload = () => {
+          scroll.current.scrollIntoView({
+            behavior: "smooth",
+            block: "end",
+            inline: "nearest"
+          });
+        };
+      });
+    }
+  }, [messages]);
   const imgurlAvatar = async () => {
     try {
       if (allChatList.length > 0) {
@@ -790,13 +801,6 @@ const Chat = () => {
                                       <img
                                         style={{ width: '100%', height: '100%' }}
                                         src={messageImage[index]}
-                                        onLoad={() => {
-                                          scroll.current.scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'end',
-                                            inline: 'nearest'
-                                          })
-                                        }}
                                       />
                                     ) : (
                                       item?.type === 'file' && (
@@ -831,59 +835,48 @@ const Chat = () => {
                           </>
                         ) : (
                           <>
-                            <div ref={scroll}>
-                              <div style={{ alignItems: 'flex-start' }} className="message">
-                                <div className="messageTop">
-                                  <div
-                                    style={{
-                                      backgroundColor:
-                                        item?.type === 'image' ? '#f5f7f9' : 'rgb(245, 241, 241)',
-                                      color: '#000'
-                                    }}
-                                    className="messageText">
-                                    {item?.type === 'text' ? (
-                                      <Typography
-                                        color="#000"
-                                        sx={{ lineHeight: 1.3, letterSpacing: 0 }}>
-                                        {item?.message}
-                                      </Typography>
-                                    ) : item?.type === 'image' ? (
-                                      <img
-                                        onLoad={() => {
-                                          scroll.current.scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'end',
-                                            inline: 'nearest'
-                                          })
-                                        }}
-                                        src={messageImage[index]}
-                                      />
-                                    ) : (
-                                      item?.type === 'file' && (
-                                        <div
-                                          style={{ display: 'flex', gap: '5px', cursor: 'pointer' }}
-                                          onClick={() => handleDownloadFile(item)}>
-                                          <TextSnippetIcon />
-                                          <Typography>{item.message}</Typography>
-                                        </div>
-                                      )
-                                    )}
-                                  </div>
-                                </div>
-                                <Typography
-                                  sx={{
-                                    lineHeight: 1.3,
-                                    letterSpacing: 0,
-                                    fontWeight: 500,
-                                    fontFamily: 'none',
-                                    fontSize: '12px',
-                                    color: '#000',
-                                    ml: '10px'
+                            <div style={{ alignItems: 'flex-start' }} className="message">
+                              <div className="messageTop">
+                                <div
+                                  style={{
+                                    backgroundColor:
+                                      item?.type === 'image' ? '#f5f7f9' : 'rgb(245, 241, 241)',
+                                    color: '#000'
                                   }}
-                                  alignSelf="flex-start">
-                                  {moment(item.createdAt).fromNow()}
-                                </Typography>
+                                  className="messageText">
+                                  {item?.type === 'text' ? (
+                                    <Typography
+                                      color="#000"
+                                      sx={{ lineHeight: 1.3, letterSpacing: 0 }}>
+                                      {item?.message}
+                                    </Typography>
+                                  ) : item?.type === 'image' ? (
+                                    <img src={messageImage[index]} />
+                                  ) : (
+                                    item?.type === 'file' && (
+                                      <div
+                                        style={{ display: 'flex', gap: '5px', cursor: 'pointer' }}
+                                        onClick={() => handleDownloadFile(item)}>
+                                        <TextSnippetIcon />
+                                        <Typography>{item.message}</Typography>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
                               </div>
+                              <Typography
+                                sx={{
+                                  lineHeight: 1.3,
+                                  letterSpacing: 0,
+                                  fontWeight: 500,
+                                  fontFamily: 'none',
+                                  fontSize: '12px',
+                                  color: '#000',
+                                  ml: '10px'
+                                }}
+                                alignSelf="flex-start">
+                                {moment(item.createdAt).fromNow()}
+                              </Typography>
                             </div>
                           </>
                         )
@@ -920,13 +913,6 @@ const Chat = () => {
                                         <img
                                           style={{ width: '100%', height: '100%' }}
                                           src={messageImage[index]}
-                                          onLoad={() => {
-                                            scroll.current.scrollIntoView({
-                                              behavior: 'smooth',
-                                              block: 'end',
-                                              inline: 'nearest'
-                                            })
-                                          }}
                                         />
                                       ) : (
                                         item?.type === 'file' && (
@@ -1000,16 +986,7 @@ const Chat = () => {
                                           {item?.message}
                                         </Typography>
                                       ) : item?.type === 'image' ? (
-                                        <img
-                                          onLoad={() => {
-                                            scroll.current.scrollIntoView({
-                                              behavior: 'smooth',
-                                              block: 'end',
-                                              inline: 'nearest'
-                                            })
-                                          }}
-                                          src={messageImage[index]}
-                                        />
+                                        <img src={messageImage[index]} />
                                       ) : (
                                         item?.type === 'file' && (
                                           <div

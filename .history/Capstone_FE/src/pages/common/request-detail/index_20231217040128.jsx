@@ -26,6 +26,7 @@ import './components/style.css'
 import { toast } from 'react-toastify'
 import useAuth from '../../../hooks/useAuth'
 import { format } from 'date-fns'
+import Swal from 'sweetalert2';
 ClassicEditor.defaultConfig = {
   toolbar: {
     items: ['heading', '|', 'bold', 'italic', '|', 'bulletedList', 'numberedList']
@@ -98,9 +99,12 @@ const TicketDetail = () => {
             createDate: formattedDate,
             imageSender: imageUser
           }
-        },
+        }
       ])
     setContent('')
+    // setTimeout(function () {
+    //   location.reload()
+    // }, 500)
   }
   console.log(userInfo);
   const handleOpen = () => setOpen(true)
@@ -142,15 +146,28 @@ const TicketDetail = () => {
     }
   }, [request[0]?.requestMessageResponse?.senderId])
 
-  const handleAccept = async () => {
+  const handleAccept = () => {
     if (request[0]?.object?.topic === 'ATTENDANCE_REQUEST') {
-      const res = await requestApi.acceptAttendanceRequest(request[0]?.object?.attendanceRequestId)
+      Swal.fire({
+        title: 'Are you sure to accept this request?',
+        icon: 'question',
+        cancelButtonText: 'Cancel!',
+        showCancelButton: true,
+        cancelButtonColor: 'red',
+        confirmButtonColor: 'green'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const res = requestApi.acceptAttendanceRequest(request[0]?.object?.attendanceRequestId)
       try {
         navigate(-1)
       } catch (error) {
         console.error('Error accepting leave request:', error)
       }
       console.log(res)
+        }
+      })
+    }
+      
     } else if (request[0]?.object?.topic === 'LEAVE_REQUEST') {
       try {
         await requestApi.acceptLeaveRequest(request[0]?.object?.leaveRequestId)
@@ -373,7 +390,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -703,7 +719,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -788,7 +803,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -804,7 +818,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -829,7 +842,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )
@@ -893,7 +905,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -909,7 +920,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -934,7 +944,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )

@@ -45,6 +45,7 @@ import { BASE_URL } from '../../../services/constraint'
 import axiosClient from '../../../utils/axios-config'
 import './components/Chat.css'
 import ChatTopbar from './components/ChatTopbar'
+import ScrollableFeed from 'react-scrollable-feed'
 const style = {
   position: 'absolute',
   top: '50%',
@@ -178,6 +179,7 @@ const Chat = () => {
     }
     fetchAllChatList()
   }, [])
+
   useEffect(() => {
     if (isActiveUser !== '') {
       setIsLoadingChat(true)
@@ -201,7 +203,7 @@ const Chat = () => {
     scroll?.current?.scrollIntoView({
       behavior: 'smooth'
     })
-  }, [messages])
+  }, [messages, messageImage])
   const imgurlAvatar = async () => {
     try {
       if (allChatList.length > 0) {
@@ -790,13 +792,6 @@ const Chat = () => {
                                       <img
                                         style={{ width: '100%', height: '100%' }}
                                         src={messageImage[index]}
-                                        onLoad={() => {
-                                          scroll.current.scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'end',
-                                            inline: 'nearest'
-                                          })
-                                        }}
                                       />
                                     ) : (
                                       item?.type === 'file' && (
@@ -848,16 +843,7 @@ const Chat = () => {
                                         {item?.message}
                                       </Typography>
                                     ) : item?.type === 'image' ? (
-                                      <img
-                                        onLoad={() => {
-                                          scroll.current.scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'end',
-                                            inline: 'nearest'
-                                          })
-                                        }}
-                                        src={messageImage[index]}
-                                      />
+                                      <img src={messageImage[index]} />
                                     ) : (
                                       item?.type === 'file' && (
                                         <div
@@ -920,13 +906,6 @@ const Chat = () => {
                                         <img
                                           style={{ width: '100%', height: '100%' }}
                                           src={messageImage[index]}
-                                          onLoad={() => {
-                                            scroll.current.scrollIntoView({
-                                              behavior: 'smooth',
-                                              block: 'end',
-                                              inline: 'nearest'
-                                            })
-                                          }}
                                         />
                                       ) : (
                                         item?.type === 'file' && (
@@ -1000,16 +979,7 @@ const Chat = () => {
                                           {item?.message}
                                         </Typography>
                                       ) : item?.type === 'image' ? (
-                                        <img
-                                          onLoad={() => {
-                                            scroll.current.scrollIntoView({
-                                              behavior: 'smooth',
-                                              block: 'end',
-                                              inline: 'nearest'
-                                            })
-                                          }}
-                                          src={messageImage[index]}
-                                        />
+                                        <img src={messageImage[index]} />
                                       ) : (
                                         item?.type === 'file' && (
                                           <div

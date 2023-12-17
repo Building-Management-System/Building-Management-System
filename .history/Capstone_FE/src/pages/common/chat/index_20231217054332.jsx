@@ -45,6 +45,7 @@ import { BASE_URL } from '../../../services/constraint'
 import axiosClient from '../../../utils/axios-config'
 import './components/Chat.css'
 import ChatTopbar from './components/ChatTopbar'
+import ScrollableFeed from 'react-scrollable-feed'
 const style = {
   position: 'absolute',
   top: '50%',

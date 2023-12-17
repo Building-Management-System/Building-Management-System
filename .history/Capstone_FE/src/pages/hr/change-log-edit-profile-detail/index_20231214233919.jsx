@@ -46,6 +46,7 @@ const ChangeLogEditProfileDetail = () => {
           hrId: currentUser.accountId
         }
         profileApi.acceptUserInfo(data)
+        navigate(-1)
       }
     })
   }
