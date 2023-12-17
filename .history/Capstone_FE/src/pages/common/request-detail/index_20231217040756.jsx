@@ -893,7 +893,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -909,7 +908,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -934,7 +932,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )

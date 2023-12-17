@@ -25,7 +25,6 @@ import ChatTopbar from '../chat/components/ChatTopbar'
 import './components/style.css'
 import { toast } from 'react-toastify'
 import useAuth from '../../../hooks/useAuth'
-import { format } from 'date-fns'
 ClassicEditor.defaultConfig = {
   toolbar: {
     items: ['heading', '|', 'bold', 'italic', '|', 'bulletedList', 'numberedList']
@@ -66,16 +65,27 @@ const TicketDetail = () => {
   const [open, setOpen] = useState(false)
   const [imageReceiver, setImageReceiver] = useState('')
   const [imageSender, setImageSender] = useState('')
-  const [imageUser, setImageUser] = useState('')
   const navigate = useNavigate()
   const currentUser = useSelector((state) => state.auth.login?.currentUser)
   const userRole = useSelector((state) => state.auth.login?.currentUser.role)
   const userId = useSelector((state) => state.auth.login?.currentUser?.accountId)
   const userInfo = useAuth()
-  const currentDate = new Date()
-  const formattedDate = format(currentDate, 'yyyy-MM-dd HH:mm:ss', { timeZone: 'UTC' });
+  const currentDate = new Date();
+const options = {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  timeZone: 'UTC', // Set your desired time zone here
+};
 
+const formattedDate = currentDate.toLocaleString('en-US', options);
 
+console.log(formattedDate);
+
+  console.log(formattedDate);
   const handleSendMessage = (e) => {
     e.preventDefault()
     let data = {
@@ -85,24 +95,26 @@ const TicketDetail = () => {
       departmentId: request[0]?.requestMessageResponse?.receiverDepartment?.departmentId
     }
 
-    requestApi.otherFormExistRequest(data)    
-      setRequest((prevRequest) => [
-        ...prevRequest,
-        {
-          object: {
-            content: content
-          },
+    requestApi.otherFormExistRequest(data)
+    setRequest((prevRequest) => [
+      ...prevRequest,
+      {
+        object: {
+          content: content,
+        },
           requestMessageResponse: {
             senderFirstName: userInfo?.firstName,
             senderLastName: userInfo?.lastName,
-            createDate: formattedDate,
-            imageSender: imageUser
+            
           }
-        },
-      ])
+      }
+    ])
     setContent('')
+    // setTimeout(function () {
+    //   location.reload()
+    // }, 500)
   }
-  console.log(userInfo);
+
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
   useEffect(() => {
@@ -268,20 +280,6 @@ const TicketDetail = () => {
     imgurlSender()
   }
 
-  const imgurlUser = async () => {
-    const storageRef = ref(storage, `/${userInfo?.image}`)
-    try {
-      const url = await getDownloadURL(storageRef)
-      setImageUser(url)
-    } catch (error) {
-      console.error('Error getting download URL:', error)
-    }
-  }
-
-  if (userInfo) {
-    imgurlUser()
-  }
-
   console.log(request[0]?.requestMessageResponse?.receiverId)
   console.log(currentUser?.accountId)
 
@@ -373,7 +371,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -703,7 +700,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -788,7 +784,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -804,7 +799,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -829,7 +823,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )
@@ -893,7 +886,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -909,7 +901,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
             <ListItem alignItems="flex-start">
               <ListItemText
                 secondary={
@@ -934,7 +925,6 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
           </List>
         </>
       )
@@ -1114,7 +1104,6 @@ const TicketDetail = () => {
                     request[0]?.requestMessageResponse?.receiverId === currentUser?.accountId ? (
                       <CKEditor
                         editor={ClassicEditor}
-                        data={content}
                         onChange={(event, editor) => {
                           const data = editor.getData()
                           setContent(data)
@@ -1126,7 +1115,6 @@ const TicketDetail = () => {
                   ) : request[0]?.requestMessageResponse?.requestTicketStatus != 'CLOSED' ? (
                     <CKEditor
                       editor={ClassicEditor}
-                      data={content}
                       onChange={(event, editor) => {
                         const data = editor.getData()
                         setContent(data)
