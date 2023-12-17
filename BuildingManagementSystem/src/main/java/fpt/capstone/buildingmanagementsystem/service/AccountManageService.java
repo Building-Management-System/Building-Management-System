@@ -162,16 +162,15 @@ public class AccountManageService implements UserDetailsService {
                                     saveAccount = accountRepository.saveAndFlush(newAccount);
                                     List<InactiveManagerTemp> inactiveManagerTemps = tempRepository.findByDepartment(saveAccount.getUser().getDepartment());
                                     if(!inactiveManagerTemps.isEmpty()) {
-                                        tempRepository.deleteAll(inactiveManagerTemps);
-                                    }
-                                    ticketManageService.updateTicketOfNewManager(saveAccount);
-                                } else {
+                                    tempRepository.deleteAll(inactiveManagerTemps);
+                                }
+                                ticketManageService.updateTicketOfNewManager(saveAccount);
+                            } else {
                                     throw new Conflict("department_exist_manager");
                                 }
                             } else {
                                 newAccount.setUser(user);
                                 saveAccount = accountRepository.saveAndFlush(newAccount);
-
                             }
                             dailyLogService.initDayOff(saveAccount.accountId);
 
@@ -187,7 +186,21 @@ public class AccountManageService implements UserDetailsService {
                                         .build();
                                 return deviceService.registerNewAccount(request);
                             }
-                            return ResponseEntity.ok(true);
+                            return ResponseEntity.ok(new GetAllAccountResponse(
+                                    newAccount.accountId,
+                                    newAccount.username,
+                                    newAccount.getUser().getFirstName(),
+                                    newAccount.getUser().getLastName(),
+                                    newAccount.getRole().getRoleName(),
+                                    newAccount.getStatus().getStatusId(),
+                                    newAccount.getStatus().getStatusName(),
+                                    newAccount.getCreatedBy(),
+                                    newAccount.getCreatedDate(),
+                                    newAccount.getUser().getDepartment().getDepartmentName(),
+                                    newAccount.getUser().getTelephoneNumber(),
+                                    newAccount.getUser().getEmail(),
+                                    newAccount.getUser().getGender()
+                            ));
                         } else {
                             throw new NotFound("hr_id_not_found");
                         }
