@@ -302,13 +302,13 @@ public class AccountManageService implements UserDetailsService {
                     if (checkManagerOfDepartment(department.getDepartmentName())) {
                         accountRepository.updateRoleAccount(newRoleId, accountId);
                         accountRepository.updateDepartmentUser(department.getDepartmentId(), accountId);
-                        Optional<InactiveManagerTemp> inactiveManagerTempOptional = tempRepository.findByDepartment(department);
-                        if (inactiveManagerTempOptional.isPresent()) {
-                            InactiveManagerTemp inactiveManager = inactiveManagerTempOptional.get();
+                        List<InactiveManagerTemp> inactiveManagerTemps = tempRepository.findByDepartment(department);
+                        if (!inactiveManagerTemps.isEmpty()) {
+                            InactiveManagerTemp inactiveManager = inactiveManagerTemps.get(0);
                             //update
                             ticketManageService.updateTicketOfNewManager(account, inactiveManager);
                             //delete from temp
-                            tempRepository.delete(inactiveManager);
+                            tempRepository.deleteAll(inactiveManagerTemps);
                         }
                         return ResponseEntity.ok(changeRoleRequest);
                     } else {
