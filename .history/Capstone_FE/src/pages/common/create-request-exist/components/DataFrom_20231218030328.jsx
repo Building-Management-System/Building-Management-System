@@ -3,14 +3,24 @@ import { CKEditor } from '@ckeditor/ckeditor5-react'
 import { Box, Button, Grid, MenuItem, Select, TextField, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import requestApi from '../../../../services/requestApi'
+import { useNavigate } from 'react-router-dom';
 ClassicEditor.defaultConfig = {
   toolbar: {
-    items: ['heading', '|', 'bold', 'italic', '|', 'bulletedList', 'numberedList']
+    items: [
+      'heading',
+      '|',
+      'bold',
+      'italic',
+      '|',
+      'bulletedList',
+      'numberedList',
+    ]
   },
   language: 'en'
-}
+};
+
 
 const OtherRequest = ({ userId }) => {
   const [title, setTitle] = useState('')
@@ -21,7 +31,7 @@ const OtherRequest = ({ userId }) => {
   const [department, setDepartment] = useState('')
   const [getAllManagerDepartment, setGetAllManagerDepartment] = useState([])
   const [manager, setManager] = useState('')
-  const { ticketId } = useParams()
+  const {ticketId} = useParams()
   const handleChange = (event) => {
     setRole(event.target.value)
   }
@@ -38,14 +48,14 @@ const OtherRequest = ({ userId }) => {
   }, [])
 
   useEffect(() => {
-    const fetchAllManagerDepartment = async () => {
-      const response = await requestApi.getAllManagerDepartment()
-      setGetAllManagerDepartment(response)
-    }
-    fetchAllManagerDepartment()
+      const fetchAllManagerDepartment = async () => {
+        const response = await requestApi.getAllManagerDepartment()
+        setGetAllManagerDepartment(response)
+      }
+      fetchAllManagerDepartment()
   }, [])
   const navigate = useNavigate()
-  console.log(department)
+  console.log(department);
   const handleCreateRequest = (e) => {
     e.preventDefault()
     if (currentUser?.role === 'employee' && role === 'manager') {
@@ -96,6 +106,8 @@ const OtherRequest = ({ userId }) => {
     }
   }, [department])
 
+
+
   const callApiOther = (e, departmentId) => {
     e.preventDefault()
     let data = {
@@ -103,9 +115,9 @@ const OtherRequest = ({ userId }) => {
       title: title,
       ticketId: ticketId,
       content: content,
-      departmentId: departmentId
+      departmentId: departmentId,
     }
-    console.log(data)
+    console.log(data);
     setTitle('')
     setContent('')
     setDepartment('')
@@ -122,7 +134,7 @@ const OtherRequest = ({ userId }) => {
       departmentId: departmentId,
       receivedId: manager[0].accountId
     }
-    console.log(data)
+    console.log(data);
     setTitle('')
     setContent('')
     setDepartment('')
@@ -148,58 +160,52 @@ const OtherRequest = ({ userId }) => {
     if (currentUser?.role === 'admin' && role === 'manager') {
       return (
         <>
-          <Typography mt={2} fontWeight="500">
-            Department
-          </Typography>
+          <Typography mt={2} fontWeight="500">Department</Typography>
           <Select
             value={department}
             sx={{ width: '100%' }}
             onChange={handleChangeDepartment}
             displayEmpty>
-            {getAllManagerDepartment.map((item) => (
-              <MenuItem key={item.departmentId} value={item.departmentId}>
-                {item.departmentName}{' '}
-              </MenuItem>
-            ))}
+            {
+              getAllManagerDepartment.map((item) => (
+                <MenuItem key={item.departmentId} value={item.departmentId} >{item.departmentName} </MenuItem>
+              ))
+            }  
           </Select>
         </>
       )
-    } else if (currentUser?.role === 'hr' && role === 'manager') {
+    }  else if (currentUser?.role === 'hr' && role === 'manager') {
       return (
         <>
-          <Typography mt={2} fontWeight="500">
-            Department
-          </Typography>
+          <Typography mt={2} fontWeight="500">Department</Typography>
           <Select
             required
             value={department}
             sx={{ width: '100%' }}
             onChange={handleChangeDepartment}
             displayEmpty>
-            {getAllManagerDepartment.map((item) => (
-              <MenuItem key={item.departmentId} value={item.departmentId}>
-                {item.departmentName}
-              </MenuItem>
-            ))}
+             {
+              getAllManagerDepartment.map((item) => (
+                <MenuItem key={item.departmentId} value={item.departmentId} >{item.departmentName}</MenuItem>
+              ))
+            }  
           </Select>
         </>
       )
     } else if (currentUser?.role === 'security' && role === 'manager') {
       return (
         <>
-          <Typography mt={2} fontWeight="500">
-            Department
-          </Typography>
+          <Typography mt={2} fontWeight="500">Department</Typography>
           <Select
             value={department}
             sx={{ width: '100%' }}
             onChange={handleChangeDepartment}
             displayEmpty>
-            {getAllManagerDepartment.map((item) => (
-              <MenuItem key={item.departmentId} value={item.departmentId}>
-                {item.departmentName}{' '}
-              </MenuItem>
-            ))}
+             {
+              getAllManagerDepartment.map((item) => (
+                <MenuItem key={item.departmentId} value={item.departmentId} >{item.departmentName} </MenuItem>
+              ))
+            }  
           </Select>
         </>
       )
@@ -235,12 +241,7 @@ const OtherRequest = ({ userId }) => {
                 <MenuItem value="security">Security</MenuItem>
               </Select>
             ) : currentUser?.role === 'hr' ? (
-              <Select
-                required
-                value={role}
-                sx={{ width: '100%' }}
-                onChange={handleChange}
-                displayEmpty>
+              <Select required value={role} sx={{ width: '100%' }} onChange={handleChange} displayEmpty>
                 <MenuItem value="admin">Admin</MenuItem>
                 <MenuItem value="manager">Manager</MenuItem>
                 <MenuItem value="security">Security</MenuItem>
@@ -282,12 +283,33 @@ const OtherRequest = ({ userId }) => {
           </Grid>
         </Grid>
         <Box pt={2} display="flex" alignItems="flex-end" justifyContent="space-between">
-          <Button
-            variant="contained"
-            onClick={() => navigate(-1)}
-            sx={{ bgcolor: 'rgb(100, 149, 237)' }}>
-            Back to Dashboard
-          </Button>
+          {currentUser?.role === 'employee' ? (
+            <Link to="/request-list-employee">
+              <Button type="submit" variant="contained">
+                Back
+              </Button>
+            </Link>
+          ) : currentUser?.role === 'manager' ? (
+            <Link to="/request-manager-list'">
+              <Button type="submit" variant="contained">
+                Back
+              </Button>
+            </Link>
+          ) : currentUser?.role === 'admin' ? (
+            <Link to="/request-list-admin">
+              <Button type="submit" variant="contained">
+                Back
+              </Button>
+            </Link>
+          ) : currentUser?.role === 'hr' ? (
+            <Link to="/request-hr-list">
+              <Button type="submit" variant="contained">
+                Back
+              </Button>
+            </Link>
+          ) : (
+            <></>
+          )}
           <Button type="submit" variant="contained">
             Save
           </Button>
@@ -296,6 +318,8 @@ const OtherRequest = ({ userId }) => {
     </Box>
   )
 }
+
+
 
 export { OtherRequest }
 

@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.repository;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.ChangeLog;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +27,6 @@ public interface ChangeLogRepository extends JpaRepository<ChangeLog, String> {
     @Query(value = "select * from change_log where employee_id = :employee_id and date = :date", nativeQuery = true)
     Optional<ChangeLog> getChangeLogDetailByUserIdAndDate(String employee_id, String date);
     Optional<ChangeLog> findChangeLogByChangeLogId(String changeLogId);
+    List<ChangeLog> findAllByEmployee(User user);
+    List<ChangeLog> findAllByManager(User user);
 }

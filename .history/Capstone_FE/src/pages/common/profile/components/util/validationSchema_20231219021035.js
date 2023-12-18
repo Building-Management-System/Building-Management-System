@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-const phoneRegExp = /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/
+const phoneRegExp = /^([0]([.][0-9]+)?|[1-9]([0-9]+)?([.][0-9]+)?)$/
 export const validationSchema = Yup.object({
     firstName: Yup.string().required('First name is required').matches(/^[a-zA-Z ]+$/, 'First Name is invalid').max(20, 'First Name is invalid'),
     lastName: Yup.string().required('Last name is required').matches(/^[a-zA-Z]+$/, 'Last Name is invalid').max(10, 'Last Name is invalid'),

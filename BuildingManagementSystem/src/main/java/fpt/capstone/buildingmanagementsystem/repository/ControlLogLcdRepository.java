@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.repository;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.Account;
 import fpt.capstone.buildingmanagementsystem.model.entity.ControlLogLcd;
+import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -20,4 +21,6 @@ public interface ControlLogLcdRepository extends JpaRepository<ControlLogLcd, St
     @Query(value = "select * from control_log_lcd where account_id = :account_id order by time desc", nativeQuery = true)
     Optional<List<ControlLogLcd>> getAll(String account_id);
     Optional<List<ControlLogLcd>> findAllByPersionName(String username);
+    List<ControlLogLcd> findAllByAccount(Account account);
+
 }

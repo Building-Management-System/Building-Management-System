@@ -3,7 +3,7 @@ const phoneRegExp = /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2
 export const validationSchema = Yup.object({
     firstName: Yup.string().required('First name is required').matches(/^[a-zA-Z ]+$/, 'First Name is invalid').max(20, 'First Name is invalid'),
     lastName: Yup.string().required('Last name is required').matches(/^[a-zA-Z]+$/, 'Last Name is invalid').max(10, 'Last Name is invalid'),
-    email: Yup.string().email('Email is not valid').matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Email must match Ex: abc@gmail.com').required('Email is required'),
+    email: Yup.string().email('Email is not valid').matches(/@[^.]*\./, 'Email must match Ex: abc@gmail.com').required('Email is required'),
     phone: Yup.string()
     .required("Phone number is required")
     .matches(phoneRegExp, 'Phone number is not valid')
