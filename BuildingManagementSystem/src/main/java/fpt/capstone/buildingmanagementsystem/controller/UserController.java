@@ -27,8 +27,8 @@ public class UserController {
     UserManageService userManageService;
 
     @RequestMapping(value = "/getAllUserInfoPending", method = RequestMethod.GET)
-    public ResponseEntity<?> getAllUserInfoPending() throws Exception {
-        return ResponseEntity.ok(userManageService.getAllUserNotVerify());
+    public ResponseEntity<?> getAllUserInfoPending(@RequestParam("userId") String userId) throws Exception {
+        return ResponseEntity.ok(userManageService.getAllUserNotVerify(userId));
     }
 
     @RequestMapping(value = "/getInfoUser", method = RequestMethod.POST)

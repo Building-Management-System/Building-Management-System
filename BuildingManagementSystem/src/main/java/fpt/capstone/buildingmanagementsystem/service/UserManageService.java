@@ -182,10 +182,15 @@ public class UserManageService {
         }
     }
 
-    public List<GetAllUserInfoPending> getAllUserNotVerify() {
+    public List<GetAllUserInfoPending> getAllUserNotVerify(String userId) {
         UserPendingStatus status = new UserPendingStatus("1", "not_verify");
         List<GetAllUserInfoPending> listResponse = new ArrayList<>();
         List<UserPending> userPending = userPendingRepository.findAllByUserPendingStatus(status);
+        for (int i = 0; i < userPending.size(); i++) {
+            if (userPending.get(i).getUserId().equals(userId)) {
+                userPending.remove(userPending.get(i));
+            }
+        }
         if (userPending.size() == 0) {
             return listResponse;
         }

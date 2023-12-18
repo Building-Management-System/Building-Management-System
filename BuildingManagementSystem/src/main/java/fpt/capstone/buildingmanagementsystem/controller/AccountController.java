@@ -31,8 +31,8 @@ public class AccountController {
     }
 
     @RequestMapping(value = "/getAllAccount", method = RequestMethod.GET)
-    public ResponseEntity<?> getAllAccount() throws Exception {
-        return ResponseEntity.ok(accountManageService.getGetAllAccount());
+    public ResponseEntity<?> getAllAccount(@RequestParam("userId") String userId) throws Exception {
+        return ResponseEntity.ok(accountManageService.getGetAllAccount(userId));
     }
 
     @RequestMapping(value = "/getRoleByUserId", method = RequestMethod.POST)
