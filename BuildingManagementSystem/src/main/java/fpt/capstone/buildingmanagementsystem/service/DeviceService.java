@@ -118,9 +118,10 @@ public class DeviceService {
                 }
                 SaveDeviceRoomResponse response = SaveDeviceRoomResponse.builder()
                         .deviceId(device.getId())
-                        .deviceLcdId(device.getDeviceId())
+                        .lcdId(device.getDeviceId())
                         .deviceName(device.getDeviceName())
                         .status(device.getStatus())
+                        .updateDate(device.getUpdateDate())
                         .deviceUrl(device.getDeviceUrl())
                         .build();
                 if (room != null) {

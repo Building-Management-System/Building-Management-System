@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -16,13 +18,15 @@ public class SaveDeviceRoomResponse {
 
     private String deviceId;
 
-    private String deviceLcdId;
+    private String lcdId;
 
     private String deviceName;
 
     private DeviceStatus status;
 
     private String deviceUrl;
+
+    private Date updateDate;
 
     private int roomId;
 
