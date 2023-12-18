@@ -15,10 +15,12 @@ import fpt.capstone.buildingmanagementsystem.model.request.ChangeStatusRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceRoomRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceStatusRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.NewDeviceRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.AccountLcdResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.DeviceAccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.DeviceRoomResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.RoomResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.SaveDeviceRoomResponse;
 import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DeviceAccountRepository;
 import fpt.capstone.buildingmanagementsystem.repository.DeviceRepository;
@@ -29,7 +31,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,27 +52,103 @@ public class DeviceService {
     RoomRepository roomRepository;
 
     public List<DeviceRoomResponse> getAllDevice() {
-        List<Room> rooms = roomRepository.findAll();
-        return rooms.stream()
-                .map(room -> new DeviceRoomResponse(
-                        room.getRoomId(),
-                        room.getRoomName(),
-                        room.getDevice().getId(),
-                        room.getDevice().getDeviceId(),
-                        room.getDevice().getDeviceName(),
-                        room.getDevice().getStatus(),
-                        room.getDevice().getDeviceUrl(),
-                        room.getDevice().getDeviceNote(),
-                        room.getDevice().getUpdateDate()
-                ))
-                .collect(Collectors.toList());
+        List<Device> devices = deviceRepository.findAll();
+        List<DeviceRoomResponse> roomResponses = new ArrayList<>();
+
+        devices.forEach(device -> {
+            List<Room> roomByDevices = roomRepository.getRoomByDevice(device.getDeviceId());
+            if (roomByDevices.isEmpty()) {
+                DeviceRoomResponse roomResponse = DeviceRoomResponse.builder()
+                        .deviceId(device.getId())
+                        .lcdId(device.getDeviceId())
+                        .deviceName(device.getDeviceName())
+                        .status(device.getStatus())
+                        .deviceUrl(device.getDeviceUrl())
+                        .deviceNote(device.getDeviceNote())
+                        .updateDate(device.getUpdateDate())
+                        .build();
+                roomResponses.add(roomResponse);
+            } else {
+                roomByDevices.forEach(room -> {
+                    DeviceRoomResponse roomResponse = new DeviceRoomResponse(
+                            room.getRoomId(),
+                            room.getRoomName(),
+                            room.getDevice().getId(),
+                            room.getDevice().getDeviceId(),
+                            room.getDevice().getDeviceName(),
+                            room.getDevice().getStatus(),
+                            room.getDevice().getDeviceUrl(),
+                            room.getDevice().getDeviceNote(),
+                            room.getDevice().getUpdateDate());
+                    roomResponses.add(roomResponse);
+                });
+            }
+        });
+
+
+        return roomResponses;
     }
+
+    public ResponseEntity<?> createRoomDevice(NewDeviceRequest request) {
+        if (request.getDeviceLcdId() != null
+                && request.getDeviceName() != null
+                && request.getDeviceUrl() != null) {
+            Optional<Device> deviceOptional = deviceRepository.findByDeviceId(request.getDeviceLcdId());
+
+            if (deviceOptional.isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Device_Lcd_Id is existed.");
+            }
+
+            Device device = Device.builder()
+                    .deviceId(request.getDeviceLcdId())
+                    .deviceName(request.getDeviceName())
+                    .status(DeviceStatus.INACTIVE)
+                    .deviceUrl(request.getDeviceUrl())
+                    .build();
+
+            try {
+                deviceRepository.save(device);
+                Room room = null;
+                if (!request.getRoomName().isEmpty()) {
+                    room = Room.builder()
+                            .roomName(request.getRoomName())
+                            .device(device)
+                            .build();
+                    roomRepository.save(room);
+                }
+                SaveDeviceRoomResponse response = SaveDeviceRoomResponse.builder()
+                        .deviceId(device.getId())
+                        .deviceLcdId(device.getDeviceId())
+                        .deviceName(device.getDeviceName())
+                        .status(device.getStatus())
+                        .deviceUrl(device.getDeviceUrl())
+                        .build();
+                if (room != null) {
+                    response.setRoomId(room.getRoomId());
+                    response.setRoomName(room.getRoomName());
+                }
+                return ResponseEntity.ok(response);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong!");
+            }
+
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("One of those fields is empty");
+        }
+    }
+
 
     public ResponseEntity<?> updateDevice(DeviceRoomRequest request) {
         Device device = deviceRepository.findById(request.getDeviceId())
                 .orElseThrow(() -> new NotFound("Not_found_device"));
 
         if (request.getDeviceLcdId() != null) {
+            Optional<Device> deviceOptional = deviceRepository.findByDeviceId(request.getDeviceLcdId());
+            if(deviceOptional.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                        .body("Device_lcd_id is existed.");
+            }
             device.setDeviceId(request.getDeviceLcdId());
         }
 
@@ -97,7 +177,7 @@ public class DeviceService {
         try {
             Device deviceResponse = deviceRepository.save(device);
             DeviceRoomResponse response = new DeviceRoomResponse(
-                room.getRoomId(),
+                    room.getRoomId(),
                     room.getRoomName(),
                     deviceResponse.getId(),
                     deviceResponse.getDeviceId(),
@@ -117,13 +197,21 @@ public class DeviceService {
     public ResponseEntity<?> updateDeviceStatus(DeviceStatusRequest request) {
         Device device = deviceRepository.findById(request.getId())
                 .orElseThrow(() -> new BadRequest("Not_found_device"));
+
+        List<Room> roomByDevices = roomRepository.getRoomByDevice(device.getDeviceId());
+
+        if(roomByDevices.size() > 1) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                    .body("Contained 2 devices in 1 room");
+        }
+
         device.setStatus(request.getStatus());
         device.setDeviceNote(request.getDeviceNote());
         try {
             return ResponseEntity.ok(deviceRepository.save(device));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(e.getCause());
+                    .body("Cannot update device status.");
         }
     }
 
@@ -202,8 +290,8 @@ public class DeviceService {
     public ResponseEntity<?> registerNewAccount(AccountDeviceRequest request) {
         try {
             if (request.getAccountId() != null
-                    || request.getRoomIdString() != null
-                    || request.getStartDate() != null) {
+                    && request.getRoomIdString() != null
+                    && request.getStartDate() != null) {
                 Account account = accountRepository.findById(request.getAccountId())
                         .orElseThrow(() -> new BadRequest("Not_found_user"));
 
@@ -217,7 +305,7 @@ public class DeviceService {
                     toDate = Until.convertStringToDateTime(request.getEndDate());
                     if (fromDate.compareTo(toDate) > 0) {
                         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
-                                .body(request);
+                                .body("to date is smaller than from date");
                     }
                 }
                 List<DeviceAccount> deviceAccounts = deviceAccountRepository.findByDeviceAndAccount(room.getDevice(), account);
@@ -232,7 +320,7 @@ public class DeviceService {
                                 return ResponseEntity.ok(messageEditPerson(deviceAccount.getDevice().getDeviceId(), account.getAccountId(), status));
                             }
                             return ResponseEntity.status(HttpStatus.CONFLICT)
-                                    .body(request);
+                                    .body("Account in range is existed");
                         }
                         if (deviceAccount.getEndDate() != null && toDate != null && deviceAccount.getEndDate().compareTo(toDate) == 0) {
                             if (deviceAccount.getStatus().equals(ControlLogStatus.BLACK_LIST)) {
@@ -242,7 +330,7 @@ public class DeviceService {
                                 return ResponseEntity.ok(messageEditPerson(deviceAccount.getDevice().getDeviceId(), account.getAccountId(), status));
                             }
                             return ResponseEntity.status(HttpStatus.CONFLICT)
-                                    .body(request);
+                                    .body("Account in range is existed");
                         }
                     }
                 }
@@ -272,12 +360,12 @@ public class DeviceService {
                         .build();
                 return ResponseEntity.ok(response);
             }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(request);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Some fields are empty.");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(e.getCause());
+                    .body("fail to save data");
         }
     }
 
