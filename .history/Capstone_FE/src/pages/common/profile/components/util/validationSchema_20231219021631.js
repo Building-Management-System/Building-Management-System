@@ -6,7 +6,8 @@ export const validationSchema = Yup.object({
     email: Yup.string().email('Email is not valid').matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Email must match Ex: abc@gmail.com').required('Email is required'),
     phone: Yup.string()
     .required("Phone number is required")
-    .matches(phoneRegExp, 'Phone number is not valid')
+    .matches(phoneRegExp, 'Phone number must start with 0')
+    .positive("A phone number can't start with a minus")
     .min(10, "Your phone number must contain 10 digits")
     .max(10, "Your phone number must contain 10 digits"),
     address: Yup.string().required('Address is required').matches(/^[#.0-9a-zA-Z\s,-]+$/, 'Address is invalid'),

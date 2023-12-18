@@ -1074,6 +1074,7 @@ const TicketDetail = () => {
                         </>
                       ) : (
                         <>
+     
                             <div ref={scroll}>
                               <StyledPaperAns>
                                 <Box display="flex" justifyContent="space-between">
@@ -1112,6 +1113,9 @@ const TicketDetail = () => {
                                   }}></Typography>
                               </StyledPaperAns>
                             </div>
+                         
+                           
+                          
                         </>
                       )}
 

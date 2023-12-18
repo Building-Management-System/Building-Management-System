@@ -7,6 +7,7 @@ export const validationSchema = Yup.object({
     phone: Yup.string()
     .required("Phone number is required")
     .matches(phoneRegExp, 'Phone number is not valid')
+    .positive("A phone number can't start with a minus")
     .min(10, "Your phone number must contain 10 digits")
     .max(10, "Your phone number must contain 10 digits"),
     address: Yup.string().required('Address is required').matches(/^[#.0-9a-zA-Z\s,-]+$/, 'Address is invalid'),

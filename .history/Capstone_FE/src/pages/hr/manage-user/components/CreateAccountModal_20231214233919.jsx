@@ -82,9 +82,8 @@ const CreateAccountModal = ({ handleCloseCreateAccount, openCreateAccount, setAl
       }
       console.log(data)
       try {
-        const res = await axiosClient.post(`${BASE_URL}/register`, data)
+        await axiosClient.post(`${BASE_URL}/register`, data)
         let dataAdd = {
-          accountId: res.accountId,
           username: values.username,
           statusId: '1',
           statusName: 'active',
