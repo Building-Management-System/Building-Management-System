@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.repository;
 
+import fpt.capstone.buildingmanagementsystem.model.entity.ChatUser;
 import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.NotificationStatus;
@@ -13,7 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, String> {
-
+    List<Notification> findAllByCreatedBy(User user);
     @Query(value = "SELECT n.*\n" +
             "FROM notification n\n" +
             "JOIN unread_mark um ON n.notification_id = um.notification_id\n" +

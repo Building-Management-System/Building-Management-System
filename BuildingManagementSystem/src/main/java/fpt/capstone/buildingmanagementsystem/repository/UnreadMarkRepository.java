@@ -13,6 +13,6 @@ import java.util.Optional;
 public interface UnreadMarkRepository extends JpaRepository<UnreadMark, String> {
     Optional<UnreadMark> findByNotificationAndUser(Notification notification, User user);
     void deleteAllByNotification_NotificationId(String id);
-
+    List<UnreadMark> findAllByUser(User user);
     List<UnreadMark> findByUser(User user);
 }
