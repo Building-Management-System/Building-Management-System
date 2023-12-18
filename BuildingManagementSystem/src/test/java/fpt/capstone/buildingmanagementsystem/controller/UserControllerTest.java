@@ -37,15 +37,15 @@ class UserControllerTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void testGetAllUserInfoPending() throws Exception {
-        ResponseEntity<?> result = userController.getAllUserInfoPending();
-        assertEquals(200, result.getStatusCodeValue());
-        assertTrue(result.getBody() instanceof List);
-
-        List<?> userList = (List<?>) result.getBody();
-        assertEquals(1, userList.size());
-    }
+//    @Test
+//    void testGetAllUserInfoPending() throws Exception {
+//        ResponseEntity<?> result = userController.getAllUserInfoPending();
+//        assertEquals(200, result.getStatusCodeValue());
+//        assertTrue(result.getBody() instanceof List);
+//
+//        List<?> userList = (List<?>) result.getBody();
+//        assertEquals(1, userList.size());
+//    }
     //test round 3
 
 

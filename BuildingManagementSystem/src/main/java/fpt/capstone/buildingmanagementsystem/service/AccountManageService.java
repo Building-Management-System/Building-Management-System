@@ -407,14 +407,12 @@ public class AccountManageService implements UserDetailsService {
                 List<RequestMessage> checkpoint3 = requestMessageRepository.findAllByReceiver(user);
                 List<OvertimeLog> checkpoint4 = overTimeRepository.findAllByUser(user);
                 List<ChatMessage> checkpoint5 = chatMessageRepository.findAllBySender(user);
-//                List<ChatMessage> checkpoint6 = chatMessageRepository.findAllByReceiver(user);
                 List<DailyLog> checkpoint7 = dailyLogRepository.findAllByUser(user);
                 if (checkpoint1.size() == 0 &&
                         checkpoint2.size() == 0
                         && checkpoint3.size() == 0
                         && checkpoint4.size() == 0
                         && checkpoint5.size() == 0
-//                        && checkpoint6.size() == 0
                         && checkpoint7.size() == 0
                         && accountRepository.findByUsername(userAccount.get().getCreatedBy()).isPresent()
                         && hrId.equals(accountRepository.findByUsername(userAccount.get().getCreatedBy()).get().getAccountId())) {
@@ -469,14 +467,14 @@ public class AccountManageService implements UserDetailsService {
         return checkPoint;
     }
 
-    public List<GetAllAccountResponse> getGetAllAccount() {
+    public List<GetAllAccountResponse> getGetAllAccount(String id) {
         List<Account> account = accountRepository.findAll();
         List<GetAllAccountResponse> getAllAccountResponses = new ArrayList<>();
         if (account.size() == 0) {
             return getAllAccountResponses;
         }
         for (int i = 0; i < account.size(); i++) {
-            if (account.get(i).getCreatedBy() == null) {
+            if (account.get(i).getCreatedBy() == null || account.get(i).getAccountId().equals(id)) {
                 account.remove(account.get(i));
             }
         }
