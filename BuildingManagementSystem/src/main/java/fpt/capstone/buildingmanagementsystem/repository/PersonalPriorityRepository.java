@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.repository;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.Notification;
+import fpt.capstone.buildingmanagementsystem.model.entity.NotificationHidden;
 import fpt.capstone.buildingmanagementsystem.model.entity.PersonalPriority;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,7 @@ import java.util.List;
 public interface PersonalPriorityRepository extends JpaRepository<PersonalPriority, String> {
 
     List<PersonalPriority> findByNotificationAndUser(Notification notification, User user);
+    List<PersonalPriority> findAllByUser(User user);
 
     void deleteAllByNotification_NotificationId(String id);
 

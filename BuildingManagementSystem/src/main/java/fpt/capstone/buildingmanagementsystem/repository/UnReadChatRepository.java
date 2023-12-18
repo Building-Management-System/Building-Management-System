@@ -19,4 +19,5 @@ public interface UnReadChatRepository extends JpaRepository<UnReadChat, String> 
     void deleteAllByChat(Chat chat);
     @Transactional
     List<UnReadChat> findAllByChat_Id(String chatId);
+    List<UnReadChat> findAllByUser(User user);
 }
