@@ -330,7 +330,7 @@ const DeviceManage = () => {
         <DataTableDeviceManage rows={listDevice} columns={columns} isLoading={isLoading} handleOpenCreateDevice={handleOpenCreateDevice} />
       </Box>
 
-      <CreateDevice openCreateDevice={openCreateDevice} handleCloseCreateDevice={handleCloseCreateDevice} setListDevice={setListDevice} listDevice={listDevice} />
+      <CreateDevice openCreateDevice={openCreateDevice} handleCloseCreateDevice={handleCloseCreateDevice} />
       {/* modal Change Status */}
       <Modal
         open={isShowStatus}

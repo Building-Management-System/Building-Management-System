@@ -68,6 +68,10 @@ const DataTableDeviceManage = ({  columns,rows,handleOpenCreateDevice, isLoading
             marginBottom: '10px',
             justifyContent: 'flex-start'
           },
+          // "& .MuiButtonBase-root ": {
+          //   bgcolor: "#fff",
+          //   color: '#000'
+          // },
           '& .MuiDataGrid-columnHeaderTitle': {
             fontWeight: '700'
           }

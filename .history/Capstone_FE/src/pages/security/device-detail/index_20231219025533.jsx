@@ -28,7 +28,6 @@ import { format } from 'date-fns'
 import { useNavigate } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete';
-import { IconButton } from '@mui/material';
 const DeviceDetail = () => {
   const currentUserId = useSelector((state) => state.auth.login.currentUser.accountId)
 
@@ -67,6 +66,12 @@ const DeviceDetail = () => {
     fetchAllUser()
   }, [])
 
+  const allUserUpdate =
+    accountLcd
+      ? allUser.filter(
+          (item) => !accountLcd.some((user) => user.accountId === item.accountId)
+        )
+      : []
 
   const columns = [
     {
@@ -130,7 +135,7 @@ const DeviceDetail = () => {
     },
     {
       field: 'action',
-      flex: 1,
+      width: '280',
       headerName: 'Action',
       headerAlign: 'center',
       align: 'center',
@@ -152,15 +157,15 @@ const DeviceDetail = () => {
               alignItems="center"
               borderRadius="4px"
               width="100%">
-              <IconButton
+              <Button
                 variant="contained"
                 sx={{ fontSize: '14px' }}
                 onClick={() => handleOpenViewStatus(params.row)}>
                 <EditIcon sx={{ color: '#00FF00' }} />
-              </IconButton>
-              <IconButton variant="contained" sx={{ fontSize: '14px' }}>
+              </Button>
+              <Button variant="contained" sx={{ fontSize: '14px' }}>
               <DeleteIcon sx={{ color: 'red' }} />
-              </IconButton>
+              </Button>
             </Box>
           </Box>
         )
@@ -269,7 +274,7 @@ const DeviceDetail = () => {
           <Autocomplete
             disablePortal
             id="combo-box-demo"
-            options={allUser}
+            options={allUserUpdate}
             getOptionLabel={(option) => option.username}
             onChange={(event, newValue) => setAccId(newValue.accountId)}
             sx={{ mt: 2 }}

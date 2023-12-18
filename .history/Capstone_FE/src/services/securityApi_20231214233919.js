@@ -60,31 +60,12 @@ const securityApi = {
             console.log(error);
         }
     },
-    createNewRoomDevice: (data) => {
+    changeRecordStatus: async (data) => {
         try {
-            let res = axiosClient.post(`${BASE_URL}/createNewRoomDevice`,data)
+            let res = await axiosClient.post(`${BASE_URL}/changeRecordStatus`,data)
             return res;
         } catch (error) {
             console.log(error);
-        }
-    },
-    changeRecordStatus: (data) => {
-        try {
-            let res = axiosClient.post(`${BASE_URL}/changeRecordStatus`,data)
-            return res;
-        } catch (error) {
-            if (error.response.status === 400) {
-                toast.error('Not found room')
-              }
-              if (error.response.status === 404) {
-                toast.error('Some field are empty')
-              }
-              if (error.response.status === 406) {
-                toast.error('Date to must be greater than date from')
-              }
-              if (error.response.status === 409) {
-                toast.error('Account in range is existed')
-              }
         }
     },
     updateDevice:  (data) => {

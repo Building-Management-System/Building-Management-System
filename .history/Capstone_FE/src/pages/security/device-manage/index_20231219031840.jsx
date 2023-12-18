@@ -51,8 +51,8 @@ const DeviceManage = () => {
   const [isShowView, setIsShowView] = useState(false)
   const [note, setNote] = useState('')
   const [noteAdd, setNoteAdd] = useState('')
-  const [openCreateDevice, setOpenCreateDevice] = useState(false)
-
+  const [handleOpenCreateDevice, setHandleOpenCreateDevice] = useState(false)
+  const [HandleCloseCreateDevice, setHandleCloseCreateDevice] = useState(false)
 
   useEffect(() => {
     const listAllDevice = async () => {
@@ -67,11 +67,6 @@ const DeviceManage = () => {
     }
     listAllDevice()
   }, [id])
-
-  const handleOpenCreateDevice = () => {
-    setOpenCreateDevice(true)
-  }
-  const handleCloseCreateDevice = () => setOpenCreateDevice(false)
 
   useEffect(() => {
     const getAllRoom = async () => {
@@ -327,10 +322,10 @@ const DeviceManage = () => {
     <>
       <Box mt={3}>
         <Header title="Manage Device" />
-        <DataTableDeviceManage rows={listDevice} columns={columns} isLoading={isLoading} handleOpenCreateDevice={handleOpenCreateDevice} />
+        <DataTableDeviceManage rows={listDevice} columns={columns} isLoading={isLoading} />
       </Box>
 
-      <CreateDevice openCreateDevice={openCreateDevice} handleCloseCreateDevice={handleCloseCreateDevice} setListDevice={setListDevice} listDevice={listDevice} />
+      <CreateDevice />
       {/* modal Change Status */}
       <Modal
         open={isShowStatus}

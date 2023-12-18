@@ -67,6 +67,12 @@ const DeviceDetail = () => {
     fetchAllUser()
   }, [])
 
+  const allUserUpdate =
+    accountLcd
+      ? allUser.filter(
+          (item) => !accountLcd.some((user) => user.accountId === item.accountId)
+        )
+      : []
 
   const columns = [
     {
@@ -130,7 +136,7 @@ const DeviceDetail = () => {
     },
     {
       field: 'action',
-      flex: 1,
+      width: '280',
       headerName: 'Action',
       headerAlign: 'center',
       align: 'center',
@@ -269,7 +275,7 @@ const DeviceDetail = () => {
           <Autocomplete
             disablePortal
             id="combo-box-demo"
-            options={allUser}
+            options={allUserUpdate}
             getOptionLabel={(option) => option.username}
             onChange={(event, newValue) => setAccId(newValue.accountId)}
             sx={{ mt: 2 }}

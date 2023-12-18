@@ -1,9 +1,6 @@
-import { Box, LinearProgress, Button, Typography } from '@mui/material'
+import { Box, LinearProgress } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import {
-  DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarFilterButton
-} from "@mui/x-data-grid";
-
+import { DataGrid } from '@mui/x-data-grid'
 const StripedDataGrid = styled(DataGrid)(() => ({
   '.late-checkin-cell .MuiDataGrid-cellContent': {
     color: 'red'
@@ -15,7 +12,7 @@ const StripedDataGrid = styled(DataGrid)(() => ({
     color: '#DAA520	'
   }
 }))
-const DataTableDeviceManage = ({  columns,rows,handleOpenCreateDevice, isLoading }) => {
+const DataTableManageUser = ({ rows, columns, handleOpenCreateAccount, isLoading }) => {
   function CustomToolbar() {
     return (
       <GridToolbarContainer>
@@ -24,13 +21,14 @@ const DataTableDeviceManage = ({  columns,rows,handleOpenCreateDevice, isLoading
             <GridToolbarFilterButton />
             <GridToolbarExport />
           </Box>
-          <Button variant="contained" onClick={handleOpenCreateDevice}>
+          <Button variant="contained" onClick={handleOpenCreateAccount}>
             <Typography>Add Device</Typography>
           </Button>
         </Box>
       </GridToolbarContainer>
     )
   }
+const DataTableDeviceManage = ({  columns,rows, isLoading }) => {
   return (
     <>
       <Box
@@ -68,6 +66,10 @@ const DataTableDeviceManage = ({  columns,rows,handleOpenCreateDevice, isLoading
             marginBottom: '10px',
             justifyContent: 'flex-start'
           },
+          // "& .MuiButtonBase-root ": {
+          //   bgcolor: "#fff",
+          //   color: '#000'
+          // },
           '& .MuiDataGrid-columnHeaderTitle': {
             fontWeight: '700'
           }

@@ -26,9 +26,7 @@ import axiosClient from '../../../utils/axios-config'
 import { useSelector } from 'react-redux'
 import { format } from 'date-fns'
 import { useNavigate } from 'react-router-dom';
-import EditIcon from '@mui/icons-material/Edit'
-import DeleteIcon from '@mui/icons-material/Delete';
-import { IconButton } from '@mui/material';
+
 const DeviceDetail = () => {
   const currentUserId = useSelector((state) => state.auth.login.currentUser.accountId)
 
@@ -130,7 +128,7 @@ const DeviceDetail = () => {
     },
     {
       field: 'action',
-      flex: 1,
+      width: '280',
       headerName: 'Action',
       headerAlign: 'center',
       align: 'center',
@@ -152,15 +150,15 @@ const DeviceDetail = () => {
               alignItems="center"
               borderRadius="4px"
               width="100%">
-              <IconButton
+              <Button
                 variant="contained"
                 sx={{ fontSize: '14px' }}
                 onClick={() => handleOpenViewStatus(params.row)}>
-                <EditIcon sx={{ color: '#00FF00' }} />
-              </IconButton>
-              <IconButton variant="contained" sx={{ fontSize: '14px' }}>
-              <DeleteIcon sx={{ color: 'red' }} />
-              </IconButton>
+                Change Status
+              </Button>
+              <Button variant="contained" sx={{ fontSize: '14px' }}>
+                Delete
+              </Button>
             </Box>
           </Box>
         )
@@ -209,35 +207,6 @@ const DeviceDetail = () => {
       toast.success('Update successfully ')
       handleCloseStatus()
     } catch (error) {
-     console.log(error);
-    }
-  }
-  const handleChangeStart = (event) => {
-    setIsStart(event.target.checked)
-  }
-  const handleChangeEnd = (event) => {
-    setIsEnd(event.target.checked)
-  }
-
-  const handleSaveAddNew = async () => {
-    try {
-      if (accId === '') {
-        toast.error('Please select user')
-      } else {
-        const data = {
-          accountId: accId,
-          roomIdString: device?.rooms[0]?.roomId.toString(),
-          startDate: format(startDate, 'yyyy-MM-dd HH:mm:ss'),
-          endDate: format(endDate, 'yyyy-MM-dd HH:mm:ss')
-        }
-        const res = await securityApi.createDeviceAccount(data)
-        const updateAcountLcd = [res, ...accountLcd]
-        console.log(updateAcountLcd);
-        setAccountLCD(updateAcountLcd)
-        toast.success('Create successfully')
-        handleCloseAddNew()
-      }
-    } catch (error) {
       if (error.response.status === 400) {
         toast.error('Not found room')
       }
@@ -250,6 +219,31 @@ const DeviceDetail = () => {
       if (error.response.status === 409) {
         toast.error('Account in range is existed')
       }
+    }
+  }
+  const handleChangeStart = (event) => {
+    setIsStart(event.target.checked)
+  }
+  const handleChangeEnd = (event) => {
+    setIsEnd(event.target.checked)
+  }
+
+  const handleSaveAddNew = async () => {
+    if (accId === '') {
+      toast.error('Please select user')
+    } else {
+      const data = {
+        accountId: accId,
+        roomIdString: device?.rooms[0]?.roomId.toString(),
+        startDate: format(startDate, 'yyyy-MM-dd HH:mm:ss'),
+        endDate: format(endDate, 'yyyy-MM-dd HH:mm:ss')
+      }
+      const res = await securityApi.createDeviceAccount(data)
+      const updateAcountLcd = [res, ...accountLcd]
+      console.log(updateAcountLcd);
+      setAccountLCD(updateAcountLcd)
+      toast.success('Create successfully')
+      handleCloseAddNew()
     }
   }
 

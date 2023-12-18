@@ -19,7 +19,6 @@ import securityApi from '../../../services/securityApi'
 import formatDate from '../../../utils/formatDate'
 import DataTableDeviceManage from './component/DataTable'
 import Header from '../../../components/Header'
-import CreateDevice from './component/CreateDevice'
 
 const style = {
   position: 'absolute',
@@ -51,9 +50,6 @@ const DeviceManage = () => {
   const [isShowView, setIsShowView] = useState(false)
   const [note, setNote] = useState('')
   const [noteAdd, setNoteAdd] = useState('')
-  const [openCreateDevice, setOpenCreateDevice] = useState(false)
-
-
   useEffect(() => {
     const listAllDevice = async () => {
       try {
@@ -67,11 +63,6 @@ const DeviceManage = () => {
     }
     listAllDevice()
   }, [id])
-
-  const handleOpenCreateDevice = () => {
-    setOpenCreateDevice(true)
-  }
-  const handleCloseCreateDevice = () => setOpenCreateDevice(false)
 
   useEffect(() => {
     const getAllRoom = async () => {
@@ -89,8 +80,8 @@ const DeviceManage = () => {
 
   const columns = [
     {
-      field: 'lcdId',
-      headerName: 'Lcd ID',
+      field: 'deviceId',
+      headerName: 'Device ID',
       align: 'center',
       headerAlign: 'center',
       flex: 1
@@ -313,13 +304,13 @@ const DeviceManage = () => {
       toast.success('Update device successfully')
     } catch (error) {
       if (error.response.status === 400) {
-        toast.error('Not found room')
+        toast.error('Not found')
       }
       if (error.response.status === 409) {
         toast.error('Room contained device active')
       }
       if (error.response.status === 406) {
-        toast.error('Device_lcd_id is existed')
+        toast.error('Device_lcd_id is existed.')
       }
     }
   }
@@ -327,10 +318,8 @@ const DeviceManage = () => {
     <>
       <Box mt={3}>
         <Header title="Manage Device" />
-        <DataTableDeviceManage rows={listDevice} columns={columns} isLoading={isLoading} handleOpenCreateDevice={handleOpenCreateDevice} />
+        <DataTableDeviceManage rows={listDevice} columns={columns} isLoading={isLoading} />
       </Box>
-
-      <CreateDevice openCreateDevice={openCreateDevice} handleCloseCreateDevice={handleCloseCreateDevice} setListDevice={setListDevice} listDevice={listDevice} />
       {/* modal Change Status */}
       <Modal
         open={isShowStatus}

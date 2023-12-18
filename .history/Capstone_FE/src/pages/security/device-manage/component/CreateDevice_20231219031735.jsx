@@ -21,7 +21,7 @@ import { useSelector } from 'react-redux'
 import { jwtDecode } from "jwt-decode";
 import { format } from 'date-fns'
 import requestApi from '../../../../services/requestApi'
-const CreateAccountModal = ({ handleCloseCreateAccount, openCreateAccount, setAllUser }) => {
+const CreateDevice = ({ handleCloseCreateAccount, openCreateAccount, setAllUser }) => {
   const style = {
     position: 'absolute',
     top: '50%',
@@ -254,7 +254,7 @@ const CreateAccountModal = ({ handleCloseCreateAccount, openCreateAccount, setAl
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               value={formik.values.username}
-              type="text"
+              type="username"
             />
             {formik.touched.username && formik.errors.username && (
               <Typography sx={{color: 'red'}} className="error-message">{formik.errors.username}</Typography>
@@ -318,4 +318,4 @@ const CreateAccountModal = ({ handleCloseCreateAccount, openCreateAccount, setAl
   )
 }
 
-export default CreateAccountModal
+export default CreateDevice

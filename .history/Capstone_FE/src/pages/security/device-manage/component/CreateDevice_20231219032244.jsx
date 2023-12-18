@@ -21,7 +21,7 @@ import { useSelector } from 'react-redux'
 import { jwtDecode } from "jwt-decode";
 import { format } from 'date-fns'
 import requestApi from '../../../../services/requestApi'
-const CreateAccountModal = ({ handleCloseCreateAccount, openCreateAccount, setAllUser }) => {
+const CreateDevice = ({ handleCloseCreateDevice, openCreateDevice }) => {
   const style = {
     position: 'absolute',
     top: '50%',
@@ -102,7 +102,7 @@ const CreateAccountModal = ({ handleCloseCreateAccount, openCreateAccount, setAl
         setAllUser((prevUser) => [dataAdd, ...prevUser])
         toast.success('Create account succesfully!')
         resetForm();
-        handleCloseCreateAccount()
+        handleCloseCreateDevice()
       } catch (error) {
         if (error.response.status === 404) {
           toast.error('Role not found!')
@@ -237,8 +237,8 @@ const CreateAccountModal = ({ handleCloseCreateAccount, openCreateAccount, setAl
 
   return (
     <Modal
-      open={openCreateAccount}
-      onClose={handleCloseCreateAccount}
+      open={openCreateDevice}
+      onClose={handleCloseCreateDevice}
       aria-labelledby="parent-modal-title"
       aria-describedby="parent-modal-description">
       <Box sx={{ ...style, width: 400 }}>
@@ -254,7 +254,7 @@ const CreateAccountModal = ({ handleCloseCreateAccount, openCreateAccount, setAl
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               value={formik.values.username}
-              type="text"
+              type="username"
             />
             {formik.touched.username && formik.errors.username && (
               <Typography sx={{color: 'red'}} className="error-message">{formik.errors.username}</Typography>
@@ -318,4 +318,4 @@ const CreateAccountModal = ({ handleCloseCreateAccount, openCreateAccount, setAl
   )
 }
 
-export default CreateAccountModal
+export default CreateDevice

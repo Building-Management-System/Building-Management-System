@@ -1,9 +1,6 @@
-import { Box, LinearProgress, Button, Typography } from '@mui/material'
+import { Box, LinearProgress } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import {
-  DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarFilterButton
-} from "@mui/x-data-grid";
-
+import { DataGrid } from '@mui/x-data-grid'
 const StripedDataGrid = styled(DataGrid)(() => ({
   '.late-checkin-cell .MuiDataGrid-cellContent': {
     color: 'red'
@@ -15,22 +12,7 @@ const StripedDataGrid = styled(DataGrid)(() => ({
     color: '#DAA520	'
   }
 }))
-const DataTableDeviceManage = ({  columns,rows,handleOpenCreateDevice, isLoading }) => {
-  function CustomToolbar() {
-    return (
-      <GridToolbarContainer>
-        <Box display="flex" justifyContent="space-between" width="100%">
-          <Box display="flex" gap={1}>
-            <GridToolbarFilterButton />
-            <GridToolbarExport />
-          </Box>
-          <Button variant="contained" onClick={handleOpenCreateDevice}>
-            <Typography>Add Device</Typography>
-          </Button>
-        </Box>
-      </GridToolbarContainer>
-    )
-  }
+const DataTableDeviceDetail = ({  columns,rows, isLoading }) => {
   return (
     <>
       <Box
@@ -68,6 +50,10 @@ const DataTableDeviceManage = ({  columns,rows,handleOpenCreateDevice, isLoading
             marginBottom: '10px',
             justifyContent: 'flex-start'
           },
+          // "& .MuiButtonBase-root ": {
+          //   bgcolor: "#fff",
+          //   color: '#000'
+          // },
           '& .MuiDataGrid-columnHeaderTitle': {
             fontWeight: '700'
           }
@@ -75,21 +61,21 @@ const DataTableDeviceManage = ({  columns,rows,handleOpenCreateDevice, isLoading
         <StripedDataGrid
           autoHeight
           disableRowSelectionOnClick
-          slots={{toolbar: CustomToolbar,loadingOverlay: LinearProgress }}
+          slots={{loadingOverlay: LinearProgress }}
           showCellVerticalBorder
           showColumnVerticalBorder
           initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
+            pagination: { paginationModel: { pageSize: 5 } },
           }}
-          pageSizeOptions={[5, 10, 25]}
+          pageSizeOptions={[5, 10, 20, 50]}
           loading={isLoading}
           columns={columns}
           rows={rows}
-          getRowId={(row) => row.deviceId + row.roomId}
+          getRowId={(row) => row.accountId}
         />  
       </Box>
     </>
   )
 }
 
-export default DataTableDeviceManage
+export default DataTableDeviceDetail

@@ -60,14 +60,6 @@ const securityApi = {
             console.log(error);
         }
     },
-    createNewRoomDevice: (data) => {
-        try {
-            let res = axiosClient.post(`${BASE_URL}/createNewRoomDevice`,data)
-            return res;
-        } catch (error) {
-            console.log(error);
-        }
-    },
     changeRecordStatus: (data) => {
         try {
             let res = axiosClient.post(`${BASE_URL}/changeRecordStatus`,data)
