@@ -259,7 +259,7 @@ const DeviceManage = () => {
       setNoteAdd('')
     } catch (error) {
       if (error.response.status === 406) {
-        toast.error("A device is used for 2 rooms or device is not belong to any room!")
+        toast.error("A device is used for 2 rooms or device is not belong to any room.!")
       }
     }
   }

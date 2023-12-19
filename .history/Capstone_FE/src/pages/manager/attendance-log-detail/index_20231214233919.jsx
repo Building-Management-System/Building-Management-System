@@ -65,11 +65,11 @@ const AttendanceLogDetail = () => {
           <ChatTopbar />
           <Box ml="40px" mt={2}>
             <Button
-                onClick={handleExportLogDetail}
-                variant="contained"
-                sx={{ bgcolor: '#097969', color: '#fff' }}>
-                Export
-              </Button>
+              onClick={handleExportLogDetail}
+              variant="contained"
+              sx={{ bgcolor: 'yellow', color: '#000' }}>
+              Export
+            </Button>
           </Box>
           <Box display="flex">
             <Box flex="1.8">

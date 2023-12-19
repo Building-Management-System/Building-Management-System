@@ -140,7 +140,7 @@ const EvaluateReport = () => {
               <Button
                 onClick={handleExportIndividualEvaluate}
                 variant="contained"
-                sx={{ bgcolor: '#097969', color: '#fff' }}>
+                sx={{ bgcolor: '#097969', color: '#000' }}>
                 Export
               </Button>
             </Grid>

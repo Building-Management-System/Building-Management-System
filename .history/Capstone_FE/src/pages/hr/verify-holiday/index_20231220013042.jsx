@@ -36,7 +36,7 @@ const VerifyHoliday = () => {
     if(codeType !== ''){
       const res = await holidayApi.checkCode(codeType, currentUser?.accountId)
       if(res === true){
-        navigate(`/change-log-view/${codeType}`)
+        navigate(`/change-log-view/${res}`)
       }else{
         toast.error('Code wrong please try again')
         setCodeType('')
