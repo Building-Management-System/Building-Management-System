@@ -136,17 +136,13 @@ const ManageUser = () => {
       width:250,
     },
     {
-      field: 'name',
+      field: 'firstName',
       headerName: 'Name',
       cellClassName: 'name-column--cell',
       headerAlign: 'center',
       align: 'center',
       width:250,
-      renderCell: (params) => (
-        <div style={{ color: 'black' }}>
-          {params.row.firstName} {params.row.lastName}
-        </div>
-      ),
+      valueGetter: (params) => `${params.row.firstName} ${params.row.lastName}`,
     },
     {
       field: 'roleName',

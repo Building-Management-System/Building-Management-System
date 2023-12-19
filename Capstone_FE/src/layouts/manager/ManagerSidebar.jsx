@@ -92,20 +92,20 @@ const ManagerSidebar = () => {
           height="65px">
           {!collapsed ? (
             <Typography sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-            <Avatar
-              alt="BMS Logo"
-              src={logoImage}
-              sx={{
-                width: 40,
-                height: 40,
-                marginRight: 1,
-                borderRadius: '0%'
-              }}
-            />
-            <Typography fontWeight="800" color="#000" fontSize="22px">
-              BMS
+              <Avatar
+                alt="BMS Logo"
+                src={logoImage}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  marginRight: 1,
+                  borderRadius: '0%'
+                }}
+              />
+              <Typography fontWeight="800" color="#000" fontSize="22px">
+                BMS
+              </Typography>
             </Typography>
-          </Typography>
           ) : null}
           <IconButton
             onClick={() => {
@@ -125,9 +125,19 @@ const ManagerSidebar = () => {
             }}
             src={`${userProfileImage}`}
           />
-          <Typography fontSize="15px" fontWeight="600">
-            {currentUser.firstName} {currentUser.lastName}
-          </Typography>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography fontSize="17px" fontWeight="600">
+              {currentUser.firstName} {currentUser.lastName}
+            </Typography>
+            <Typography fontSize="15px" fontWeight="600">
+              <span style={{ color: 'black' }}>Role: </span>
+              <span style={{ color: '#66B2FF' }}>
+                {currentUser && currentUser.roleName
+                  ? currentUser.roleName.charAt(0).toUpperCase() + currentUser.roleName.slice(1)
+                  : 'N/A'}
+              </span>
+            </Typography>
+          </div>
         </Box>
         <Divider />
         {/* <Box mb="25px">
