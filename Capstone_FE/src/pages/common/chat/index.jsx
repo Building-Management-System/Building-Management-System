@@ -209,15 +209,16 @@ const Chat = () => {
         const downloadURLPromises = allChatList.map(async (item) => {
           if (item.avatar && Array.isArray(item.avatar)) {
             const avatarPromises = item.avatar.map(async (avatarItem) => {
-              const storageRef = ref(storage, `/${avatarItem}`)
-              return getDownloadURL(storageRef)
+              if(avatarItem !== 'unknown'){
+                const storageRef = ref(storage, `/${avatarItem}`)
+                return getDownloadURL(storageRef)
+              }
             })
             return Promise.all(avatarPromises)
           } else {
             return Promise.resolve(null)
           }
         })
-
         const downloadURLs = await Promise.all(downloadURLPromises)
         const result = allChatList.map((obj, index) => {
           return {
@@ -234,6 +235,7 @@ const Chat = () => {
   useEffect(() => {
     imgurlAvatar()
   }, [allChatList])
+
   console.log(allChatList)
   const handleChange = (newMessage) => {
     setNewMessage(newMessage)
@@ -469,8 +471,10 @@ const Chat = () => {
     try {
       if (userAvatar.length > 0) {
         const downloadURLPromises = userAvatar.map((item) => {
-          const storageRef = ref(storage, `/${item.image}`)
-          return getDownloadURL(storageRef)
+          if(item.image !== 'unknown'){
+            const storageRef = ref(storage, `/${item.image}`)
+            return getDownloadURL(storageRef)
+          }
         })
         const downloadURLs = await Promise.all(downloadURLPromises)
         const result = userAvatar.map((obj, index) => {
@@ -489,6 +493,7 @@ const Chat = () => {
   useEffect(() => {
     imgurlUserAvatar()
   }, [userAvatar])
+
   console.log(userAvatar)
   const handleUpdateChat = async () => {
     if (selectedUserGroup.length > 1 && chatName === '') {
