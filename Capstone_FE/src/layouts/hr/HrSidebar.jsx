@@ -34,30 +34,30 @@ const HrSidebar = () => {
       window.location.pathname === '/manage-user'
         ? 0
         : window.location.pathname === '/manage-profile'
-        ? 1
-        : window.location.pathname === '/request-list-hr'
-        ? 2
-        : window.location.pathname === '/request-hr-list'
-        ? 3
-        : window.location.pathname === '/book-room-hr'
-        ? 4
-        : window.location.pathname === '/notification-list-hr'
-        ? 5
-        : window.location.pathname === '/notification-draftlist'
-        ? 6
-        : window.location.pathname === '/notification-uploadsent'
-        ? 7
-        : window.location.pathname === '/notification-uploadreceive'
-        ? 8
-        : window.location.pathname === '/notification-schedulelist'
-        ? 10
-        : window.location.pathname === '/notification-department-hr'
-        ? 9
-        : window.location.pathname === '/view-list-evaluate'
-        ? 11
-        : window.location.pathname === '/change-log-view'
-        ? 12
-        : 0
+          ? 1
+          : window.location.pathname === '/request-list-hr'
+            ? 2
+            : window.location.pathname === '/request-hr-list'
+              ? 3
+              : window.location.pathname === '/book-room-hr'
+                ? 4
+                : window.location.pathname === '/notification-list-hr'
+                  ? 5
+                  : window.location.pathname === '/notification-draftlist'
+                    ? 6
+                    : window.location.pathname === '/notification-uploadsent'
+                      ? 7
+                      : window.location.pathname === '/notification-uploadreceive'
+                        ? 8
+                        : window.location.pathname === '/notification-schedulelist'
+                          ? 10
+                          : window.location.pathname === '/notification-department-hr'
+                            ? 9
+                            : window.location.pathname === '/view-list-evaluate'
+                              ? 11
+                              : window.location.pathname === '/change-log-view'
+                                ? 12
+                                : 0
     return initialIndex
   })
   const [userProfileImage, setUserProfileImage] = useState('')
@@ -108,20 +108,20 @@ const HrSidebar = () => {
           height="65px">
           {!collapsed ? (
             <Typography sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-            <Avatar
-              alt="BMS Logo"
-              src={logoImage}
-              sx={{
-                width: 40,
-                height: 40,
-                marginRight: 1,
-                borderRadius: '0%'
-              }}
-            />
-            <Typography fontWeight="800" color="#000" fontSize="22px">
-              BMS
+              <Avatar
+                alt="BMS Logo"
+                src={logoImage}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  marginRight: 1,
+                  borderRadius: '0%'
+                }}
+              />
+              <Typography fontWeight="800" color="#000" fontSize="22px">
+                BMS
+              </Typography>
             </Typography>
-          </Typography>
           ) : null}
           <IconButton
             onClick={() => {
@@ -141,9 +141,19 @@ const HrSidebar = () => {
             }}
             src={`${userProfileImage}`}
           />
-          <Typography fontSize="15px" fontWeight="600">
-            {currentUser.firstName} {currentUser.lastName}
-          </Typography>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography fontSize="17px" fontWeight="600">
+              {currentUser.firstName} {currentUser.lastName}
+            </Typography>
+            <Typography fontSize="15px" fontWeight="600">
+              <span style={{ color: 'black' }}>Role: </span>
+              <span style={{ color: '#66B2FF' }}>
+                {currentUser && currentUser.roleName
+                  ? currentUser.roleName.charAt(0).toUpperCase() + currentUser.roleName.slice(1)
+                  : 'N/A'}
+              </span>
+            </Typography>
+          </div>
         </Box>
         <Divider />
         {/* <Box mb="25px">

@@ -4,6 +4,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.AccountDeviceRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangeRecordStatusRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceRoomRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.DeviceStatusRequest;
+import fpt.capstone.buildingmanagementsystem.model.request.NewDeviceRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.DeviceAccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.DeviceRoomResponse;
 import fpt.capstone.buildingmanagementsystem.service.DeviceService;
@@ -60,4 +61,8 @@ public class DeviceController {
         return deviceService.changeRecordStatus(request);
     }
 
+    @PostMapping("createNewRoomDevice")
+    public ResponseEntity<?> createNewRoomDevice(@RequestBody NewDeviceRequest request) {
+        return deviceService.createRoomDevice(request);
+    }
 }

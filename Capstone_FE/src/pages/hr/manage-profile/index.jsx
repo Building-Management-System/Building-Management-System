@@ -7,22 +7,45 @@ import { storage } from '../../../firebase/config'
 import { BASE_URL } from '../../../services/constraint'
 import axiosClient from '../../../utils/axios-config'
 import DataTableManageProfile from './components/DataTable'
-const ManageProfile = () => {
+import { useSelector } from 'react-redux'
 
+const ManageProfile = () => {
+  const userId = useSelector((state) => state.auth.login.currentUser.accountId)
   const navigate = useNavigate()
   const [usersProfile, setUsersProfile] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true)
-      const res = await axiosClient.get(`${BASE_URL}/getAllUserInfoPending`)
-      setUsersProfile(res)
-      setIsLoading(false)
-    }
-    fetchData()
-  }, [])
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const res = await axiosClient.get(`${BASE_URL}/getAllUserInfoPending`, {
+  //       params: {
+  //         userId: currentUser,
+  //       }
+  //     })
+  //     setIsLoading(true)
+  //     setUsersProfile(res)
+  //     setIsLoading(false)
+  //   }
+  //   fetchData()
+  // }, [])
 
-
+    useEffect(() => {
+      try {
+        setIsLoading(true)
+        const fetchAttendanceDetail = async () => {
+          const response = await axiosClient.get(`${BASE_URL}/getAllUserInfoPending`, {
+            params: {
+              userId: userId,
+            }
+          })
+          setUsersProfile(response)
+          setIsLoading(false)
+        }
+        fetchAttendanceDetail()
+      } catch (error) {
+        console.log(error)
+        setIsLoading(false)
+      }
+    }, [userId])
 
   const imgurl = async () => {
     if (usersProfile.length > 0) {

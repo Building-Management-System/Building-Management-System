@@ -35,14 +35,23 @@ const ManageUserByManager = () => {
   }, [userId]);
   const departmentName = info?.departmentName
   useEffect(() => {
-    setIsLoading(true)
-    const fetchAllUser = async () => {
-      const response = await axiosClient.get(`${BASE_URL}/getAllAccount`, userId)
-      setAllUser(response)
+    try {
+      setIsLoading(true)
+      const fetchAttendanceDetail = async () => {
+        const response = await axiosClient.get(`${BASE_URL}/getAllAccount`, {
+          params: {
+            userId: userId,
+          }
+        })
+        setAllUser(response)
+        setIsLoading(false)
+      }
+      fetchAttendanceDetail()
+    } catch (error) {
+      console.log(error)
       setIsLoading(false)
     }
-    fetchAllUser()
-  }, [])
+  }, [userId])
 
   console.log(info.departmentId)
   const columns = [
