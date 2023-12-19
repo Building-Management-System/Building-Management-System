@@ -2,9 +2,13 @@ import { toast } from 'react-toastify'
 import axiosClient from '../utils/axios-config'
 import { BASE_URL } from './constraint'
 const profileApi = {
-  getAlltUserInfo: async () => {
+  getAlltUserInfo: async (data) => {
     try {
-      const response = await axiosClient.get(`${BASE_URL}/getAllUserInfoPending`)
+      const response = await axiosClient.get(`${BASE_URL}/getAllUserInfoPending`, {
+        params: {
+          userId: data
+        }
+      })
       return response
     } catch (error) {
         console.log(error);   

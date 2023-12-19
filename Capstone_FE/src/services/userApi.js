@@ -27,7 +27,7 @@ const userApi = {
   },
 
   getAllUserByUserId: (data) => {
-    try {
+    try { 
       const res = axiosClient.get(`${BASE_URL}/getUserAccountActive`, {
         params: {
           userId: data
