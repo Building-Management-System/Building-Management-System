@@ -59,6 +59,7 @@ const style = {
 const TicketDetail = () => {
   const [request, setRequest] = useState([])
   const [roleSender, setRoleSender] = useState(null)
+  const [roleReceiver, setRoleReceiver] = useState(null)
   const [content, setContent] = useState('')
   const [contentReason, setContentReason] = useState('')
   const { requestId } = useParams()
@@ -137,6 +138,7 @@ const TicketDetail = () => {
     getMessageDetail()
   }, [])
   console.log(request)
+
   useEffect(() => {
     if (request.length !== 0) {
       const getRoleByID = async () => {
@@ -147,6 +149,18 @@ const TicketDetail = () => {
       getRoleByID()
     }
   }, [request[0]?.requestMessageResponse?.senderId])
+
+  useEffect(() => {
+    if (request.length !== 0) {
+      const getRoleByID = async () => {
+        const res = await userApi.getRoleByUserId(request[0]?.requestMessageResponse?.receiverId)
+        setRoleReceiver(res.roleName)
+        console.log(res)
+      }
+      getRoleByID()
+    }
+  }, [request[0]?.requestMessageResponse?.receiverId])
+
 
   const handleAccept = async () => {
     if (request[0]?.object?.topic === 'ATTENDANCE_REQUEST') {
@@ -247,6 +261,7 @@ const TicketDetail = () => {
     })
   }, [request])
   console.log(request[0]?.object.overtimeRequestId)
+
   const imgurlReceiver = async () => {
     const storageRef = ref(storage, `/${request[0]?.requestMessageResponse?.imageReceiver}`)
     try {
@@ -289,8 +304,8 @@ const TicketDetail = () => {
     imgurlUser()
   }
 
-  console.log(request[0]?.requestMessageResponse?.receiverId)
-  console.log(currentUser?.accountId)
+  console.log(imageSender)
+  console.log(imageReceiver)
 
   const checkTopic = () => {
     if (request[0]?.object?.topic === 'ATTENDANCE_REQUEST') {
@@ -392,7 +407,7 @@ const TicketDetail = () => {
                       color="text.primary">
                       Status :
                       {request[0]?.object?.status === false &&
-                      request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
+                        request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
                         <span style={{ color: 'red' }}>Reject</span>
                       ) : request[0]?.object?.status === true &&
                         request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
@@ -481,7 +496,7 @@ const TicketDetail = () => {
             </ListItem>
             <Divider component="li" />
             {request[0]?.object?.toDate === request[0]?.object?.fromDate &&
-            request[0]?.object?.halfDay == false ? (
+              request[0]?.object?.halfDay == false ? (
               <>
                 <ListItem alignItems="flex-start">
                   <ListItemText
@@ -530,7 +545,7 @@ const TicketDetail = () => {
                           color="text.primary">
                           Status :
                           {request[0]?.object?.status === false &&
-                          request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
+                            request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
                             <span style={{ color: 'red' }}>Reject</span>
                           ) : request[0]?.object?.status === true &&
                             request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
@@ -722,7 +737,7 @@ const TicketDetail = () => {
                       color="text.primary">
                       Status :
                       {request[0]?.object?.status === false &&
-                      request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
+                        request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
                         <span style={{ color: 'red' }}>Reject</span>
                       ) : request[0]?.object?.status === true &&
                         request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
@@ -823,7 +838,7 @@ const TicketDetail = () => {
                       color="text.primary">
                       Status :
                       {request[0]?.object?.status === false &&
-                      request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
+                        request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
                         <span style={{ color: 'red' }}>Reject</span>
                       ) : request[0]?.object?.status === true &&
                         request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
@@ -891,10 +906,10 @@ const TicketDetail = () => {
                       {request[0]?.object?.type === 'HALF_MORNING'
                         ? 'HALF MORNING'
                         : request[0]?.object?.type === 'HALF_AFTERNOON'
-                        ? 'HALF AFTERNOON'
-                        : request[0]?.object?.type === 'ALL_DAY'
-                        ? 'ALL DAY'
-                        : ''}
+                          ? 'HALF AFTERNOON'
+                          : request[0]?.object?.type === 'ALL_DAY'
+                            ? 'ALL DAY'
+                            : ''}
                     </Typography>
                   </React.Fragment>
                 }
@@ -928,7 +943,7 @@ const TicketDetail = () => {
                       color="text.primary">
                       Status :
                       {request[0]?.object?.status === false &&
-                      request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
+                        request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
                         <span style={{ color: 'red' }}>Reject</span>
                       ) : request[0]?.object?.status === true &&
                         request[0]?.requestMessageResponse?.requestTicketStatus === 'CLOSED' ? (
@@ -948,7 +963,6 @@ const TicketDetail = () => {
     }
   }
 
-  console.log(request[0]?.object?.type)
   return (
     <>
       {request.length === 0 ? (
@@ -966,165 +980,405 @@ const TicketDetail = () => {
                       <Button variant="outlined">{request[0]?.object?.topic}</Button>
                     </Box>
                   </Box>
-                  {request?.map((req, index) => (
-                    <>
-                      {request[index]?.requestMessageResponse?.receiverId === userId ? (
-                        <>
-                          {index === 0 ? (
-                            <div ref={scroll}>
-                              <StyledPaper>
-                                <Box display="flex" justifyContent="space-between">
-                                  <Box display="flex" gap={1} alignItems="center" mb={2}>
-                                    {req?.requestMessageResponse?.imageSender === null ? (
-                                      <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
-                                    ) : (
-                                      <Avatar src={imageSender} alt="Avatar" />
-                                    )}
-                                    <Box display="flex" flexDirection="column">
-                                      <Typography fontSize="16px" variant="body1">
-                                        {req?.requestMessageResponse?.senderFirstName === null ||
-                                        req?.requestMessageResponse?.senderLastName === null ? (
-                                          <>unknown</>
-                                        ) : (
-                                          <>
-                                            {' '}
-                                            {req?.requestMessageResponse?.senderFirstName}{' '}
-                                            {req?.requestMessageResponse?.senderLastName}
-                                          </>
-                                        )}
-                                      </Typography>
-                                      <Typography
-                                        sx={{ textTransform: 'capitalize' }}
-                                        fontSize="12px"
-                                        variant="body1">
-                                        {roleSender}
-                                      </Typography>
-                                    </Box>
-                                  </Box>
-                                  <Box>{req?.requestMessageResponse?.createDate}</Box>
-                                </Box>
-                                <Typography
-                                  dangerouslySetInnerHTML={{
-                                    __html: req?.object?.content
-                                  }}></Typography>
-                                {request[0]?.object?.topic !== 'OTHER_REQUEST' &&
-                                request[0]?.requestMessageResponse?.requestTicketStatus !=
-                                  'CLOSED' ? (
-                                  <Box display="flex" gap="10px" justifyContent="flex-end">
-                                    <Button
-                                      onClick={handleOpen}
-                                      variant="contained"
-                                      sx={{ bgcolor: 'red' }}>
-                                      Reject
-                                    </Button>
 
-                                    <LoadingButton
-                                      onClick={handleAccept}
-                                      variant="contained"
-                                      sx={{ bgcolor: 'green' }}>
-                                      Accept
-                                    </LoadingButton>
-                                  </Box>
-                                ) : (
-                                  <></>
-                                )}
-                              </StyledPaper>
-                            </div>
-                          ) : (
-                            <div ref={scroll}>
-                              <StyledPaper>
-                                <Box display="flex" justifyContent="space-between">
-                                  <Box display="flex" gap={1} alignItems="center" mb={2}>
-                                    {req?.requestMessageResponse?.imageSender === null ? (
-                                      <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
-                                    ) : (
-                                      <Avatar src={imageSender} alt="Avatar" />
-                                    )}
-                                    <Box display="flex" flexDirection="column">
-                                      <Typography fontSize="16px" variant="body1">
-                                        {req?.requestMessageResponse?.senderFirstName === null ||
-                                        req?.requestMessageResponse?.senderLastName === null ? (
-                                          <>unknown</>
-                                        ) : (
-                                          <>
-                                            {' '}
-                                            {req?.requestMessageResponse?.senderFirstName}{' '}
-                                            {req?.requestMessageResponse?.senderLastName}
-                                          </>
-                                        )}
-                                      </Typography>
-                                      <Typography
-                                        sx={{ textTransform: 'capitalize' }}
-                                        fontSize="12px"
-                                        variant="body1">
-                                        {roleSender}
-                                      </Typography>
+                  {request[0]?.requestMessageResponse?.receiverId === userId ? (<>
+                    {request?.map((req, index) =>
+                    (
+                      <>
+                        {request[index]?.requestMessageResponse?.receiverId === userId ? (
+                          <>
+                            {index === 0 ? (
+                              <div ref={scroll}>
+                                <StyledPaper>
+                                  <Box display="flex" justifyContent="space-between">
+                                    <Box display="flex" gap={1} alignItems="center" mb={2}>
+                                      {req?.requestMessageResponse?.imageSender === null ? (
+                                        <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
+                                      ) : (
+                                        <Avatar src={imageSender} alt="Avatar" />
+                                      )}
+                                      <Box display="flex" flexDirection="column">
+                                        <Typography fontSize="16px" variant="body1">
+                                          {req?.requestMessageResponse?.senderFirstName === null ||
+                                            req?.requestMessageResponse?.senderLastName === null ? (
+                                            <>unknown</>
+                                          ) : (
+                                            <>
+                                              {' '}
+                                              {req?.requestMessageResponse?.senderFirstName}{' '}
+                                              {req?.requestMessageResponse?.senderLastName}
+                                            </>
+                                          )}
+                                        </Typography>
+                                        <Typography
+                                          sx={{ textTransform: 'capitalize' }}
+                                          fontSize="12px"
+                                          variant="body1">
+                                          {roleSender}
+                                        </Typography>
+                                      </Box>
                                     </Box>
+                                    <Box>{req?.requestMessageResponse?.createDate}</Box>
                                   </Box>
+                                  <Typography
+                                    dangerouslySetInnerHTML={{
+                                      __html: req?.object?.content
+                                    }}></Typography>
+                                  {request[0]?.object?.topic !== 'OTHER_REQUEST' &&
+                                    request[0]?.requestMessageResponse?.requestTicketStatus !=
+                                    'CLOSED' ? (
+                                    <Box display="flex" gap="10px" justifyContent="flex-end">
+                                      <Button
+                                        onClick={handleOpen}
+                                        variant="contained"
+                                        sx={{ bgcolor: 'red' }}>
+                                        Reject
+                                      </Button>
 
-                                  <Box>{req?.requestMessageResponse?.createDate}</Box>
-                                </Box>
-                                <Typography
-                                  dangerouslySetInnerHTML={{
-                                    __html: req?.object?.content
-                                  }}></Typography>
-                              </StyledPaper>
-                            </div>
+                                      <LoadingButton
+                                        onClick={handleAccept}
+                                        variant="contained"
+                                        sx={{ bgcolor: 'green' }}>
+                                        Accept
+                                      </LoadingButton>
+                                    </Box>
+                                  ) : (
+                                    <></>
+                                  )}
+                                </StyledPaper>
+                              </div>
+                            ) : (
+                              <div ref={scroll}>
+                                <StyledPaper>
+                                  <Box display="flex" justifyContent="space-between">
+                                    <Box display="flex" gap={1} alignItems="center" mb={2}>
+                                      {req?.requestMessageResponse?.imageSender === null ? (
+                                        <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
+                                      ) : (
+                                        <Avatar src={imageSender} alt="Avatar" />
+                                      )}
+                                      <Box display="flex" flexDirection="column">
+                                        <Typography fontSize="16px" variant="body1">
+                                          {req?.requestMessageResponse?.senderFirstName === null ||
+                                            req?.requestMessageResponse?.senderLastName === null ? (
+                                            <>unknown</>
+                                          ) : (
+                                            <>
+                                              {' '}
+                                              {req?.requestMessageResponse?.senderFirstName}{' '}
+                                              {req?.requestMessageResponse?.senderLastName}
+                                            </>
+                                          )}
+                                        </Typography>
+                                        <Typography
+                                          sx={{ textTransform: 'capitalize' }}
+                                          fontSize="12px"
+                                          variant="body1">
+                                          {roleSender}
+                                        </Typography>
+                                      </Box>
+                                    </Box>
+
+                                    <Box>{req?.requestMessageResponse?.createDate}</Box>
+                                  </Box>
+                                  <Typography
+                                    dangerouslySetInnerHTML={{
+                                      __html: req?.object?.content
+                                    }}></Typography>
+                                </StyledPaper>
+                              </div>
+                            )}
+                          </>
+                        ) :
+                          (
+                            <>
+                              {index === 0 ? (
+                                <div ref={scroll}>
+                                  <StyledPaperAns>
+                                    <Box display="flex" justifyContent="space-between">
+                                      <Box display="flex" gap={1} alignItems="center" mb={2}>
+                                        {req?.requestMessageResponse?.imageSender === null ? (
+                                          <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
+                                        ) : (
+                                          <Avatar src={imageSender} alt="Avatar" />
+                                        )}
+                                        <Box display="flex" flexDirection="column">
+                                          <Typography fontSize="16px" variant="body1">
+                                            {req?.requestMessageResponse?.senderFirstName === null ||
+                                              req?.requestMessageResponse?.senderLastName === null ? (
+                                              <>unknown</>
+                                            ) : (
+                                              <>
+                                                {' '}
+                                                {req?.requestMessageResponse?.senderFirstName}{' '}
+                                                {req?.requestMessageResponse?.senderLastName}
+                                              </>
+                                            )}
+                                          </Typography>
+                                          <Typography
+                                            sx={{ textTransform: 'capitalize' }}
+                                            fontSize="12px"
+                                            variant="body1">
+                                            {userRole}
+                                          </Typography>
+                                        </Box>
+                                      </Box>
+                                      <Box>{req?.requestMessageResponse?.createDate}</Box>
+                                    </Box>
+                                    <Typography
+                                      dangerouslySetInnerHTML={{
+                                        __html: req?.object?.content
+                                      }}></Typography>
+                                  </StyledPaperAns>
+                                </div>
+                              ) : (
+                                <div ref={scroll}>
+                                  <StyledPaperAns>
+                                    <Box display="flex" justifyContent="space-between">
+                                      <Box display="flex" gap={1} alignItems="center" mb={2}>
+                                        {req?.requestMessageResponse?.imageReceiver === null ? (
+                                          <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
+                                        ) : (
+                                          <Avatar src={imageReceiver} alt="Avatar" />
+                                        )}
+                                        <Box display="flex" flexDirection="column">
+                                          <Typography fontSize="16px" variant="body1">
+                                            {req?.requestMessageResponse?.senderFirstName === null ||
+                                              req?.requestMessageResponse?.senderLastName === null ? (
+                                              <>unknown</>
+                                            ) : (
+                                              <>
+                                                {' '}
+                                                {req?.requestMessageResponse?.senderFirstName}{' '}
+                                                {req?.requestMessageResponse?.senderLastName}
+                                              </>
+                                            )}
+                                          </Typography>
+                                          <Typography
+                                            sx={{ textTransform: 'capitalize' }}
+                                            fontSize="12px"
+                                            variant="body1">
+                                            {userRole}
+                                          </Typography>
+                                        </Box>
+                                      </Box>
+                                      <Box>{req?.requestMessageResponse?.createDate}</Box>
+                                    </Box>
+                                    <Typography
+                                      dangerouslySetInnerHTML={{
+                                        __html: req?.object?.content
+                                      }}></Typography>
+                                  </StyledPaperAns>
+                                </div>
+                              )}
+                            </>
                           )}
-                        </>
-                      ) : (
-                        <>
-                            <div ref={scroll}>
-                              <StyledPaperAns>
-                                <Box display="flex" justifyContent="space-between">
-                                  <Box display="flex" gap={1} alignItems="center" mb={2}>
-                                    {req?.requestMessageResponse?.imageSender === null ? (
-                                      <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
-                                    ) : (
-                                      <Avatar src={imageSender} alt="Avatar" />
-                                    )}
-                                    <Box display="flex" flexDirection="column">
-                                      <Typography fontSize="16px" variant="body1">
-                                        {req?.requestMessageResponse?.senderFirstName === null ||
-                                        req?.requestMessageResponse?.senderLastName === null ? (
-                                          <>unknown</>
-                                        ) : (
-                                          <>
-                                            {' '}
-                                            {req?.requestMessageResponse?.senderFirstName}{' '}
-                                            {req?.requestMessageResponse?.senderLastName}
-                                          </>
-                                        )}
-                                      </Typography>
-                                      <Typography
-                                        sx={{ textTransform: 'capitalize' }}
-                                        fontSize="12px"
-                                        variant="body1">
-                                        {userRole}
-                                      </Typography>
+                      </>
+                    ))}
+                  </>) 
+                  :
+                   (<>
+                    {request?.map((req, index) =>
+                    (
+                      <>
+                        {request[index]?.requestMessageResponse?.receiverId === userId ? (
+                          <>
+                            {index === 0 ? (
+                              <div ref={scroll}>
+                                <StyledPaper>
+                                  <Box display="flex" justifyContent="space-between">
+                                    <Box display="flex" gap={1} alignItems="center" mb={2}>
+                                      {req?.requestMessageResponse?.imageSender === null ? (
+                                        <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
+                                      ) : (
+                                        <Avatar src={imageSender} alt="Avatar" />
+                                      )}
+                                      <Box display="flex" flexDirection="column">
+                                        <Typography fontSize="16px" variant="body1">
+                                          {req?.requestMessageResponse?.senderFirstName === null ||
+                                            req?.requestMessageResponse?.senderLastName === null ? (
+                                            <>unknown</>
+                                          ) : (
+                                            <>
+                                              {' '}
+                                              {req?.requestMessageResponse?.senderFirstName}{' '}
+                                              {req?.requestMessageResponse?.senderLastName}
+                                            </>
+                                          )}
+                                        </Typography>
+                                        <Typography
+                                          sx={{ textTransform: 'capitalize' }}
+                                          fontSize="12px"
+                                          variant="body1">
+                                          {roleSender}
+                                        </Typography>
+                                      </Box>
                                     </Box>
+                                    <Box>{req?.requestMessageResponse?.createDate}</Box>
                                   </Box>
-                                  <Box>{req?.requestMessageResponse?.createDate}</Box>
-                                </Box>
-                                <Typography
-                                  dangerouslySetInnerHTML={{
-                                    __html: req?.object?.content
-                                  }}></Typography>
-                              </StyledPaperAns>
-                            </div>
-                        </>
-                      )}
+                                  <Typography
+                                    dangerouslySetInnerHTML={{
+                                      __html: req?.object?.content
+                                    }}></Typography>
+                                  {request[0]?.object?.topic !== 'OTHER_REQUEST' &&
+                                    request[0]?.requestMessageResponse?.requestTicketStatus !=
+                                    'CLOSED' ? (
+                                    <Box display="flex" gap="10px" justifyContent="flex-end">
+                                      <Button
+                                        onClick={handleOpen}
+                                        variant="contained"
+                                        sx={{ bgcolor: 'red' }}>
+                                        Reject
+                                      </Button>
 
+                                      <LoadingButton
+                                        onClick={handleAccept}
+                                        variant="contained"
+                                        sx={{ bgcolor: 'green' }}>
+                                        Accept
+                                      </LoadingButton>
+                                    </Box>
+                                  ) : (
+                                    <></>
+                                  )}
+                                </StyledPaper>
+                              </div>
+                            ) : (
+                              <div ref={scroll}>
+                                <StyledPaper>
+                                  <Box display="flex" justifyContent="space-between">
+                                    <Box display="flex" gap={1} alignItems="center" mb={2}>
+                                      {req?.requestMessageResponse?.imageReceiver === null ? (
+                                        <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
+                                      ) : (
+                                        <Avatar src={imageReceiver} alt="Avatar" />
+                                      )}
+                                      <Box display="flex" flexDirection="column">
+                                        <Typography fontSize="16px" variant="body1">
+                                          {req?.requestMessageResponse?.senderFirstName === null ||
+                                            req?.requestMessageResponse?.senderLastName === null ? (
+                                            <>unknown</>
+                                          ) : (
+                                            <>
+                                              {' '}
+                                              {req?.requestMessageResponse?.senderFirstName}{' '}
+                                              {req?.requestMessageResponse?.senderLastName}
+                                            </>
+                                          )}
+                                        </Typography>
+                                        <Typography
+                                          sx={{ textTransform: 'capitalize' }}
+                                          fontSize="12px"
+                                          variant="body1">
+                                          {roleReceiver}
+                                        </Typography>
+                                      </Box>
+                                    </Box>
 
-                    </>
-                  ))}
+                                    <Box>{req?.requestMessageResponse?.createDate}</Box>
+                                  </Box>
+                                  <Typography
+                                    dangerouslySetInnerHTML={{
+                                      __html: req?.object?.content
+                                    }}></Typography>
+                                </StyledPaper>
+                              </div>
+                            )}
+                          </>
+                        ) :
+                          (
+                            <>
+                              {index === 0 ? (
+                                <div ref={scroll}>
+                                  <StyledPaperAns>
+                                    <Box display="flex" justifyContent="space-between">
+                                      <Box display="flex" gap={1} alignItems="center" mb={2}>
+                                        {req?.requestMessageResponse?.imageSender === null ? (
+                                          <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
+                                        ) : (
+                                          <Avatar src={imageSender} alt="Avatar" />
+                                        )}
+                                        <Box display="flex" flexDirection="column">
+                                          <Typography fontSize="16px" variant="body1">
+                                            {req?.requestMessageResponse?.senderFirstName === null ||
+                                              req?.requestMessageResponse?.senderLastName === null ? (
+                                              <>unknown</>
+                                            ) : (
+                                              <>
+                                                {' '}
+                                                {req?.requestMessageResponse?.senderFirstName}{' '}
+                                                {req?.requestMessageResponse?.senderLastName}
+                                              </>
+                                            )}
+                                          </Typography>
+                                          <Typography
+                                            sx={{ textTransform: 'capitalize' }}
+                                            fontSize="12px"
+                                            variant="body1">
+                                            {roleSender}
+                                          </Typography>
+                                        </Box>
+                                      </Box>
+                                      <Box>{req?.requestMessageResponse?.createDate}</Box>
+                                    </Box>
+                                    <Typography
+                                      dangerouslySetInnerHTML={{
+                                        __html: req?.object?.content
+                                      }}></Typography>
+                                  </StyledPaperAns>
+                                </div>
+                              ) : (
+                                <div ref={scroll}>
+                                  <StyledPaperAns>
+                                    <Box display="flex" justifyContent="space-between">
+                                      <Box display="flex" gap={1} alignItems="center" mb={2}>
+                                        {req?.requestMessageResponse?.imageSender === null ? (
+                                          <Avatar src="/path/to/avatar.jpg" alt="Avatar" />
+                                        ) : (
+                                          <Avatar src={imageSender} alt="Avatar" />
+                                        )}
+                                        <Box display="flex" flexDirection="column">
+                                          <Typography fontSize="16px" variant="body1">
+                                            {req?.requestMessageResponse?.senderFirstName === null ||
+                                              req?.requestMessageResponse?.senderLastName === null ? (
+                                              <>unknown</>
+                                            ) : (
+                                              <>
+                                                {' '}
+                                                {req?.requestMessageResponse?.senderFirstName}{' '}
+                                                {req?.requestMessageResponse?.senderLastName}
+                                              </>
+                                            )}
+                                          </Typography>
+                                          <Typography
+                                            sx={{ textTransform: 'capitalize' }}
+                                            fontSize="12px"
+                                            variant="body1">
+                                            {roleSender}
+                                          </Typography>
+                                        </Box>
+                                      </Box>
+                                      <Box>{req?.requestMessageResponse?.createDate}</Box>
+                                    </Box>
+                                    <Typography
+                                      dangerouslySetInnerHTML={{
+                                        __html: req?.object?.content
+                                      }}></Typography>
+                                  </StyledPaperAns>
+                                </div>
+                              )}
+                            </>
+                          )}
+                      </>
+                    ))}
+                  </>)}
                 </div>
                 <Box style={{ display: 'flex', flexDirection: 'column' }}>
                   {currentUser?.role === 'hr' ||
-                  currentUser?.role === 'admin' ||
-                  currentUser?.role === 'security' ? (
+                    currentUser?.role === 'admin' ||
+                    currentUser?.role === 'security' ? (
                     request[0]?.requestMessageResponse?.requestTicketStatus != 'CLOSED' &&
-                    request[0]?.requestMessageResponse?.receiverId === currentUser?.accountId ? (
+                      request[0]?.requestMessageResponse?.receiverId === currentUser?.accountId ? (
                       <CKEditor
                         editor={ClassicEditor}
                         data={content}
@@ -1157,20 +1411,20 @@ const TicketDetail = () => {
                       Back to Dashboard
                     </Button>
                     {currentUser?.role === 'hr' ||
-                    currentUser?.role === 'admin' ||
-                    currentUser?.role === 'security'
+                      currentUser?.role === 'admin' ||
+                      currentUser?.role === 'security'
                       ? request[0]?.requestMessageResponse?.requestTicketStatus != 'CLOSED' &&
-                        request[0]?.requestMessageResponse?.receiverId ===
-                          currentUser?.accountId && (
-                          <Button sx={{ mr: 2 }} type="submit" variant="contained" color="primary">
-                            Send
-                          </Button>
-                        )
+                      request[0]?.requestMessageResponse?.receiverId ===
+                      currentUser?.accountId && (
+                        <Button sx={{ mr: 2 }} type="submit" variant="contained" color="primary">
+                          Send
+                        </Button>
+                      )
                       : request[0]?.requestMessageResponse?.requestTicketStatus != 'CLOSED' && (
-                          <Button sx={{ mr: 2 }} type="submit" variant="contained" color="primary">
-                            Send
-                          </Button>
-                        )}
+                        <Button sx={{ mr: 2 }} type="submit" variant="contained" color="primary">
+                          Send
+                        </Button>
+                      )}
                   </Box>
                 </Box>
               </form>

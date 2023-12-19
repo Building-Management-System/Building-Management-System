@@ -46,7 +46,15 @@ const CreateDevice = ({ handleCloseCreateDevice, openCreateDevice, setListDevice
         resetForm()
         handleCloseCreateDevice()
       } catch (error) {
-        console.log(error);
+        if (error.response.status === 406) {
+            toast.error("One of those fields is empty!")
+         }
+         if (error.response.status === 409) {
+            toast.error("Device_Lcd_Id is existed!")
+         }
+         if (error.response.status === 500) {
+            toast.error("Something went wrong!")
+         }
       }
     }
   })

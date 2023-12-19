@@ -52,9 +52,9 @@ const securityApi = {
             console.log(error);
         }
     },
-    updateDeviceStatus: async (data) => {
+    updateDeviceStatus: (data) => {
         try {
-            let res = await axiosClient.post(`${BASE_URL}/updateDeviceStatus`,data)
+            let res =  axiosClient.post(`${BASE_URL}/updateDeviceStatus`,data)
             return res;
         } catch (error) {
             console.log(error);
@@ -87,7 +87,7 @@ const securityApi = {
               }
         }
     },
-    updateDevice:  (data) => {
+    updateDevice: (data) => {
         try {
             let res =  axiosClient.post(`${BASE_URL}/updateDevice`,data)
             return res;
