@@ -64,15 +64,25 @@ const AttendenceFrom = ({ userId }) => {
     validationSchema: validationSchema,
     onSubmit: (values) => {
       try {
+        const manualDate = date.format('YYYY-MM-DD');
+        let showDateWarning = false;
         let data = {
           userId: userId,
           title: values.title,
           content: values.content,
-          manualDate: date.format('YYYY-MM-DD'),
+          manualDate: manualDate,
           manualFirstEntry: isFrom ? from.format('HH:mm:ss') : null,
           manualLastExit: isTo ? to.format('HH:mm:ss') : null,
           departmentId: receiveIdAndDepartment?.managerInfoResponse?.managerDepartmentId,
           receivedId: receiveIdAndDepartment?.managerInfoResponse?.managerId
+        }
+        if (dayjs(manualDate).month() !== currentDate.getMonth() || dayjs(manualDate).year() !== currentDate.getFullYear()) {
+          showDateWarning = true;
+        }
+
+        if (showDateWarning) {
+          toast.warning("Dates are only allowed from the beginning of the month to the current date.");
+          return;
         }
         if (!isFrom && !isTo) {
           toast.warning("The 'From' and 'To' cannot be null at the same time.")
@@ -209,7 +219,6 @@ const OtFrom = () => {
     }
     fetchReceiveIdAndDepartment()
   }, [])
-
   useEffect(() => {
     const fetchOvertimeSystem = async () => {
       const response = await overtimeApi.getOvertimeSystem(userId, date.format('YYYY-MM-DD'))
@@ -217,9 +226,7 @@ const OtFrom = () => {
     }
     fetchOvertimeSystem()
   }, [date])
-
   console.log(overtimeSystem)
-
   const formik = useFormik({
     initialValues: {
       title: '',
@@ -228,6 +235,9 @@ const OtFrom = () => {
     validationSchema: validationSchema,
     onSubmit: (values) => {
       try {
+
+        const manualDate = date.format('YYYY-MM-DD');
+        let showDateWarning = false;
         let data = {
           userId: userId,
           title: values.title,
@@ -239,15 +249,20 @@ const OtFrom = () => {
           departmentId: receiveIdAndDepartment?.managerInfoResponse?.managerDepartmentId,
           receivedId: receiveIdAndDepartment?.managerInfoResponse?.managerId
         }
-
+        if (dayjs(manualDate).month() < currentDate.getMonth() || dayjs(manualDate).year() < currentDate.getFullYear()) {
+          showDateWarning = true;
+        }
+        if (showDateWarning) {
+          toast.warning("Dates are only allowed from the beginning of the month to the current date.");
+          return;
+        }
         console.log(data)
-       requestApi.requestOverTimeForm(data, navigate)
+        requestApi.requestOverTimeForm(data, navigate)
       } catch (error) {
         toast.warning('Error!!')
       }
     }
   })
-
   return (
     <Box p={3} pl={0}>
       <form onSubmit={formik.handleSubmit}>
@@ -683,6 +698,8 @@ const LateRequest = () => {
     validationSchema: validationSchema,
     onSubmit: (values) => {
       try {
+        const manualDate = date.format('YYYY-MM-DD');
+        let showDateWarning = false;
         let data = {
           userId: userId,
           title: values.title,
@@ -693,11 +710,18 @@ const LateRequest = () => {
           departmentId: receiveIdAndDepartment?.managerInfoResponse?.managerDepartmentId,
           receivedId: receiveIdAndDepartment?.managerInfoResponse?.managerId
         }
+        if (dayjs(manualDate).month() !== currentDate.getMonth() || dayjs(manualDate).year() !== currentDate.getFullYear()) {
+          showDateWarning = true;
+        }
+        if (showDateWarning) {
+          toast.warning("Dates are only allowed from the beginning of the month to the current date.");
+          return;
+        }
 
         console.log(data)
-       requestApi.requestLateForm(data, navigate)
+        requestApi.requestLateForm(data, navigate)
       } catch (error) {
-       console.log(error);
+        console.log(error);
       }
     }
   })
@@ -797,7 +821,6 @@ const LateRequest = () => {
     </Box>
   )
 }
-
 const LeaveRequest = ({ userId }) => {
   const [dateFrom, setDateFrom] = useState(dayjs(new Date()))
   const [dateTo, setDateTo] = useState(dayjs(new Date()))
@@ -809,7 +832,6 @@ const LeaveRequest = ({ userId }) => {
   const handleChangeHalfDay = (event) => {
     setChecked(event.target.checked)
   }
-
   useEffect(() => {
     const fetchReceiveIdAndDepartment = async () => {
       const response = await requestApi.getReceiveIdAndDepartment(userId)
@@ -817,7 +839,6 @@ const LeaveRequest = ({ userId }) => {
     }
     fetchReceiveIdAndDepartment()
   }, [])
-
   const formik = useFormik({
     initialValues: {
       title: '',
@@ -827,6 +848,28 @@ const LeaveRequest = ({ userId }) => {
     onSubmit: (values) => {
       try {
         let data
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1; 
+        const fromYear = dateFrom.year();
+        const fromMonth = dateFrom.month() + 1; 
+        const toYear = dateTo.year();
+        const toMonth = dateTo.month() + 1; 
+        if (fromYear < currentYear || (fromYear === currentYear && fromMonth < currentMonth)) {
+          toast.warning('Invalid start month. Please select a valid month.');
+          setDateFrom(dayjs(new Date()));
+          setDateTo(dayjs(new Date()));
+          return;
+        }
+        if (toYear < currentYear || (toYear === currentYear && toMonth < currentMonth)) {
+          toast.warning('Invalid start month. Please select a valid month.');
+          setDateFrom(dayjs(new Date()));
+          setDateTo(dayjs(new Date()));
+          return;
+        }
+        if (dateFrom.format('YYYY-MM-DD') > dateTo.format('YYYY-MM-DD')) {
+          toast.warning('Date form must later than date to.');
+          return;
+        }
         if (dateFrom.format('YYYY-MM-DD') === dateTo.format('YYYY-MM-DD')) {
           data = {
             userId: userId,
@@ -854,7 +897,7 @@ const LeaveRequest = ({ userId }) => {
         }
 
         console.log(data)
-       requestApi.requestLeaveForm(data,navigate)
+        requestApi.requestLeaveForm(data, navigate)
       } catch (error) {
         toast.warning('Error!!')
       }
@@ -996,18 +1039,18 @@ const WorkingOutSideRequest = () => {
   const [isChecked, setIsChecked] = useState(true)
   const userId = useSelector((state) => state.auth.login?.currentUser?.accountId)
   const navigate = useNavigate()
+  const currentDate = new Date()
+  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
   const handleCheckboxChange = (event) => {
     setIsChecked(event.target.checked)
-
     if (!event.target.checked) {
       setOutSideType('ALL_DAY')
     }
   }
-
   const handleChange = (event) => {
     setOutSideType(event.target.value)
   }
-
   useEffect(() => {
     const fetchReceiveIdAndDepartment = async () => {
       const response = await requestApi.getReceiveIdAndDepartment(userId)
@@ -1025,16 +1068,24 @@ const WorkingOutSideRequest = () => {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       try {
+        const manualDate = date.format('YYYY-MM-DD');
+        let showDateWarning = false;
         let data = {
           userId: userId,
           title: values.title,
           content: values.content,
           type: outSideType,
-          date: date.format('YYYY-MM-DD'),
+          date: manualDate,
           departmentId: receiveIdAndDepartment?.managerInfoResponse?.managerDepartmentId,
           receivedId: receiveIdAndDepartment?.managerInfoResponse?.managerId
         }
-
+        if (dayjs(manualDate).month() !== currentDate.getMonth() || dayjs(manualDate).year() !== currentDate.getFullYear()) {
+          showDateWarning = true;
+        }
+        if (showDateWarning) {
+          toast.warning("Dates are only allowed from the beginning of the month to the current date.");
+          return;
+        }
         console.log(data)
         await requestApi.requestOutSideWorkForm(data, navigate)
       } catch (error) {
@@ -1076,6 +1127,8 @@ const WorkingOutSideRequest = () => {
                 value={date}
                 onChange={(e) => setDate(e)}
                 renderInput={(props) => <TextField sx={{ width: '100%' }} {...props} />}
+                minDate={firstDayOfMonth}
+                maxDate={lastDayOfMonth}
               />
             </LocalizationProvider>
           </Grid>

@@ -41,10 +41,9 @@ export default function CheckAttendance() {
         setIsLoading(false)
       }
     }
-
     fetchAllUserAttendance()
   }, [month])
-
+console.log(currentUser);
   useEffect(() => {
     const fetchGetCreatedDate = async () => {
       try {
