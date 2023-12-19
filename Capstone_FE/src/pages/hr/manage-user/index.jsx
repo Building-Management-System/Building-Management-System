@@ -31,6 +31,7 @@ const ManageUser = () => {
   const [openCreateAccount, setOpenCreateAccount] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const currentUser = useSelector((state) => state.auth.login?.currentUser)
+  
   const navigate = useNavigate()
   const handleOpen = (data) => {
     setOpen(true)
@@ -43,15 +44,33 @@ const ManageUser = () => {
   }
   const handleCloseCreateAccount = () => setOpenCreateAccount(false)
 
+  // useEffect(() => {
+  //   setIsLoading(true)
+  //   const fetchAllUser = async () => {
+  //     const response = await axiosClient.get(`${BASE_URL}/getAllAccount`, userId)
+  //     setAllUser(response)
+  //     setIsLoading(false)
+  //   }
+  //   fetchAllUser()
+  // }, [])
   useEffect(() => {
-    setIsLoading(true)
-    const fetchAllUser = async () => {
-      const response = await axiosClient.get(`${BASE_URL}/getAllAccount`, userId)
-      setAllUser(response)
+    try {
+      setIsLoading(true)
+      const fetchAttendanceDetail = async () => {
+        const response = await axiosClient.get(`${BASE_URL}/getAllAccount`, {
+          params: {
+            userId: userId,
+          }
+        })
+        setAllUser(response)
+        setIsLoading(false)
+      }
+      fetchAttendanceDetail()
+    } catch (error) {
+      console.log(error)
       setIsLoading(false)
     }
-    fetchAllUser()
-  }, [])
+  }, [userId])
 
   console.log(allUser);
 
@@ -117,7 +136,9 @@ const ManageUser = () => {
             } else if (error.response.status === 404) {
               toast.error('Username does not exist!')
             } else if (error.response.status === 500) {
-              toast.error('Only HR who created this account can delete this account!')
+              toast.error('Can not delete !!')
+            }else if(error.response.status === 409) {
+              toast.error('Only the person who created the account can delete it !!')
             } else {
               toast.error('An error occurred while deleting the account.')
             }
@@ -136,17 +157,13 @@ const ManageUser = () => {
       width:250,
     },
     {
-      field: 'name',
+      field: 'firstName',
       headerName: 'Name',
       cellClassName: 'name-column--cell',
       headerAlign: 'center',
       align: 'center',
       width:250,
-      renderCell: (params) => (
-        <div style={{ color: 'black' }}>
-          {params.row.firstName} {params.row.lastName}
-        </div>
-      ),
+      valueGetter: (params) => `${params.row.firstName} ${params.row.lastName}`,
     },
     {
       field: 'roleName',

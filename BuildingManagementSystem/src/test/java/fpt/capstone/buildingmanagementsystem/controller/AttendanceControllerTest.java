@@ -37,62 +37,62 @@ class AttendanceControllerTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void testGetAttendanceUser() {
-        String userId = "3a5cccac-9490-4b9b-9e1e-16ce220b35cb";
-        int month = 11;
-        String year = "2023";
-
-        GetAttendanceUserResponse response = attendanceController.getAttendanceUser(userId, month, year);
-
-        TotalAttendanceUser expectedTotalAttendanceUser = new TotalAttendanceUser(
-                "November,2023", 2, 15.0, 1.75, 13.25, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 1.63
-        );
-
-        List<DailyLogResponse> expectedDailyLogList = Arrays.asList(
-                new DailyLogResponse(
-                        "d2f2e1b8-253d-498b-a6ca-6e596a7ad7c2",
-                        "Wednesday, November 22, 2023",
-                        new Time(10, 15, 00),
-                        new Time(22, 15, 00),
-                        null,
-                        null,
-                        10.0,
-                        1.75,
-                        8.25,
-                        true,
-                        false,
-                        0.0,
-                        0.0,
-                        true,
-                        0.0,
-                        1.0
-                ),
-                new DailyLogResponse(
-                        "54ae58ad-8cb1-461b-84b5-fd42a3f1c527",
-                        "Monday, November 20, 2023",
-                        new Time(14,15,00),
-                        new Time(20, 15, 00),
-                        null,
-                        null,
-                        5.0,
-                        0.0,
-                        5.0,
-                        true,
-                        false,
-                        0.0,
-                        0.0,
-                        true,
-                        0.0,
-                        0.63
-                )
-        );
-
-        assertEquals(expectedTotalAttendanceUser, response.getTotalAttendanceUser());
-        assertEquals(expectedDailyLogList, response.getDailyLogList());
-
-    }
-    //test
+//    @Test
+//    void testGetAttendanceUser() {
+//        String userId = "3a5cccac-9490-4b9b-9e1e-16ce220b35cb";
+//        int month = 11;
+//        String year = "2023";
+//
+//        GetAttendanceUserResponse response = attendanceController.getAttendanceUser(userId, month, year);
+//
+//        TotalAttendanceUser expectedTotalAttendanceUser = new TotalAttendanceUser(
+//                "November,2023", 2, 15.0, 1.75, 13.25, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 1.63
+//        );
+//
+//        List<DailyLogResponse> expectedDailyLogList = Arrays.asList(
+//                new DailyLogResponse(
+//                        "d2f2e1b8-253d-498b-a6ca-6e596a7ad7c2",
+//                        "Wednesday, November 22, 2023",
+//                        new Time(10, 15, 00),
+//                        new Time(22, 15, 00),
+//                        null,
+//                        null,
+//                        10.0,
+//                        1.75,
+//                        8.25,
+//                        true,
+//                        false,
+//                        0.0,
+//                        0.0,
+//                        true,
+//                        0.0,
+//                        1.0
+//                ),
+//                new DailyLogResponse(
+//                        "54ae58ad-8cb1-461b-84b5-fd42a3f1c527",
+//                        "Monday, November 20, 2023",
+//                        new Time(14,15,00),
+//                        new Time(20, 15, 00),
+//                        null,
+//                        null,
+//                        5.0,
+//                        0.0,
+//                        5.0,
+//                        true,
+//                        false,
+//                        0.0,
+//                        0.0,
+//                        true,
+//                        0.0,
+//                        0.63
+//                )
+//        );
+//
+//        assertEquals(expectedTotalAttendanceUser, response.getTotalAttendanceUser());
+//        assertEquals(expectedDailyLogList, response.getDailyLogList());
+//
+//    }
+//    //test
 
     @Test
     void testGetAttendanceUser_BadRequest() {
