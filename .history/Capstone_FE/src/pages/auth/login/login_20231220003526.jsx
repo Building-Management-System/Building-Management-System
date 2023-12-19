@@ -12,7 +12,7 @@ import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import authApi from '../../../services/authApi'
-import BG from '../../../assets/images/bg-auth.png'
+import BG from '../../../assets/images/startup.svg'
 import logoImage from '../../../assets/images/vite.jpg'
 export default function Login() {
   // const [open, setOpen] = useState(false);
@@ -45,7 +45,7 @@ export default function Login() {
         <Grid container sx={{ flex: '1 1 auto' }}>
           <Grid
             xs={12}
-            lg={5}
+            lg={6}
             sx={{
               backgroundColor: 'background.paper',
               display: 'flex',
@@ -69,7 +69,7 @@ export default function Login() {
                   width: '100%'
                 }}>
                 <div>
-                  <Stack spacing={1} sx={{ mb: 3 }} alignItems='center'>
+                  <Stack spacing={1} sx={{ mb: 3 }}>
                     <Avatar
                       alt="BMS Logo"
                       src={logoImage}
@@ -151,13 +151,12 @@ export default function Login() {
           <Grid
             item
             xs={12}
-            lg={7}
+            lg={6}
             sx={{
               backgroundImage: `url(${BG})`,
               backgroundRepeat: 'no-repeat',
-              backgroundSize: 'contained',
-              backgroundPosition: 'center',
-              backgroundColor: '#f5f7f9'
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
             }}
           />
         </Grid>

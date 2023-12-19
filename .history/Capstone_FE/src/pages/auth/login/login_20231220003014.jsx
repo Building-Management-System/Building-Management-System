@@ -7,13 +7,11 @@ import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import Avatar from '@mui/material/Avatar'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import authApi from '../../../services/authApi'
-import BG from '../../../assets/images/bg-auth.png'
-import logoImage from '../../../assets/images/vite.jpg'
+import BG from '../../../assets/images/user.png'
 export default function Login() {
   // const [open, setOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false)
@@ -45,7 +43,7 @@ export default function Login() {
         <Grid container sx={{ flex: '1 1 auto' }}>
           <Grid
             xs={12}
-            lg={5}
+            lg={6}
             sx={{
               backgroundColor: 'background.paper',
               display: 'flex',
@@ -69,20 +67,8 @@ export default function Login() {
                   width: '100%'
                 }}>
                 <div>
-                  <Stack spacing={1} sx={{ mb: 3 }} alignItems='center'>
-                    <Avatar
-                      alt="BMS Logo"
-                      src={logoImage}
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        marginRight: 1,
-                        borderRadius: '0%'
-                      }}
-                    />
-                    <Typography sx={{ fontSize: '30px', fontWeight: '700', textAlign: 'center' }}>
-                      Sign In
-                    </Typography>
+                  <Stack spacing={1} sx={{ mb: 3 }}>
+                    <Typography sx={{ fontSize: '35px', fontWeight: '700' }}>Login</Typography>
                   </Stack>
                   <form noValidate onSubmit={handleSubmit}>
                     <Stack spacing={3}>
@@ -150,14 +136,14 @@ export default function Login() {
           </Grid>
           <Grid
             item
-            xs={12}
-            lg={7}
+            xs={false}
+            sm={4}
+            md={7}
             sx={{
               backgroundImage: `url(${BG})`,
               backgroundRepeat: 'no-repeat',
-              backgroundSize: 'contained',
-              backgroundPosition: 'center',
-              backgroundColor: '#f5f7f9'
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
             }}
           />
         </Grid>
