@@ -14,6 +14,7 @@ import fpt.capstone.buildingmanagementsystem.model.enumEnitty.LateType;
 import fpt.capstone.buildingmanagementsystem.model.request.SaveChangeLogRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.AttendanceDetailResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.ControlLogResponse;
+import fpt.capstone.buildingmanagementsystem.model.response.DailyLogAttendanceResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.DailyLogResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAttendanceUserResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.LateFormResponse;
@@ -332,5 +333,23 @@ public class AttendanceService {
         dailyLog.setDateType(dailyLogService.getDateType(dailyDate));
         checkoutAnalyzeSchedule.updateTotalField(dailyLog);
         return dailyLog;
+    }
+
+    public DailyLogAttendanceResponse getDailyLogAttendance(String userId, java.sql.Date date) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequest("Not_found_user"));
+
+        Optional<DailyLog> dailyLogOptional = dailyLogRepository.findByUserAndDate(user, date);
+
+        if(dailyLogOptional.isPresent()) {
+            DailyLog dailyLog = dailyLogOptional.get();
+            return new DailyLogAttendanceResponse(
+                    dailyLog.getUser().getUserId(),
+                    dailyLog.getDate(),
+                    dailyLog.getCheckin(),
+                    dailyLog.getCheckout()
+            );
+        }
+        return new DailyLogAttendanceResponse();
     }
 }
