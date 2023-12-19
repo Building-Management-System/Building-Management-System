@@ -159,7 +159,7 @@ const EmployeeSidebar = () => {
               active={activeIndex === 0}
               icon={<EventAvailableIcon />}
               component={<Link to="/check-attendance-employee" onClick={() => setActiveIndex(0)} />}>
-              Check Attendace
+              Check Attendance
             </MenuItem>
             <MenuItem
               active={activeIndex === 3}
