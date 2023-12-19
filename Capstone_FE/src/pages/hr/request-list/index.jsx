@@ -27,7 +27,7 @@ import requestApi from '../../../services/requestApi'
 import useAuth from '../../../hooks/useAuth'
 function formatDate(date) {
   const createDate = new Date(date);
-  const year = createDate.getFullYear().toString().slice(-2);
+  const year = createDate.getFullYear().toString().slice(0);
   const month = String(createDate.getMonth() + 1).padStart(2, '0');
   const day = String(createDate.getDate()).padStart(2, '0');
   const hours = String(createDate.getHours()).padStart(2, '0');
