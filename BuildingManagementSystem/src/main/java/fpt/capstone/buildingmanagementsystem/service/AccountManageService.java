@@ -8,18 +8,7 @@ import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.AccountMapper;
 import fpt.capstone.buildingmanagementsystem.mapper.RoleMapper;
 import fpt.capstone.buildingmanagementsystem.model.dto.RoleDto;
-import fpt.capstone.buildingmanagementsystem.model.entity.Account;
-import fpt.capstone.buildingmanagementsystem.model.entity.ChatMessage;
-import fpt.capstone.buildingmanagementsystem.model.entity.DailyLog;
-import fpt.capstone.buildingmanagementsystem.model.entity.DayOff;
-import fpt.capstone.buildingmanagementsystem.model.entity.Department;
-import fpt.capstone.buildingmanagementsystem.model.entity.InactiveManagerTemp;
-import fpt.capstone.buildingmanagementsystem.model.entity.OvertimeLog;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestMessage;
-import fpt.capstone.buildingmanagementsystem.model.entity.RequestTicket;
-import fpt.capstone.buildingmanagementsystem.model.entity.Role;
-import fpt.capstone.buildingmanagementsystem.model.entity.Status;
-import fpt.capstone.buildingmanagementsystem.model.entity.User;
+import fpt.capstone.buildingmanagementsystem.model.entity.*;
 import fpt.capstone.buildingmanagementsystem.model.enumEnitty.ControlLogStatus;
 import fpt.capstone.buildingmanagementsystem.model.request.AccountDeviceRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ChangePasswordRequest;
@@ -31,18 +20,7 @@ import fpt.capstone.buildingmanagementsystem.model.request.RegisterRequest;
 import fpt.capstone.buildingmanagementsystem.model.request.ResetPasswordRequest;
 import fpt.capstone.buildingmanagementsystem.model.response.AccountResponse;
 import fpt.capstone.buildingmanagementsystem.model.response.GetAllAccountResponse;
-import fpt.capstone.buildingmanagementsystem.repository.AccountRepository;
-import fpt.capstone.buildingmanagementsystem.repository.ChatMessageRepository;
-import fpt.capstone.buildingmanagementsystem.repository.DailyLogRepository;
-import fpt.capstone.buildingmanagementsystem.repository.DayOffRepository;
-import fpt.capstone.buildingmanagementsystem.repository.DepartmentRepository;
-import fpt.capstone.buildingmanagementsystem.repository.InactiveManagerTempRepository;
-import fpt.capstone.buildingmanagementsystem.repository.OverTimeRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestMessageRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RequestTicketRepository;
-import fpt.capstone.buildingmanagementsystem.repository.RoleRepository;
-import fpt.capstone.buildingmanagementsystem.repository.StatusRepository;
-import fpt.capstone.buildingmanagementsystem.repository.UserRepository;
+import fpt.capstone.buildingmanagementsystem.repository.*;
 import fpt.capstone.buildingmanagementsystem.security.PasswordEncode;
 import fpt.capstone.buildingmanagementsystem.until.EmailSender;
 import fpt.capstone.buildingmanagementsystem.until.Until;
@@ -70,9 +48,31 @@ import static fpt.capstone.buildingmanagementsystem.until.Until.getRandomString;
 
 @Service
 public class AccountManageService implements UserDetailsService {
-
+    @Autowired
+    InactiveManagerTempRepository inactiveManagerTempRepository;
+    @Autowired
+    ControlLogLcdRepository controlLogLcdRepository;
+    @Autowired
+    NotificationRepository notificationRepository;
+    @Autowired
+    UnreadMarkRepository unreadMarkRepository;
+    @Autowired
+    NotificationHiddenRepository notificationHiddenRepository;
+    @Autowired
+    PersonalPriorityRepository personalPriorityRepository;
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
+    @Autowired
+    ChangeLogRepository changeLogRepository;
+    @Autowired
+    UnReadChatRepository unReadChatRepository;
+    @Autowired
+    ChatUserRepository chatUserRepository;
+    @Autowired
+    MonthlyEvaluateRepository monthlyEvaluateRepository;
+    @Autowired
+    NotificationReceiverRepository notificationReceiverRepository;
+    @Autowired
+    HolidayRepository holidayRepository;
     @Autowired
     DailyLogRepository dailyLogRepository;
     @Autowired
@@ -160,13 +160,17 @@ public class AccountManageService implements UserDetailsService {
                                 if (checkManagerOfDepartment(registerRequest.getDepartmentName())) {
                                     newAccount.setUser(user);
                                     saveAccount = accountRepository.saveAndFlush(newAccount);
+                                    List<InactiveManagerTemp> inactiveManagerTemps = tempRepository.findByDepartment(saveAccount.getUser().getDepartment());
+                                    if (!inactiveManagerTemps.isEmpty()) {
+                                        tempRepository.deleteAll(inactiveManagerTemps);
+                                    }
+                                    ticketManageService.updateTicketOfNewManager(saveAccount);
                                 } else {
                                     throw new Conflict("department_exist_manager");
                                 }
                             } else {
                                 newAccount.setUser(user);
                                 saveAccount = accountRepository.saveAndFlush(newAccount);
-
                             }
                             dailyLogService.initDayOff(saveAccount.accountId);
 
@@ -182,7 +186,21 @@ public class AccountManageService implements UserDetailsService {
                                         .build();
                                 return deviceService.registerNewAccount(request);
                             }
-                            return ResponseEntity.ok(true);
+                            return ResponseEntity.ok(new GetAllAccountResponse(
+                                    newAccount.accountId,
+                                    newAccount.username,
+                                    newAccount.getUser().getFirstName(),
+                                    newAccount.getUser().getLastName(),
+                                    newAccount.getRole().getRoleName(),
+                                    newAccount.getStatus().getStatusId(),
+                                    newAccount.getStatus().getStatusName(),
+                                    newAccount.getCreatedBy(),
+                                    newAccount.getCreatedDate(),
+                                    newAccount.getUser().getDepartment().getDepartmentName(),
+                                    newAccount.getUser().getTelephoneNumber(),
+                                    newAccount.getUser().getEmail(),
+                                    newAccount.getUser().getGender()
+                            ));
                         } else {
                             throw new NotFound("hr_id_not_found");
                         }
@@ -302,13 +320,13 @@ public class AccountManageService implements UserDetailsService {
                     if (checkManagerOfDepartment(department.getDepartmentName())) {
                         accountRepository.updateRoleAccount(newRoleId, accountId);
                         accountRepository.updateDepartmentUser(department.getDepartmentId(), accountId);
-                        Optional<InactiveManagerTemp> inactiveManagerTempOptional = tempRepository.findByDepartment(department);
-                        if (inactiveManagerTempOptional.isPresent()) {
-                            InactiveManagerTemp inactiveManager = inactiveManagerTempOptional.get();
+                        List<InactiveManagerTemp> inactiveManagerTemps = tempRepository.findByDepartment(department);
+                        if (!inactiveManagerTemps.isEmpty()) {
+                            InactiveManagerTemp inactiveManager = inactiveManagerTemps.get(0);
                             //update
                             ticketManageService.updateTicketOfNewManager(account, inactiveManager);
                             //delete from temp
-                            tempRepository.delete(inactiveManager);
+                            tempRepository.deleteAll(inactiveManagerTemps);
                         }
                         return ResponseEntity.ok(changeRoleRequest);
                     } else {
@@ -325,7 +343,7 @@ public class AccountManageService implements UserDetailsService {
                         !Objects.equals(changeRoleRequest.getRoleName(), "manager")) {
                     InactiveManagerTemp temp = InactiveManagerTemp.builder()
                             .manager(account)
-                            .department(department)
+                            .department(account.getUser().getDepartment())
                             .build();
                     tempRepository.save(temp);
                 }
@@ -389,24 +407,54 @@ public class AccountManageService implements UserDetailsService {
                 List<RequestMessage> checkpoint3 = requestMessageRepository.findAllByReceiver(user);
                 List<OvertimeLog> checkpoint4 = overTimeRepository.findAllByUser(user);
                 List<ChatMessage> checkpoint5 = chatMessageRepository.findAllBySender(user);
-//                List<ChatMessage> checkpoint6 = chatMessageRepository.findAllByReceiver(user);
-                List<DailyLog> checkpoint7 = dailyLogRepository.findAllByUser(user);
-                if (checkpoint1.size() == 0 &&
-                        checkpoint2.size() == 0
+                List<DailyLog> checkpoint6 = dailyLogRepository.findAllByUser(user);
+                List<Holiday> checkpoint7 = holidayRepository.findAllByUser(user);
+                List<NotificationReceiver> checkpoint8 = notificationReceiverRepository.findAllByReceiver(user);
+                List<MonthlyEvaluate> checkpoint9 = monthlyEvaluateRepository.findByEmployee(user);
+                List<MonthlyEvaluate> checkpoint10 = monthlyEvaluateRepository.findByAcceptedBy(user);
+                List<MonthlyEvaluate> checkpoint11 = monthlyEvaluateRepository.findByCreatedBy(user);
+                List<ChatUser> checkpoint12 = chatUserRepository.findAllByUser(user);
+                List<UnReadChat> checkpoint13 = unReadChatRepository.findAllByUser(user);
+                List<ChangeLog> checkpoint14 = changeLogRepository.findAllByEmployee(user);
+                List<ChangeLog> checkpoint15 = changeLogRepository.findAllByManager(user);
+                List<PersonalPriority> checkpoint16 = personalPriorityRepository.findAllByUser(user);
+                List<UnreadMark> checkpoint17 = unreadMarkRepository.findAllByUser(user);
+                List<Notification> checkpoint18 = notificationRepository.findAllByCreatedBy(user);
+                List<InactiveManagerTemp> checkpoint19 = inactiveManagerTempRepository.findAllByManager(userAccount.get());
+                List<ControlLogLcd> checkpoint20 = controlLogLcdRepository.findAllByAccount(userAccount.get());
+                if (checkpoint1.size() == 0
+                        && checkpoint2.size() == 0
                         && checkpoint3.size() == 0
                         && checkpoint4.size() == 0
                         && checkpoint5.size() == 0
-//                        && checkpoint6.size() == 0
+                        && checkpoint6.size() == 0
                         && checkpoint7.size() == 0
-                        && accountRepository.findByUsername(userAccount.get().getCreatedBy()).isPresent()
-                        && hrId.equals(accountRepository.findByUsername(userAccount.get().getCreatedBy()).get().getAccountId())) {
-                    DayOff dayOff = dayOffRepository.findByAccount(userAccount.get())
-                            .orElseThrow(() -> new BadRequest("Not_found_day_off"));
-                    dayOffRepository.delete(dayOff);
-                    notificationService.deleteFromHiddenNotification(userAccount.get().getUser());
-                    deviceService.deleteAccountDevice(userAccount.get().getAccountId());
-                    accountRepository.delete(userAccount.get());
-                    return true;
+                        && checkpoint8.size() == 0
+                        && checkpoint9.size() == 0
+                        && checkpoint10.size() == 0
+                        && checkpoint11.size() == 0
+                        && checkpoint12.size() == 0
+                        && checkpoint13.size() == 0
+                        && checkpoint14.size() == 0
+                        && checkpoint15.size() == 0
+                        && checkpoint16.size() == 0
+                        && checkpoint17.size() == 0
+                        && checkpoint18.size() == 0
+                        && checkpoint19.size() == 0
+                        && checkpoint20.size() == 0) {
+                    if (accountRepository.findByUsername(userAccount.get().getCreatedBy()).isPresent() &&
+                            hrId.equals(accountRepository.findByUsername(userAccount.get().getCreatedBy()).get().getAccountId())) {
+                        DayOff dayOff = dayOffRepository.findByAccount(userAccount.get())
+                                .orElseThrow(() -> new BadRequest("Not_found_day_off"));
+                        //check
+                        dayOffRepository.delete(dayOff);
+                        notificationService.deleteFromHiddenNotification(userAccount.get().getUser());
+                        deviceService.deleteAccountDevice(userAccount.get().getAccountId());
+                        accountRepository.delete(userAccount.get());
+                        return true;
+                    } else {
+                        throw new Conflict("only_the_person_who_created_the_account_can_delete_it");
+                    }
                 } else {
                     throw new ServerError("can_not_delete");
                 }
@@ -451,14 +499,14 @@ public class AccountManageService implements UserDetailsService {
         return checkPoint;
     }
 
-    public List<GetAllAccountResponse> getGetAllAccount() {
+    public List<GetAllAccountResponse> getGetAllAccount(String id) {
         List<Account> account = accountRepository.findAll();
         List<GetAllAccountResponse> getAllAccountResponses = new ArrayList<>();
         if (account.size() == 0) {
             return getAllAccountResponses;
         }
         for (int i = 0; i < account.size(); i++) {
-            if (account.get(i).getCreatedBy() == null) {
+            if (account.get(i).getCreatedBy() == null || account.get(i).getAccountId().equals(id)) {
                 account.remove(account.get(i));
             }
         }

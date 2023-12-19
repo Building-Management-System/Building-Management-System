@@ -109,4 +109,12 @@ public class Until {
     public static int getYear(java.sql.Date date) {
         return date.toLocalDate().getYear();
     }
+
+    public static int getMonth(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        int month = calendar.get(Calendar.MONTH);
+        month += 1;
+        return month;
+    }
 }

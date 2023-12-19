@@ -170,6 +170,22 @@ public class TicketManageService {
         }
     }
 
+    public void updateTicketOfNewManager(Account account) {
+        Map<String, List<TicketRequestDto>> ticketReceives = ticketRepositoryv2.getTicketRequestByDepartment(account.getUser().getDepartment().getDepartmentName())
+                .stream()
+                .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));
+        ticketReceives.forEach((key, messages) -> {
+            Ticket ticket = ticketRepository.findById(key)
+                    .orElseThrow(() -> new BadRequest("Not_found_ticket"));
+            if (ticket.isStatus()) {
+                RequestMessage firstMessage = requestMessageRepository.findById(messages.get(0).getMessageId())
+                        .orElseThrow(() -> new BadRequest("Not_found_message"));
+                firstMessage.setReceiver(account.getUser());
+                requestMessageRepository.save(firstMessage);
+            }
+        });
+    }
+
     public void updateTicketOfNewManager(Account account, InactiveManagerTemp inactiveManager) {
         Map<String, List<TicketRequestDto>> ticketReceives = ticketRepositoryv2.getTicketRequestByDepartment(inactiveManager.getDepartment().getDepartmentName())
                 .stream()
@@ -186,7 +202,7 @@ public class TicketManageService {
             }
         });
 
-        //close all tickets are send of old manager
+        //close all tickets are send by old manager
         Map<String, List<TicketRequestDto>> ticketSends = ticketRepositoryv2.getTicketRequestBySenderId(inactiveManager.getManager().getAccountId())
                 .stream()
                 .collect(groupingBy(TicketRequestDto::getTicketId, Collectors.toList()));

@@ -2,6 +2,7 @@ package fpt.capstone.buildingmanagementsystem.repository;
 
 import fpt.capstone.buildingmanagementsystem.model.entity.Chat;
 import fpt.capstone.buildingmanagementsystem.model.entity.ChatUser;
+import fpt.capstone.buildingmanagementsystem.model.entity.UnReadChat;
 import fpt.capstone.buildingmanagementsystem.model.entity.User;
 import org.conscrypt.OAEPParameters;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,4 +24,5 @@ public interface ChatUserRepository extends JpaRepository<ChatUser, String> {
     void deleteAllByChat_Id(String chatId);
     @Transactional
     void deleteByUserAndChat(User user, Chat chat);
+    List<ChatUser> findAllByUser(User user);
 }

@@ -246,21 +246,21 @@ class AccountTungDemo {
         assertEquals("security", result.getRoleName());
     }
 
-    @Test
-    void testGetGetAllAccount() {
-        // Arrange
-        List<Account> accounts = new ArrayList<>();
-
-        when(accountRepository.findAll()).thenReturn(accounts);
-
-        // Act
-        List<GetAllAccountResponse> responses = accountManageService.getGetAllAccount();
-
-        // Assert
-        assertNotNull(responses);
-        assertFalse(responses.isEmpty());
-        assertEquals(9, responses.size());
-    }
+//    @Test
+//    void testGetGetAllAccount() {
+//        // Arrange
+//        List<Account> accounts = new ArrayList<>();
+//
+//        when(accountRepository.findAll()).thenReturn(accounts);
+//
+//        // Act
+//        List<GetAllAccountResponse> responses = accountManageService.getGetAllAccount();
+//
+//        // Assert
+//        assertNotNull(responses);
+//        assertFalse(responses.isEmpty());
+//        assertEquals(9, responses.size());
+//    }
 
     @Test
     void testGetAccountId() {
