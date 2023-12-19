@@ -1,16 +1,13 @@
 import { LoadingButton } from '@mui/lab'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
 import authApi from '../../../services/authApi'
-import { Link, useNavigate } from 'react-router-dom'
-import BG from '../../../assets/images/bg-auth.png'
-import logoImage from '../../../assets/images/vite.jpg'
-import Avatar from '@mui/material/Avatar'
+import { useNavigate } from 'react-router-dom';
+import BG from '../../../assets/images/startup.svg'
 const ResetPassword = () => {
   const [username, setUsername] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -19,7 +16,7 @@ const ResetPassword = () => {
     setIsLoading(true)
     e.preventDefault()
     let data = {
-      username: username
+        username: username
     }
     authApi.resetPassword(data, navigate)
     setIsLoading(false)
@@ -35,7 +32,7 @@ const ResetPassword = () => {
         <Grid container sx={{ flex: '1 1 auto' }}>
           <Grid
             xs={12}
-            lg={5}
+            lg={6}
             sx={{
               backgroundColor: 'background.paper',
               display: 'flex',
@@ -59,20 +56,8 @@ const ResetPassword = () => {
                   width: '100%'
                 }}>
                 <div>
-                  <Stack spacing={1} sx={{ mb: 3 }} alignItems="center">
-                    <Avatar
-                      alt="BMS Logo"
-                      src={logoImage}
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        marginRight: 1,
-                        borderRadius: '0%'
-                      }}
-                    />
-                    <Typography sx={{ fontSize: '30px', fontWeight: '700' }}>
-                      Reset Password
-                    </Typography>
+                  <Stack spacing={1} sx={{ mb: 3 }}>
+                    <Typography sx={{ fontSize: '30px', fontWeight: '700' }}>Reset Password</Typography>
                   </Stack>
                   <form noValidate onSubmit={handleSubmit}>
                     <Stack spacing={3}>
@@ -98,14 +83,6 @@ const ResetPassword = () => {
                       variant="contained">
                       Submit
                     </LoadingButton>
-                    <Button
-                      component={Link}
-                      to={`/login`}
-                      color="primary"
-                      fullWidth
-                      sx={{ mt: 2 }}>
-                      Back to login
-                    </Button>
                   </form>
                 </div>
               </Box>
@@ -114,13 +91,12 @@ const ResetPassword = () => {
           <Grid
             item
             xs={12}
-            lg={7}
+            lg={6}
             sx={{
               backgroundImage: `url(${BG})`,
               backgroundRepeat: 'no-repeat',
-              backgroundSize: 'contained',
-              backgroundPosition: 'center',
-              backgroundColor: '#f5f7f9'
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
             }}
           />
         </Grid>

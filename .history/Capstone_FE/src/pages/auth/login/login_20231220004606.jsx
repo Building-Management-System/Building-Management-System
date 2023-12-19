@@ -45,7 +45,7 @@ export default function Login() {
         <Grid container sx={{ flex: '1 1 auto' }}>
           <Grid
             xs={12}
-            lg={5}
+            lg={6}
             sx={{
               backgroundColor: 'background.paper',
               display: 'flex',
@@ -151,13 +151,12 @@ export default function Login() {
           <Grid
             item
             xs={12}
-            lg={7}
+            lg={6}
             sx={{
               backgroundImage: `url(${BG})`,
               backgroundRepeat: 'no-repeat',
               backgroundSize: 'contained',
-              backgroundPosition: 'center',
-              backgroundColor: '#f5f7f9'
+              backgroundPosition: 'center'
             }}
           />
         </Grid>

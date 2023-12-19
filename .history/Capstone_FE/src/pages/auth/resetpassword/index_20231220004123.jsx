@@ -1,38 +1,27 @@
-import VisibilityIcon from '@mui/icons-material/Visibility'
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import { LoadingButton } from '@mui/lab'
-import { IconButton } from '@mui/material'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import Avatar from '@mui/material/Avatar'
 import { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
 import authApi from '../../../services/authApi'
-import BG from '../../../assets/images/bg-auth.png'
+import { useNavigate } from 'react-router-dom';
+import BG from '../../../assets/images/startup.svg'
 import logoImage from '../../../assets/images/vite.jpg'
-export default function Login() {
-  // const [open, setOpen] = useState(false);
-  const [showPassword, setShowPassword] = useState(false)
-  const isLoading = useSelector((state) => state.auth.login?.isFetching)
-  console.log(isLoading)
-  const handleClickShowPassword = () => {
-    setShowPassword(!showPassword)
-  }
-  const navigate = useNavigate()
+import Avatar from '@mui/material/Avatar'
+const ResetPassword = () => {
   const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const dispatch = useDispatch()
-  const handleSubmit = async (e) => {
+  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
+  const handleSubmit = (e) => {
+    setIsLoading(true)
     e.preventDefault()
     let data = {
-      username: username,
-      password: password
+        username: username
     }
-    authApi.loginUser(data, dispatch, navigate)
+    authApi.resetPassword(data, navigate)
+    setIsLoading(false)
   }
   return (
     <>
@@ -45,7 +34,7 @@ export default function Login() {
         <Grid container sx={{ flex: '1 1 auto' }}>
           <Grid
             xs={12}
-            lg={5}
+            lg={6}
             sx={{
               backgroundColor: 'background.paper',
               display: 'flex',
@@ -69,8 +58,8 @@ export default function Login() {
                   width: '100%'
                 }}>
                 <div>
-                  <Stack spacing={1} sx={{ mb: 3 }} alignItems='center'>
-                    <Avatar
+                  <Stack spacing={1} sx={{ mb: 3 }}>
+                  <Avatar
                       alt="BMS Logo"
                       src={logoImage}
                       sx={{
@@ -80,9 +69,7 @@ export default function Login() {
                         borderRadius: '0%'
                       }}
                     />
-                    <Typography sx={{ fontSize: '30px', fontWeight: '700', textAlign: 'center' }}>
-                      Sign In
-                    </Typography>
+                    <Typography sx={{ fontSize: '30px', fontWeight: '700' }}>Reset Password</Typography>
                   </Stack>
                   <form noValidate onSubmit={handleSubmit}>
                     <Stack spacing={3}>
@@ -93,41 +80,6 @@ export default function Login() {
                         type="username"
                         onChange={(e) => setUsername(e.target.value)}
                       />
-                      <TextField
-                        required
-                        fullWidth
-                        name="password"
-                        label="Password"
-                        type={showPassword ? 'text' : 'password'}
-                        id="password"
-                        onChange={(e) => setPassword(e.target.value)}
-                        InputProps={{
-                          endAdornment: (
-                            <IconButton
-                              aria-label="toggle password visibility"
-                              edge="end"
-                              onClick={handleClickShowPassword}
-                              size="large">
-                              {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                            </IconButton>
-                          )
-                        }}
-                      />
-                    </Stack>
-                    <Stack direction="row" justifyContent="space-between" mt={1}>
-                      <Typography
-                        variant="body1"
-                        component="span"
-                        onClick={() => {
-                          navigate('/reset-password')
-                        }}
-                        style={{
-                          marginTop: '10px',
-                          cursor: 'pointer',
-                          color: 'rgb(99, 102, 241)'
-                        }}>
-                        Forgot password?
-                      </Typography>
                     </Stack>
                     <LoadingButton
                       fullWidth
@@ -151,13 +103,12 @@ export default function Login() {
           <Grid
             item
             xs={12}
-            lg={7}
+            lg={6}
             sx={{
               backgroundImage: `url(${BG})`,
               backgroundRepeat: 'no-repeat',
-              backgroundSize: 'contained',
-              backgroundPosition: 'center',
-              backgroundColor: '#f5f7f9'
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
             }}
           />
         </Grid>
@@ -165,3 +116,5 @@ export default function Login() {
     </>
   )
 }
+
+export default ResetPassword
