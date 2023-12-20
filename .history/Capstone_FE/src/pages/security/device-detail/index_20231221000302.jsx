@@ -118,7 +118,7 @@ const DeviceDetail = () => {
       renderCell: (params) => {
         return (
           <Box>
-            <Typography>{params.row.endDate === null ? '' : formatDate(params.row.endDate)}</Typography>
+            <Typography>{formatDate(params.row.endDate)}</Typography>
           </Box>
         )
       }
@@ -361,7 +361,7 @@ const DeviceDetail = () => {
       <Box margin={3}>
         <Box display="flex" justifyContent="space-between">
           <Button>All Register</Button>
-          {device?.rooms !== null && (
+          {device?.rooms && (
             <Button onClick={handleOpenAddNew} variant="contained">
               Add new
             </Button>

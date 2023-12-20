@@ -350,7 +350,7 @@ const Chat = () => {
             toast.error('User not found!')
           }
           if (error.response.status === 500) {
-            toast.error(`Your files mustn't be over 62MB!`)
+            toast.error('Null!')
           }
         }
       }
@@ -471,10 +471,8 @@ const Chat = () => {
     try {
       if (userAvatar.length > 0) {
         const downloadURLPromises = userAvatar.map((item) => {
-          if(item.image !== 'unknown'){
-            const storageRef = ref(storage, `/${item.image}`)
-            return getDownloadURL(storageRef)
-          }
+          const storageRef = ref(storage, `/${item.image}`)
+          return getDownloadURL(storageRef)
         })
         const downloadURLs = await Promise.all(downloadURLPromises)
         const result = userAvatar.map((obj, index) => {

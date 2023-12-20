@@ -118,7 +118,7 @@ const DeviceDetail = () => {
       renderCell: (params) => {
         return (
           <Box>
-            <Typography>{params.row.endDate === null ? '' : formatDate(params.row.endDate)}</Typography>
+            <Typography>{formatDate(params.row.endDate)}</Typography>
           </Box>
         )
       }

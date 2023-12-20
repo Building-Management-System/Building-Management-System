@@ -209,16 +209,15 @@ const Chat = () => {
         const downloadURLPromises = allChatList.map(async (item) => {
           if (item.avatar && Array.isArray(item.avatar)) {
             const avatarPromises = item.avatar.map(async (avatarItem) => {
-              if(avatarItem !== 'unknown'){
-                const storageRef = ref(storage, `/${avatarItem}`)
-                return getDownloadURL(storageRef)
-              }
+              const storageRef = ref(storage, `/${avatarItem}`)
+              return getDownloadURL(storageRef)
             })
             return Promise.all(avatarPromises)
           } else {
             return Promise.resolve(null)
           }
         })
+        console.log(downloadURLPromises);
         const downloadURLs = await Promise.all(downloadURLPromises)
         const result = allChatList.map((obj, index) => {
           return {
@@ -350,7 +349,7 @@ const Chat = () => {
             toast.error('User not found!')
           }
           if (error.response.status === 500) {
-            toast.error(`Your files mustn't be over 62MB!`)
+            toast.error('Null!')
           }
         }
       }
@@ -471,10 +470,8 @@ const Chat = () => {
     try {
       if (userAvatar.length > 0) {
         const downloadURLPromises = userAvatar.map((item) => {
-          if(item.image !== 'unknown'){
-            const storageRef = ref(storage, `/${item.image}`)
-            return getDownloadURL(storageRef)
-          }
+          const storageRef = ref(storage, `/${item.image}`)
+          return getDownloadURL(storageRef)
         })
         const downloadURLs = await Promise.all(downloadURLPromises)
         const result = userAvatar.map((obj, index) => {

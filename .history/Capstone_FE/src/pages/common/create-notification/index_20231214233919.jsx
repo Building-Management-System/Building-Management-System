@@ -235,7 +235,7 @@ const CreateNotification = () => {
           if (error.response.status === 400) {
             toast.error("You must setup schedule's time after 5 minutes from current !")
           } else if (error.response.status === 500) {
-            toast.error("Your files mustn't be over 62MB!")
+            toast.error("Your files mustn't over 62MB!")
           }
         }
       } else {

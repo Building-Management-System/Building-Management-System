@@ -1,6 +1,8 @@
 import StarIcon from '@mui/icons-material/Star'
 import StarBorderIcon from '@mui/icons-material/StarBorder'
 import { Box, Button, Checkbox, Typography } from '@mui/material'
+import { format } from 'date-fns'
+
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -11,7 +13,6 @@ import { BASE_URL } from '../../../services/constraint'
 import notificationApi from '../../../services/notificationApi'
 import axiosClient from '../../../utils/axios-config'
 import DataTableDraft from './components/DataTableDraft'
-import formatDate from '../../../utils/formatDate'
 const NotificationDraftList = () => {
 
   const userId = useSelector((state) => state.auth.login.currentUser.accountId)
@@ -231,7 +232,7 @@ const NotificationDraftList = () => {
           alignItems="center"
           borderRadius="4px"
           color="#000">
-          <div>{formatDate(params.row.uploadDate)}</div>
+          <div>{format(params.row.uploadDate)}</div>
         </Box>
       )
     },

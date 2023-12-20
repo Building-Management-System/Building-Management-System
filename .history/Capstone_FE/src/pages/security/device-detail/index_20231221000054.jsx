@@ -118,7 +118,7 @@ const DeviceDetail = () => {
       renderCell: (params) => {
         return (
           <Box>
-            <Typography>{params.row.endDate === null ? '' : formatDate(params.row.endDate)}</Typography>
+            <Typography>{formatDate(params.row.endDate)}</Typography>
           </Box>
         )
       }
@@ -276,7 +276,7 @@ const DeviceDetail = () => {
             renderInput={(params) => <TextField {...params} label="UserName" />}
           />
           <Typography mt={1} id="modal-modal-title" variant="h6" component="h2">
-            Room : {device?.rooms && device?.rooms[0]?.roomName}
+            Room : {device?.rooms[0] && device?.rooms[0]?.roomName}
           </Typography>
 
           <Box mt={1} display="flex" justifyContent="space-between">

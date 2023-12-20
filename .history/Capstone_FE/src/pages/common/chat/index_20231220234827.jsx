@@ -350,7 +350,7 @@ const Chat = () => {
             toast.error('User not found!')
           }
           if (error.response.status === 500) {
-            toast.error(`Your files mustn't be over 62MB!`)
+            toast.error(`Your files mustn't be over 63MB!`)
           }
         }
       }

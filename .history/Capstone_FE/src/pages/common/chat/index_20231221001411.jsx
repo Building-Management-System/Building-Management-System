@@ -138,6 +138,7 @@ const Chat = () => {
         setAllChatList((prev) => [res, ...prev])
         setChatNameMessage('')
         setSelectedUser([])
+        navigate(0)
         handleClose()
         toast.success('Create new Chat successfully!!!!')
       } else if (selectedUser.length <= 1) {
@@ -160,6 +161,7 @@ const Chat = () => {
         setAllUserSingleChat(
           allUserSingleChat.filter((user) => user.accountId !== selectedUserSingleChat)
         )
+        navigate(0)
         handleClose()
         toast.success('Create new Chat successfully!!!!')
       } else {

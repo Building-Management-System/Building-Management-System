@@ -11,7 +11,7 @@ const RequireAuth = ({ allowedRoles }) => {
       return <Navigate to="/unauthorized" />;
     }
   }else{
-    return <Navigate to="/login" />;
+    return <Navigate to="/unauthorized" />;
   }
 };
 

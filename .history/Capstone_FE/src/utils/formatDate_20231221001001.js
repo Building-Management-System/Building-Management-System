@@ -14,7 +14,7 @@ export default function formatDate(date) {
 }
 export function formatDateTime(date) {
   if (date === null || date === undefined) {
-    return ''
+    return null
   }
   const createDate = new Date(date)
   const hours = String(createDate.getHours()).padStart(2, '0')
@@ -24,9 +24,6 @@ export function formatDateTime(date) {
 }
 
 export function formatDateNotTime(date) {
-  if (date === null || date === undefined) {
-    return ''
-  }
   const createDate = new Date(date)
   const year = createDate.getFullYear().toString().slice()
   const month = String(createDate.getMonth() + 1).padStart(2, '0')
