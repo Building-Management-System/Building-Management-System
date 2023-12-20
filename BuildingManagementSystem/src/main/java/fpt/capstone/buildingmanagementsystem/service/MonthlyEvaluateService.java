@@ -244,6 +244,8 @@ public class MonthlyEvaluateService {
         response.setDepartment(monthlyEvaluate.getEmployee().getDepartment());
         response.setEmployeeUserName(monthlyEvaluate.getEmployee().getAccount().getUsername());
         response.setHireDate(monthlyEvaluate.getEmployee().getAccount().getCreatedDate());
+        response.setAcceptedHrId(monthlyEvaluate.getAcceptedBy().getUserId());
+        response.setAcceptedHrUserName(monthlyEvaluate.getAcceptedBy().getAccount().getUsername());
         return response;
     }
 

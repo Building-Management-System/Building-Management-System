@@ -145,7 +145,7 @@ public class InitializationService {
                         .createdDate(Until.generateRealTime())
                         .updateDate(Until.generateRealTime())
                         .build();
-                Room room = new Room(i, "R10" + i, lcd);
+                Room room = new Room(i, "R10" + (i-6), lcd);
                 roomList.add(room);
                 devices.add(lcd);
             }
