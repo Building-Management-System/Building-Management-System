@@ -6,6 +6,7 @@ import fpt.capstone.buildingmanagementsystem.model.entity.DeviceAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
@@ -15,4 +16,5 @@ public interface DeviceAccountRepository extends JpaRepository<DeviceAccount, St
     List<DeviceAccount> findByDeviceAndAccount(Device device, Account account);
 
     List<DeviceAccount> findByAccount(Account account);
+
 }

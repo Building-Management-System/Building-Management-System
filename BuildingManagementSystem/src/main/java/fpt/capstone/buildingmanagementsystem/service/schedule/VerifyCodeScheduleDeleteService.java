@@ -1,5 +1,6 @@
 package fpt.capstone.buildingmanagementsystem.service.schedule;
 
+import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.model.entity.EmailCode;
 import fpt.capstone.buildingmanagementsystem.repository.EmailCodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +37,11 @@ class DeleteEmailCode extends TimerTask {
         this.emailCodeRepository = emailCodeRepository;
     }
     @Override
-    @Transactional
-    public void run() throws ObjectOptimisticLockingFailureException {
-        emailCodeRepository.delete(emailCode);
+    public void run(){
+        try {
+            emailCodeRepository.delete(emailCode);
+        }catch (Exception e){
+            throw new ServerError("More over one task !");
+        }
     }
 }

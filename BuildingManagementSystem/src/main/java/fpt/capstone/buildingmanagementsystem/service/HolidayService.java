@@ -163,14 +163,14 @@ public class HolidayService {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(Until.generateRealTime());
             //
-            calendar.add(Calendar.MINUTE, 3);
+            calendar.add(Calendar.MINUTE, 5);
             java.util.Date newDate = calendar.getTime();
             EmailCode emailCode = EmailCode.builder()
                     .code(code)
                     .userId(account.getAccountId()).deleteTime(newDate)
                     .build();
             emailCodeRepository.save(emailCode);
-            emailSender.setMailSender(toEmail, "[Notification] - BMS verify code", "- Code: " + code + "\n- Note: The code is only valid for 10 minutes and can only be used once !");
+            emailSender.setMailSender(toEmail, "[Notification] - BMS verify code", "- Code: " + code + "\n- Note: The code is only valid for 5 minutes and can only be used once !");
             return true;
         } catch (ServerError e) {
             throw new ServerError("fail");
