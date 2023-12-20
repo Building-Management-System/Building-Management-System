@@ -29,18 +29,13 @@ const ChangeLogView = () => {
     const fetchAllHolidays = async () => {
       const res = await holidayApi.getAllHoliday()
       const updatedData = res.map((item) => {
-        const originalDate = new Date(item.toDate)
-
-        // Subtract one day
-        const modifiedDate = new Date(originalDate)
-        modifiedDate.setDate(originalDate.getDate() + 1)
-
-        // Format the result as 'YYYY-MM-DD'
-        const formattedDate = modifiedDate.toISOString().split('T')[0]
+        const endDate = parseInt(item.toDate.split('-')[2]) + 1
+        const updateEndDate = item.toDate.replace(item.toDate.split('-')[2], endDate.toString())
+        console.log(updateEndDate);
         return {
           id: item.holidayId,
           startDate: item.fromDate,
-          endDate: formattedDate,
+          endDate: item.toDate,
           title: item.title,
           content: item.content,
           username: item.username
@@ -150,7 +145,7 @@ const ChangeLogView = () => {
         <Grid display="flex" gap="8px" ml="25px" mt={1} item xs={10}>
           <Typography>Date: </Typography>
           <Typography>
-            {appointmentData.startDate} - {formattedDate}
+            {appointmentData.startDate} - {appointmentData.endDate}
           </Typography>
         </Grid>
         <Grid display="flex" gap="8px" ml="25px" mt={1} item xs={10}>

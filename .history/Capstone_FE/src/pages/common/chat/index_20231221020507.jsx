@@ -56,7 +56,7 @@ const style = {
   boxShadow: 24,
   p: 4
 }
-const SOCKET_URL = 'https://capstone-nodejs.onrender.com'
+const SOCKET_URL = 'http://localhost:3001'
 const Chat = () => {
   const [newMessage, setNewMessage] = useState('')
   const [allUser, setAllUser] = useState([])
@@ -65,6 +65,7 @@ const Chat = () => {
   const [isActiveUser, setIsActiveUser] = useState('')
   const [messages, setMessages] = useState([])
   const [arrivalMessage, setArrivalMessage] = useState('')
+  const [arrivalChat, setArrivalChat] = useState([])
   const [file, setFile] = useState()
   const [isLoadingChat, setIsLoadingChat] = useState(false)
   const [messageImage, setMessageImage] = useState('')
@@ -136,6 +137,7 @@ const Chat = () => {
         }
         const res = await chatApi.createNewChat(data)
         setAllChatList((prev) => [res, ...prev])
+        socket.current.emit('send-allchatlist', res)
         setChatNameMessage('')
         setSelectedUser([])
         handleClose()
@@ -155,6 +157,7 @@ const Chat = () => {
           message: chatNameMessage
         }
         const res = await chatApi.createNewChat(data)
+        socket.current.emit('send-allchatlist', res)
         setAllChatList((prev) => [res, ...prev])
         setChatNameMessage('')
         setAllUserSingleChat(

@@ -150,7 +150,7 @@ const ChangeLogView = () => {
         <Grid display="flex" gap="8px" ml="25px" mt={1} item xs={10}>
           <Typography>Date: </Typography>
           <Typography>
-            {appointmentData.startDate} - {formattedDate}
+            {appointmentData.startDate} - {appointmentData.endDate}
           </Typography>
         </Grid>
         <Grid display="flex" gap="8px" ml="25px" mt={1} item xs={10}>
