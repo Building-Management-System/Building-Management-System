@@ -712,7 +712,7 @@ const LateRequest = () => {
           showDateWarning = true;
         }
         if (showDateWarning) {
-          toast.warning("Dates are only allowed from the beginning of the month to the current date.");
+          toast.warning("Dates are only allowed in current month.");
           return;
         }
 
@@ -1080,7 +1080,7 @@ const WorkingOutSideRequest = () => {
           showDateWarning = true;
         }
         if (showDateWarning) {
-          toast.warning("Dates are only allowed from the beginning of the month to the current date.");
+          toast.warning("Dates are only allowed in current month.");
           return;
         }
         console.log(data)

@@ -56,7 +56,7 @@ const style = {
   boxShadow: 24,
   p: 4
 }
-const SOCKET_URL = 'https://capstone-nodejs.onrender.com'
+const SOCKET_URL = 'http://localhost:3001'
 const Chat = () => {
   const [newMessage, setNewMessage] = useState('')
   const [allUser, setAllUser] = useState([])
@@ -140,6 +140,17 @@ const Chat = () => {
         setSelectedUser([])
         handleClose()
         toast.success('Create new Chat successfully!!!!')
+        socket.current.emit('send-allchatlist', {
+          from: currentUserId,
+          chatId: isActiveUser?.chatId,
+          message: res.message,
+          to: isActiveUser.user.map((item) => {
+            return item.accountId
+          }),
+          senderId: res.senderId,
+          messageId: res.messageId,
+          type: 'image'
+        })
       } else if (selectedUser.length <= 1) {
         toast.error('Please select at least two people')
       } else if (chatName === '' || chatNameMessage === '') {
@@ -167,7 +178,6 @@ const Chat = () => {
       }
     }
   }
-
 
   useEffect(() => {
     const fetchAllChatList = async () => {

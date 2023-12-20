@@ -140,25 +140,61 @@ const TicketDetail = () => {
   console.log(request[0])
 
   const [employeeDaily, setEmployeeDaily] = useState([])
-  
+
   useEffect(() => {
     if (request[0]?.object?.topic === 'OVERTIME_REQUEST') {
-    const fetchEmployeeDaily = async () => {
-      try {
-        const response = await userApi.getDailYLog(
-          request[0]?.requestMessageResponse?.senderId,
-          request[0]?.object?.overtimeDate,
-        );
-        console.log('API Response:', response);
-        setEmployeeDaily(response || []);
-      } catch (error) {
-        console.error('Error fetching', error);
-      }
-    };
+      const fetchEmployeeDaily = async () => {
+        try {
+          const response = await userApi.getDailYLog(
+            request[0]?.requestMessageResponse?.senderId,
+            request[0]?.object?.overtimeDate,
+          );
+          console.log('API Response:', response);
+          setEmployeeDaily(response || []);
+        } catch (error) {
+          console.error('Error fetching', error);
+        }
+      };
 
-    fetchEmployeeDaily();
-  }
+      fetchEmployeeDaily();
+    }
   }, [request[0]?.requestMessageResponse?.senderId, request[0]?.object?.overtimeDate]);
+  useEffect(() => {
+    if (request[0]?.object?.topic === 'ATTENDANCE_REQUEST') {
+      const fetchEmployeeDaily = async () => {
+        try {
+          const response = await userApi.getDailYLog(
+            request[0]?.requestMessageResponse?.senderId,
+            request[0]?.object?.manualDate,
+          );
+          console.log('API Response:', response);
+          setEmployeeDaily(response || []);
+        } catch (error) {
+          console.error('Error fetching', error);
+        }
+      };
+
+      fetchEmployeeDaily();
+    }
+  }, [request[0]?.requestMessageResponse?.senderId, request[0]?.object?.manualDate]);
+
+  useEffect(() => {
+    if (request[0]?.object?.topic === 'OUTSIDE_REQUEST') {
+      const fetchEmployeeDaily = async () => {
+        try {
+          const response = await userApi.getDailYLog(
+            request[0]?.requestMessageResponse?.senderId,
+            request[0]?.object?.date,
+          );
+          console.log('API Response:', response);
+          setEmployeeDaily(response || []);
+        } catch (error) {
+          console.error('Error fetching', error);
+        }
+      };
+      fetchEmployeeDaily();
+    }
+  }, [request[0]?.requestMessageResponse?.senderId, request[0]?.object?.date]);
 
   useEffect(() => {
     if (request.length !== 0) {
@@ -442,6 +478,29 @@ const TicketDetail = () => {
               />
             </ListItem>
             <Divider component="li" />
+            <ListItem alignItems="flex-start">
+              <ListItemText
+                secondary={
+                  <React.Fragment>
+                    <Typography
+                      sx={{ display: 'inline' }}
+                      component="span"
+                      variant="body2"
+                      color="#f74a4a">
+                      System CheckIn: {employeeDaily.dailyCheckIn === null ? '00:00:00' : employeeDaily.dailyCheckIn}
+                      <br />
+                    </Typography>
+                    <Typography
+                      sx={{ display: 'inline' }}
+                      component="span"
+                      variant="body2"
+                      color="#f74a4a">
+                      System CheckOut: {employeeDaily.dailyCheckOut === null ? '00:00:00' : employeeDaily.dailyCheckOut}
+                    </Typography>
+                  </React.Fragment>
+                }
+              />
+            </ListItem>
           </List>
         </>
       )
@@ -747,31 +806,7 @@ const TicketDetail = () => {
                 }
               />
             </ListItem>
-            <Divider component="li" />
-            <ListItem alignItems="flex-start">
-              <ListItemText
-                secondary={
-                  <React.Fragment>
-                    <Typography
-                      sx={{ display: 'inline' }}
-                      component="span"
-                      variant="body2"
-                      color="text.primary">
-                      System CheckIn : {employeeDaily.dailyCheckIn }
-                      <br />
-                    </Typography>
-                    <Typography
-                      sx={{ display: 'inline' }}
-                      component="span"
-                      variant="body2"
-                      color="text.primary">
-                      System CheckOut : {employeeDaily.dailyCheckOut}
-                    </Typography>
 
-                  </React.Fragment>
-                }
-              />
-            </ListItem>
 
             <Divider component="li" />
             <ListItem alignItems="flex-start">
@@ -799,6 +834,30 @@ const TicketDetail = () => {
               />
             </ListItem>
             <Divider component="li" />
+
+            <ListItem alignItems="flex-start">
+              <ListItemText
+                secondary={
+                  <React.Fragment>
+                    <Typography
+                      sx={{ display: 'inline' }}
+                      component="span"
+                      variant="body2"
+                      color="#f74a4a">
+                      System CheckIn: {employeeDaily.dailyCheckIn === null ? '00:00:00' : employeeDaily.dailyCheckIn}
+                      <br />
+                    </Typography>
+                    <Typography
+                      sx={{ display: 'inline' }}
+                      component="span"
+                      variant="body2"
+                      color="#f74a4a">
+                      System CheckOut: {employeeDaily.dailyCheckOut === null ? '00:00:00' : employeeDaily.dailyCheckOut}
+                    </Typography>
+                  </React.Fragment>
+                }
+              />
+            </ListItem>
           </List>
         </>
       )
@@ -1005,6 +1064,29 @@ const TicketDetail = () => {
               />
             </ListItem>
             <Divider component="li" />
+            <ListItem alignItems="flex-start">
+              <ListItemText
+                secondary={
+                  <React.Fragment>
+                    <Typography
+                      sx={{ display: 'inline' }}
+                      component="span"
+                      variant="body2"
+                      color="#f74a4a">
+                      System CheckIn: {employeeDaily.dailyCheckIn === null ? '00:00:00' : employeeDaily.dailyCheckIn}
+                      <br />
+                    </Typography>
+                    <Typography
+                      sx={{ display: 'inline' }}
+                      component="span"
+                      variant="body2"
+                      color="#f74a4a">
+                      System CheckOut: {employeeDaily.dailyCheckOut === null ? '00:00:00' : employeeDaily.dailyCheckOut}
+                    </Typography>
+                  </React.Fragment>
+                }
+              />
+            </ListItem>
           </List>
         </>
       )

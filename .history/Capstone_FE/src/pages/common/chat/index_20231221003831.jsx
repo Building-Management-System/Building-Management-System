@@ -56,7 +56,7 @@ const style = {
   boxShadow: 24,
   p: 4
 }
-const SOCKET_URL = 'https://capstone-nodejs.onrender.com'
+const SOCKET_URL = 'http://localhost:3001'
 const Chat = () => {
   const [newMessage, setNewMessage] = useState('')
   const [allUser, setAllUser] = useState([])
@@ -167,7 +167,6 @@ const Chat = () => {
       }
     }
   }
-
 
   useEffect(() => {
     const fetchAllChatList = async () => {

@@ -1,31 +1,30 @@
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import CalendarViewMonthIcon from '@mui/icons-material/CalendarViewMonth'
 import ChecklistRtlIcon from '@mui/icons-material/ChecklistRtl'
 import ClearAllIcon from '@mui/icons-material/ClearAll'
 import ContactMailIcon from '@mui/icons-material/ContactMail'
-import DensitySmallIcon from '@mui/icons-material/DensitySmall'
 import DraftsIcon from '@mui/icons-material/Drafts'
+import EventAvailableIcon from '@mui/icons-material/EventAvailable'
+import EventNoteIcon from '@mui/icons-material/EventNote'
+import FactCheckIcon from '@mui/icons-material/FactCheck'
 import ForwardToInboxIcon from '@mui/icons-material/ForwardToInbox'
+import GroupIcon from '@mui/icons-material/Group'
 import MarkunreadMailboxIcon from '@mui/icons-material/MarkunreadMailbox'
 import MenuIcon from '@mui/icons-material/Menu'
 import NotificationsIcon from '@mui/icons-material/Notifications'
+import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar'
 import UploadIcon from '@mui/icons-material/Upload'
+import ViewSidebarIcon from '@mui/icons-material/ViewSidebar'
 import { Avatar, Box, Divider, IconButton, Typography } from '@mui/material'
 import { getDownloadURL, ref } from 'firebase/storage'
 import { useState } from 'react'
 import { Menu, MenuItem, Sidebar, SubMenu, useProSidebar } from 'react-pro-sidebar'
 import { Link } from 'react-router-dom'
+import logoImage from '../../assets/images/vite.jpg'
 import { storage } from '../../firebase/config'
 import useAuth from '../../hooks/useAuth'
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
-import FactCheckIcon from '@mui/icons-material/FactCheck';
-import ViewSidebarIcon from '@mui/icons-material/ViewSidebar';
-import GroupIcon from '@mui/icons-material/Group';
-import logoImage from '../../assets/images/vite.jpg';
 const ManagerSidebar = () => {
   const { collapseSidebar, toggleSidebar, broken, collapsed } = useProSidebar()
   const [activeIndex, setActiveIndex] = useState(() => {
@@ -283,13 +282,6 @@ const ManagerSidebar = () => {
               label='Scheduled'
               icon={<CalendarTodayIcon />}
             >
-              <MenuItem
-                active={activeIndex === 7}
-                icon={<DensitySmallIcon />}
-                component={<Link to="/notification-department-manager" onClick={() => setActiveIndex(7)} />}>
-                {' '}
-                All
-              </MenuItem>
               <MenuItem
                 active={activeIndex === 8}
                 icon={<ContactMailIcon />}
