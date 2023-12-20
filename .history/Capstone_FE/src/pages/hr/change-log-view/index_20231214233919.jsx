@@ -17,7 +17,7 @@ import holidayApi from '../../../services/holidayApi'
 import { useSelector } from 'react-redux'
 import { Typography, Grid, Divider } from '@mui/material'
 import { jwtDecode } from 'jwt-decode'
-import { toast } from 'react-toastify'
+import { toast } from 'react-toastify';
 const ChangeLogView = () => {
   const [holidays, setHolidays] = useState([])
   const BoolEditor = () => {
@@ -117,9 +117,9 @@ const ChangeLogView = () => {
 
         return newData
       })
-    } else if ((added && added.title === '') || (added && added.content === '')) {
+    }else if(added && added.title === '' || added && added.content === ''){
       toast.error(`All field can't be blank`)
-    } else if (deleted !== undefined) {
+    }else if (deleted !== undefined) {
       setHolidays((prevData) => {
         let newData = [...prevData]
         holidayApi.deleteHoliday(deleted)
@@ -131,10 +131,6 @@ const ChangeLogView = () => {
 
   const Content = ({ appointmentData }) => {
     console.log(appointmentData)
-    const originalDate = new Date(appointmentData.endDate)
-    const modifiedDate = new Date(originalDate)
-    modifiedDate.setDate(originalDate.getDate() - 1)
-    const formattedDate = modifiedDate.toISOString().split('T')[0]
     return (
       <Grid mt={1} container alignItems="center">
         <Grid display="flex" gap="8px" ml="25px" item xs={10}>
@@ -144,7 +140,7 @@ const ChangeLogView = () => {
         <Grid display="flex" gap="8px" ml="25px" mt={1} item xs={10}>
           <Typography>Date: </Typography>
           <Typography>
-            {appointmentData.startDate} - {formattedDate}
+            {appointmentData.startDate} - {appointmentData.endDate}
           </Typography>
         </Grid>
         <Grid display="flex" gap="8px" ml="25px" mt={1} item xs={10}>
@@ -161,9 +157,7 @@ const ChangeLogView = () => {
 
   const Header = ({ ...restProps }) => {
     return (
-      <AppointmentTooltip.Header
-        style={{ flexDirection: 'column', paddingLeft: '0px', alignItems: 'flex-end' }}
-        {...restProps}>
+      <AppointmentTooltip.Header style={{flexDirection: 'column', paddingLeft: '0px', alignItems: 'flex-end'}} {...restProps}>
         <Grid container>
           <Grid item xs={12}>
             <Divider />
@@ -184,12 +178,7 @@ const ChangeLogView = () => {
         <DateNavigator />
         <TodayButton />
         <Appointments />
-        <AppointmentTooltip
-          contentComponent={Content}
-          headerComponent={Header}
-          showDeleteButton
-          showCloseButton
-        />
+        <AppointmentTooltip contentComponent={Content} headerComponent={Header} showDeleteButton showCloseButton />
         <ConfirmationDialog
           messages={{
             confirmDeleteMessage: () => (

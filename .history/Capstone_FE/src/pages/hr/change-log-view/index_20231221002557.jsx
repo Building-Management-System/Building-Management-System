@@ -132,8 +132,12 @@ const ChangeLogView = () => {
   const Content = ({ appointmentData }) => {
     console.log(appointmentData)
     const originalDate = new Date(appointmentData.endDate)
+
+    // Subtract one day
     const modifiedDate = new Date(originalDate)
     modifiedDate.setDate(originalDate.getDate() - 1)
+
+    // Format the result as 'YYYY-MM-DD'
     const formattedDate = modifiedDate.toISOString().split('T')[0]
     return (
       <Grid mt={1} container alignItems="center">
