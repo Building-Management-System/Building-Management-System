@@ -19,7 +19,7 @@ import ChatTopbar from '../../common/chat/components/ChatTopbar'
 import DataTableDeviceDetail from './component/DataTable'
 import formatDate, { formatDateNotTime } from '../../../utils/formatDate'
 import { toast } from 'react-toastify'
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
+import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { BASE_URL } from '../../../services/constraint'
 import axiosClient from '../../../utils/axios-config'
@@ -230,6 +230,7 @@ const DeviceDetail = () => {
           startDate: format(startDate, 'yyyy-MM-dd HH:mm:ss'),
           endDate: format(endDate, 'yyyy-MM-dd HH:mm:ss')
         }
+        console.log(data);
         const res = await securityApi.createDeviceAccount(data)
         const updateAcountLcd = [res, ...accountLcd]
         console.log(updateAcountLcd);
@@ -296,24 +297,22 @@ const DeviceDetail = () => {
           </Box>
           <Box mt={1} display="flex" justifyContent="space-between">
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
+              <DateTimePicker
                 disabled={isStart ? false : true}
                 minDate={new Date()}
                 value={startDate}
-                views={['day', 'month', 'year']}
                 onChange={(e) => setStartDate(e.toDate())}
-                renderInput={(props) => <TextField sx={{ width: '200px' }} {...props} />}
+                renderInput={(props) => <TextField sx={{ width: '250px' }} {...props} />}
               />
             </LocalizationProvider>
 
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
+              <DateTimePicker
                 disabled={isEnd ? false : true}
                 minDate={new Date()}
                 value={endDate}
-                views={['day', 'month', 'year']}
                 onChange={(e) => setEndDate(e.toDate())}
-                renderInput={(props) => <TextField sx={{ width: '200px' }} {...props} />}
+                renderInput={(props) => <TextField sx={{ width: '250px' }} {...props} />}
               />
             </LocalizationProvider>
           </Box>
