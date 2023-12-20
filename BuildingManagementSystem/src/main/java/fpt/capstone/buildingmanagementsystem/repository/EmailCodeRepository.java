@@ -11,7 +11,4 @@ import java.util.List;
 @Repository
 public interface EmailCodeRepository extends JpaRepository<EmailCode, String> {
     List<EmailCode> findByCodeAndUserId(String code, String userId);
-
-    @Transactional
-    void delete(EmailCode emailCode);
 }
