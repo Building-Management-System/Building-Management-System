@@ -42,6 +42,7 @@ import userApi from '../../../services/userApi'
 import axiosClient from '../../../utils/axios-config'
 import ChatTopbar from '../chat/components/ChatTopbar'
 import { validationSchema } from './util/validationSchema'
+import { date } from 'yup'
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />
 const checkedIcon = <CheckBoxIcon fontSize="small" />
 ClassicEditor.defaultConfig = {
@@ -68,6 +69,7 @@ const CreateNotification = () => {
     file: [],
     filepreview: []
   })
+  const currentDate = new Date()
   const navigate = useNavigate()
   const [progress, setProgress] = useState(0)
   useEffect(() => {
@@ -203,6 +205,8 @@ const CreateNotification = () => {
     onSubmit: async (values) => {
       if (isSave) {
         let formData = new FormData()
+        const manualDate = date.format('YYYY-MM-DD HH:mm');
+        let showDateWarning = false;
         const data = {
           buttonStatus: 'save',
           userId: currentUser?.accountId,
@@ -231,6 +235,13 @@ const CreateNotification = () => {
           })
           toast.success('Save draft notification successfully!!')
           navigate(-1)
+          if (dayjs(manualDate).month() < currentDate.getMonth() || dayjs(manualDate).year() < currentDate.getFullYear() || dayjs(manualDate).day() < currentDate.getDay() ) {
+            showDateWarning = true;
+          }
+          if (showDateWarning) {
+            toast.warning("Dates are only allowed from the beginning of the month to the current date.");
+            return;
+          }
         } catch (error) {
           if (error.response.status === 400) {
             toast.error("You must setup schedule's time after 5 minutes from current !")
@@ -240,6 +251,7 @@ const CreateNotification = () => {
         }
       } else {
         let formData = new FormData()
+       
         const data = {
           buttonStatus: 'upload',
           userId: currentUser?.accountId,
@@ -250,6 +262,7 @@ const CreateNotification = () => {
           content: values.content,
           uploadDatePlan: checkedSetupTime ? setupTime.format('YYYY-MM-DD HH:mm:ss') : null
         }
+    
         formData.append('data', JSON.stringify(data))
         fileImage.file.forEach((file) => {
           formData.append(`image[]`, file)
@@ -499,6 +512,7 @@ const CreateNotification = () => {
                           checked={checkedSetupTime}
                           onChange={handleChangeSetupTime}
                           inputProps={{ 'aria-label': 'controlled' }}
+
                         />
                       </Grid>
                       {checkedSetupTime && (
@@ -510,6 +524,7 @@ const CreateNotification = () => {
                               renderInput={(props) => (
                                 <TextField sx={{ width: '100%' }} {...props} />
                               )}
+                              minDate={currentDate}
                             />
                           </LocalizationProvider>
                         </Grid>

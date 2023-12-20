@@ -483,6 +483,9 @@ const requestApi = {
       if (error.response.status === 404) {
         toast.error('User not found!')
       }
+      if (error.response.status === 409) {
+        toast.error('Title is missing!')
+      }
     }
   },
 

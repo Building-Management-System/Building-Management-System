@@ -58,15 +58,25 @@ const AttendanceRequestModal = ({ openAttendanceRequest, handleCloseAttendanceRe
     },
     validationSchema: validationAttendanceSchema,
     onSubmit: (values, { resetForm }) => {
+      const manualDate = date.format('YYYY-MM-DD');
+      let showDateWarning = false;
       let data = {
         userId: userId,
         title: values.title,
         content: values.content,
-        manualDate: date.format('YYYY-MM-DD'),
+        manualDate: manualDate,
         manualFirstEntry: isFrom ? from.format('HH:mm:ss') : null,
         manualLastExit: isTo ? to.format('HH:mm:ss') : null,
         departmentId: receiveIdAndDepartment?.managerInfoResponse?.managerDepartmentId,
         receivedId: receiveIdAndDepartment?.managerInfoResponse?.managerId
+      }
+      if (dayjs(manualDate).month() !== currentDate.getMonth() || dayjs(manualDate).year() !== currentDate.getFullYear()) {
+        showDateWarning = true;
+      }
+
+      if (showDateWarning) {
+        toast.warning("Dates are only allowed from the beginning of the month to the current date.");
+        return;
       }
       if (!isFrom && !isTo) {
         toast.warning("The 'From' and 'To' cannot be null at the same time.");
