@@ -1,6 +1,7 @@
 package fpt.capstone.buildingmanagementsystem.service;
 
 import fpt.capstone.buildingmanagementsystem.exception.BadRequest;
+import fpt.capstone.buildingmanagementsystem.exception.Conflict;
 import fpt.capstone.buildingmanagementsystem.exception.NotFound;
 import fpt.capstone.buildingmanagementsystem.exception.ServerError;
 import fpt.capstone.buildingmanagementsystem.mapper.RoomBookingRequestMapper;
@@ -135,7 +136,7 @@ public class RoomBookingService {
                     throw new BadRequest("date_time_input_wrong");
                 }
             } else {
-                throw new BadRequest("request_fail");
+                throw new Conflict("request_fail");
             }
         } catch (ServerError e) {
             throw new ServerError("fail");

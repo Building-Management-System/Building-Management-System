@@ -10,6 +10,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,6 +28,6 @@ public class EmailCode {
     private String emailCodeId;
 
     private String code;
-
+    private Date deleteTime;
     private String userId;
 }
