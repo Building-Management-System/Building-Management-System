@@ -343,6 +343,7 @@ public class DeviceService {
                         .status(ControlLogStatus.WHITE_LIST)
                         .device(room.getDevice())
                         .account(account)
+                        .inTaskDelete(false)
                         .build();
                 if (toDate != null) deviceAccount.setEndDate(toDate);
                 DeviceAccount saveTo = deviceAccountRepository.save(deviceAccount);

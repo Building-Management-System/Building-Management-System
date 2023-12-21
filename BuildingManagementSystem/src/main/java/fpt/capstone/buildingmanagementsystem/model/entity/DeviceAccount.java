@@ -48,6 +48,9 @@ public class DeviceAccount {
     private Date updateDate;
 
     @Column
+    private boolean inTaskDelete;
+
+    @Column
     @Enumerated(EnumType.STRING)
     private ControlLogStatus status;
 
