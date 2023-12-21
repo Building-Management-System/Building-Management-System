@@ -168,7 +168,6 @@ const Chat = () => {
     }
   }
 
-
   useEffect(() => {
     const fetchAllChatList = async () => {
       const data = {

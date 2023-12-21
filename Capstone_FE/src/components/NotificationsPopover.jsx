@@ -28,7 +28,7 @@ const NotificationsPopover = () => {
   const [showMore, setShowMore] = useState(false)
   const [viewAll, setViewAll] = useState(false)
   const navigate = useNavigate()
-  const userId = useSelector((state) => state.auth.login.currentUser?.accountId)
+  const userId = useSelector((state) => state.auth.login.currentUser.accountId)
   const handleOpen = (event) => {
     setOpen(event.currentTarget)
   }
