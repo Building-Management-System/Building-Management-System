@@ -17,7 +17,7 @@ public class AutoDeleteAccountDeviceService {
     DeviceAccountRepository deviceAccountRepository;
     @Scheduled(cron = "0 0/2 * * * ?")
     public void getAllNotificationScheduled(){
-        List<DeviceAccount> deviceAccountList= deviceAccountRepository.findAll();
+        List<DeviceAccount> deviceAccountList= deviceAccountRepository.findAllByInTaskDelete(false);
         if(deviceAccountList.size()>0) {
             for (DeviceAccount deviceAccount : deviceAccountList) {
                 if (!(deviceAccount.getEndDate() == null)) {
@@ -26,6 +26,8 @@ public class AutoDeleteAccountDeviceService {
                     scheduledTime.setTime(deviceAccount.getEndDate().getTime());
                     DeleteAccountDevice uploadDate = new DeleteAccountDevice(deviceAccount, deviceAccountRepository);
                     timer.schedule(uploadDate, scheduledTime);
+                    deviceAccount.setInTaskDelete(true);
+                    deviceAccountRepository.save(deviceAccount);
                 }
             }
         }
