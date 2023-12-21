@@ -120,10 +120,9 @@ const ListAllControlLogByStaff = () => {
       cellClassName: 'name-column--cell',
       headerAlign: 'center',
       align: 'center',
-      width: 120,
+      width: 180,
       renderCell: (params) => {
         let textColor = '';
-
 
         if (params.row.verifyType === 'WHITE_LIST') {
           textColor = 'green';
@@ -148,7 +147,7 @@ const ListAllControlLogByStaff = () => {
       cellClassName: 'name-column--cell',
       headerAlign: 'center',
       align: 'center',
-      width: 250,
+      flex: 1,
       renderCell: (params) => {
         return (
           <Box

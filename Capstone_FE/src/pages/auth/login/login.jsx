@@ -1,14 +1,14 @@
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import { LoadingButton } from '@mui/lab'
-import { IconButton } from '@mui/material'
+import { IconButton, FormControlLabel, Checkbox } from '@mui/material'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import Avatar from '@mui/material/Avatar'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import authApi from '../../../services/authApi'
@@ -18,6 +18,7 @@ export default function Login() {
   // const [open, setOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false)
   const isLoading = useSelector((state) => state.auth.login?.isFetching)
+  const [rememberMe, setRememberMe] = useState(false)
   console.log(isLoading)
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword)
@@ -26,14 +27,31 @@ export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const dispatch = useDispatch()
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     let data = {
       username: username,
       password: password
     }
+    if (rememberMe) {
+      localStorage.setItem('rememberedUsername', username)
+      localStorage.setItem('rememberedPassword', password)
+    } else {
+      localStorage.removeItem('rememberedUsername')
+      localStorage.removeItem('rememberedPassword')
+    }
     authApi.loginUser(data, dispatch, navigate)
   }
+
+  useEffect(() => {
+    const rememberedUsername = localStorage.getItem('rememberedUsername')
+    const rememberedPassword = localStorage.getItem('rememberedPassword')
+    if (rememberedUsername && rememberedPassword) {
+      setUsername(rememberedUsername)
+      setPassword(rememberedPassword)
+      setRememberMe(true)
+    }
+  }, [])
   return (
     <>
       <Box
@@ -69,7 +87,7 @@ export default function Login() {
                   width: '100%'
                 }}>
                 <div>
-                  <Stack spacing={1} sx={{ mb: 3 }} alignItems='center'>
+                  <Stack spacing={1} sx={{ mb: 3 }} alignItems="center">
                     <Avatar
                       alt="BMS Logo"
                       src={logoImage}
@@ -91,6 +109,7 @@ export default function Login() {
                         label="Username"
                         name="username"
                         type="username"
+                        value={username}
                         onChange={(e) => setUsername(e.target.value)}
                       />
                       <TextField
@@ -100,6 +119,7 @@ export default function Login() {
                         label="Password"
                         type={showPassword ? 'text' : 'password'}
                         id="password"
+                        value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         InputProps={{
                           endAdornment: (
@@ -115,6 +135,16 @@ export default function Login() {
                       />
                     </Stack>
                     <Stack direction="row" justifyContent="space-between" mt={1}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={rememberMe}
+                            onChange={() => setRememberMe(!rememberMe)}
+                            color="primary"
+                          />
+                        }
+                        label="Remember Me"
+                      />
                       <Typography
                         variant="body1"
                         component="span"
