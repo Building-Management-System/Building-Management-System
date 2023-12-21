@@ -29,5 +29,6 @@ public class EmailCode {
 
     private String code;
     private Date deleteTime;
+    private boolean inTaskDelete;
     private String userId;
 }

@@ -17,7 +17,7 @@ public class VerifyCodeScheduleDeleteService {
     EmailCodeRepository emailCodeRepository;
     @Scheduled(cron = "0 0/2 * * * ?")
     public void getAllNotificationScheduled(){
-        List<EmailCode> emailCodeList= emailCodeRepository.findAll();
+        List<EmailCode> emailCodeList= emailCodeRepository.findAllByInTaskDelete(false);
         if(emailCodeList.size()>0) {
             for (EmailCode emailCode : emailCodeList) {
                 Timer timer = new Timer();
@@ -25,6 +25,8 @@ public class VerifyCodeScheduleDeleteService {
                 scheduledTime.setTime(emailCode.getDeleteTime().getTime());
                 DeleteEmailCode delete = new DeleteEmailCode(emailCode, emailCodeRepository);
                 timer.schedule(delete, scheduledTime);
+                emailCode.setInTaskDelete(true);
+                emailCodeRepository.save(emailCode);
             }
         }
     }

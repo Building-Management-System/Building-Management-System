@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface EmailCodeRepository extends JpaRepository<EmailCode, String> {
     List<EmailCode> findByCodeAndUserId(String code, String userId);
+    List<EmailCode> findAllByInTaskDelete(boolean check);
+
 }

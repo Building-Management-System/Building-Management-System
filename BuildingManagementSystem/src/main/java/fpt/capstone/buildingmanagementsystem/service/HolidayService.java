@@ -167,7 +167,7 @@ public class HolidayService {
             java.util.Date newDate = calendar.getTime();
             EmailCode emailCode = EmailCode.builder()
                     .code(code)
-                    .userId(account.getAccountId()).deleteTime(newDate)
+                    .userId(account.getAccountId()).deleteTime(newDate).inTaskDelete(false)
                     .build();
             emailCodeRepository.save(emailCode);
             emailSender.setMailSender(toEmail, "[Notification] - BMS verify code", "- Code: " + code + "\n- Note: The code is only valid for 5 minutes and can only be used once !");
