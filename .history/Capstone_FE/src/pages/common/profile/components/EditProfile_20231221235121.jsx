@@ -93,7 +93,6 @@ const EditProfile = (props) => {
                 <DatePicker
                   label="Date of birth"
                   value={props.userInfo.dateOfBirth !== 'unknown' ? props.birthUpdate : props.birth}
-                  maxDate={new Date()}
                   onChange={
                     props.userInfo.dateOfBirth !== 'unknown'
                       ? (newValue) => props.setBirthUpdate(newValue)

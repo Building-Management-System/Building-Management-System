@@ -19,6 +19,8 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const isLoading = useSelector((state) => state.auth.login?.isFetching)
   const [rememberMe, setRememberMe] = useState(false)
+  const [storedUsername, setStoredUsername] = useState('')
+  const [storedPassword, setStoredPassword] = useState('')
   console.log(isLoading)
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword)
@@ -34,21 +36,22 @@ export default function Login() {
       password: password
     }
     if (rememberMe) {
-      sessionStorage.setItem('rememberedUsername', username)
-      sessionStorage.setItem('rememberedPassword', password)
+      localStorage.setItem('rememberedUsername', username)
+      localStorage.setItem('rememberedPassword', password)
     } else {
-      sessionStorage.removeItem('rememberedUsername')
-      sessionStorage.removeItem('rememberedPassword')
+      localStorage.removeItem('rememberedUsername')
+      localStorage.removeItem('rememberedPassword')
     }
     authApi.loginUser(data, dispatch, navigate)
   }
 
   useEffect(() => {
-    const rememberedUsername = sessionStorage.getItem('rememberedUsername')
-    const rememberedPassword = sessionStorage.getItem('rememberedPassword')
+    const rememberedUsername = localStorage.getItem('rememberedUsername')
+    const rememberedPassword = localStorage.getItem('rememberedPassword')
     if (rememberedUsername && rememberedPassword) {
-      setUsername(rememberedUsername)
-      setPassword(rememberedPassword)
+      setStoredUsername(rememberedUsername)
+      setStoredPassword(rememberedPassword)
+      setRememberMe(true)
       setRememberMe(true)
     }
   }, [])
@@ -109,7 +112,7 @@ export default function Login() {
                         label="Username"
                         name="username"
                         type="username"
-                        value={username}
+                        value={rememberMe ? storedUsername : ''}
                         onChange={(e) => setUsername(e.target.value)}
                       />
                       <TextField
@@ -119,7 +122,7 @@ export default function Login() {
                         label="Password"
                         type={showPassword ? 'text' : 'password'}
                         id="password"
-                        value={password}
+                        value={rememberMe ? storedPassword : ''}
                         onChange={(e) => setPassword(e.target.value)}
                         InputProps={{
                           endAdornment: (

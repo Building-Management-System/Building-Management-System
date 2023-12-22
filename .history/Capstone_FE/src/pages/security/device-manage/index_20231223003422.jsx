@@ -51,6 +51,7 @@ const DeviceManage = () => {
   const [isShowView, setIsShowView] = useState(false)
   const [note, setNote] = useState('')
   const [noteAdd, setNoteAdd] = useState('')
+  const [noteChangeStatus, setNoteChangeStatus] = useState('')
   const [openCreateDevice, setOpenCreateDevice] = useState(false)
 
 
@@ -238,7 +239,7 @@ const DeviceManage = () => {
     setIsShowStatus(true)
     setId(e?.deviceId)
     setChangeStatus(e?.status)
-    setNoteAdd(e?.deviceNote)
+    setNoteChangeStatus(e?.deviceNote)
   }
 
   const handleCloseStatus = () => {
@@ -407,8 +408,8 @@ const DeviceManage = () => {
               </Typography>
               <TextField
                 multiline
-                value={noteAdd}
-                onChange={(e) => setNoteAdd(e.target.value)}
+                value={noteChangeStatus}
+                onChange={(e) => setNoteChangeStatus(e.target.value)}
                 sx={{ width: '100%', mb: 2 }}
                 rows={4}
               />

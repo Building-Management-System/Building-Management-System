@@ -1,7 +1,7 @@
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import { LoadingButton } from '@mui/lab'
-import { IconButton, FormControlLabel, Checkbox } from '@mui/material'
+import { IconButton,FormControlLabel,Checkbox } from '@mui/material'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
@@ -18,7 +18,7 @@ export default function Login() {
   // const [open, setOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false)
   const isLoading = useSelector((state) => state.auth.login?.isFetching)
-  const [rememberMe, setRememberMe] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false);
   console.log(isLoading)
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword)
@@ -34,24 +34,20 @@ export default function Login() {
       password: password
     }
     if (rememberMe) {
-      sessionStorage.setItem('rememberedUsername', username)
-      sessionStorage.setItem('rememberedPassword', password)
+      localStorage.setItem('rememberedUsername', username);
     } else {
-      sessionStorage.removeItem('rememberedUsername')
-      sessionStorage.removeItem('rememberedPassword')
+      localStorage.removeItem('rememberedUsername');
     }
     authApi.loginUser(data, dispatch, navigate)
   }
 
   useEffect(() => {
-    const rememberedUsername = sessionStorage.getItem('rememberedUsername')
-    const rememberedPassword = sessionStorage.getItem('rememberedPassword')
-    if (rememberedUsername && rememberedPassword) {
-      setUsername(rememberedUsername)
-      setPassword(rememberedPassword)
-      setRememberMe(true)
+    const rememberedUsername = localStorage.getItem('rememberedUsername');
+    if (rememberedUsername) {
+      setUsername(rememberedUsername);
+      setRememberMe(true);
     }
-  }, [])
+  }, []);
   return (
     <>
       <Box

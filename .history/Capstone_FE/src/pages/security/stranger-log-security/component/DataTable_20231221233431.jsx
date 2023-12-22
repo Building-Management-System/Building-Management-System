@@ -1,9 +1,8 @@
-import { Box, LinearProgress, Button, Typography } from '@mui/material'
+import { Box, LinearProgress } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import {
   DataGrid, GridToolbarContainer, GridToolbarExport, GridToolbarFilterButton
 } from "@mui/x-data-grid";
-
 const StripedDataGrid = styled(DataGrid)(() => ({
   '.late-checkin-cell .MuiDataGrid-cellContent': {
     color: 'red'
@@ -15,7 +14,7 @@ const StripedDataGrid = styled(DataGrid)(() => ({
     color: '#DAA520	'
   }
 }))
-const DataTableDeviceManage = ({  columns,rows,handleOpenCreateDevice, isLoading }) => {
+const DataTableStrangerLog = ({  columns,rows, isLoading }) => {
   function CustomToolbar() {
     return (
       <GridToolbarContainer>
@@ -24,9 +23,6 @@ const DataTableDeviceManage = ({  columns,rows,handleOpenCreateDevice, isLoading
             <GridToolbarFilterButton />
             <GridToolbarExport />
           </Box>
-          <Button variant="contained" onClick={handleOpenCreateDevice}>
-            <Typography>Add Device</Typography>
-          </Button>
         </Box>
       </GridToolbarContainer>
     )
@@ -68,6 +64,10 @@ const DataTableDeviceManage = ({  columns,rows,handleOpenCreateDevice, isLoading
             marginBottom: '10px',
             justifyContent: 'flex-start'
           },
+          // "& .MuiButtonBase-root ": {
+          //   bgcolor: "#fff",
+          //   color: '#000'
+          // },
           '& .MuiDataGrid-columnHeaderTitle': {
             fontWeight: '700'
           }
@@ -78,18 +78,16 @@ const DataTableDeviceManage = ({  columns,rows,handleOpenCreateDevice, isLoading
           slots={{toolbar: CustomToolbar,loadingOverlay: LinearProgress }}
           showCellVerticalBorder
           showColumnVerticalBorder
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
-          }}
-          pageSizeOptions={[5, 10, 25]}
+          rowsPerPageOptions={[50]}
           loading={isLoading}
+          rowHeight={180}
           columns={columns}
           rows={rows}
-          getRowId={(row) => row.lcdId + row.roomId}
+          getRowId={(row) => row.strangerLogId}
         />  
       </Box>
     </>
   )
 }
 
-export default DataTableDeviceManage
+export default DataTableStrangerLog

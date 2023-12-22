@@ -24,7 +24,7 @@ import Overview from './components/Overview'
 import { validationSchema } from './components/util/validationSchema'
 import dayjs from 'dayjs'
 import axios  from 'axios'
-
+import axiosClient from '../../../utils/axios-config'
 const Profile = () => {
   const currentUser = useSelector((state) => state.auth.login?.currentUser)
   console.log(currentUser);

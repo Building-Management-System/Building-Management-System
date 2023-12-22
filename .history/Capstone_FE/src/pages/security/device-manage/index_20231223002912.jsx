@@ -248,64 +248,34 @@ const DeviceManage = () => {
   }
 
   const handleSaveChangeStatus = async () => {
-    if(changeStatus === 'INACTIVE' || changeStatus === 'ACTIVE'){
-      try {
-        let data = {
-          id: id,
-          status: changeStatus,
-          deviceNote: ''
-        }
-        await securityApi.updateDeviceStatus(data)
-        toast.success('Change status successfully')
-        setListDevice((prevDevice) =>
-          prevDevice.map((device) => {
-            if (device.deviceId === id) {
-              return {
-                ...device,
-                status: changeStatus,
-                deviceNote: noteAdd
-              }
-            } else {
-              return device
-            }
-          })
-        )
-        handleCloseStatus()
-      } catch (error) {
-        if (error.response.status === 406) {
-          toast.error("A device is used for 2 rooms or device is not belong to any room!")
-        }
+    try {
+      let data = {
+        id: id,
+        status: changeStatus,
+        deviceNote: noteAdd
       }
-    }else{
-      try {
-        let data = {
-          id: id,
-          status: changeStatus,
-          deviceNote: noteAdd
-        }
-        await securityApi.updateDeviceStatus(data)
-        toast.success('Change status successfully')
-        setListDevice((prevDevice) =>
-          prevDevice.map((device) => {
-            if (device.deviceId === id) {
-              return {
-                ...device,
-                status: changeStatus,
-                deviceNote: noteAdd
-              }
-            } else {
-              return device
+      await securityApi.updateDeviceStatus(data)
+      toast.success('Change status successfully')
+      setListDevice((prevDevice) =>
+        prevDevice.map((device) => {
+          if (device.deviceId === id) {
+            return {
+              ...device,
+              status: changeStatus,
+              deviceNote: noteAdd
             }
-          })
-        )
-        handleCloseStatus()
-      } catch (error) {
-        if (error.response.status === 406) {
-          toast.error("A device is used for 2 rooms or device is not belong to any room!")
-        }
+          } else {
+            return device
+          }
+        })
+      )
+      setNoteAdd('')
+      handleCloseStatus()
+    } catch (error) {
+      if (error.response.status === 406) {
+        toast.error("A device is used for 2 rooms or device is not belong to any room!")
       }
-    }  
-    
+    }
   }
 
   const handleCloseUpdate = () => {

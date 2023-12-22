@@ -23,8 +23,6 @@ import EditProfile from './components/EditProfile'
 import Overview from './components/Overview'
 import { validationSchema } from './components/util/validationSchema'
 import dayjs from 'dayjs'
-import axios  from 'axios'
-
 const Profile = () => {
   const currentUser = useSelector((state) => state.auth.login?.currentUser)
   console.log(currentUser);
@@ -38,7 +36,6 @@ const Profile = () => {
   const [countryUpdate, setCountryUpdate] = useState('')
   const [birthUpdate, setBirthUpdate] = useState('')
   const [phoneUpdate, setPhoneUpdate] = useState('')
-  const [province, setProvince] = useState([])
   const [info, setInfo] = useState('')
   const userInfo = useAuth()
   console.log(userInfo);
@@ -47,17 +44,6 @@ const Profile = () => {
     setInfo(userInfo)
   }, [userInfo])
 
-  useEffect(() => {
-    const fetchAllProvince = async () => {
-      const response = await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`,{
-        headers: { Token: `35830a49-a027-11ee-96dc-de6f804954c9` }
-      })
-      setProvince(response.data)
-    }
-    fetchAllProvince()
-  }, [])
-
-  console.log(province);
   console.log(birth.format('YYYY-MM-DD'));
   console.log(dayjs(birthUpdate).format('YYYY-MM-DD'));
   console.log(info);

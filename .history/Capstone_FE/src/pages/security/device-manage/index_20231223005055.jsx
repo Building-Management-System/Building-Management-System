@@ -345,7 +345,7 @@ const DeviceManage = () => {
       const res = await securityApi.updateDevice(data)
       setListDevice((prevDevice) =>
         prevDevice.map((device) => {
-          if (device.deviceId === id) {
+          if (device.lcdId === deviceLcdId) {
             return {
               res
             }

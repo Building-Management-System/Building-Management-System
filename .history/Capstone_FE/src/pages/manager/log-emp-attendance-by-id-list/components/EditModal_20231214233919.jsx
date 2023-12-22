@@ -64,7 +64,7 @@ const EditEmpLogAttendence = ({ openEditLog, handleCloseEditLog, dailyLogModal, 
         toast.error('Update failed. If both Manual CheckOut and Manual CheckIn are entered, Manual CheckOut must be later than Manual CheckIn.');
       }
     }
-  }; 
+  };
   const [isTimePickerEnabledOut, setIsTimePickerEnabledOut] = useState(true);
 
   // const handleSave = () => {
@@ -107,8 +107,8 @@ const EditEmpLogAttendence = ({ openEditLog, handleCloseEditLog, dailyLogModal, 
     onSubmit: (values) => {
       const data = {
         managerId: receiveIdAndDepartment?.managerInfoResponse?.managerId,
-        manualCheckIn: isTimePickerEnabled? null: formatDateTime(values.manualCheckIn),
-        manualCheckOut: isTimePickerEnabledOut? null: formatDateTime(values.manualCheckOut),
+        manualCheckIn: formatDateTime(values.manualCheckIn),
+        manualCheckOut: formatDateTime(values.manualCheckOut),
         type: values.type === "NONE" || values.type === "NOT_WORKING_OUTSIDE" ? null : values.type,
         date: outputDateString,
         changeType: 'FROM_EDIT',
@@ -125,7 +125,7 @@ const EditEmpLogAttendence = ({ openEditLog, handleCloseEditLog, dailyLogModal, 
     setIsContentEmpty(!formik.values.content.trim());
   }, [formik.values.content]);
 
-  const handleSave = (event) => {
+  const handleSave = () => {
     event.preventDefault();
     if (!isContentEmpty) {
       setOpen(true);

@@ -253,7 +253,7 @@ const NotificationUploadReceive = () => {
       headerName: 'Title',
       headerAlign: 'center',
       align: 'center',
-      width: 250
+      width: 200
     },
     {
       headerName: 'Content',

@@ -24,7 +24,6 @@ import Overview from './components/Overview'
 import { validationSchema } from './components/util/validationSchema'
 import dayjs from 'dayjs'
 import axios  from 'axios'
-
 const Profile = () => {
   const currentUser = useSelector((state) => state.auth.login?.currentUser)
   console.log(currentUser);
@@ -49,9 +48,7 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchAllProvince = async () => {
-      const response = await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`,{
-        headers: { Token: `35830a49-a027-11ee-96dc-de6f804954c9` }
-      })
+      const response = await axios.get(`https://vn-public-apis.fpo.vn/provinces/getAll?limit=-1`)
       setProvince(response.data)
     }
     fetchAllProvince()

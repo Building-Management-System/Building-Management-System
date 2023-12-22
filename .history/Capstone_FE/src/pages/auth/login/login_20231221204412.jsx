@@ -1,14 +1,14 @@
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import { LoadingButton } from '@mui/lab'
-import { IconButton, FormControlLabel, Checkbox } from '@mui/material'
+import { IconButton,FormControlLabel,Checkbox } from '@mui/material'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import Avatar from '@mui/material/Avatar'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import authApi from '../../../services/authApi'
@@ -18,7 +18,7 @@ export default function Login() {
   // const [open, setOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false)
   const isLoading = useSelector((state) => state.auth.login?.isFetching)
-  const [rememberMe, setRememberMe] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false);
   console.log(isLoading)
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword)
@@ -27,31 +27,19 @@ export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const dispatch = useDispatch()
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     let data = {
       username: username,
       password: password
     }
-    if (rememberMe) {
-      sessionStorage.setItem('rememberedUsername', username)
-      sessionStorage.setItem('rememberedPassword', password)
-    } else {
-      sessionStorage.removeItem('rememberedUsername')
-      sessionStorage.removeItem('rememberedPassword')
-    }
     authApi.loginUser(data, dispatch, navigate)
-  }
-
-  useEffect(() => {
-    const rememberedUsername = sessionStorage.getItem('rememberedUsername')
-    const rememberedPassword = sessionStorage.getItem('rememberedPassword')
-    if (rememberedUsername && rememberedPassword) {
-      setUsername(rememberedUsername)
-      setPassword(rememberedPassword)
-      setRememberMe(true)
+    if (rememberMe) {
+      localStorage.setItem('rememberedUsername', username);
+    } else {
+      localStorage.removeItem('rememberedUsername');
     }
-  }, [])
+  }
   return (
     <>
       <Box
@@ -109,7 +97,6 @@ export default function Login() {
                         label="Username"
                         name="username"
                         type="username"
-                        value={username}
                         onChange={(e) => setUsername(e.target.value)}
                       />
                       <TextField
@@ -119,7 +106,6 @@ export default function Login() {
                         label="Password"
                         type={showPassword ? 'text' : 'password'}
                         id="password"
-                        value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         InputProps={{
                           endAdornment: (
