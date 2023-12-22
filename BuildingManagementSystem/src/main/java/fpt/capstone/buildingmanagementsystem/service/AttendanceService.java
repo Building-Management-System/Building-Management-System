@@ -99,25 +99,25 @@ public class AttendanceService {
                         .collect(Collectors.toList());
                 if (dailyLogs.size() > 0) {
                     for (DailyLog dailyLog : dailyLogs) {
-                        totalAttendance = totalAttendance + dailyLog.getTotalAttendance();
-                        morningTotal = morningTotal + dailyLog.getMorningTotal();
-                        afternoonTotal = afternoonTotal + dailyLog.getAfternoonTotal();
+                        totalAttendance = roundToTwoDecimalPlaces(totalAttendance + dailyLog.getTotalAttendance());
+                        morningTotal = roundToTwoDecimalPlaces(morningTotal + dailyLog.getMorningTotal());
+                        afternoonTotal = roundToTwoDecimalPlaces(afternoonTotal + dailyLog.getAfternoonTotal());
                         if (dailyLog.isEarlyCheckout()) {
-                            lateCheckinTotal = lateCheckinTotal + 1.0;
+                            lateCheckinTotal = roundToTwoDecimalPlaces(lateCheckinTotal + 1.0);
                         }
                         if (dailyLog.isEarlyCheckout()) {
-                            earlyCheckoutTotal = earlyCheckoutTotal + 1.0;
+                            earlyCheckoutTotal = roundToTwoDecimalPlaces(earlyCheckoutTotal + 1.0);
                         }
                         if (dailyLog.isViolate()) {
-                            ViolateTotal = ViolateTotal + 1.0;
+                            ViolateTotal = roundToTwoDecimalPlaces(ViolateTotal + 1.0);
                         }
                         if ((getCheckWeekend(dailyLog.getDate()) != Calendar.SATURDAY) && (getCheckWeekend(dailyLog.getDate()) != Calendar.SUNDAY)) {
                             totalDay = totalDay + 1;
                         }
-                        permittedLeave = permittedLeave + dailyLog.getPermittedLeave();
-                        nonPermittedLeave = nonPermittedLeave + dailyLog.getNonPermittedLeave();
-                        outsideWork = outsideWork + dailyLog.getOutsideWork();
-                        paidDay = paidDay + dailyLog.getPaidDay();
+                        permittedLeave = roundToTwoDecimalPlaces(permittedLeave + dailyLog.getPermittedLeave());
+                        nonPermittedLeave = roundToTwoDecimalPlaces(nonPermittedLeave + dailyLog.getNonPermittedLeave());
+                        outsideWork = roundToTwoDecimalPlaces(outsideWork + dailyLog.getOutsideWork());
+                        paidDay = roundToTwoDecimalPlaces(paidDay + dailyLog.getPaidDay());
                         DailyLogResponse dailyLogResponse = dailyLogMapper.convertGetAttendanceUserResponse(dailyLog);
                         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.US);
                         dailyLogResponse.setDateDaily(sdf.format(Until.convertDateToCalender(dailyLog.getDate()).getTime()));
@@ -348,5 +348,8 @@ public class AttendanceService {
             );
         }
         return new DailyLogAttendanceResponse();
+    }
+    public static double roundToTwoDecimalPlaces(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 }
