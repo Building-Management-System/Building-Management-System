@@ -111,7 +111,7 @@ public class RequestChangeLogService {
             DailyLog dailyLog = dailyLogRepository.findByUserAndDate(employee, requestDate)
                     .orElseThrow(() -> new BadRequest("Not_found_daily_log"));
             //attendance
-            if (!changeLogRequest.getManualCheckIn().isEmpty() && changeLogRequest.getManualCheckOut().isEmpty()) {
+            if (changeLogRequest.getManualCheckIn() != null && changeLogRequest.getManualCheckOut() == null) {
                 Time checkin = Until.convertStringToTime(changeLogRequest.getManualCheckIn());
                 if (compareTime(checkin, dailyLog.getCheckout()) > 0) {
                     return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -120,7 +120,7 @@ public class RequestChangeLogService {
 
                 dailyLog.setCheckin(checkin);
             }
-            if (!changeLogRequest.getManualCheckOut().isEmpty() && changeLogRequest.getManualCheckIn().isEmpty()) {
+            if (changeLogRequest.getManualCheckOut() != null && changeLogRequest.getManualCheckIn() == null) {
                 Time checkout = Until.convertStringToTime(changeLogRequest.getManualCheckOut());
                 if (compareTime(checkout, dailyLog.getCheckin()) < 0) {
                     return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -128,7 +128,7 @@ public class RequestChangeLogService {
                 }
                 dailyLog.setCheckout(checkout);
             }
-            if (!changeLogRequest.getManualCheckIn().isEmpty() && !changeLogRequest.getManualCheckOut().isEmpty()) {
+            if (changeLogRequest.getManualCheckIn() != null && changeLogRequest.getManualCheckOut() != null) {
                 Time checkin = Until.convertStringToTime(changeLogRequest.getManualCheckIn());
                 Time checkout = Until.convertStringToTime(changeLogRequest.getManualCheckOut());
                 if (compareTime(checkin, checkout) > 0) {
