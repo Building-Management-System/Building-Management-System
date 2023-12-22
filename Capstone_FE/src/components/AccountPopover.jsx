@@ -32,7 +32,7 @@ const AccountPopover = () => {
 
   const handleLogout = () => {
     dispatch(logOutSuccess())
-    localStorage.clear()
+    localStorage.removeItem('token')
     navigate('/login')
     toast.success('Logout successfully!');
   }
