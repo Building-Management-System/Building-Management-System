@@ -93,7 +93,6 @@ public class CheckoutAnalyzeSchedule {
 
     private static final Logger logger = LoggerFactory.getLogger(CheckoutAnalyzeSchedule.class);
 
-    //todo: set cron by api
     //cron = "0 01 0 * * ?"
     @Scheduled(cron = "0 56 1 * * ?")
     @Transactional
@@ -261,7 +260,7 @@ public class CheckoutAnalyzeSchedule {
         }
         dailyLog.setTotalAttendance(roundDouble(dailyLog.getMorningTotal() + dailyLog.getAfternoonTotal()));
         if (dailyLog.getDateType().equals(DateType.NORMAL)) {
-            dailyLog.setPaidDay(Math.min(roundDouble(dailyLog.getTotalAttendance() / 8), 1));
+            dailyLog.setPaidDay(Math.min(roundDouble((dailyLog.getTotalAttendance() + dailyLog.getPermittedLeave()) / 8), 1));
         }
     }
 
@@ -296,6 +295,15 @@ public class CheckoutAnalyzeSchedule {
             double permittedLeaveLeft = roundDouble(getPermittedLeaveLeft(account, dailyLog.getMonth(), year, dailyLog));
 
             isLeaveWithoutNoticeViolate = leaveRequestForms.isEmpty();
+
+            //todo: test
+            //todo:: check neu con ngay nghi có phép, check paid_day = 1
+            if (!isLeaveWithoutNoticeViolate) {
+                isEarlyCheckoutViolate = false;
+                isLateCheckinViolate = false;
+                dailyLog.setEarlyCheckout(false);
+                dailyLog.setLateCheckin(false);
+            }
 
             if (offHours <= permittedLeaveLeft) {
                 dailyLog.setPermittedLeave(offHours);

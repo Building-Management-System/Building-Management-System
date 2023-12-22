@@ -131,7 +131,7 @@ public class DailyLogService {
         dailyLog.setTotalAttendance(roundDouble(dailyLog.getMorningTotal() + dailyLog.getAfternoonTotal()));
 
         if (dailyLog.getDateType().equals(DateType.NORMAL)) {
-            dailyLog.setPaidDay(Math.min(roundDouble(dailyLog.getTotalAttendance() / 8), 1));
+            dailyLog.setPaidDay(Math.min(roundDouble((dailyLog.getTotalAttendance() + dailyLog.getPermittedLeave()) / 8), 1));
         }
 
         return dailyLog;
@@ -237,7 +237,7 @@ public class DailyLogService {
         dailyLog.setTotalAttendance((dailyLog.getMorningTotal() + dailyLog.getAfternoonTotal()));
 
         if (dailyLog.getDateType().equals(DateType.NORMAL)) {
-            dailyLog.setPaidDay(Math.min(roundDouble(dailyLog.getTotalAttendance() / 8), 1));
+            dailyLog.setPaidDay(Math.min(roundDouble((dailyLog.getTotalAttendance() + dailyLog.getPermittedLeave()) / 8), 1));
         }
         return checkoutAnalyzeSchedule.checkViolate(dailyLog, user.getAccount(), date);
     }

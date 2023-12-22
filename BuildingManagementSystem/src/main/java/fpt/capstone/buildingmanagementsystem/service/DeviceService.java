@@ -146,7 +146,7 @@ public class DeviceService {
 
         if (request.getDeviceLcdId() != null) {
             Optional<Device> deviceOptional = deviceRepository.findByDeviceId(request.getDeviceLcdId());
-            if(deviceOptional.isPresent()) {
+            if (deviceOptional.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
                         .body("Device_lcd_id is existed.");
             }
@@ -172,10 +172,10 @@ public class DeviceService {
         }
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new BadRequest("Not_found_room"));
-
-        room.setDevice(device);
-        roomRepository.save(room);
+//        if(room.getDevice().getDeviceId().equals(device.getDeviceId()))
         try {
+            room.setDevice(device);
+            roomRepository.save(room);
             Device deviceResponse = deviceRepository.save(device);
             DeviceRoomResponse response = new DeviceRoomResponse(
                     room.getRoomId(),
@@ -201,7 +201,7 @@ public class DeviceService {
 
         List<Room> roomByDevices = roomRepository.getRoomByDevice(device.getDeviceId());
 
-        if(roomByDevices.size() > 1) {
+        if (roomByDevices.size() > 1) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
                     .body("Contained 2 devices in 1 room");
         }

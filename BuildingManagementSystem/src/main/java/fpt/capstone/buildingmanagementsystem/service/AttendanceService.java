@@ -191,9 +191,6 @@ public class AttendanceService {
                     double outsideWork = dailyLog.getOutsideWork();
                     List<ControlLogResponse> controlLogResponse = new ArrayList<>();
 
-
-
-
                     controlLogLcds.forEach(element -> {
                         ControlLogResponse controlLogResponse1 = new ControlLogResponse();
                         controlLogResponse1.setLog(element.getTime().toString());
