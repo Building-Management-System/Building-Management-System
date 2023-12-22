@@ -1,32 +1,18 @@
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
-import { CKEditor } from '@ckeditor/ckeditor5-react'
-import {
-  Box,
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  MenuItem,
-  Modal,
-  Select,
-  TextField,
-  Typography
-} from '@mui/material'
-import { DatePicker, LocalizationProvider, TimePicker } from '@mui/x-date-pickers'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { useFormik } from 'formik'
-import { useSelector } from 'react-redux'
-import { toast } from 'react-toastify'
-import { BASE_URL } from '../../../../services/constraint'
-import axiosClient from '../../../../utils/axios-config'
-import { formatDateTime } from '../../../../utils/formatDate'
-import { validationSchema } from './util/validationSchema'
-import { useEffect, useState } from 'react'
-import requestApi from '../../../../services/requestApi'
-import 'react-confirm-alert/src/react-confirm-alert.css'
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import { Box, Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, Modal, Select, TextField, Typography } from '@mui/material';
+import { DatePicker, LocalizationProvider, TimePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { useFormik } from 'formik';
+import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import { BASE_URL } from '../../../../services/constraint';
+import axiosClient from '../../../../utils/axios-config';
+import { formatDateTime } from '../../../../utils/formatDate';
+import { validationSchema } from './util/validationSchema';
+import { useEffect, useState } from 'react';
+import requestApi from '../../../../services/requestApi';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 const style = {
   position: 'absolute',
   top: '50%',
@@ -38,134 +24,124 @@ const style = {
   boxShadow: 24,
   p: 4,
   zIndex: 1000
-}
+};
 
-const EditEmpLogAttendence = ({
-  openEditLog,
-  handleCloseEditLog,
-  dailyLogModal,
-  userName,
-  systemCheckIn,
-  systemCheckOut,
-  employeeId,
-  date,
-  manualCheckIn,
-  manualCheckOut,
-  setDailyLog
-}) => {
-  const userId = useSelector((state) => state.auth.login?.currentUser?.accountId)
+const EditEmpLogAttendence = ({ openEditLog, handleCloseEditLog, dailyLogModal, userName, systemCheckIn,
+  systemCheckOut, employeeId, date, manualCheckIn, manualCheckOut,dailyLog,setDailyLog }) => {
 
-  let inputDateString = dailyLogModal?.dateDaily
+  const userId = useSelector((state) => state.auth.login?.currentUser?.accountId);
 
-  let inputDate = new Date(inputDateString)
+  let inputDateString = dailyLogModal?.dateDaily;
 
-  let year = inputDate.getFullYear()
-  let month = (inputDate.getMonth() + 1).toString().padStart(2, '0')
-  let day = inputDate.getDate().toString().padStart(2, '0')
+  let inputDate = new Date(inputDateString);
 
-  let outputDateString = `${year}-${month}-${day}`
-  const [receiveIdAndDepartment, setReceiveIdAndDepartment] = useState('')
+  let year = inputDate.getFullYear();
+  let month = (inputDate.getMonth() + 1).toString().padStart(2, '0');
+  let day = inputDate.getDate().toString().padStart(2, '0');
+
+  let outputDateString = `${year}-${month}-${day}`;
+  const [receiveIdAndDepartment, setReceiveIdAndDepartment] = useState('');
   useEffect(() => {
     const fetchReceiveIdAndDepartment = async () => {
-      const response = await requestApi.getReceiveIdAndDepartment(userId)
-      setReceiveIdAndDepartment(response)
+      const response = await requestApi.getReceiveIdAndDepartment(userId);
+      setReceiveIdAndDepartment(response);
+    };
+    fetchReceiveIdAndDepartment();
+  }, []);
+  const [isTimePickerEnabled, setIsTimePickerEnabled] = useState(true);
+  const editEmpLog = async (data) => {
+    try {
+      await axiosClient.post(`${BASE_URL}/saveChangeLog`, data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      toast.success('Update successfully!');
+    } catch (error) {    
+      if (error.response.status === 409) {
+        toast.error('Manual CheckIn or Manual CheckOut is invalid!')
+      }else{
+        toast.error('Update failed. If both Manual CheckOut and Manual CheckIn are entered, Manual CheckOut must be later than Manual CheckIn.');
+      }
     }
-    fetchReceiveIdAndDepartment()
-  }, [])
-  const [isTimePickerEnabled, setIsTimePickerEnabled] = useState(true)
-  const [isTimePickerEnabledOut, setIsTimePickerEnabledOut] = useState(true)
+  }; 
+  const [isTimePickerEnabledOut, setIsTimePickerEnabledOut] = useState(true);
 
-  const [open, setOpen] = useState(false)
-  const [isContentEmpty, setIsContentEmpty] = useState(true)
+  const [open, setOpen] = useState(false);
+  const [isContentEmpty, setIsContentEmpty] = useState(true);
+
 
   const formik = useFormik({
     initialValues: {
       content: '',
       type: 'NONE',
       manualCheckIn: manualCheckIn,
-      manualCheckOut: manualCheckOut
+      manualCheckOut: manualCheckOut,
+
     },
     validationSchema: validationSchema,
-    onSubmit: async (values) => {
+    onSubmit: (values) => {
       const data = {
         managerId: receiveIdAndDepartment?.managerInfoResponse?.managerId,
-        manualCheckIn: isTimePickerEnabled ? null : formatDateTime(values.manualCheckIn),
-        manualCheckOut: isTimePickerEnabledOut ? null : formatDateTime(values.manualCheckOut),
-        type: values.type === 'NONE' || values.type === 'NOT_WORKING_OUTSIDE' ? null : values.type,
+        manualCheckIn: isTimePickerEnabled? null: formatDateTime(values.manualCheckIn),
+        manualCheckOut: isTimePickerEnabledOut? null: formatDateTime(values.manualCheckOut),
+        type: values.type === "NONE" || values.type === "NOT_WORKING_OUTSIDE" ? null : values.type,
         date: outputDateString,
         changeType: 'FROM_EDIT',
         violet: values.violate ? 1 : 0,
         reason: values.content,
         employeeId: employeeId,
         workOutSide: values.workOutSide
-      }
-      try {
-        await axiosClient.post(`${BASE_URL}/saveChangeLog`, data, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        toast.success('Update successfully!')
-        setDailyLog((prevDailyLog) =>
-          prevDailyLog.map((log) => {
-            if (log.dailyId === dailyLogModal?.dailyId) {
-              return {
-                ...log,
-                checkin: isTimePickerEnabled ? log.checkin : formatDateTime(values.manualCheckIn),
-                checkout: isTimePickerEnabledOut
-                  ? log.checkout
-                  : formatDateTime(values.manualCheckOut)
-              }
-            } else {
-              return log
-            }
-          })
-        )
-      } catch (error) {
-        if (error.response.status === 409) {
-          toast.error('Manual CheckIn or Manual CheckOut is invalid!')
-        } else {
-          toast.error(
-            'Update failed. If both Manual CheckOut and Manual CheckIn are entered, Manual CheckOut must be later than Manual CheckIn.'
-          )
-        }
-      }
-    }
+      };
+      editEmpLog(data);
+      // setDailyLog((prevDailyLog) =>
+      //   prevDailyLog.map((log) => {
+      //     if (log.deviceId === id) {
+      //       return {
+      //         res
+      //       }
+      //     } else {
+      //       return device
+      //     }
+      //   })
+      // )
+    },
   })
   useEffect(() => {
-    setIsContentEmpty(!formik.values.content.trim())
-  }, [formik.values.content])
+    setIsContentEmpty(!formik.values.content.trim());
+  }, [formik.values.content]);
 
   const handleSave = (event) => {
-    event.preventDefault()
+    event.preventDefault();
     if (!isContentEmpty) {
-      setOpen(true)
+      setOpen(true);
     } else {
-      toast.warning('Content cannot be left blank')
+      toast.warning("Content cannot be left blank")
     }
-  }
+  };
   const handleCloseDialog = () => {
-    setOpen(false)
-  }
+    setOpen(false);
+  };
   const handleConfirmSave = () => {
-    console.log('Yes clicked')
-    formik.handleSubmit()
-    handleCloseEditLog()
-    handleCloseDialog()
-  }
+    console.log('Yes clicked');
+    formik.handleSubmit();
+    handleCloseEditLog();
+    handleCloseDialog();
+  };
 
   const handleCancelSave = () => {
-    console.log('No clicked')
-    handleCloseDialog()
-  }
+    console.log('No clicked');
+    handleCloseDialog();
+  };
 
-  console.log(employeeId)
+  console.log(employeeId);
   return (
     <Modal
       open={openEditLog}
       onClose={handleCloseEditLog}
       aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description">
+      aria-describedby="modal-modal-description"
+    >
       <Box sx={style}>
         <Box p={3} pl={0}>
           <form>
@@ -194,6 +170,7 @@ const EditEmpLogAttendence = ({
                     value={date}
                     disabled
                     renderInput={(props) => <TextField sx={{ width: '100%' }} {...props} />}
+
                   />
                 </LocalizationProvider>
               </Grid>
@@ -201,11 +178,7 @@ const EditEmpLogAttendence = ({
                 <Typography fontWeight="500">System CheckIn</Typography>
                 <TextField
                   disabled
-                  value={
-                    systemCheckIn !== null
-                      ? formatDateTime(new Date(`2000-01-01T${systemCheckIn}`), 'hh:mm:ss')
-                      : 'null'
-                  }
+                  value={systemCheckIn !== null ? formatDateTime(new Date(`2000-01-01T${systemCheckIn}`), 'hh:mm:ss') : 'null'}
                   sx={{ width: '100%' }}
                 />
               </Grid>
@@ -213,11 +186,7 @@ const EditEmpLogAttendence = ({
                 <Typography fontWeight="500">System CheckOut</Typography>
                 <TextField
                   disabled
-                  value={
-                    systemCheckOut !== null
-                      ? formatDateTime(new Date(`2000-01-01T${systemCheckOut}`), 'hh:mm:ss')
-                      : 'null'
-                  }
+                  value={systemCheckOut !== null ? formatDateTime(new Date(`2000-01-01T${systemCheckOut}`), 'hh:mm:ss') : 'null'}
                   sx={{ width: '100%' }}
                 />
               </Grid>
@@ -226,27 +195,34 @@ const EditEmpLogAttendence = ({
                   <Checkbox
                     checked={!isTimePickerEnabled}
                     onChange={() => {
-                      setIsTimePickerEnabled(!isTimePickerEnabled)
+                      setIsTimePickerEnabled(!isTimePickerEnabled);
                       formik.setFieldValue(
                         'manualCheckIn',
                         isTimePickerEnabled ? new Date('2000-01-01T12:00:00') : null
-                      )
+                      );
                     }}
                     sx={{ padding: '0 0 0 5px' }}
                   />
-                  <Typography fontWeight="600" ml={1}>
-                    Manual CheckIn
-                  </Typography>
+                  <Typography fontWeight="600" ml={1}>Manual CheckIn</Typography>
                 </Box>
                 <Box>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     {isTimePickerEnabled ? (
-                      <TextField sx={{ width: '100%' }} disabled value={null} />
+                      <TextField
+                        sx={{ width: '100%' }}
+                        disabled
+                        value={null}
+                      />
                     ) : (
                       <TimePicker
                         value={formik.values.manualCheckIn}
                         onChange={(date) => formik.setFieldValue('manualCheckIn', date)}
-                        renderInput={(props) => <TextField sx={{ width: '100%' }} {...props} />}
+                        renderInput={(props) => (
+                          <TextField
+                            sx={{ width: '100%' }}
+                            {...props}
+                          />
+                        )}
                       />
                     )}
                   </LocalizationProvider>
@@ -257,27 +233,34 @@ const EditEmpLogAttendence = ({
                   <Checkbox
                     checked={!isTimePickerEnabledOut}
                     onChange={() => {
-                      setIsTimePickerEnabledOut(!isTimePickerEnabledOut)
+                      setIsTimePickerEnabledOut(!isTimePickerEnabledOut);
                       formik.setFieldValue(
                         'manualCheckOut',
                         isTimePickerEnabledOut ? new Date('2000-01-01T12:00:00') : null
-                      )
+                      );
                     }}
                     sx={{ padding: '0 0 0 5px' }}
                   />
-                  <Typography fontWeight="500" ml={1}>
-                    Manual CheckOut
-                  </Typography>
+                  <Typography fontWeight="500" ml={1}>Manual CheckOut</Typography>
                 </Box>
                 <Box>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     {isTimePickerEnabledOut ? (
-                      <TextField sx={{ width: '100%' }} disabled value={null} />
+                      <TextField
+                        sx={{ width: '100%' }}
+                        disabled
+                        value={null}
+                      />
                     ) : (
                       <TimePicker
                         value={formik.values.manualCheckOut}
                         onChange={(date) => formik.setFieldValue('manualCheckOut', date)}
-                        renderInput={(props) => <TextField sx={{ width: '100%' }} {...props} />}
+                        renderInput={(props) => (
+                          <TextField
+                            sx={{ width: '100%' }}
+                            {...props}
+                          />
+                        )}
                       />
                     )}
                   </LocalizationProvider>
@@ -287,35 +270,38 @@ const EditEmpLogAttendence = ({
                 Type
                 <Select
                   onChange={(e) => {
-                    formik.handleChange(e)
-                    if (e.target.value === 'NONE') {
-                      formik.setFieldValue('value', null)
-                      formik.setFieldValue('workOutSide', -1)
-                    } else if (e.target.value === 'MORNING') {
-                      formik.setFieldValue('value', 'MORNING')
-                      formik.setFieldValue('workOutSide', 0.5)
-                    } else if (e.target.value === 'AFTERNOON') {
-                      formik.setFieldValue('value', 'AFTERNOON')
-                      formik.setFieldValue('workOutSide', 0.5)
-                    } else if (e.target.value === 'ALL_DAY') {
-                      formik.setFieldValue('value', 'ALL_DAY')
-                      formik.setFieldValue('workOutSide', 1)
-                    } else if (e.target.value === 'NOT_WORKING_OUTSIDE') {
-                      formik.setFieldValue('value', null)
-                      formik.setFieldValue('workOutSide', 0)
+                    formik.handleChange(e);
+                    if (e.target.value === "NONE") {
+                      formik.setFieldValue('value', null);
+                      formik.setFieldValue('workOutSide', -1);
+                    } else if (e.target.value === "MORNING") {
+                      formik.setFieldValue('value', "MORNING");
+                      formik.setFieldValue('workOutSide', 0.5);
+                    } else if (e.target.value === "AFTERNOON") {
+                      formik.setFieldValue('value', "AFTERNOON");
+                      formik.setFieldValue('workOutSide', 0.5);
+                    } else if (e.target.value === "ALL_DAY") {
+                      formik.setFieldValue('value', "ALL_DAY");
+                      formik.setFieldValue('workOutSide', 1);
+                    } else if (e.target.value === "NOT_WORKING_OUTSIDE") {
+                      formik.setFieldValue('value', null);
+                      formik.setFieldValue('workOutSide', 0);
                     }
                   }}
                   onBlur={formik.handleBlur}
                   value={formik.values.type}
                   sx={{ width: '100%' }}
                   name="type"
-                  displayEmpty>
+                  displayEmpty
+                >
                   <MenuItem value="NONE">NONE</MenuItem>
                   <MenuItem value="MORNING">MORNING</MenuItem>
                   <MenuItem value="AFTERNOON">AFTERNOON</MenuItem>
                   <MenuItem value="ALL_DAY">ALL DAY</MenuItem>
                   <MenuItem value="NOT_WORKING_OUTSIDE">NOT WORKING OUTSIDE</MenuItem>
                 </Select>
+              
+                
               </Grid>
               <Grid item xs={12}>
                 <Typography fontWeight="500">Violate</Typography>
@@ -331,8 +317,8 @@ const EditEmpLogAttendence = ({
                   editor={ClassicEditor}
                   data={formik.values.content}
                   onChange={(event, editor) => {
-                    const data = editor.getData()
-                    formik.setFieldValue('content', data)
+                    const data = editor.getData();
+                    formik.setFieldValue('content', data);
                   }}
                 />
                 {formik.touched.content && formik.errors.content ? (
@@ -343,11 +329,7 @@ const EditEmpLogAttendence = ({
               </Grid>
             </Grid>
             <Box pt={2} display="flex" alignItems="flex-end">
-              <Button
-                type="submit"
-                variant="contained"
-                sx={{ marginRight: '10px' }}
-                onClick={handleSave}>
+              <Button type="submit" variant="contained" sx={{ marginRight: '10px' }} onClick={handleSave}>
                 Save
               </Button>
               <Button variant="contained" onClick={handleCloseEditLog}>
@@ -357,9 +339,7 @@ const EditEmpLogAttendence = ({
             <Dialog open={open} onClose={handleCloseDialog}>
               <DialogTitle>Confirmation</DialogTitle>
               <DialogContent>
-                <p>
-                  Are you sure ? All your actions that affect others will be your responsibility
-                </p>
+                <p>Are you sure ? All your actions that affect others will be your responsibility</p>
               </DialogContent>
               <DialogActions>
                 <Button onClick={handleConfirmSave} color="primary">
@@ -374,7 +354,7 @@ const EditEmpLogAttendence = ({
         </Box>
       </Box>
     </Modal>
-  )
-}
+  );
+};
 
-export default EditEmpLogAttendence
+export default EditEmpLogAttendence;
