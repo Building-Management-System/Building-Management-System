@@ -23,12 +23,6 @@ const style = {
   p: 4
 }
 
-ClassicEditor.defaultConfig = {
-  toolbar: {
-    items: ['heading', '|', 'bold', '|', 'bulletedList', 'numberedList']
-  },
-  language: 'en'
-}
 const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest }) => {
   const [from, setFrom] = useState(dayjs(new Date()))
   const [to, setTo] = useState(dayjs(new Date()))

@@ -42,7 +42,7 @@ const style = {
 
 ClassicEditor.defaultConfig = {
   toolbar: {
-    items: ['heading']
+    items: ['heading', '|', 'bold', '|', 'bulletedList', 'numberedList']
   },
   language: 'en'
 }

@@ -107,7 +107,7 @@ const ChangeLogView = () => {
       }
 
       let dataAdd = {
-        id: currentUser?.accountId + dateStart.format('YYYY-MM-DD HH:mm:ss'),
+        id: currentUser?.accountId,
         startDate: dateStart.format('YYYY-MM-DD'),
         endDate: dateEnd.add(1, 'days').format('YYYY-MM-DD'),
         title: added.title,

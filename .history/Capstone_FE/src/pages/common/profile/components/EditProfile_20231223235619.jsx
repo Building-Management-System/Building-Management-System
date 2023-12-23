@@ -107,7 +107,7 @@ const EditProfile = (props) => {
               <TextField
                 fullWidth
                 label="Country"
-                value={props.country}
+                value={props.country === 'unknown' ? '' : props.country}
                 name="country"
                 onChange={props.formik.handleChange}
                 onBlur={props.formik.handleBlur}
@@ -123,7 +123,7 @@ const EditProfile = (props) => {
               <TextField
                 fullWidth
                 label="Address"
-                value={props.address}
+                value={props.address === 'unknown' ? '' : props.address}
                 name="address"
                 onChange={props.formik.handleChange}
                 onBlur={props.formik.handleBlur}
@@ -139,7 +139,7 @@ const EditProfile = (props) => {
               <TextField
                 fullWidth
                 label="City"
-                value={props.city}
+                value={props.city === 'unknown' ? '' : props.city}
                 name="city"
                 onChange={props.formik.handleChange}
                 onBlur={props.formik.handleBlur}

@@ -29,7 +29,7 @@ import { validationSchema } from './util/validationSchema'
 
 ClassicEditor.defaultConfig = {
   toolbar: {
-    items: ['heading']
+    items: ['paragraph']
   },
   language: 'en'
 }

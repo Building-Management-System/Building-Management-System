@@ -15,6 +15,7 @@ import {
   TableRow,
   TextField,
   Typography,
+  Divider,
   TableHead
 } from '@mui/material'
 import { useFormik } from 'formik'
@@ -26,24 +27,24 @@ import overtimeApi from '../../../services/overtimeApi'
 import ChatTopbar from '../../common/chat/components/ChatTopbar'
 import EvaluateTable from './component/DataTable'
 import { validationSchema } from './util/validationSchema'
-
 ClassicEditor.defaultConfig = {
   toolbar: {
-    items: ['heading']
+    items: ['paragraph']
   },
   language: 'en'
 }
-const CreateEvaluate = () => {
+const UpdateEvaluate = () => {
   const currentUser = useSelector((state) => state.auth.login?.currentUser)
   console.log(currentUser)
   const [loading, setIsLoading] = useState(false)
   const [show, setShow] = useState(false)
   const [userAttendance, setUserAttendance] = useState('')
   const [dailyLog, setDailyLog] = useState([])
-  const [status, setStatus] = useState('GOOD')
+  const [status, setStatus] = useState('')
   const [selectedOption, setSelectedOption] = useState('option1')
   const { employee_id, date } = useParams()
   const [overTimeData, setOverTimeDate] = useState([])
+  const [userEvaluate, setUserEvaluate] = useState({})
   console.log(employee_id)
   console.log(date)
   const navigate = useNavigate()
@@ -80,26 +81,48 @@ const CreateEvaluate = () => {
     fetchAllUserAttendance()
   }, [selectedOption])
 
+  useEffect(() => {
+    const fetchUserEvaluate = async () => {
+      setIsLoading(true)
+      try {
+        const data = {
+          userId: employee_id,
+          month: date.split('-')[1],
+          year: date.split('-')[0]
+        }
+        const response = await attendanceApi.getIndividualEvaluate(data)
+        setUserEvaluate(response)
+        console.log(response)
+        setStatus(response.evaluateEnum)
+      } catch (error) {
+        console.error('Error fetching user attendance:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchUserEvaluate()
+  }, [])
+
   const handleOptionChange = (selectedValue) => {
     setSelectedOption(selectedValue)
   }
 
+  console.log(userEvaluate?.note)
+
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      content: ''
+      content: userEvaluate?.note
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
       let data = {
-        employeeId: employee_id,
-        managerId: currentUser.accountId,
-        month: date.split('-')[1],
-        year: date.split('-')[0],
+        evaluateId: userEvaluate?.evaluateId,
         note: values.content,
         rate: status
       }
       console.log(data)
-      attendanceApi.createEvaluate(data)
+      attendanceApi.updateEvaluate(data)
       navigate(-1)
     }
   })
@@ -108,42 +131,42 @@ const CreateEvaluate = () => {
     {
       field: 'approveDate',
       headerName: 'Approve Date',
-      width: 280
+      flex: 1
     },
     {
       field: 'checkin',
       headerName: 'Check In',
-      width: 170
+      flex: 1
     },
     {
       field: 'checkout',
       headerName: 'Check Out',
-      width: 150
+      flex: 1
     },
     {
       field: 'dateType',
       headerName: 'Date Type',
-      width: 150
+      flex: 1
     },
     {
       field: 'systemCheckIn',
       headerName: 'System Check In',
-      width: 150
+      flex: 1
     },
     {
       field: 'systemCheckOut',
       headerName: 'System Check Out',
-      width: 150
+      flex: 1
     },
     {
       field: 'totalAttendance',
       headerName: 'Total Attendance',
-      width: 150
+      flex: 1
     },
     {
       field: 'totalPaid',
       headerName: 'Total Paid',
-      width: 100
+      flex: 1
     }
   ]
 
@@ -151,12 +174,12 @@ const CreateEvaluate = () => {
     {
       field: 'dateDaily',
       headerName: 'Date',
-      flex: 1
+      width: 280
     },
     {
       field: 'totalAttendance',
       headerName: 'Total Attendance',
-      flex: 1
+      width: 170
     },
     {
       field: 'morningTotal',
@@ -174,7 +197,7 @@ const CreateEvaluate = () => {
       valueGetter: ({ value }) => {
         return value === true ? 1 : 0
       },
-      flex: 1
+      width: 150
     },
     {
       field: 'earlyCheckout',
@@ -182,7 +205,7 @@ const CreateEvaluate = () => {
       valueGetter: ({ value }) => {
         return value === true ? 1 : 0
       },
-      flex: 1
+      width: 150
     },
     {
       field: 'permittedLeave',
@@ -192,7 +215,7 @@ const CreateEvaluate = () => {
     {
       field: 'nonPermittedLeave',
       headerName: 'Non Permitted Leave',
-      flex: 1
+      width: 200
     },
     {
       field: 'violate',
@@ -249,7 +272,7 @@ const CreateEvaluate = () => {
           <Box mt={1}>
             <TableContainer>
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                <TableHead>
+              <TableHead>
                   <TableRow sx={{ '&:last-child td, &:last-child th': { border: 1, padding: '8px' } }}>
                   <TableCell component="th" scope="row"></TableCell>
                     <TableCell sx={{fontSize: 16, fontWeight: 700}} align="center">Total Attendance</TableCell>
@@ -285,7 +308,7 @@ const CreateEvaluate = () => {
                       {userAttendance?.totalAttendanceUser?.earlyCheckoutTotal}
                     </TableCell>
                     <TableCell align="center">
-                      {userAttendance?.totalAttendanceUser?.permittedLeave.toFixed(2)}
+                      {userAttendance?.totalAttendanceUser?.permittedLeave}
                     </TableCell>
                     <TableCell align="center">
                       {userAttendance?.totalAttendanceUser?.nonPermittedLeave.toFixed(2)}
@@ -358,6 +381,24 @@ const CreateEvaluate = () => {
               </Typography>
             ) : null}
           </Box>
+          {userEvaluate?.hrNote !== null && (
+            <Box mt={3}>
+              <Divider />
+              <Box display="flex" alignItems="center" gap="5px" mt={2} fontSize="18px">
+                Status:{' '}
+                <Typography color="red" fontSize="16px">
+                  Reject
+                </Typography>
+              </Box>
+              <TextField
+                sx={{ width: '100%', backgroundColor: '#f0f0f0' }}
+                InputProps={{ readOnly: true }}
+                multiline
+                rows={3}
+                value={`${userEvaluate.hrNote}`}
+              />
+            </Box>
+          )}
           <Box display="flex" justifyContent="space-between" mt={2}>
             <Button variant="contained" onClick={() => navigate(-1)}>
               Back
@@ -372,4 +413,4 @@ const CreateEvaluate = () => {
   )
 }
 
-export default CreateEvaluate
+export default UpdateEvaluate

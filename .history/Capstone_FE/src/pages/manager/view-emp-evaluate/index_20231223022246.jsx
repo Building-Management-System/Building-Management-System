@@ -238,8 +238,9 @@ const ViewEmpEvaluateReportByManager = () => {
           Approve Date: {`${formatDateNotTime(evaluate.approvedDate)}`}
         </Typography>
         <Box display='flex' gap='5px' alignItems='center'>
-        <Typography>NOTE: </Typography>
+        <Typography fontSize='20px'>NOTE: </Typography>
         <Typography
+        fontSize='20px'
           dangerouslySetInnerHTML={{
             __html: evaluate.note
           }}></Typography>

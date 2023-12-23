@@ -1,15 +1,14 @@
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import { CKEditor } from '@ckeditor/ckeditor5-react'
 import { Box, Button, Grid, MenuItem, Modal, Select, TextField, Typography } from '@mui/material'
-import { DatePicker, LocalizationProvider, TimePicker } from '@mui/x-date-pickers'
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import dayjs from 'dayjs'
 import { useFormik } from 'formik'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import requestApi from '../../../../services/requestApi'
 import { validationSchema } from './util/validationSchema'
-import overtimeApi from '../../../../services/overtimeApi'
+import { toast } from 'react-toastify'
 
 const style = {
   position: 'absolute',
@@ -23,19 +22,22 @@ const style = {
   p: 4
 }
 
-ClassicEditor.defaultConfig = {
-  toolbar: {
-    items: ['heading', '|', 'bold', '|', 'bulletedList', 'numberedList']
-  },
-  language: 'en'
-}
-const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest }) => {
-  const [from, setFrom] = useState(dayjs(new Date()))
-  const [to, setTo] = useState(dayjs(new Date()))
-  const [date, setDate] = useState(dayjs(new Date()))
-  const [overtimeSystem, setOvertimeSystem] = useState({})
+const LateRequestModal = ({ openLateRequest, handleCloseLateRequest, dailyLogModal }) => {
+  const [lateDuration, setLateDuration] = useState('')
   const [receiveIdAndDepartment, setReceiveIdAndDepartment] = useState('')
   const userId = useSelector((state) => state.auth.login?.currentUser?.accountId)
+
+  let inputDateString = dailyLogModal?.dateDaily
+
+  let inputDate = new Date(inputDateString)
+
+  let year = inputDate.getFullYear()
+  let month = (inputDate.getMonth() + 1).toString().padStart(2, '0')
+  let day = inputDate.getDate().toString().padStart(2, '0')
+
+  let outputDateString = `${year}-${month}-${day}`
+
+  console.log(outputDateString)
   useEffect(() => {
     const fetchReceiveIdAndDepartment = async () => {
       const response = await requestApi.getReceiveIdAndDepartment(userId)
@@ -43,18 +45,13 @@ const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest 
     }
     fetchReceiveIdAndDepartment()
   }, [])
-  useEffect(() => {
-    const fetchOvertimeSystem = async () => {
-      const response = await overtimeApi.getOvertimeSystem(userId, date.format('YYYY-MM-DD'))
-      setOvertimeSystem(response)
-    }
-    fetchOvertimeSystem()
-  }, [date])
+
   const formik = useFormik({
     initialValues: {
       title: '',
       content: '',
-      topicOvertime: 'WEEKEND_AND_NORMAL_DAY'
+      lateType: 'LATE_MORNING',
+      lateDuration: ''
     },
     validationSchema: validationSchema,
     onSubmit: (values, {resetForm}) => {
@@ -62,23 +59,29 @@ const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest 
         userId: userId,
         title: values.title,
         content: values.content,
-        topicOvertime: values.topicOvertime,
-        overtimeDate: date.format('YYYY-MM-DD'),
-        fromTime: from.format('HH:mm:ss'),
-        toTime: to.format('HH:mm:ss'),
+        lateType: values.lateType,
+        lateDuration: lateDuration,
+        requestDate: outputDateString,
         departmentId: receiveIdAndDepartment?.managerInfoResponse?.managerDepartmentId,
         receivedId: receiveIdAndDepartment?.managerInfoResponse?.managerId
       }
+      if (!lateDuration) {
+        toast.error('Please enter the duration.');
+        return; 
+      }
+      
+      else{
       console.log(data)
-      requestApi.requestOverTimeForm(data)
+      requestApi.requestLateForm(data)
       resetForm()
-      handleCloseOvertimeRequest()
+      handleCloseLateRequest()
+      }
     }
   })
   return (
     <Modal
-      open={openOvertimeRequest}
-      onClose={handleCloseOvertimeRequest}
+      open={openLateRequest}
+      onClose={handleCloseLateRequest}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description">
       <Box sx={style}>
@@ -87,10 +90,10 @@ const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest 
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Typography fontWeight="700" fontSize="18px">
-                  Overtime Request
+                  Late Request
                 </Typography>
               </Grid>
-              <Grid item xs={12} sx={{ mb: 1 }}>
+              <Grid item xs={12}>
                 <Typography fontWeight="500">Title</Typography>
                 <TextField
                   name="title"
@@ -108,84 +111,53 @@ const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest 
                 )}
               </Grid>
               <Grid item xs={12}>
+                Type
                 <Select
-                  sx={{ width: '100%' }}
                   onChange={(e) => {
                     formik.handleChange(e)
                   }}
                   onBlur={formik.handleBlur}
-                  value={formik.values.topicOvertime}
-                  name="topicOvertime"
+                  value={formik.values.lateType}
+                  sx={{ width: '100%' }}
+                  name="lateType"
                   displayEmpty>
-                  <MenuItem value="WEEKEND_AND_NORMAL_DAY">WEEKEND AND NORMAL DAY</MenuItem>
-                  <MenuItem value="HOLIDAY">HOLIDAY</MenuItem>
+                  <MenuItem value="LATE_MORNING">LATE CHECK IN</MenuItem>
+                  <MenuItem value="EARLY_AFTERNOON">EARLY CHECK OUT</MenuItem>
                 </Select>
-                {formik.touched.topicOvertime && formik.errors.topicOvertime && (
+                {formik.touched.lateType && formik.errors.lateType && (
                   <Typography sx={{ color: 'red' }} className="error-message">
-                    {formik.errors.topicOvertime}
+                    {formik.errors.lateType}
                   </Typography>
                 )}
               </Grid>
-              {overtimeSystem?.systemCheckin === null ? (
-                <Grid item xs={6} mb={2}>
-                  <Typography fontWeight="500">System Check In</Typography>
-                  <TextField sx={{ width: '100%' }} disabled value="0:00" />
-                </Grid>
-              ) : (
-                <Grid item xs={6} mb={2}>
-                  <Typography fontWeight="500">System Check In</Typography>
-                  <TextField
-                    sx={{ width: '100%' }}
-                    disabled
-                    value={overtimeSystem?.systemCheckin}
-                  />
-                </Grid>
-              )}
-
-              {overtimeSystem?.systemCheckout === null ? (
-                <Grid item xs={6} mb={2}>
-                  <Typography fontWeight="500">System Check Out</Typography>
-                  <TextField sx={{ width: '100%' }} disabled value="0:00" />
-                </Grid>
-              ) : (
-                <Grid item xs={6} mb={2}>
-                  <Typography fontWeight="500">System Check Out</Typography>
-                  <TextField
-                    sx={{ width: '100%' }}
-                    disabled
-                    value={overtimeSystem?.systemCheckout}
-                  />
-                </Grid>
-              )}
               <Grid item xs={4} mb={2}>
                 <Typography fontWeight="500">Date</Typography>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
-                    value={date}
-                    onChange={(e) => setDate(e)}
+                    disabled
+                    value={outputDateString}
+                    onChange={() => {}}
                     renderInput={(props) => <TextField sx={{ width: '100%' }} {...props} />}
                   />
                 </LocalizationProvider>
               </Grid>
               <Grid item xs={4} mb={2}>
-                <Typography fontWeight="500">From</Typography>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <TimePicker
-                    value={from}
-                    onChange={(e) => setFrom(e)}
-                    renderInput={(props) => <TextField sx={{ width: '100%' }} {...props} />}
-                  />
-                </LocalizationProvider>
-              </Grid>
-              <Grid item xs={4} mb={2}>
-                <Typography fontWeight="500">To</Typography>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <TimePicker
-                    value={to}
-                    onChange={(e) => setTo(e)}
-                    renderInput={(props) => <TextField sx={{ width: '100%' }} {...props} />}
-                  />
-                </LocalizationProvider>
+                <Typography fontWeight="500">Duration</Typography>
+                <TextField
+                  value={lateDuration}
+                  onChange={(e) => {
+                    const inputValue = parseInt(e.target.value, 10)
+                    if (inputValue > 90) {
+                      setLateDuration(90)
+                    } else if (inputValue < 0) {
+                      setLateDuration(0)
+                    } else {
+                      setLateDuration(inputValue)
+                    }
+                  }}
+                  sx={{ width: '100%' }}
+                  type="number"
+                />
               </Grid>
               <Grid item xs={12}>
                 <Typography fontWeight="500">Reason</Typography>
@@ -207,7 +179,7 @@ const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest 
             )} */}
               </Grid>
             </Grid>
-            <Box pt={2} display="flex" alignItems="flex-end" justifyContent="flex-end">
+            <Box pt={2} display="flex" alignItems="flex-end" justifyContent="space-between">
               <Button type="submit" variant="contained">
                 Save
               </Button>
@@ -219,4 +191,4 @@ const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest 
   )
 }
 
-export default OvertimeRequestModal
+export default LateRequestModal

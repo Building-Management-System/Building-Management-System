@@ -1,15 +1,16 @@
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import { CKEditor } from '@ckeditor/ckeditor5-react'
-import { Box, Button, Grid, MenuItem, Modal, Select, TextField, Typography } from '@mui/material'
+import { Box, Button, Checkbox, Grid, Modal, TextField, Typography } from '@mui/material'
 import { DatePicker, LocalizationProvider, TimePicker } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 import { useFormik } from 'formik'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
 import requestApi from '../../../../services/requestApi'
-import { validationSchema } from './util/validationSchema'
-import overtimeApi from '../../../../services/overtimeApi'
+import { validationAttendanceSchema } from './util/validationAttendanceSchema'
+import { toast } from 'react-toastify'
 
 const style = {
   position: 'absolute',
@@ -23,19 +24,17 @@ const style = {
   p: 4
 }
 
-ClassicEditor.defaultConfig = {
-  toolbar: {
-    items: ['heading', '|', 'bold', '|', 'bulletedList', 'numberedList']
-  },
-  language: 'en'
-}
-const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest }) => {
+const AttendanceRequestModal = ({ openAttendanceRequest, handleCloseAttendanceRequest }) => {
   const [from, setFrom] = useState(dayjs(new Date()))
   const [to, setTo] = useState(dayjs(new Date()))
   const [date, setDate] = useState(dayjs(new Date()))
-  const [overtimeSystem, setOvertimeSystem] = useState({})
   const [receiveIdAndDepartment, setReceiveIdAndDepartment] = useState('')
   const userId = useSelector((state) => state.auth.login?.currentUser?.accountId)
+  const currentUser = useSelector((state) => state.auth.login?.currentUser)
+  const [isFrom, setIsFrom] = useState(true)
+  const [isTo, setIsTo] = useState(true)
+  const currentDate = new Date()
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
   useEffect(() => {
     const fetchReceiveIdAndDepartment = async () => {
       const response = await requestApi.getReceiveIdAndDepartment(userId)
@@ -43,42 +42,57 @@ const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest 
     }
     fetchReceiveIdAndDepartment()
   }, [])
-  useEffect(() => {
-    const fetchOvertimeSystem = async () => {
-      const response = await overtimeApi.getOvertimeSystem(userId, date.format('YYYY-MM-DD'))
-      setOvertimeSystem(response)
-    }
-    fetchOvertimeSystem()
-  }, [date])
+
+  const handleChangeFrom = (event) => {
+    setIsFrom(event.target.checked)
+  }
+
+  const handleChangeTo = (event) => {
+    setIsTo(event.target.checked)
+  }
+
   const formik = useFormik({
     initialValues: {
       title: '',
-      content: '',
-      topicOvertime: 'WEEKEND_AND_NORMAL_DAY'
+      content: ''
     },
-    validationSchema: validationSchema,
-    onSubmit: (values, {resetForm}) => {
+    validationSchema: validationAttendanceSchema,
+    onSubmit: (values, { resetForm }) => {
+      const manualDate = date.format('YYYY-MM-DD');
+      let showDateWarning = false;
       let data = {
         userId: userId,
         title: values.title,
         content: values.content,
-        topicOvertime: values.topicOvertime,
-        overtimeDate: date.format('YYYY-MM-DD'),
-        fromTime: from.format('HH:mm:ss'),
-        toTime: to.format('HH:mm:ss'),
+        manualDate: manualDate,
+        manualFirstEntry: isFrom ? from.format('HH:mm:ss') : null,
+        manualLastExit: isTo ? to.format('HH:mm:ss') : null,
         departmentId: receiveIdAndDepartment?.managerInfoResponse?.managerDepartmentId,
         receivedId: receiveIdAndDepartment?.managerInfoResponse?.managerId
       }
+      if (dayjs(manualDate).month() !== currentDate.getMonth() || dayjs(manualDate).year() !== currentDate.getFullYear()) {
+        showDateWarning = true;
+      }
+
+      if (showDateWarning) {
+        toast.warning("Dates are only allowed from the beginning of the month to the current date.");
+        return;
+      }
+      if (!isFrom && !isTo) {
+        toast.warning("The 'From' and 'To' cannot be null at the same time.");
+        return;
+      }
       console.log(data)
-      requestApi.requestOverTimeForm(data)
+      requestApi.requestAttendanceForm(data)
       resetForm()
-      handleCloseOvertimeRequest()
+      handleCloseAttendanceRequest()
     }
   })
+
   return (
     <Modal
-      open={openOvertimeRequest}
-      onClose={handleCloseOvertimeRequest}
+      open={openAttendanceRequest}
+      onClose={handleCloseAttendanceRequest}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description">
       <Box sx={style}>
@@ -87,10 +101,10 @@ const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest 
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Typography fontWeight="700" fontSize="18px">
-                  Overtime Request
+                  Attendance Request
                 </Typography>
               </Grid>
-              <Grid item xs={12} sx={{ mb: 1 }}>
+              <Grid item xs={12}>
                 <Typography fontWeight="500">Title</Typography>
                 <TextField
                   name="title"
@@ -101,94 +115,58 @@ const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest 
                   size="small"
                   placeholder="Enter the request title"
                 />
-                {formik.touched.title && formik.errors.title && (
-                  <Typography sx={{ color: 'red' }} className="error-message">
+                {formik.touched.title && formik.errors.title ? (
+                  <Typography sx={{ color: 'red', textAlign: 'left', fontSize: '15px' }}>
                     {formik.errors.title}
                   </Typography>
-                )}
+                ) : null}
               </Grid>
-              <Grid item xs={12}>
-                <Select
-                  sx={{ width: '100%' }}
-                  onChange={(e) => {
-                    formik.handleChange(e)
-                  }}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.topicOvertime}
-                  name="topicOvertime"
-                  displayEmpty>
-                  <MenuItem value="WEEKEND_AND_NORMAL_DAY">WEEKEND AND NORMAL DAY</MenuItem>
-                  <MenuItem value="HOLIDAY">HOLIDAY</MenuItem>
-                </Select>
-                {formik.touched.topicOvertime && formik.errors.topicOvertime && (
-                  <Typography sx={{ color: 'red' }} className="error-message">
-                    {formik.errors.topicOvertime}
-                  </Typography>
-                )}
-              </Grid>
-              {overtimeSystem?.systemCheckin === null ? (
-                <Grid item xs={6} mb={2}>
-                  <Typography fontWeight="500">System Check In</Typography>
-                  <TextField sx={{ width: '100%' }} disabled value="0:00" />
-                </Grid>
-              ) : (
-                <Grid item xs={6} mb={2}>
-                  <Typography fontWeight="500">System Check In</Typography>
-                  <TextField
-                    sx={{ width: '100%' }}
-                    disabled
-                    value={overtimeSystem?.systemCheckin}
-                  />
-                </Grid>
-              )}
-
-              {overtimeSystem?.systemCheckout === null ? (
-                <Grid item xs={6} mb={2}>
-                  <Typography fontWeight="500">System Check Out</Typography>
-                  <TextField sx={{ width: '100%' }} disabled value="0:00" />
-                </Grid>
-              ) : (
-                <Grid item xs={6} mb={2}>
-                  <Typography fontWeight="500">System Check Out</Typography>
-                  <TextField
-                    sx={{ width: '100%' }}
-                    disabled
-                    value={overtimeSystem?.systemCheckout}
-                  />
-                </Grid>
-              )}
               <Grid item xs={4} mb={2}>
                 <Typography fontWeight="500">Date</Typography>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
                     value={date}
-                    onChange={(e) => setDate(e)}
+                    onChange={(date) => {
+                      setDate(date)
+                    }}
                     renderInput={(props) => <TextField sx={{ width: '100%' }} {...props} />}
+                    minDate={firstDayOfMonth}
+                    maxDate={currentDate}
                   />
                 </LocalizationProvider>
               </Grid>
               <Grid item xs={4} mb={2}>
-                <Typography fontWeight="500">From</Typography>
+                <Box display="flex" gap="5px">
+                  <Typography fontWeight="500">From</Typography>
+                  <Checkbox sx={{ p: 0 }} checked={isFrom} onChange={handleChangeFrom}/>
+                </Box>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <TimePicker
+                    disabled={isFrom ? false : true}
                     value={from}
                     onChange={(e) => setFrom(e)}
                     renderInput={(props) => <TextField sx={{ width: '100%' }} {...props} />}
                   />
                 </LocalizationProvider>
               </Grid>
+
               <Grid item xs={4} mb={2}>
-                <Typography fontWeight="500">To</Typography>
+                <Box display="flex" gap="5px">
+                  <Typography fontWeight="500">To</Typography>
+                  <Checkbox sx={{ p: 0 }} checked={isTo} onChange={handleChangeTo} />
+                </Box>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <TimePicker
+                    disabled={isTo ? false : true}
                     value={to}
                     onChange={(e) => setTo(e)}
                     renderInput={(props) => <TextField sx={{ width: '100%' }} {...props} />}
                   />
                 </LocalizationProvider>
               </Grid>
+
               <Grid item xs={12}>
-                <Typography fontWeight="500">Reason</Typography>
+                <Typography fontWeight="500">Content</Typography>
                 <CKEditor
                   editor={ClassicEditor}
                   data={formik.values.content}
@@ -202,12 +180,36 @@ const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest 
                     {formik.errors.content}
                   </Typography>
                 ) : null}
-                {/* {formik.touched.content && formik.errors.content && (
-              <div className="error-message">{formik.errors.content}</div>
-            )} */}
               </Grid>
             </Grid>
-            <Box pt={2} display="flex" alignItems="flex-end" justifyContent="flex-end">
+            <Box pt={2} display="flex" alignItems="flex-end" justifyContent="space-between">
+              {currentUser?.role === 'employee' ? (
+                <Link to="/request-list-employee">
+                  <Button type="submit" variant="contained">
+                    Back
+                  </Button>
+                </Link>
+              ) : currentUser?.role === 'manager' ? (
+                <Link to="/request-manager-list">
+                  <Button type="submit" variant="contained">
+                    Back
+                  </Button>
+                </Link>
+              ) : currentUser?.role === 'admin' ? (
+                <Link to="/request-list-admin">
+                  <Button type="submit" variant="contained">
+                    Back
+                  </Button>
+                </Link>
+              ) : currentUser?.role === 'hr' ? (
+                <Link to="/request-hr-list">
+                  <Button type="submit" variant="contained">
+                    Back
+                  </Button>
+                </Link>
+              ) : (
+                <></>
+              )}
               <Button type="submit" variant="contained">
                 Save
               </Button>
@@ -219,4 +221,4 @@ const OvertimeRequestModal = ({ openOvertimeRequest, handleCloseOvertimeRequest 
   )
 }
 
-export default OvertimeRequestModal
+export default AttendanceRequestModal

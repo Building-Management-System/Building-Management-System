@@ -48,7 +48,7 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />
 const checkedIcon = <CheckBoxIcon fontSize="small" />
 ClassicEditor.defaultConfig = {
   toolbar: {
-    items: ['heading', '|', 'bold', '|', 'bulletedList', 'numberedList']
+    items: ['heading', '|', 'bold', 'italic', '|', 'bulletedList', 'numberedList']
   },
   language: 'en'
 }

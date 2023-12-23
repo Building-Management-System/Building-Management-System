@@ -343,9 +343,9 @@ const DeviceManage = () => {
     }
     try {
       await securityApi.updateDevice(data)
-      toast.success('Update device successfully')
-      handleCloseUpdate()
       navigate(0)
+      handleCloseUpdate()
+      toast.success('Update device successfully')
     } catch (error) {
       if (error.response.status === 400) {
         toast.error('Not found room')
