@@ -11,13 +11,14 @@ const holidayApi = {
     }
   },
 
-  createHoliday : (data) => {
+  createHoliday : async (data) => {
     try {
-      const res = axiosClient.post(`${BASE_URL}/saveHoliday`, data)     
-      return res
+      await axiosClient.post(`${BASE_URL}/saveHoliday`, data)
+      toast.success('Create holiday successfully')
+      return 1
     } catch (error) {
       if (error.response.status === 400) {
-        toast.error("You can't create holiday before current time")
+        toast.error("You can't book room before current time")
       }
       if (error.response.status === 404) {
         toast.error('User not found!')

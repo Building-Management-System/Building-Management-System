@@ -105,8 +105,7 @@ const ChangeLogView = () => {
         fromDate: timeStart,
         toDate: timeEnd
       }      
-      try {
-        const res = await holidayApi.createHoliday(data)
+      const res = await holidayApi.createHoliday(data)
       setHolidays((prevData) => {
         let dataAdd = {
           id: res,
@@ -123,14 +122,6 @@ const ChangeLogView = () => {
         }
         return newData
       })
-      } catch (error) {
-        if (error.response.status === 400) {
-          toast.error("You can't book room before current time")
-        }
-        if (error.response.status === 404) {
-          toast.error('User not found!')
-        }
-      }
     } else if ((added && added.title === '') || (added && added.content === '')) {
       toast.error(`All field can't be blank`)
     } else if (deleted !== undefined) {

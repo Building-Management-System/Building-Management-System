@@ -17,7 +17,7 @@ const holidayApi = {
       return res
     } catch (error) {
       if (error.response.status === 400) {
-        toast.error("You can't create holiday before current time")
+        toast.error("You can't book room before current time")
       }
       if (error.response.status === 404) {
         toast.error('User not found!')

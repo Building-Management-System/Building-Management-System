@@ -104,33 +104,25 @@ const ChangeLogView = () => {
         content: added.content,
         fromDate: timeStart,
         toDate: timeEnd
-      }      
-      try {
-        const res = await holidayApi.createHoliday(data)
+      }
+
+      let dataAdd = {
+        id: currentUser?.accountId + dateStart.format('YYYY-MM-DD HH:mm:ss'),
+        startDate: dateStart.format('YYYY-MM-DD'),
+        endDate: dateEnd.add(1, 'days').format('YYYY-MM-DD'),
+        title: added.title,
+        content: added.content,
+        username: decoded.sub
+      }
+      const res = await holidayApi.createHoliday(data)
       setHolidays((prevData) => {
-        let dataAdd = {
-          id: res,
-          startDate: dateStart.format('YYYY-MM-DD'),
-          endDate: dateEnd.add(1, 'days').format('YYYY-MM-DD'),
-          title: added.title,
-          content: added.content,
-          username: decoded.sub
-        }
         let newData = [...prevData]
         if (added && res) {
           newData = [...newData, dataAdd]
-          toast.success('Create holiday successfully')
         }
+
         return newData
       })
-      } catch (error) {
-        if (error.response.status === 400) {
-          toast.error("You can't book room before current time")
-        }
-        if (error.response.status === 404) {
-          toast.error('User not found!')
-        }
-      }
     } else if ((added && added.title === '') || (added && added.content === '')) {
       toast.error(`All field can't be blank`)
     } else if (deleted !== undefined) {
