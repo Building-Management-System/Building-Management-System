@@ -484,7 +484,6 @@ export default function LogEmpAttendanceByIdList() {
           userName={userName}
           date={dailyLogModal?.dateDaily}
           employeeId={employee}
-          setDailyLog={setDailyLog}
         />
       </Box>
     </>

@@ -27,7 +27,7 @@ const style = {
 };
 
 const EditEmpLogAttendence = ({ openEditLog, handleCloseEditLog, dailyLogModal, userName, systemCheckIn,
-  systemCheckOut, employeeId, date, manualCheckIn, manualCheckOut, setDailyLog }) => {
+  systemCheckOut, employeeId, date, manualCheckIn, manualCheckOut }) => {
 
   const userId = useSelector((state) => state.auth.login?.currentUser?.accountId);
 

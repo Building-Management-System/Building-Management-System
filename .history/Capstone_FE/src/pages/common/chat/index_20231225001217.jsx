@@ -418,7 +418,7 @@ const Chat = () => {
     arrivalMessage && isActiveUser?.chatId === arrivalMessage?.chatId && setMessages((pre) => [...pre, arrivalMessage])
   }, [arrivalMessage])
 
-  console.log(userChangeAdmin)
+  console.log(messages)
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0])
@@ -1184,7 +1184,7 @@ const Chat = () => {
               multiple
               id="tags-outlined"
               options={allUserUpdate}
-              defaultValue={userGroupUpdate && userGroupUpdate.filter((user) => {
+              defaultValue={userGroupUpdate.filter((user) => {
                 return user.accountId !== currentUserId
               })}
               value={selectedUserGroup ? selectedUserGroup.accountId : []}
@@ -1220,9 +1220,7 @@ const Chat = () => {
                 label="Username"
                 onChange={(e) => setUserChangeAdmin(e.target.value)}>
                 {isActiveUser &&
-                  isActiveUser?.user.filter((user) => {
-                    return user.accountId !== currentUserId
-                  }).map((item) => (
+                  isActiveUser?.user.map((item) => (
                     <MenuItem key={item.accountId} value={item.accountId}>
                       {item.username}
                     </MenuItem>

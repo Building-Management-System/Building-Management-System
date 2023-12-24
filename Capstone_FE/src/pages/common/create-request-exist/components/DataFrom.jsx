@@ -298,4 +298,3 @@ const OtherRequest = ({ userId }) => {
 }
 
 export { OtherRequest }
-

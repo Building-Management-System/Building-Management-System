@@ -418,7 +418,7 @@ const Chat = () => {
     arrivalMessage && isActiveUser?.chatId === arrivalMessage?.chatId && setMessages((pre) => [...pre, arrivalMessage])
   }, [arrivalMessage])
 
-  console.log(userChangeAdmin)
+  console.log(messages)
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0])
@@ -528,9 +528,7 @@ const Chat = () => {
       })
 
       setIsActiveUser(res)
-      const copyWithoutFirstElement = selectedUserGroupId.slice(1)
-      console.log(copyWithoutFirstElement);
-      setSelectedUserGroup(copyWithoutFirstElement)
+      setSelectedUserGroup(selectedUserGroupId.slice(1))
       handleCloseUpdateGroup()
     } else {
       toast.error(`Chat name can't be blank or number member in the group must be greater than 1`)
@@ -1184,9 +1182,7 @@ const Chat = () => {
               multiple
               id="tags-outlined"
               options={allUserUpdate}
-              defaultValue={userGroupUpdate && userGroupUpdate.filter((user) => {
-                return user.accountId !== currentUserId
-              })}
+              defaultValue={userGroupUpdate}
               value={selectedUserGroup ? selectedUserGroup.accountId : []}
               getOptionLabel={(option) => option.username}
               onChange={(event, newValue) => setSelectedUserGroup(newValue)}
@@ -1220,9 +1216,7 @@ const Chat = () => {
                 label="Username"
                 onChange={(e) => setUserChangeAdmin(e.target.value)}>
                 {isActiveUser &&
-                  isActiveUser?.user.filter((user) => {
-                    return user.accountId !== currentUserId
-                  }).map((item) => (
+                  isActiveUser?.user.map((item) => (
                     <MenuItem key={item.accountId} value={item.accountId}>
                       {item.username}
                     </MenuItem>

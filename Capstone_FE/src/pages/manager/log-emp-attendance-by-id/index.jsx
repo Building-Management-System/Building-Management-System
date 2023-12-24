@@ -35,8 +35,8 @@ export default function LogEmpAttendanceById() {
                 if (selectedOption === 'option1') {
                     response = await attendanceApi.getAttendanceUser(
                         employee_id,
-                        date.split('-')[0],
                         date.split('-')[1],
+                        date.split('-')[0],
                     );
                     const { username, hireDate } = response;
                     setUserAttendance(response);
@@ -46,8 +46,8 @@ export default function LogEmpAttendanceById() {
                 } else if (selectedOption === 'option2') {
                     response = await overtimeApi.getOvertimeUser(
                         employee_id,
-                        date.split('-')[0],
                         date.split('-')[1],
+                        date.split('-')[0],
                     );
                     const option2DataWithId = response?.overTimeLogResponses.map((item, index) => ({
                         ...item,
@@ -158,7 +158,7 @@ console.log(createdDate);
                     const totalAttendance = dailyLog.reduce((total, item) => total + item.totalAttendance, 0)
                     return `${totalAttendance.toFixed(2)}`
                 }
-                return value
+                return Math.round(value *100 ) /100
             }
         },
         {
@@ -170,7 +170,7 @@ console.log(createdDate);
                     const morningTotal = dailyLog.reduce((total, item) => total + item.morningTotal, 0)
                     return `${morningTotal.toFixed(2)}`
                 }
-                return value
+                return Math.round(value *100 ) /100
             }
         },
         {
@@ -182,7 +182,7 @@ console.log(createdDate);
                     const afternoonTotal = dailyLog.reduce((total, item) => total + item.afternoonTotal, 0)
                     return `${afternoonTotal.toFixed(2)}`
                 }
-                return value
+                return Math.round(value *100 ) /100
             }
         },
         {
@@ -214,9 +214,9 @@ console.log(createdDate);
             valueGetter: ({ row, value }) => {
                 if (row.id === 'TOTAL') {
                     const permittedLeave = dailyLog.reduce((total, item) => total + item.permittedLeave, 0)
-                    return `${permittedLeave}`
+                    return `${permittedLeave.toFixed(2)}`
                 }
-                return value
+                return Math.round(value *100 ) /100
             }
         },
         {
@@ -226,9 +226,9 @@ console.log(createdDate);
             valueGetter: ({ row, value }) => {
                 if (row.id === 'TOTAL') {
                     const nonPermittedLeave = dailyLog.reduce((total, item) => total + item.nonPermittedLeave, 0)
-                    return `${nonPermittedLeave}`
+                    return `${nonPermittedLeave.toFixed(2)}`
                 }
-                return value
+                return Math.round(value *100 ) /100
             }
         },
         {

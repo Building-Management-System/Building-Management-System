@@ -29,7 +29,7 @@ import EvaluateTable from './component/DataTable'
 import { validationSchema } from './util/validationSchema'
 ClassicEditor.defaultConfig = {
   toolbar: {
-    items: ['heading']
+    items: ['heading', '|', 'bold', 'italic', '|', 'bulletedList', 'numberedList']
   },
   language: 'en'
 }
@@ -129,8 +129,8 @@ const UpdateEvaluate = () => {
 
   const columnOverTime = [
     {
-      field: 'approveDate',
-      headerName: 'Approve Date',
+      field: 'date',
+      headerName: 'Date',
       flex: 1
     },
     {
@@ -179,17 +179,25 @@ const UpdateEvaluate = () => {
     {
       field: 'totalAttendance',
       headerName: 'Total Attendance',
-      width: 170
+      width: 170,
+      renderCell: (params) => (
+        <strong>{params.value !== undefined ? params.value.toFixed(2) : ''}</strong>
+      ),
     },
     {
       field: 'morningTotal',
       headerName: 'Total Morning',
-      flex: 1
+      flex: 1,
+      renderCell: (params) => (
+        <strong>{params.value !== undefined ? params.value.toFixed(2) : ''}</strong>
+      ),
     },
     {
       field: 'afternoonTotal',
       headerName: 'Total Afternoon',
-      flex: 1
+      flex: 1,  renderCell: (params) => (
+        <strong>{params.value !== undefined ? params.value.toFixed(2) : ''}</strong>
+      ),
     },
     {
       field: 'lateCheckin',
@@ -210,12 +218,18 @@ const UpdateEvaluate = () => {
     {
       field: 'permittedLeave',
       headerName: 'Permitted Leave',
-      flex: 1
+      flex: 1,
+      renderCell: (params) => (
+        <strong>{params.value !== undefined ? params.value.toFixed(2) : ''}</strong>
+      ),
     },
     {
       field: 'nonPermittedLeave',
       headerName: 'Non Permitted Leave',
-      width: 200
+      width: 200,
+      renderCell: (params) => (
+        <strong>{params.value !== undefined ? params.value.toFixed(2) : ''}</strong>
+      ),
     },
     {
       field: 'violate',
@@ -228,7 +242,10 @@ const UpdateEvaluate = () => {
     {
       field: 'paidDay',
       headerName: 'Paid Day',
-      flex: 1
+      flex: 1,
+      renderCell: (params) => (
+        <strong>{params.value !== undefined ? params.value.toFixed(2) : ''}</strong>
+      ),
     }
   ]
 
@@ -299,16 +316,16 @@ const UpdateEvaluate = () => {
                       {userAttendance?.totalAttendanceUser?.morningTotal.toFixed(2)}
                     </TableCell>
                     <TableCell align="center">
-                      {userAttendance?.totalAttendanceUser?.afternoonTotal}
+                      {userAttendance?.totalAttendanceUser?.afternoonTotal.toFixed(2)}
                     </TableCell>
                     <TableCell align="center">
-                      {userAttendance?.totalAttendanceUser?.lateCheckinTotal}
+                      {userAttendance?.totalAttendanceUser?.lateCheckinTotal.toFixed(2)}
                     </TableCell>
                     <TableCell align="center">
-                      {userAttendance?.totalAttendanceUser?.earlyCheckoutTotal}
+                      {userAttendance?.totalAttendanceUser?.earlyCheckoutTotal.toFixed(2)}
                     </TableCell>
                     <TableCell align="center">
-                      {userAttendance?.totalAttendanceUser?.permittedLeave}
+                      {userAttendance?.totalAttendanceUser?.permittedLeave.toFixed(2)}
                     </TableCell>
                     <TableCell align="center">
                       {userAttendance?.totalAttendanceUser?.nonPermittedLeave.toFixed(2)}

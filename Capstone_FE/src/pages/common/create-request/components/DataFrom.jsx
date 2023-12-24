@@ -204,7 +204,7 @@ const OtFrom = () => {
   const [overtimeSystem, setOvertimeSystem] = useState({})
   const [receiveIdAndDepartment, setReceiveIdAndDepartment] = useState('')
   const currentDate = new Date()
-  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+  // const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
   const userId = useSelector((state) => state.auth.login?.currentUser?.accountId)
   const navigate = useNavigate()
   const handleChange = (event) => {
@@ -328,7 +328,7 @@ const OtFrom = () => {
                 value={date}
                 onChange={(e) => setDate(e)}
                 renderInput={(props) => <TextField sx={{ width: '100%' }} {...props} />}
-                minDate={firstDayOfMonth}
+               
               />
             </LocalizationProvider>
           </Grid>

@@ -13,8 +13,7 @@ const holidayApi = {
 
   createHoliday : (data) => {
     try {
-     const res = axiosClient.post(`${BASE_URL}/saveHoliday`, data)
-     return res
+     axiosClient.post(`${BASE_URL}/saveHoliday`, data)
     } catch (error) {
       if (error.response.status === 400) {
         toast.error("You can't book room before current time")

@@ -130,9 +130,6 @@ const ChangeLogView = () => {
         if (error.response.status === 404) {
           toast.error('User not found!')
         }
-        if (error.response.status === 409) {
-          toast.error(`All field can't be blank`)
-        }
       }
     } else if ((added && added.title === '') || (added && added.content === '')) {
       toast.error(`All field can't be blank`)
