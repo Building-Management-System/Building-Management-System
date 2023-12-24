@@ -225,7 +225,7 @@ const ViewLogAttendance = () => {
             valueGetter: ({ row, value }) => {
                 if (row.id === 'TOTAL') {
                     const permittedLeave = dailyLog.reduce((total, item) => total + item.permittedLeave, 0)
-                    return `${permittedLeave}`
+                    return `${permittedLeave.toFixed(2)}`
                 }
                 return value
             }
@@ -240,7 +240,7 @@ const ViewLogAttendance = () => {
                         (total, item) => total + item.nonPermittedLeave,
                         0
                     )
-                    return `${nonPermittedLeave}`
+                    return `${nonPermittedLeave.toFixed(2)}`
                 }
                 return value
             }

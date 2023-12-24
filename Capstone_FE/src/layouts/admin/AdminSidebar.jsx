@@ -104,7 +104,7 @@ const AdminSidebar = () => {
           </IconButton>
         </Box>
         <Divider />
-        <Box height="60px" bgcolor="white" display="flex" alignItems="center" ml="20px" gap="20px">
+        <Box height="88px" bgcolor="white" display="flex" alignItems="center" ml="20px" gap="20px">
           <Avatar
             sx={{
               cursor: 'pointer',

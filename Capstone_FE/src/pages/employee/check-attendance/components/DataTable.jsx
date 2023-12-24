@@ -10,10 +10,10 @@ const StripedDataGrid = styled(DataGrid)(() => ({
     color: 'gray'
   },
   '.early-checkout-cell .MuiDataGrid-cellContent': {
-    color: '#DAA520	'
+    color: '#DAA520'
   },
   '.holiday-cell .MuiDataGrid-cellContent': {
-    color: 'gray'
+    color: '#228B22'
   },
 }))
 const DataTableCheckAttendance = ({ rows, columns, isLoading, CustomToolbar }) => {

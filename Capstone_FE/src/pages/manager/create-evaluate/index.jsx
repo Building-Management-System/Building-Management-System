@@ -29,7 +29,7 @@ import { validationSchema } from './util/validationSchema'
 
 ClassicEditor.defaultConfig = {
   toolbar: {
-    items: ['heading']
+    items: ['heading', '|', 'bold', 'italic', '|', 'bulletedList', 'numberedList']
   },
   language: 'en'
 }
@@ -106,8 +106,8 @@ const CreateEvaluate = () => {
 
   const columnOverTime = [
     {
-      field: 'approveDate',
-      headerName: 'Approve Date',
+      field: 'date',
+      headerName: 'Date',
       width: 280
     },
     {
@@ -151,22 +151,32 @@ const CreateEvaluate = () => {
     {
       field: 'dateDaily',
       headerName: 'Date',
-      flex: 1
+  width:280
     },
     {
       field: 'totalAttendance',
       headerName: 'Total Attendance',
-      flex: 1
+      flex: 1,
+      renderCell: (params) => (
+        <strong>{params.value !== undefined ? params.value.toFixed(2) : ''}</strong>
+      ),
+
     },
     {
       field: 'morningTotal',
       headerName: 'Total Morning',
-      flex: 1
+      flex: 1,
+      renderCell: (params) => (
+        <strong>{params.value !== undefined ? params.value.toFixed(2) : ''}</strong>
+      ),
     },
     {
       field: 'afternoonTotal',
       headerName: 'Total Afternoon',
-      flex: 1
+      flex: 1,
+      renderCell: (params) => (
+        <strong>{params.value !== undefined ? params.value.toFixed(2) : ''}</strong>
+      ),
     },
     {
       field: 'lateCheckin',
@@ -187,12 +197,18 @@ const CreateEvaluate = () => {
     {
       field: 'permittedLeave',
       headerName: 'Permitted Leave',
-      flex: 1
+      flex: 1,
+      renderCell: (params) => (
+        <strong>{params.value !== undefined ? params.value.toFixed(2) : ''}</strong>
+      ),
     },
     {
       field: 'nonPermittedLeave',
       headerName: 'Non Permitted Leave',
-      flex: 1
+      flex: 1,
+      renderCell: (params) => (
+        <strong>{params.value !== undefined ? params.value.toFixed(2) : ''}</strong>
+      ),
     },
     {
       field: 'violate',
@@ -205,7 +221,10 @@ const CreateEvaluate = () => {
     {
       field: 'paidDay',
       headerName: 'Paid Day',
-      flex: 1
+      flex: 1,
+      renderCell: (params) => (
+        <strong>{params.value !== undefined ? params.value.toFixed(2) : ''}</strong>
+      ),
     }
   ]
 
@@ -251,16 +270,16 @@ const CreateEvaluate = () => {
               <Table sx={{ minWidth: 650 }} aria-label="simple table">
                 <TableHead>
                   <TableRow sx={{ '&:last-child td, &:last-child th': { border: 1, padding: '8px' } }}>
-                  <TableCell component="th" scope="row"></TableCell>
-                    <TableCell sx={{fontSize: 16, fontWeight: 700}} align="center">Total Attendance</TableCell>
-                    <TableCell sx={{fontSize: 16, fontWeight: 700}} align="center">Morning Total</TableCell>
-                    <TableCell sx={{fontSize: 16, fontWeight: 700}} align="center">Afternoon Total</TableCell>
-                    <TableCell sx={{fontSize: 16, fontWeight: 700}} align="center">Late Checkin Total</TableCell>
-                    <TableCell sx={{fontSize: 16, fontWeight: 700}} align="center">Early Checkout Total</TableCell>
-                    <TableCell sx={{fontSize: 16, fontWeight: 700}} align="center">Permitted Leave</TableCell>
-                    <TableCell sx={{fontSize: 16, fontWeight: 700}} align="center">Non Permitted Leave</TableCell>
-                    <TableCell sx={{fontSize: 16, fontWeight: 700}} align="center">Violate Total</TableCell>
-                    <TableCell sx={{fontSize: 16, fontWeight: 700}} align="center">Paid Day</TableCell>
+                    <TableCell component="th" scope="row"></TableCell>
+                    <TableCell sx={{ fontSize: 16, fontWeight: 700 }} align="center">Total Attendance</TableCell>
+                    <TableCell sx={{ fontSize: 16, fontWeight: 700 }} align="center">Morning Total</TableCell>
+                    <TableCell sx={{ fontSize: 16, fontWeight: 700 }} align="center">Afternoon Total</TableCell>
+                    <TableCell sx={{ fontSize: 16, fontWeight: 700 }} align="center">Late Checkin Total</TableCell>
+                    <TableCell sx={{ fontSize: 16, fontWeight: 700 }} align="center">Early Checkout Total</TableCell>
+                    <TableCell sx={{ fontSize: 16, fontWeight: 700 }} align="center">Permitted Leave</TableCell>
+                    <TableCell sx={{ fontSize: 16, fontWeight: 700 }} align="center">Non Permitted Leave</TableCell>
+                    <TableCell sx={{ fontSize: 16, fontWeight: 700 }} align="center">Violate Total</TableCell>
+                    <TableCell sx={{ fontSize: 16, fontWeight: 700 }} align="center">Paid Day</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -270,13 +289,13 @@ const CreateEvaluate = () => {
                       Total
                     </TableCell>
                     <TableCell align="center">
-                      {userAttendance?.totalAttendanceUser?.totalAttendance}
+                      {userAttendance?.totalAttendanceUser?.totalAttendance.toFixed(2)}
                     </TableCell>
                     <TableCell align="center">
                       {userAttendance?.totalAttendanceUser?.morningTotal.toFixed(2)}
                     </TableCell>
                     <TableCell align="center">
-                      {userAttendance?.totalAttendanceUser?.afternoonTotal}
+                      {userAttendance?.totalAttendanceUser?.afternoonTotal.toFixed(2)}
                     </TableCell>
                     <TableCell align="center">
                       {userAttendance?.totalAttendanceUser?.lateCheckinTotal}

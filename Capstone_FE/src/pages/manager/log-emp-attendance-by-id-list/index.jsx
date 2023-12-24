@@ -101,7 +101,6 @@ export default function LogEmpAttendanceByIdList() {
     console.log(params)
     setDailyLogModal(params)
   }
-
   const handleCloseEditLog = () => setOpenLateRequest(false)
 
   useEffect(() => {
@@ -228,12 +227,28 @@ export default function LogEmpAttendanceByIdList() {
     {
       field: 'systemCheckIn',
       headerName: 'System Check Out',
-      width: 170
+      width: 170,
+      renderCell: (params) => {
+        const systemCheckInValue = params.row.systemCheckIn;
+        if (systemCheckInValue === null ) {
+          return '00:00:00';
+        }
+        // Process and return other display values if needed
+        return systemCheckInValue;
+      },
     },
     {
       field: 'systemCheckOut',
       headerName: 'System Check In',
-      width: 170
+      width: 170,
+      renderCell: (params) => {
+        const systemCheckInValue = params.row.systemCheckOut;
+        if (systemCheckInValue === null ) {
+          return '00:00:00';
+        }
+        // Process and return other display values if needed
+        return systemCheckInValue;
+      },
     },
     {
       field: 'totalAttendance',
@@ -244,7 +259,7 @@ export default function LogEmpAttendanceByIdList() {
           const totalAttendance = dailyLog.reduce((total, item) => total + item.totalAttendance, 0)
           return `${totalAttendance.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -256,7 +271,7 @@ export default function LogEmpAttendanceByIdList() {
           const morningTotal = dailyLog.reduce((total, item) => total + item.morningTotal, 0)
           return `${morningTotal.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -268,7 +283,7 @@ export default function LogEmpAttendanceByIdList() {
           const afternoonTotal = dailyLog.reduce((total, item) => total + item.afternoonTotal, 0)
           return `${afternoonTotal.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -300,9 +315,9 @@ export default function LogEmpAttendanceByIdList() {
       valueGetter: ({ row, value }) => {
         if (row.id === 'TOTAL') {
           const permittedLeave = dailyLog.reduce((total, item) => total + item.permittedLeave, 0)
-          return `${permittedLeave}`
+          return `${permittedLeave.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -315,9 +330,9 @@ export default function LogEmpAttendanceByIdList() {
             (total, item) => total + item.nonPermittedLeave,
             0
           )
-          return `${nonPermittedLeave}`
+          return `${nonPermittedLeave.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -329,7 +344,7 @@ export default function LogEmpAttendanceByIdList() {
           const outsideWork = dailyLog.reduce((total, item) => total + item.outsideWork, 0)
           return `${outsideWork}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -469,8 +484,6 @@ export default function LogEmpAttendanceByIdList() {
           userName={userName}
           date={dailyLogModal?.dateDaily}
           employeeId={employee}
-          dailyLog={dailyLog}
-          setDailyLog={setDailyLog}
         />
       </Box>
     </>

@@ -120,7 +120,7 @@ export default function CheckAttendanceManager() {
           const totalAttendance = dailyLog.reduce((total, item) => total + item.totalAttendance, 0)
           return `${totalAttendance.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -132,7 +132,7 @@ export default function CheckAttendanceManager() {
           const morningTotal = dailyLog.reduce((total, item) => total + item.morningTotal, 0)
           return `${morningTotal.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -144,7 +144,7 @@ export default function CheckAttendanceManager() {
           const afternoonTotal = dailyLog.reduce((total, item) => total + item.afternoonTotal, 0)
           return `${afternoonTotal.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -176,9 +176,9 @@ export default function CheckAttendanceManager() {
       valueGetter: ({ row, value }) => {
         if (row.id === 'TOTAL') {
           const permittedLeave = dailyLog.reduce((total, item) => total + item.permittedLeave, 0)
-          return `${permittedLeave}`
+          return `${permittedLeave.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {

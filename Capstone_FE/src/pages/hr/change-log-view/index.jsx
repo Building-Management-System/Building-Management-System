@@ -125,7 +125,7 @@ const ChangeLogView = () => {
       })
       } catch (error) {
         if (error.response.status === 400) {
-          toast.error("You can't book room before current time")
+          toast.error("You can't set date to  room before date from")
         }
         if (error.response.status === 404) {
           toast.error('User not found!')

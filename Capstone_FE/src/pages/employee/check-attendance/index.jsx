@@ -146,7 +146,7 @@ console.log(currentUser);
           const totalAttendance = dailyLog.reduce((total, item) => total + item.totalAttendance, 0)
           return `${totalAttendance.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -158,7 +158,7 @@ console.log(currentUser);
           const morningTotal = dailyLog.reduce((total, item) => total + item.morningTotal, 0)
           return `${morningTotal.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -170,7 +170,7 @@ console.log(currentUser);
           const afternoonTotal = dailyLog.reduce((total, item) => total + item.afternoonTotal, 0)
           return `${afternoonTotal.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -202,9 +202,9 @@ console.log(currentUser);
       valueGetter: ({ row, value }) => {
         if (row.id === 'TOTAL') {
           const permittedLeave = dailyLog.reduce((total, item) => total + item.permittedLeave, 0)
-          return `${permittedLeave}`
+          return `${permittedLeave.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -217,9 +217,9 @@ console.log(currentUser);
             (total, item) => total + item.nonPermittedLeave,
             0
           )
-          return `${nonPermittedLeave}`
+          return `${nonPermittedLeave.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
@@ -254,7 +254,7 @@ console.log(currentUser);
           const paidDay = dailyLog.reduce((total, item) => total + item.paidDay, 0)
           return `${paidDay.toFixed(2)}`
         }
-        return value
+        return Math.round(value *100 ) /100
       }
     },
     {
